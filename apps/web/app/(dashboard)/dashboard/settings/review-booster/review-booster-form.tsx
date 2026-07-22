@@ -4,18 +4,7 @@ import { useState, useTransition, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { toastManager } from '@louez/ui'
-import {
-  Star,
-  Lock,
-  Zap,
-  ArrowRight,
-  Eye,
-  MessageSquare,
-  Mail,
-  Phone,
-  ExternalLink,
-  Pencil,
-} from 'lucide-react'
+import { Lock, Pencil } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import { Switch } from '@louez/ui'
@@ -26,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@louez/ui'
+import { ArrowRightIcon, ChatIcon, ExternalLinkIcon, EyeIcon, MailIcon, MobileIcon, StarIcon, ZapIcon } from '@louez/ui/icons'
 import {
   Select,
   SelectContent,
@@ -152,7 +142,7 @@ export function ReviewBoosterForm({
   }
 
   const handleUpgrade = () => {
-    router.push('/dashboard/subscription')
+    router.push('/dashboard/settings/subscription')
   }
 
   const handleOpenTemplateSheet = async () => {
@@ -195,7 +185,7 @@ export function ReviewBoosterForm({
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
-                  <Star className="h-6 w-6 text-primary" />
+                  <StarIcon className="h-6 w-6 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-lg">{t('locked.title')}</h3>
@@ -205,9 +195,9 @@ export function ReviewBoosterForm({
                 </div>
               </div>
               <Button onClick={handleUpgrade} className="gap-2 flex-shrink-0">
-                <Zap className="h-4 w-4" />
+                <ZapIcon className="h-4 w-4" />
                 {t('locked.upgrade')}
-                <ArrowRight className="h-4 w-4" />
+                <ArrowRightIcon className="h-4 w-4" />
               </Button>
             </div>
           </CardContent>
@@ -226,7 +216,7 @@ export function ReviewBoosterForm({
           </div>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Star className="h-5 w-5" />
+              <StarIcon className="h-5 w-5 shrink-0" />
               {t('searchPlace')}
             </CardTitle>
           </CardHeader>
@@ -255,7 +245,7 @@ export function ReviewBoosterForm({
       <Card className="min-w-0">
         <CardHeader>
           <CardTitle className="flex min-w-0 items-center gap-2">
-            <Star className="h-5 w-5 shrink-0" />
+            <StarIcon className="h-5 w-5 shrink-0" />
             {t('searchPlace')}
           </CardTitle>
           <CardDescription>{t('searchPlaceDescription')}</CardDescription>
@@ -283,7 +273,7 @@ export function ReviewBoosterForm({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
+                <EyeIcon className="h-5 w-5 shrink-0" />
                 {t('displaySettings')}
               </CardTitle>
               <CardDescription>{t('displaySettingsDescription')}</CardDescription>
@@ -340,7 +330,7 @@ export function ReviewBoosterForm({
               {/* Preview link */}
               {settings.displayReviewsOnStorefront && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <ExternalLink className="h-4 w-4" />
+                  <ExternalLinkIcon className="h-4 w-4" />
                   <a
                     href={`/${store.slug}`}
                     target="_blank"
@@ -358,7 +348,7 @@ export function ReviewBoosterForm({
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
+                <ChatIcon className="h-5 w-5 shrink-0" />
                 {t('automationSettings')}
               </CardTitle>
               <CardDescription>{t('automationSettingsDescription')}</CardDescription>
@@ -374,7 +364,7 @@ export function ReviewBoosterForm({
                 <div className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
-                      <Mail className="h-4 w-4" />
+                      <MailIcon className="h-4 w-4" />
                     </div>
                     <div className="space-y-0.5">
                       <label className="text-sm font-medium leading-none cursor-pointer">
@@ -445,7 +435,7 @@ export function ReviewBoosterForm({
                 <div className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
-                      <Phone className="h-4 w-4" />
+                      <MobileIcon className="h-4 w-4" />
                     </div>
                     <div className="space-y-0.5">
                       <label className="text-sm font-medium leading-none cursor-pointer">

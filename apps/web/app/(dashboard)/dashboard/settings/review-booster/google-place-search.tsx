@@ -3,7 +3,8 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { Search, Star, Loader2, X, Building2, Check } from 'lucide-react'
+import { SearchIcon, StarIcon, StoreIcon } from '@louez/ui/icons'
+import { Loader2, X, Check } from 'lucide-react'
 import { Input } from '@louez/ui'
 import { Button } from '@louez/ui'
 import { searchGooglePlaces, fetchGooglePlaceDetails } from './actions'
@@ -143,7 +144,7 @@ export function GooglePlaceSearch({
         <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
           <div className="flex min-w-0 items-start gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 flex-shrink-0">
-              <Building2 className="h-5 w-5 text-primary" />
+              <StoreIcon className="h-5 w-5 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex min-w-0 items-center gap-2">
@@ -158,7 +159,7 @@ export function GooglePlaceSearch({
               {selectedPlace.rating && (
                 <div className="mt-1 flex min-w-0 items-center gap-2">
                   <div className="flex shrink-0 items-center gap-1">
-                    <Star className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400" />
+                    <StarIcon className="h-4 w-4 shrink-0 fill-amber-400 text-amber-400" />
                     <span className="text-sm font-medium">{selectedPlace.rating.toFixed(1)}</span>
                   </div>
                   {selectedPlace.reviewCount && (
@@ -186,7 +187,7 @@ export function GooglePlaceSearch({
   return (
     <div className="relative min-w-0">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           ref={inputRef}
           type="text"
@@ -242,7 +243,7 @@ export function GooglePlaceSearch({
                       </div>
                     ) : (
                       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted flex-shrink-0">
-                        <Building2 className="h-5 w-5 text-muted-foreground" />
+                        <StoreIcon className="h-5 w-5 text-muted-foreground" />
                       </div>
                     )}
                     <div className="min-w-0 flex-1">
@@ -252,7 +253,7 @@ export function GooglePlaceSearch({
                       </p>
                       {place.rating && (
                         <div className="mt-1 flex min-w-0 items-center gap-1">
-                          <Star className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
+                          <StarIcon className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
                           <span className="text-xs">{place.rating.toFixed(1)}</span>
                           {place.reviewCount && (
                             <span className="min-w-0 truncate text-xs text-muted-foreground">

@@ -5,8 +5,8 @@ import { useStore } from "@tanstack/react-form";
 import { useTransition, useState } from "react";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { Info, Receipt } from "lucide-react";
 import { toastManager } from "@louez/ui";
+import { InfoCircleIcon, PercentageIcon } from "@louez/ui/icons";
 
 import { Input } from "@louez/ui";
 import { Label } from "@louez/ui";
@@ -112,7 +112,7 @@ export function TaxSettingsForm({ store }: TaxSettingsFormProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Receipt className="h-5 w-5" />
+              <PercentageIcon className="h-5 w-5 shrink-0" />
               {t("enableSection")}
             </CardTitle>
             <CardDescription>{t("enableSectionDescription")}</CardDescription>
@@ -220,7 +220,7 @@ export function TaxSettingsForm({ store }: TaxSettingsFormProps) {
 
                 {/* Example calculation */}
                 <div className="flex items-start gap-3 rounded-lg bg-muted/50 p-4 text-sm">
-                  <Info className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
+                  <InfoCircleIcon className="h-4 w-4 mt-0.5 text-muted-foreground shrink-0" />
                   <div className="text-muted-foreground">
                     <p>
                       {displayMode === "inclusive"

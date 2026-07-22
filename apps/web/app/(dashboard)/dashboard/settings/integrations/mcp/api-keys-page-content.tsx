@@ -3,17 +3,7 @@
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
-import {
-  Check,
-  Copy,
-  Eye,
-  EyeOff,
-  KeyRound,
-  Plus,
-  Terminal,
-  Trash2,
-  AlertTriangle,
-} from 'lucide-react'
+import { Check, Copy, EyeOff, Plus, Trash2 } from 'lucide-react'
 import {
   Badge,
   Button,
@@ -40,6 +30,7 @@ import {
   toastManager,
 } from '@louez/ui'
 import type { ApiKeyPermissions } from '@louez/db/schema'
+import { EyeIcon, KeyIcon, TerminalIcon, WarningIcon } from '@louez/ui/icons'
 
 import { orpc } from '@/lib/orpc/react'
 
@@ -204,7 +195,7 @@ export function ApiKeysPageContent() {
         ) : keys.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-10">
-              <KeyRound className="text-muted-foreground mb-3 h-8 w-8" />
+              <KeyIcon className="text-muted-foreground mb-3 h-8 w-8" />
               <p className="text-muted-foreground text-sm">{t('noKeys')}</p>
             </CardContent>
           </Card>
@@ -214,7 +205,7 @@ export function ApiKeysPageContent() {
               <Card key={apiKey.id}>
                 <CardContent className="flex items-center justify-between py-3">
                   <div className="flex items-center gap-3">
-                    <KeyRound className="text-muted-foreground h-4 w-4 shrink-0" />
+                    <KeyIcon className="text-muted-foreground h-4 w-4 shrink-0" />
                     <div className="min-w-0">
                       <p className="text-sm font-medium">{apiKey.name}</p>
                       <p className="text-muted-foreground font-mono text-xs">
@@ -266,10 +257,10 @@ export function ApiKeysPageContent() {
         <div className="grid gap-3 sm:grid-cols-2">
           <Card>
             <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <Terminal className="h-4 w-4" />
-                <CardTitle className="text-sm">{t('mcpServerTitle')}</CardTitle>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <TerminalIcon className="h-4 w-4 shrink-0" />
+                {t('mcpServerTitle')}
+              </CardTitle>
               <CardDescription className="text-xs">{t('mcpDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -281,10 +272,10 @@ export function ApiKeysPageContent() {
 
           <Card>
             <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <Terminal className="h-4 w-4" />
-                <CardTitle className="text-sm">{t('stdioTitle')}</CardTitle>
-              </div>
+              <CardTitle className="flex items-center gap-2 text-sm">
+                <TerminalIcon className="h-4 w-4 shrink-0" />
+                {t('stdioTitle')}
+              </CardTitle>
               <CardDescription className="text-xs">{t('stdioDescription')}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -303,7 +294,7 @@ export function ApiKeysPageContent() {
           {showMcpConfig ? (
             <EyeOff className="mr-1.5 h-3.5 w-3.5" />
           ) : (
-            <Eye className="mr-1.5 h-3.5 w-3.5" />
+            <EyeIcon className="mr-1.5 h-3.5 w-3.5" />
           )}
           {t('showMcpConfig')}
         </Button>
@@ -367,7 +358,7 @@ export function ApiKeysPageContent() {
                   </Button>
                 </div>
                 <div className="bg-destructive/10 text-destructive flex items-start gap-2 rounded-lg p-3 text-sm">
-                  <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <WarningIcon className="mt-0.5 h-4 w-4 shrink-0" />
                   <p>{t('keyCreatedWarning')}</p>
                 </div>
               </div>

@@ -4,6 +4,8 @@
     "description": "Einfache und moderne Plattform für Gerätevermietung"
   },
   "common": {
+    "duration": "Dauer",
+    "price": "Preis",
     "save": "Speichern",
     "unsavedChanges": "Nicht gespeicherte Änderungen",
     "cancel": "Abbrechen",
@@ -1068,6 +1070,7 @@
         "productSection": "Produkt",
         "productSectionDescription": "Name, Fotos und Beschreibung Ihres Produkts",
         "addVideo": "YouTube-Video hinzufügen",
+        "categories": "Kategorien",
         "categorySearchPlaceholder": "Suchen oder erstellen…",
         "categoryCreateOption": "„{name}“ erstellen",
         "categoryNoResults": "Keine Kategorie gefunden",
@@ -2384,6 +2387,21 @@
     },
     "settings": {
       "title": "Einstellungen",
+      "settingsNavigation": {
+        "label": "Einstellungsnavigation",
+        "mobileLabel": "Einstellungsseite auswählen",
+        "search": {
+          "label": "Einstellungen durchsuchen",
+          "placeholder": "Einstellungen suchen…",
+          "noResults": "Keine passenden Einstellungen gefunden."
+        },
+        "groups": {
+          "store": "Shop",
+          "rental": "Vermietung",
+          "communication": "Kommunikation",
+          "accountData": "Konto und Daten"
+        }
+      },
       "store": "Shop",
       "appearance": "Erscheinungsbild",
       "reservations": "Reservierungen",

@@ -36,10 +36,8 @@ import {
   AnalyticsIcon,
   CalendarDaysIcon,
   CalendarIcon,
-  CreditCardIcon,
   CrownIcon,
   ExternalLinkIcon,
-  GiftIcon,
   HomeIcon,
   LifeBuoyIcon,
   LogOutIcon,
@@ -98,12 +96,6 @@ const analyticsNavigation = [
 
 const managementNavigation = [
   { key: "team", href: "/dashboard/team", icon: UsersIcon },
-  { key: "referrals", href: "/dashboard/referrals", icon: GiftIcon },
-  {
-    key: "subscription",
-    href: "/dashboard/subscription",
-    icon: CreditCardIcon,
-  },
   { key: "settings", href: "/dashboard/settings", icon: SettingsIcon },
 ];
 
@@ -388,7 +380,7 @@ function PlanBadge({ planSlug }: { planSlug?: string }) {
 
   return (
     <Link
-      href="/dashboard/subscription"
+      href="/dashboard/settings/subscription"
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-colors group-data-[collapsible=icon]:hidden",
         config.className,

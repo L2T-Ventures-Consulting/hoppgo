@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import { Download, Receipt, CalendarRange, Package } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import {
@@ -15,6 +14,7 @@ import {
 import { RadioGroup, RadioGroupItem } from '@louez/ui'
 import { Label } from '@louez/ui'
 import { toastManager } from '@louez/ui'
+import { CalendarCheckIcon, DownloadIcon, PricingIcon, ProductIcon } from '@louez/ui/icons'
 import { DateTimePicker } from '@/components/ui/date-time-picker'
 import type { ExportFormat, ExportType } from '@/lib/export/types'
 
@@ -29,7 +29,7 @@ export function ExportForm({ storeSlug }: ExportFormProps) {
     <div className="space-y-6">
       <ExportCard
         type="payments"
-        icon={Receipt}
+        icon={PricingIcon}
         title={t('payments.title')}
         description={t('payments.description')}
         buttonLabel={t('payments.button')}
@@ -39,7 +39,7 @@ export function ExportForm({ storeSlug }: ExportFormProps) {
 
       <ExportCard
         type="reservations"
-        icon={CalendarRange}
+        icon={CalendarCheckIcon}
         title={t('reservations.title')}
         description={t('reservations.description')}
         buttonLabel={t('reservations.button')}
@@ -49,7 +49,7 @@ export function ExportForm({ storeSlug }: ExportFormProps) {
 
       <ExportCard
         type="products"
-        icon={Package}
+        icon={ProductIcon}
         title={t('products.title')}
         description={t('products.description')}
         buttonLabel={t('products.button')}
@@ -142,15 +142,11 @@ function ExportCard({
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-            <Icon className="h-5 w-5 text-primary" />
-          </div>
-          <div>
-            <CardTitle>{title}</CardTitle>
-            <CardDescription>{description}</CardDescription>
-          </div>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <Icon className="h-5 w-5 shrink-0" />
+          {title}
+        </CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-4">
@@ -199,7 +195,7 @@ function ExportCard({
           </div>
 
           <Button onClick={handleExport} disabled={isExporting} className="shrink-0">
-            <Download className="mr-2 h-4 w-4" />
+            <DownloadIcon className="mr-2 h-4 w-4" />
             {isExporting ? t('exporting') : buttonLabel}
           </Button>
         </div>

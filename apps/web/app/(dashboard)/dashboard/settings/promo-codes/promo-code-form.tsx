@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { Loader2, Shuffle, Percent, Banknote } from 'lucide-react'
+import { PercentageIcon, PricingIcon } from '@louez/ui/icons'
+import { Loader2, Shuffle } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { cn } from '@louez/utils'
 import {
@@ -237,7 +238,7 @@ export function PromoCodeFormDialog({
                     : 'hover:bg-muted/50'
                 )}
               >
-                <Percent className="h-5 w-5 shrink-0" />
+                <PercentageIcon className="h-5 w-5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">{t('percentage')}</p>
                   <p className="text-xs text-muted-foreground">
@@ -255,7 +256,7 @@ export function PromoCodeFormDialog({
                     : 'hover:bg-muted/50'
                 )}
               >
-                <Banknote className="h-5 w-5 shrink-0" />
+                <PricingIcon className="h-5 w-5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">{t('fixedAmount')}</p>
                   <p className="text-xs text-muted-foreground">

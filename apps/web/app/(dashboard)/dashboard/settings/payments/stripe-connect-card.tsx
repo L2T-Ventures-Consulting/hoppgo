@@ -3,14 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import {
-  CheckCircle2,
-  ExternalLink,
-  Loader2,
-  RefreshCw,
-  AlertCircle,
-  Unlink,
-} from 'lucide-react'
+import { Loader2, RefreshCw } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import {
@@ -32,6 +25,7 @@ import {
   AlertDialogTrigger,
 } from '@louez/ui'
 import { toastManager } from '@louez/ui'
+import { CheckCircleIcon, ExternalLinkIcon, FastPaymentIcon, UnlinkIcon, WarningIcon } from '@louez/ui/icons'
 
 import {
   startStripeOnboarding,
@@ -126,19 +120,22 @@ export function StripeConnectCard({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="space-y-1">
-            <CardTitle>{t('stripeConnect')}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <FastPaymentIcon className="h-5 w-5 shrink-0" />
+              {t('stripeConnect')}
+            </CardTitle>
             <CardDescription>{t('stripeConnectDescription')}</CardDescription>
           </div>
           {isConnected && (
             <Badge variant={isActive ? 'default' : 'secondary'}>
               {isActive ? (
                 <>
-                  <CheckCircle2 className="mr-1 h-3 w-3" />
+                  <CheckCircleIcon className="mr-1 h-3 w-3" />
                   {t('status.active')}
                 </>
               ) : (
                 <>
-                  <AlertCircle className="mr-1 h-3 w-3" />
+                  <WarningIcon className="mr-1 h-3 w-3" />
                   {t('status.incomplete')}
                 </>
               )}
@@ -164,7 +161,7 @@ export function StripeConnectCard({
           <div className="space-y-4">
             <div className="rounded-lg border bg-muted/50 p-4">
               <div className="flex items-center gap-2 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-green-500" />
+                <CheckCircleIcon className="h-4 w-4 text-green-500" />
                 <span>{t('activeDescription')}</span>
               </div>
             </div>
@@ -178,7 +175,7 @@ export function StripeConnectCard({
                 {isOpeningDashboard ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <ExternalLink className="mr-2 h-4 w-4" />
+                  <ExternalLinkIcon className="mr-2 h-4 w-4" />
                 )}
                 {t('openDashboard')}
               </Button>
@@ -192,7 +189,7 @@ export function StripeConnectCard({
 
               <AlertDialog>
                 <AlertDialogTrigger render={<Button variant="ghost" className="text-destructive" />}>
-                  <Unlink className="mr-2 h-4 w-4" />
+                  <UnlinkIcon className="mr-2 h-4 w-4" />
                   {t('disconnect')}
                 </AlertDialogTrigger>
                 <AlertDialogContent>
@@ -220,7 +217,7 @@ export function StripeConnectCard({
           <div className="space-y-4">
             <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-900 dark:bg-yellow-900/20">
               <div className="flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-200">
-                <AlertCircle className="h-4 w-4" />
+                <WarningIcon className="h-4 w-4" />
                 <span>{t('incompleteDescription')}</span>
               </div>
             </div>
@@ -242,7 +239,7 @@ export function StripeConnectCard({
 
               <AlertDialog>
                 <AlertDialogTrigger render={<Button variant="ghost" className="text-destructive" />}>
-                  <Unlink className="mr-2 h-4 w-4" />
+                  <UnlinkIcon className="mr-2 h-4 w-4" />
                   {t('disconnect')}
                 </AlertDialogTrigger>
                 <AlertDialogContent>

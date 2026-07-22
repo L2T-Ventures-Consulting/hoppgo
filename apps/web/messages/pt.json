@@ -4,6 +4,8 @@
     "description": "Plataforma de aluguel de equipamentos simples e moderna"
   },
   "common": {
+    "duration": "Duração",
+    "price": "Preço",
     "save": "Salvar",
     "unsavedChanges": "Alterações não salvas",
     "cancel": "Cancelar",
@@ -1029,6 +1031,7 @@
         "productSection": "Produto",
         "productSectionDescription": "Nome, fotos e descrição do seu produto",
         "addVideo": "Adicionar um vídeo do YouTube",
+        "categories": "Categorias",
         "categorySearchPlaceholder": "Pesquisar ou criar…",
         "categoryCreateOption": "Criar «{name}»",
         "categoryNoResults": "Nenhuma categoria encontrada",
@@ -2384,6 +2387,21 @@
     },
     "settings": {
       "title": "Configuracoes",
+      "settingsNavigation": {
+        "label": "Navegação das configurações",
+        "mobileLabel": "Escolher uma página de configurações",
+        "search": {
+          "label": "Pesquisar nas configurações",
+          "placeholder": "Pesquisar configurações…",
+          "noResults": "Nenhuma configuração corresponde à pesquisa."
+        },
+        "groups": {
+          "store": "Loja",
+          "rental": "Alugueres",
+          "communication": "Comunicação",
+          "accountData": "Conta e dados"
+        }
+      },
       "store": "Loja",
       "appearance": "Aparencia",
       "reservations": "Reservas",

@@ -1,40 +1,31 @@
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 
-import { ArrowLeft } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from "next-intl/server";
 
-import { getCurrentStore } from '@/lib/store-context'
-import { getStorefrontUrl } from '@/lib/storefront-url'
+import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
+import { getCurrentStore } from "@/lib/store-context";
+import { getStorefrontUrl } from "@/lib/storefront-url";
 
-import { EmbedCodeSection } from './embed-code-section'
+import { EmbedCodeSection } from "./embed-code-section";
 
 export default async function WidgetIntegrationPage() {
-  const store = await getCurrentStore()
+  const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding')
+    redirect("/onboarding");
   }
 
-  const t = await getTranslations('dashboard.settings.embed')
-  const embedUrl = getStorefrontUrl(store.slug, '/embed')
+  const t = await getTranslations("dashboard.settings.embed");
+  const tHub = await getTranslations("dashboard.settings.integrationsHub");
+  const embedUrl = getStorefrontUrl(store.slug, "/embed");
 
   return (
-    <div className="space-y-6">
-      <Link
-        href="/dashboard/settings/integrations"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {t('backToIntegrations')}
-      </Link>
-
-      <div>
-        <h2 className="text-lg font-semibold">Widget</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
-      </div>
-
+    <SettingsPageShell
+      back={{ href: "/dashboard/settings/integrations", label: t("backToIntegrations") }}
+      title={tHub("builtIn.widget.name")}
+      description={t("description")}
+    >
       <EmbedCodeSection embedUrl={embedUrl} storeName={store.name} />
-    </div>
-  )
+    </SettingsPageShell>
+  );
 }

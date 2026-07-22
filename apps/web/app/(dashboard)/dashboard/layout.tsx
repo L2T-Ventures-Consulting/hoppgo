@@ -9,6 +9,7 @@ import { DashboardBreadcrumbs } from "@/components/dashboard/dashboard-breadcrum
 import { DashboardBreadcrumbsProvider } from "@/components/dashboard/dashboard-breadcrumbs-context";
 import { DashboardHeaderActions } from "@/components/dashboard/dashboard-header-actions";
 import { ReservationPollingProvider } from "@/components/dashboard/reservation-polling-provider";
+import { SettingsSearchFocus } from "@/components/dashboard/settings-search-focus";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { WelcomeOverlay } from "@/components/dashboard/welcome-overlay";
 
@@ -88,12 +89,15 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                     planSlug={planSlug}
                   />
                 </header>
-                <div className="px-4 py-6 sm:px-6 lg:px-8">{children}</div>
+                <div data-dashboard-content className="px-4 py-6 sm:px-6 lg:px-8">
+                  {children}
+                </div>
               </SidebarInset>
             </DashboardBreadcrumbsProvider>
           </SidebarProvider>
           <Suspense fallback={null}>
             <WelcomeOverlay />
+            <SettingsSearchFocus />
           </Suspense>
         </div>
       </ReservationPollingProvider>

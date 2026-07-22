@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import { CheckCircle2, AlertCircle } from 'lucide-react'
 
 import { getCurrentStore } from '@/lib/store-context'
 import { getAccountStatus } from '@/lib/stripe'
@@ -9,6 +8,7 @@ import { stores } from '@louez/db'
 import { eq } from 'drizzle-orm'
 import { Card, CardContent, CardHeader, CardTitle } from '@louez/ui'
 import { Button } from '@louez/ui'
+import { CheckCircleIcon, WarningIcon } from '@louez/ui/icons'
 import Link from 'next/link'
 
 import { sanitizeStripeNextPath } from '../stripe-return'
@@ -68,12 +68,12 @@ export default async function StripeCallbackPage({
     <div className="flex min-h-[50vh] items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          {isActive ? (
-            <CheckCircle2 className="mx-auto h-12 w-12 text-green-500" />
-          ) : (
-            <AlertCircle className="mx-auto h-12 w-12 text-yellow-500" />
-          )}
-          <CardTitle className="mt-4">
+          <CardTitle className="flex items-center justify-center gap-2">
+            {isActive ? (
+              <CheckCircleIcon className="h-5 w-5 shrink-0 text-green-500" />
+            ) : (
+              <WarningIcon className="h-5 w-5 shrink-0 text-yellow-500" />
+            )}
             {isActive ? t('callback.successTitle') : t('callback.incompleteTitle')}
           </CardTitle>
         </CardHeader>

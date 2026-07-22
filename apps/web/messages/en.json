@@ -4,6 +4,8 @@
     "description": "Simple and modern equipment rental platform"
   },
   "common": {
+    "duration": "Duration",
+    "price": "Price",
     "save": "Save",
     "unsavedChanges": "Unsaved changes",
     "cancel": "Cancel",
@@ -1074,6 +1076,7 @@
         "productSection": "Product",
         "productSectionDescription": "Name, photos and description of your product",
         "addVideo": "Add a YouTube video",
+        "categories": "Categories",
         "categorySearchPlaceholder": "Search or create…",
         "categoryCreateOption": "Create “{name}”",
         "categoryNoResults": "No category found",
@@ -2417,6 +2420,21 @@
     },
     "settings": {
       "title": "Settings",
+      "settingsNavigation": {
+        "label": "Settings navigation",
+        "mobileLabel": "Choose a settings page",
+        "search": {
+          "label": "Search settings",
+          "placeholder": "Search settings…",
+          "noResults": "No settings match your search."
+        },
+        "groups": {
+          "store": "Store",
+          "rental": "Rentals",
+          "communication": "Communication",
+          "accountData": "Account and data"
+        }
+      },
       "store": "Store",
       "appearance": "Appearance",
       "reservations": "Reservations",

@@ -4,15 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
 import { useStore } from '@tanstack/react-form'
-import {
-  Gauge,
-  Gift,
-  Percent,
-  Plus,
-  Shield,
-  Sparkles,
-  Trash2,
-} from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { z } from 'zod'
 
@@ -30,6 +22,13 @@ import {
   Switch,
   toastManager,
 } from '@louez/ui'
+import {
+  AdminShieldIcon,
+  FastPaymentIcon,
+  PercentageIcon,
+  PricingIcon,
+  RewardIcon,
+} from '@louez/ui/icons'
 
 import { FloatingSaveBar } from '@/components/dashboard/floating-save-bar'
 import { RootError } from '@/components/form/root-error'
@@ -151,7 +150,7 @@ export function AdminSettingsForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5" />
+              <AdminShieldIcon className="h-5 w-5 shrink-0" />
               {t('trialSection')}
             </CardTitle>
             <CardDescription>{t('trialSectionDescription')}</CardDescription>
@@ -195,7 +194,7 @@ export function AdminSettingsForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Percent className="h-5 w-5" />
+              <PercentageIcon className="h-5 w-5 shrink-0" />
               {t('discountSection')}
             </CardTitle>
             <CardDescription>{t('discountSectionDescription')}</CardDescription>
@@ -270,7 +269,7 @@ export function AdminSettingsForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gift className="h-5 w-5" />
+              <RewardIcon className="h-5 w-5 shrink-0" />
               {t('freeReservations.title')}
             </CardTitle>
             <CardDescription>
@@ -329,7 +328,7 @@ export function AdminSettingsForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gauge className="h-5 w-5" />
+              <FastPaymentIcon className="h-5 w-5 shrink-0" />
               {t('payAsYouGo.title')}
             </CardTitle>
             <CardDescription>{t('payAsYouGo.description')}</CardDescription>
@@ -375,7 +374,7 @@ export function AdminSettingsForm({
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Sparkles className="h-5 w-5" />
+              <PricingIcon className="h-5 w-5 shrink-0" />
               {t('payAsYouGo.pricingTitle')}
             </CardTitle>
             <CardDescription>

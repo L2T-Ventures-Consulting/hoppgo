@@ -4,6 +4,8 @@
     "description": "Plataforma de alquiler de equipos simple y moderna"
   },
   "common": {
+    "duration": "Duración",
+    "price": "Precio",
     "save": "Guardar",
     "unsavedChanges": "Cambios sin guardar",
     "cancel": "Cancelar",
@@ -1068,6 +1070,7 @@
         "productSection": "Producto",
         "productSectionDescription": "Nombre, fotos y descripción de tu producto",
         "addVideo": "Añadir un vídeo de YouTube",
+        "categories": "Categorías",
         "categorySearchPlaceholder": "Buscar o crear…",
         "categoryCreateOption": "Crear «{name}»",
         "categoryNoResults": "No se encontró ninguna categoría",
@@ -2390,6 +2393,21 @@
     },
     "settings": {
       "title": "Configuracion",
+      "settingsNavigation": {
+        "label": "Navegación de configuración",
+        "mobileLabel": "Elegir una página de configuración",
+        "search": {
+          "label": "Buscar en la configuración",
+          "placeholder": "Buscar ajustes…",
+          "noResults": "Ningún ajuste coincide con tu búsqueda."
+        },
+        "groups": {
+          "store": "Tienda",
+          "rental": "Alquileres",
+          "communication": "Comunicación",
+          "accountData": "Cuenta y datos"
+        }
+      },
       "store": "Tienda",
       "appearance": "Apariencia",
       "reservations": "Reservas",

@@ -7,11 +7,12 @@ import { useRouter } from 'next/navigation';
 import { useStore } from '@tanstack/react-form';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { AlertCircle, Calendar, CalendarX2, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import type { StoreSettings } from '@louez/types';
 import { toastManager } from '@louez/ui';
+import { CalendarIcon, CalendarXIcon, ClockIcon, WarningIcon } from '@louez/ui/icons';
 import { Button } from '@louez/ui';
 import { Input } from '@louez/ui';
 import {
@@ -162,7 +163,10 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
               <CardHeader>
                 <div className="flex min-w-0 items-center justify-between gap-4">
                   <div className="min-w-0 space-y-1">
-                    <CardTitle>{t('weeklySchedule')}</CardTitle>
+                    <CardTitle className="flex min-w-0 items-center gap-2">
+                      <ClockIcon className="h-5 w-5 shrink-0" />
+                      {t('weeklySchedule')}
+                    </CardTitle>
                     <CardDescription>
                       {t('weeklyScheduleDescription')}
                     </CardDescription>
@@ -206,7 +210,10 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
               <CardHeader>
                 <div className="flex min-w-0 items-center justify-between gap-4">
                   <div className="min-w-0 space-y-1">
-                    <CardTitle>{t('closurePeriods')}</CardTitle>
+                    <CardTitle className="flex min-w-0 items-center gap-2">
+                      <CalendarXIcon className="h-5 w-5 shrink-0" />
+                      {t('closurePeriods')}
+                    </CardTitle>
                     <CardDescription>
                       {t('closurePeriodsDescription')}
                     </CardDescription>
@@ -227,7 +234,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
                 {closurePeriods.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
                     <div className="bg-muted mb-3 rounded-full p-3">
-                      <CalendarX2 className="text-muted-foreground h-5 w-5" />
+                      <CalendarXIcon className="text-muted-foreground h-5 w-5" />
                     </div>
                     <p className="text-muted-foreground text-sm font-medium">
                       {t('noClosure')}
@@ -245,7 +252,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
                       >
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-center gap-2">
-                            <Calendar className="text-muted-foreground h-4 w-4 shrink-0" />
+                            <CalendarIcon className="text-muted-foreground h-4 w-4 shrink-0" />
                             <span className="truncate text-sm font-medium">
                               {field.name}
                             </span>
@@ -600,7 +607,7 @@ function ClosurePeriodDialog({
         <DialogPanel className="space-y-3">
           {error && (
             <Alert variant="error">
-              <AlertCircle className="h-4 w-4" />
+              <WarningIcon className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}

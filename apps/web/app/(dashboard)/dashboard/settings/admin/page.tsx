@@ -1,33 +1,30 @@
-import { getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-import { getCurrentStore } from '@/lib/store-context'
-import { isCurrentUserPlatformAdmin } from '@/lib/platform-admin'
-import { getStoreBilling } from '@/lib/pay-as-you-go'
-import { AdminSettingsForm } from './admin-settings-form'
+import { getCurrentStore } from "@/lib/store-context";
+import { isCurrentUserPlatformAdmin } from "@/lib/platform-admin";
+import { getStoreBilling } from "@/lib/pay-as-you-go";
+import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
+import { AdminSettingsForm } from "./admin-settings-form";
 
 export default async function AdminSettingsPage() {
-  const store = await getCurrentStore()
+  const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding')
+    redirect("/onboarding");
   }
 
-  const isAdmin = await isCurrentUserPlatformAdmin()
+  const isAdmin = await isCurrentUserPlatformAdmin();
   if (!isAdmin) {
-    redirect('/dashboard/settings')
+    redirect("/dashboard/settings");
   }
 
-  const t = await getTranslations('dashboard.settings')
+  const t = await getTranslations("dashboard.settings");
 
-  const billing = await getStoreBilling(store.id)
+  const billing = await getStoreBilling(store.id);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-4 sm:space-y-6">
-      <p className="text-sm sm:text-base text-muted-foreground">
-        {t('admin.description')}
-      </p>
-
+    <SettingsPageShell title={t("admin.title")} description={t("admin.description")}>
       <AdminSettingsForm
         trialDays={store.trialDays ?? 0}
         discountPercent={store.discountPercent ?? 0}
@@ -39,6 +36,6 @@ export default async function AdminSettingsPage() {
         freeReservationsGranted={billing.freeReservationsGranted}
         freeReservationsRemaining={billing.freeReservationsRemaining}
       />
-    </div>
-  )
+    </SettingsPageShell>
+  );
 }

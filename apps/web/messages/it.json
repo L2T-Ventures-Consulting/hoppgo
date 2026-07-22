@@ -4,6 +4,8 @@
     "description": "Piattaforma di noleggio attrezzature semplice e moderna"
   },
   "common": {
+    "duration": "Durata",
+    "price": "Prezzo",
     "save": "Salva",
     "unsavedChanges": "Modifiche non salvate",
     "cancel": "Annulla",
@@ -1029,6 +1031,7 @@
         "productSection": "Prodotto",
         "productSectionDescription": "Nome, foto e descrizione del tuo prodotto",
         "addVideo": "Aggiungi un video YouTube",
+        "categories": "Categorie",
         "categorySearchPlaceholder": "Cerca o crea…",
         "categoryCreateOption": "Crea «{name}»",
         "categoryNoResults": "Nessuna categoria trovata",
@@ -2384,6 +2387,21 @@
     },
     "settings": {
       "title": "Impostazioni",
+      "settingsNavigation": {
+        "label": "Navigazione delle impostazioni",
+        "mobileLabel": "Scegli una pagina delle impostazioni",
+        "search": {
+          "label": "Cerca nelle impostazioni",
+          "placeholder": "Cerca impostazioni…",
+          "noResults": "Nessuna impostazione corrisponde alla ricerca."
+        },
+        "groups": {
+          "store": "Negozio",
+          "rental": "Noleggi",
+          "communication": "Comunicazione",
+          "accountData": "Account e dati"
+        }
+      },
       "store": "Negozio",
       "appearance": "Aspetto",
       "reservations": "Prenotazioni",

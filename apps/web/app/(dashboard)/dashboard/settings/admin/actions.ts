@@ -151,6 +151,6 @@ export async function updateAdminSettings(data: AdminSettingsInput) {
   })
 
   revalidatePath('/dashboard/settings/admin')
-  revalidatePath('/dashboard/subscription')
+  revalidatePath('/dashboard/settings/subscription')
   return { success: true }
 }

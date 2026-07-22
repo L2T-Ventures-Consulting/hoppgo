@@ -4,20 +4,8 @@ import { useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useMutation } from "@tanstack/react-query";
-import {
-  Upload,
-  X,
-  Check,
-  Sun,
-  Moon,
-  Plus,
-  ImageIcon,
-  Sparkles,
-  ArrowRight,
-  CalendarIcon,
-  Clock,
-  Loader2,
-} from "lucide-react";
+import { ArrowRightIcon, CalendarIcon, ClockIcon, ImageIcon, SparklesIcon } from "@louez/ui/icons";
+import { Upload, X, Check, Sun, Moon, Plus, Loader2 } from "lucide-react";
 import { Button } from "@louez/ui";
 import { Label } from "@louez/ui";
 import { Switch } from "@louez/ui";
@@ -918,7 +906,7 @@ export function AppearanceForm({ store }: AppearanceFormProps) {
                       )}
                     >
                       <span className="flex items-center gap-1">
-                        <Sparkles className="h-3 w-3" style={{ color: primaryColor }} />
+                        <SparklesIcon className="h-3 w-3" style={{ color: primaryColor }} />
                         {t("previewStats", { count: 10 })}
                       </span>
                     </div>
@@ -935,7 +923,7 @@ export function AppearanceForm({ store }: AppearanceFormProps) {
                           }}
                         >
                           {t("previewCatalogButton")}
-                          <ArrowRight className="h-3 w-3 ml-1" />
+                          <ArrowRightIcon className="h-3 w-3 ml-1" />
                         </button>
                       </div>
                     )}
@@ -1058,7 +1046,7 @@ export function AppearanceForm({ store }: AppearanceFormProps) {
                             )}
                           />
                           <div className="flex items-center gap-1 px-2 py-1.5">
-                            <Clock className="h-3 w-3 opacity-50" />
+                            <ClockIcon className="h-3 w-3 opacity-50" />
                             <span className="font-medium">09:00</span>
                           </div>
                         </div>
@@ -1097,7 +1085,7 @@ export function AppearanceForm({ store }: AppearanceFormProps) {
                             )}
                           />
                           <div className="flex items-center gap-1 px-2 py-1.5">
-                            <Clock className="h-3 w-3 opacity-50" />
+                            <ClockIcon className="h-3 w-3 opacity-50" />
                             <span className="font-medium">18:00</span>
                           </div>
                         </div>
@@ -1114,7 +1102,7 @@ export function AppearanceForm({ store }: AppearanceFormProps) {
                       }}
                     >
                       {t("previewDatePicker.submitButton")}
-                      <ArrowRight className="h-3 w-3" />
+                      <ArrowRightIcon className="h-3 w-3" />
                     </button>
 
                     {/* Quick select */}

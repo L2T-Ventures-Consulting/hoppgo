@@ -1,15 +1,23 @@
-import { redirect } from 'next/navigation'
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-import { getCurrentStore } from '@/lib/store-context'
+import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
+import { getCurrentStore } from "@/lib/store-context";
 
-import { IntegrationsCatalogView } from './components/integrations-catalog-view'
+import { IntegrationsCatalogView } from "./components/integrations-catalog-view";
 
 export default async function IntegrationsPage() {
-  const store = await getCurrentStore()
+  const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding')
+    redirect("/onboarding");
   }
 
-  return <IntegrationsCatalogView />
+  const t = await getTranslations("dashboard.settings");
+
+  return (
+    <SettingsPageShell title={t("integrations")} description={t("integrationsPage.description")}>
+      <IntegrationsCatalogView />
+    </SettingsPageShell>
+  );
 }

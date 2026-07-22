@@ -4,6 +4,8 @@
     "description": "Eenvoudig en modern materiaalverhuurplatform"
   },
   "common": {
+    "duration": "Duur",
+    "price": "Prijs",
     "save": "Opslaan",
     "unsavedChanges": "Niet-opgeslagen wijzigingen",
     "cancel": "Annuleren",
@@ -1029,6 +1031,7 @@
         "productSection": "Product",
         "productSectionDescription": "Naam, foto's en beschrijving van je product",
         "addVideo": "Een YouTube-video toevoegen",
+        "categories": "Categorieën",
         "categorySearchPlaceholder": "Zoeken of aanmaken…",
         "categoryCreateOption": "'{name}' aanmaken",
         "categoryNoResults": "Geen categorie gevonden",
@@ -2384,6 +2387,21 @@
     },
     "settings": {
       "title": "Instellingen",
+      "settingsNavigation": {
+        "label": "Instellingennavigatie",
+        "mobileLabel": "Kies een instellingenpagina",
+        "search": {
+          "label": "Instellingen doorzoeken",
+          "placeholder": "Instellingen zoeken…",
+          "noResults": "Geen instellingen komen overeen met je zoekopdracht."
+        },
+        "groups": {
+          "store": "Winkel",
+          "rental": "Verhuur",
+          "communication": "Communicatie",
+          "accountData": "Account en gegevens"
+        }
+      },
       "store": "Winkel",
       "appearance": "Uiterlijk",
       "reservations": "Reserveringen",

@@ -4,6 +4,8 @@
     "description": "Prosta i nowoczesna platforma wynajmu sprzętu"
   },
   "common": {
+    "duration": "Czas trwania",
+    "price": "Cena",
     "save": "Zapisz",
     "unsavedChanges": "Niezapisane zmiany",
     "cancel": "Anuluj",
@@ -1029,6 +1031,7 @@
         "productSection": "Produkt",
         "productSectionDescription": "Nazwa, zdjęcia i opis produktu",
         "addVideo": "Dodaj film z YouTube",
+        "categories": "Kategorie",
         "categorySearchPlaceholder": "Szukaj lub utwórz…",
         "categoryCreateOption": "Utwórz „{name}”",
         "categoryNoResults": "Nie znaleziono kategorii",
@@ -2384,6 +2387,21 @@
     },
     "settings": {
       "title": "Ustawienia",
+      "settingsNavigation": {
+        "label": "Nawigacja ustawień",
+        "mobileLabel": "Wybierz stronę ustawień",
+        "search": {
+          "label": "Przeszukaj ustawienia",
+          "placeholder": "Szukaj ustawień…",
+          "noResults": "Brak ustawień pasujących do wyszukiwania."
+        },
+        "groups": {
+          "store": "Sklep",
+          "rental": "Wynajem",
+          "communication": "Komunikacja",
+          "accountData": "Konto i dane"
+        }
+      },
       "store": "Sklep",
       "appearance": "Wygląd",
       "reservations": "Rezerwacje",

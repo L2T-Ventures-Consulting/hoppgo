@@ -2,17 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import {
-  FileCheck,
-  CreditCard,
-  Mail,
-  CheckCircle2,
-  Zap,
-  Clock,
-  AlertCircle,
-  Lightbulb,
-  Loader2,
-} from 'lucide-react'
+import { Lightbulb, Loader2 } from 'lucide-react'
 
 import {
   Card,
@@ -23,6 +13,7 @@ import {
 } from '@louez/ui'
 import { Badge } from '@louez/ui'
 import { Button } from '@louez/ui'
+import { CheckCircleIcon, ClockIcon, CreditCardIcon, FastPaymentIcon, FileCheckIcon, MailIcon, WarningIcon, ZapIcon } from '@louez/ui/icons'
 
 interface PaymentFlowExplanationProps {
   reservationMode: 'payment' | 'request'
@@ -76,13 +67,13 @@ export function PaymentFlowExplanation({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
+                <ClockIcon className="h-5 w-5 shrink-0 text-primary" />
                 {t('title')}
               </CardTitle>
               <CardDescription>{t('subtitle')}</CardDescription>
             </div>
             <Badge variant="secondary" className="gap-1">
-              <FileCheck className="h-3 w-3" />
+              <FileCheckIcon className="h-3 w-3" />
               {t('modes.request')}
             </Badge>
           </div>
@@ -94,10 +85,10 @@ export function PaymentFlowExplanation({
               {t('currentFlow')}
             </h4>
             <div className="flex flex-col gap-2">
-              <FlowStep number={1} icon={FileCheck} text={t('steps.requestSubmitted')} isActive={activeStep === 1} />
-              <FlowStep number={2} icon={Mail} text={t('steps.youReview')} isActive={activeStep === 2} />
-              <FlowStep number={3} icon={CheckCircle2} text={t('steps.acceptOrReject')} isActive={activeStep === 3} />
-              <FlowStep number={4} icon={CreditCard} text={t('steps.paymentOnSite')} isActive={activeStep === 4} />
+              <FlowStep number={1} icon={FileCheckIcon} text={t('steps.requestSubmitted')} isActive={activeStep === 1} />
+              <FlowStep number={2} icon={MailIcon} text={t('steps.youReview')} isActive={activeStep === 2} />
+              <FlowStep number={3} icon={CheckCircleIcon} text={t('steps.acceptOrReject')} isActive={activeStep === 3} />
+              <FlowStep number={4} icon={CreditCardIcon} text={t('steps.paymentOnSite')} isActive={activeStep === 4} />
             </div>
           </div>
 
@@ -136,18 +127,18 @@ export function PaymentFlowExplanation({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5 text-primary" />
+                <ClockIcon className="h-5 w-5 shrink-0 text-primary" />
                 {t('title')}
               </CardTitle>
               <CardDescription>{t('subtitle')}</CardDescription>
             </div>
             <div className="flex gap-2">
               <Badge variant="secondary" className="gap-1">
-                <FileCheck className="h-3 w-3" />
+                <FileCheckIcon className="h-3 w-3" />
                 {t('modes.request')}
               </Badge>
               <Badge variant="default" className="gap-1">
-                <CreditCard className="h-3 w-3" />
+                <CreditCardIcon className="h-3 w-3" />
                 {t('modes.stripeActive')}
               </Badge>
             </div>
@@ -160,10 +151,10 @@ export function PaymentFlowExplanation({
               {t('currentFlow')}
             </h4>
             <div className="flex flex-col gap-2">
-              <FlowStep number={1} icon={FileCheck} text={t('steps.requestSubmitted')} isActive={activeStep === 1} />
-              <FlowStep number={2} icon={Mail} text={t('steps.youReview')} isActive={activeStep === 2} />
-              <FlowStep number={3} icon={CheckCircle2} text={t('steps.acceptOrReject')} isActive={activeStep === 3} />
-              <FlowStep number={4} icon={CreditCard} text={t('steps.paymentOnlineOrSite')} isActive={activeStep === 4} />
+              <FlowStep number={1} icon={FileCheckIcon} text={t('steps.requestSubmitted')} isActive={activeStep === 1} />
+              <FlowStep number={2} icon={MailIcon} text={t('steps.youReview')} isActive={activeStep === 2} />
+              <FlowStep number={3} icon={CheckCircleIcon} text={t('steps.acceptOrReject')} isActive={activeStep === 3} />
+              <FlowStep number={4} icon={CreditCardIcon} text={t('steps.paymentOnlineOrSite')} isActive={activeStep === 4} />
             </div>
           </div>
 
@@ -199,13 +190,13 @@ export function PaymentFlowExplanation({
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="h-5 w-5 text-destructive" />
+                <WarningIcon className="h-5 w-5 shrink-0 text-destructive" />
                 {t('title')}
               </CardTitle>
               <CardDescription>{t('subtitle')}</CardDescription>
             </div>
             <Badge variant="error" className="gap-1">
-              <AlertCircle className="h-3 w-3" />
+              <WarningIcon className="h-3 w-3" />
               {t('modes.configRequired')}
             </Badge>
           </div>
@@ -214,7 +205,7 @@ export function PaymentFlowExplanation({
           {/* Warning */}
           <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4">
             <div className="flex gap-3">
-              <AlertCircle className="h-5 w-5 shrink-0 text-destructive" />
+              <WarningIcon className="h-5 w-5 shrink-0 text-destructive" />
               <div className="space-y-2">
                 <p className="text-sm font-medium text-destructive">
                   {t('warnings.noStripeWithPayment.title')}
@@ -247,18 +238,18 @@ export function PaymentFlowExplanation({
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-primary" />
+              <FastPaymentIcon className="h-5 w-5 shrink-0 text-primary" />
               {t('title')}
             </CardTitle>
             <CardDescription>{t('subtitle')}</CardDescription>
           </div>
           <div className="flex gap-2">
             <Badge variant="default" className="gap-1">
-              <Zap className="h-3 w-3" />
+              <ZapIcon className="h-3 w-3" />
               {t('modes.instant')}
             </Badge>
             <Badge variant="default" className="gap-1">
-              <CreditCard className="h-3 w-3" />
+              <CreditCardIcon className="h-3 w-3" />
               {t('modes.stripeActive')}
             </Badge>
           </div>
@@ -271,16 +262,16 @@ export function PaymentFlowExplanation({
             {t('currentFlow')}
           </h4>
           <div className="flex flex-col gap-2">
-            <FlowStep number={1} icon={CreditCard} text={t('steps.customerPays')} isActive={activeStep === 1} />
-            <FlowStep number={2} icon={CheckCircle2} text={t('steps.reservationConfirmed')} isActive={activeStep === 2} />
-            <FlowStep number={3} icon={Mail} text={t('steps.bothNotified')} isActive={activeStep === 3} />
+            <FlowStep number={1} icon={CreditCardIcon} text={t('steps.customerPays')} isActive={activeStep === 1} />
+            <FlowStep number={2} icon={CheckCircleIcon} text={t('steps.reservationConfirmed')} isActive={activeStep === 2} />
+            <FlowStep number={3} icon={MailIcon} text={t('steps.bothNotified')} isActive={activeStep === 3} />
           </div>
         </div>
 
         {/* Info box */}
         <div className="rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-900 dark:bg-green-900/20">
           <div className="flex gap-3">
-            <CheckCircle2 className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
+            <CheckCircleIcon className="h-5 w-5 shrink-0 text-green-600 dark:text-green-400" />
             <p className="text-sm text-green-800 dark:text-green-200">
               {t('info.instantPayment')}
             </p>

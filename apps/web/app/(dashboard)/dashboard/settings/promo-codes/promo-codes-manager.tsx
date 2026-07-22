@@ -4,16 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { format } from 'date-fns'
-import {
-  Plus,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  Tag,
-  Loader2,
-  Power,
-  PowerOff,
-} from 'lucide-react'
+import { Plus, MoreHorizontal, Pencil, Trash2, Loader2, Power, PowerOff } from 'lucide-react'
 import { formatCurrency } from '@louez/utils'
 import {
   AlertDialog,
@@ -37,6 +28,7 @@ import {
   DropdownMenuTrigger,
   toastManager,
 } from '@louez/ui'
+import { TagIcon } from '@louez/ui/icons'
 
 import { togglePromoCode, deletePromoCode } from './actions'
 import { PromoCodeFormDialog } from './promo-code-form'
@@ -182,7 +174,7 @@ export function PromoCodesManager({ codes, currency }: PromoCodesManagerProps) {
         <CardHeader className="flex flex-row items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Tag className="h-5 w-5" />
+              <TagIcon className="h-5 w-5 shrink-0" />
               {t('title')}
             </CardTitle>
             <CardDescription>
@@ -199,7 +191,7 @@ export function PromoCodesManager({ codes, currency }: PromoCodesManagerProps) {
         <CardContent>
           {codes.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
-              <Tag className="h-12 w-12 text-muted-foreground" />
+              <TagIcon className="h-12 w-12 text-muted-foreground" />
               <h3 className="mt-4 text-lg font-semibold">
                 {t('noPromoCodes')}
               </h3>

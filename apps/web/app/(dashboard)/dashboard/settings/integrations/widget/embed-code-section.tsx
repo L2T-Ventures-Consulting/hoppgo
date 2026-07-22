@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { Copy, Check, ExternalLink, Code, Eye } from 'lucide-react'
+import { Copy, Check } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
+import { CodeIcon, ExternalLinkIcon, EyeIcon } from '@louez/ui/icons'
 
 interface EmbedCodeSectionProps {
   embedUrl: string
@@ -60,7 +61,7 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
+            <EyeIcon className="h-5 w-5 shrink-0" />
             {t('preview')}
           </CardTitle>
           <CardDescription>{t('previewDescription')}</CardDescription>
@@ -83,7 +84,7 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Code className="h-5 w-5" />
+            <CodeIcon className="h-5 w-5 shrink-0" />
             {t('code')}
           </CardTitle>
           <CardDescription>{t('codeDescription')}</CardDescription>
@@ -124,7 +125,7 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
               className="text-sm text-primary hover:underline inline-flex items-center gap-1"
             >
               {embedUrl}
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLinkIcon className="h-3 w-3" />
             </a>
           </div>
         </CardContent>

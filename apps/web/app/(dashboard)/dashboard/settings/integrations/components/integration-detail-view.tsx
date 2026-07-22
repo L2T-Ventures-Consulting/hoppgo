@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import Link from 'next/link';
+import Link from "next/link";
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeftIcon, ExternalLink } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 import {
   Badge,
@@ -16,28 +15,28 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Skeleton,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
   toastManager,
-} from '@louez/ui';
+} from "@louez/ui";
+import { ArrowLeftIcon, CameraIcon, CogIcon, ExternalLinkIcon, InfoCircleIcon, ListCheckIcon, PuzzleIcon, WarningIcon } from "@louez/ui/icons";
 
-import { getIntegration } from '@/lib/integrations/registry';
-import type { IntegrationDetail } from '@/lib/integrations/registry/types';
-import { orpc } from '@/lib/orpc/react';
+import { getIntegration } from "@/lib/integrations/registry";
+import type { IntegrationDetail } from "@/lib/integrations/registry/types";
+import { orpc } from "@/lib/orpc/react";
 
 type IntegrationDetailViewProps = {
   integrationId: string;
 };
 
-type IntegrationTab = 'features' | 'configuration' | 'about';
+type IntegrationTab = "features" | "configuration" | "about";
 
-const TULIP_INTEGRATION_ID = 'tulip';
+const TULIP_INTEGRATION_ID = "tulip";
 
-export function IntegrationDetailView({
-  integrationId,
-}: IntegrationDetailViewProps) {
+export function IntegrationDetailView({ integrationId }: IntegrationDetailViewProps) {
   const t = useTranslations();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState<IntegrationTab | null>(null);
@@ -81,12 +80,12 @@ export function IntegrationDetailView({
     orpc.dashboard.integrations.setEnabled.mutationOptions({
       onSuccess: async (_, input) => {
         toastManager.add({
-          type: 'success',
+          type: "success",
           title: resolveMessage(
             input.enabled
-              ? 'dashboard.settings.integrationsHub.toasts.enabled'
-              : 'dashboard.settings.integrationsHub.toasts.disabled',
-            input.enabled ? 'Integration enabled.' : 'Integration disabled.',
+              ? "dashboard.settings.integrationsHub.toasts.enabled"
+              : "dashboard.settings.integrationsHub.toasts.disabled",
+            input.enabled ? "Integration enabled." : "Integration disabled.",
           ),
         });
 
@@ -108,40 +107,33 @@ export function IntegrationDetailView({
       },
       onError: () => {
         toastManager.add({
-          type: 'error',
-          title: resolveMessage('errors.generic', 'Something went wrong.'),
+          type: "error",
+          title: resolveMessage("errors.generic", "Something went wrong."),
         });
       },
     }),
   );
 
   const integration: IntegrationDetail | null =
-    detailQuery.data && !('error' in detailQuery.data)
+    detailQuery.data && !("error" in detailQuery.data)
       ? (detailQuery.data.integration as unknown as IntegrationDetail)
       : null;
   const usesConnectionAsEnabledState =
-    integration?.id === 'tulip' || integration?.category === 'calendar';
-  const showConfigurationLockedCard =
-    !usesConnectionAsEnabledState && !integration?.enabled;
+    integration?.id === "tulip" || integration?.category === "calendar";
+  const showConfigurationLockedCard = !usesConnectionAsEnabledState && !integration?.enabled;
   const initialTab: IntegrationTab =
-    integration && (integration.enabled || integration.connected)
-      ? 'configuration'
-      : 'features';
+    integration && (integration.enabled || integration.connected) ? "configuration" : "features";
   const activeTab = selectedTab ?? initialTab;
-  const registration = useMemo(
-    () => getIntegration(integrationId),
-    [integrationId],
-  );
+  const registration = useMemo(() => getIntegration(integrationId), [integrationId]);
   const ConfigurationPanel = registration?.adapter.getConfigurationPanel?.();
 
   if (detailQuery.isLoading) {
     return (
-      <p className="text-muted-foreground text-sm">
-        {resolveMessage(
-          'dashboard.settings.integrationsHub.loading',
-          'Loading integration...',
-        )}
-      </p>
+      <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-6">
+        <Skeleton className="h-5 w-40" />
+        <Skeleton className="h-33 rounded-2xl" />
+        <Skeleton className="h-64 rounded-2xl" />
+      </div>
     );
   }
 
@@ -149,16 +141,17 @@ export function IntegrationDetailView({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <WarningIcon className="h-5 w-5 shrink-0" />
             {resolveMessage(
-              'dashboard.settings.integrationsHub.detailNotFoundTitle',
-              'Integration not found',
+              "dashboard.settings.integrationsHub.detailNotFoundTitle",
+              "Integration not found",
             )}
           </CardTitle>
           <CardDescription>
             {resolveMessage(
-              'dashboard.settings.integrationsHub.detailNotFoundDescription',
-              'The integration could not be loaded.',
+              "dashboard.settings.integrationsHub.detailNotFoundDescription",
+              "The integration could not be loaded.",
             )}
           </CardDescription>
         </CardHeader>
@@ -167,16 +160,13 @@ export function IntegrationDetailView({
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-6">
       <Link
         href="/dashboard/settings/integrations"
-        className="text-primary flex items-center gap-2 text-sm"
+        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition"
       >
         <ArrowLeftIcon className="h-4 w-4" />
-        {resolveMessage(
-          'dashboard.settings.integrationsHub.backToCatalog',
-          'Back to catalog',
-        )}
+        {resolveMessage("dashboard.settings.integrationsHub.backToCatalog", "Back to catalog")}
       </Link>
 
       <Card>
@@ -198,8 +188,8 @@ export function IntegrationDetailView({
                   {resolveMessage(
                     integration.descriptionKey,
                     resolveMessage(
-                      'dashboard.settings.integrationsHub.fallbackDescription',
-                      'Integration details are available on this page.',
+                      "dashboard.settings.integrationsHub.fallbackDescription",
+                      "Integration details are available on this page.",
                     ),
                   )}
                 </p>
@@ -207,29 +197,27 @@ export function IntegrationDetailView({
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={integration.enabled ? 'success' : 'secondary'}>
+              <Badge variant={integration.enabled ? "success" : "secondary"}>
                 {integration.enabled
                   ? resolveMessage(
-                      'dashboard.settings.integrationsHub.statusLabels.enabled',
-                      'Enabled',
+                      "dashboard.settings.integrationsHub.statusLabels.enabled",
+                      "Enabled",
                     )
                   : resolveMessage(
-                      'dashboard.settings.integrationsHub.statusLabels.disabled',
-                      'Disabled',
+                      "dashboard.settings.integrationsHub.statusLabels.disabled",
+                      "Disabled",
                     )}
               </Badge>
               {!usesConnectionAsEnabledState && (
-                <Badge
-                  variant={integration.connected ? 'success' : 'secondary'}
-                >
+                <Badge variant={integration.connected ? "success" : "secondary"}>
                   {integration.connected
                     ? resolveMessage(
-                        'dashboard.settings.integrationsHub.statusLabels.connected',
-                        'Connected',
+                        "dashboard.settings.integrationsHub.statusLabels.connected",
+                        "Connected",
                       )
                     : resolveMessage(
-                        'dashboard.settings.integrationsHub.statusLabels.notConnected',
-                        'Not connected',
+                        "dashboard.settings.integrationsHub.statusLabels.notConnected",
+                        "Not connected",
                       )}
                 </Badge>
               )}
@@ -245,16 +233,12 @@ export function IntegrationDetailView({
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant={
-                integration.enabled || usesConnectionAsEnabledState
-                  ? 'outline'
-                  : 'default'
-              }
+              variant={integration.enabled || usesConnectionAsEnabledState ? "outline" : "default"}
               disabled={setEnabledMutation.isPending}
               onClick={() => {
                 if (integration.enabled || usesConnectionAsEnabledState) {
                   prefetchTulipState();
-                  setSelectedTab('configuration');
+                  setSelectedTab("configuration");
                   return;
                 }
 
@@ -266,30 +250,21 @@ export function IntegrationDetailView({
             >
               {integration.enabled || usesConnectionAsEnabledState
                 ? resolveMessage(
-                    'dashboard.settings.integrationsHub.openConfigurationAction',
-                    'Open configuration',
+                    "dashboard.settings.integrationsHub.openConfigurationAction",
+                    "Open configuration",
                   )
                 : resolveMessage(
-                    'dashboard.settings.integrationsHub.enableAction',
-                    'Enable integration',
+                    "dashboard.settings.integrationsHub.enableAction",
+                    "Enable integration",
                   )}
             </Button>
 
             <Button
               type="button"
               variant="outline"
-              render={
-                <a
-                  href={integration.websiteUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                />
-              }
+              render={<a href={integration.websiteUrl} target="_blank" rel="noreferrer" />}
             >
-              {resolveMessage(
-                'dashboard.settings.integrationsHub.visitWebsite',
-                'Visit website',
-              )}
+              {resolveMessage("dashboard.settings.integrationsHub.visitWebsite", "Visit website")}
             </Button>
           </div>
         </CardContent>
@@ -299,11 +274,7 @@ export function IntegrationDetailView({
         <Tabs
           value={activeTab}
           onValueChange={(value) => {
-            if (
-              value === 'features' ||
-              value === 'configuration' ||
-              value === 'about'
-            ) {
+            if (value === "features" || value === "configuration" || value === "about") {
               setSelectedTab(value);
             }
           }}
@@ -311,10 +282,7 @@ export function IntegrationDetailView({
         >
           <TabsList variant="underline">
             <TabsTrigger value="features">
-              {resolveMessage(
-                'dashboard.settings.integrationsHub.tabs.features',
-                'Features',
-              )}
+              {resolveMessage("dashboard.settings.integrationsHub.tabs.features", "Features")}
             </TabsTrigger>
             <TabsTrigger
               value="configuration"
@@ -323,34 +291,30 @@ export function IntegrationDetailView({
               onTouchStart={prefetchTulipState}
             >
               {resolveMessage(
-                'dashboard.settings.integrationsHub.tabs.configuration',
-                'Configuration',
+                "dashboard.settings.integrationsHub.tabs.configuration",
+                "Configuration",
               )}
             </TabsTrigger>
             <TabsTrigger value="about">
-              {resolveMessage(
-                'dashboard.settings.integrationsHub.tabs.about',
-                'About',
-              )}
+              {resolveMessage("dashboard.settings.integrationsHub.tabs.about", "About")}
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="features" className="space-y-4">
             <Card>
               <CardHeader>
-                <CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <ListCheckIcon className="h-5 w-5 shrink-0" />
                   {resolveMessage(
-                    'dashboard.settings.integrationsHub.featuresTitle',
-                    'What it does',
+                    "dashboard.settings.integrationsHub.featuresTitle",
+                    "What it does",
                   )}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <ul className="text-muted-foreground list-disc space-y-2 pl-5 text-sm">
                   {integration.featureKeys.map((featureKey: string) => (
-                    <li key={featureKey}>
-                      {resolveMessage(featureKey, featureKey)}
-                    </li>
+                    <li key={featureKey}>{resolveMessage(featureKey, featureKey)}</li>
                   ))}
                 </ul>
               </CardContent>
@@ -358,19 +322,14 @@ export function IntegrationDetailView({
 
             <Card>
               <CardHeader>
-                <CardTitle>
-                  {resolveMessage(
-                    'dashboard.settings.integrationsHub.galleryTitle',
-                    'Gallery',
-                  )}
+                <CardTitle className="flex items-center gap-2">
+                  <CameraIcon className="h-5 w-5 shrink-0" />
+                  {resolveMessage("dashboard.settings.integrationsHub.galleryTitle", "Gallery")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
                 {integration.galleryPaths.map((imagePath: string) => (
-                  <div
-                    key={imagePath}
-                    className="bg-background overflow-hidden rounded-md border"
-                  >
+                  <div key={imagePath} className="bg-background overflow-hidden rounded-md border">
                     <img
                       src={imagePath}
                       alt={resolveMessage(integration.nameKey, integration.id)}
@@ -386,16 +345,17 @@ export function IntegrationDetailView({
             {showConfigurationLockedCard ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <CogIcon className="h-5 w-5 shrink-0" />
                     {resolveMessage(
-                      'dashboard.settings.integrationsHub.configurationLockedTitle',
-                      'Enable to configure',
+                      "dashboard.settings.integrationsHub.configurationLockedTitle",
+                      "Enable to configure",
                     )}
                   </CardTitle>
                   <CardDescription>
                     {resolveMessage(
-                      'dashboard.settings.integrationsHub.configurationLockedDescription',
-                      'You need to enable this integration before opening its configuration.',
+                      "dashboard.settings.integrationsHub.configurationLockedDescription",
+                      "You need to enable this integration before opening its configuration.",
                     )}
                   </CardDescription>
                 </CardHeader>
@@ -411,8 +371,8 @@ export function IntegrationDetailView({
                     }}
                   >
                     {resolveMessage(
-                      'dashboard.settings.integrationsHub.enableAction',
-                      'Enable integration',
+                      "dashboard.settings.integrationsHub.enableAction",
+                      "Enable integration",
                     )}
                   </Button>
                 </CardContent>
@@ -425,16 +385,17 @@ export function IntegrationDetailView({
                   <>
                     <Card>
                       <CardHeader>
-                        <CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                          <WarningIcon className="h-5 w-5 shrink-0" />
                           {resolveMessage(
-                            'dashboard.settings.integrationsHub.configurationUnavailableTitle',
-                            'Configuration unavailable',
+                            "dashboard.settings.integrationsHub.configurationUnavailableTitle",
+                            "Configuration unavailable",
                           )}
                         </CardTitle>
                         <CardDescription>
                           {resolveMessage(
-                            'dashboard.settings.integrationsHub.configurationUnavailableDescription',
-                            'This integration does not expose a configuration panel yet.',
+                            "dashboard.settings.integrationsHub.configurationUnavailableDescription",
+                            "This integration does not expose a configuration panel yet.",
                           )}
                         </CardDescription>
                       </CardHeader>
@@ -442,16 +403,17 @@ export function IntegrationDetailView({
 
                     <Card className="border-destructive/40">
                       <CardHeader>
-                        <CardTitle>
+                        <CardTitle className="flex items-center gap-2">
+                          <WarningIcon className="h-5 w-5 shrink-0" />
                           {resolveMessage(
-                            'dashboard.settings.integrationsHub.dangerZoneTitle',
-                            'Danger zone',
+                            "dashboard.settings.integrationsHub.dangerZoneTitle",
+                            "Danger zone",
                           )}
                         </CardTitle>
                         <CardDescription>
                           {resolveMessage(
-                            'dashboard.settings.integrationsHub.dangerZoneDescription',
-                            'Disable this integration to stop synchronization and hide its checkout behavior.',
+                            "dashboard.settings.integrationsHub.dangerZoneDescription",
+                            "Disable this integration to stop synchronization and hide its checkout behavior.",
                           )}
                         </CardDescription>
                       </CardHeader>
@@ -469,8 +431,8 @@ export function IntegrationDetailView({
                             }}
                           >
                             {resolveMessage(
-                              'dashboard.settings.integrationsHub.disableAction',
-                              'Disable integration',
+                              "dashboard.settings.integrationsHub.disableAction",
+                              "Disable integration",
                             )}
                           </Button>
                         </CardContent>
@@ -485,11 +447,9 @@ export function IntegrationDetailView({
           <TabsContent value="about">
             <Card>
               <CardHeader>
-                <CardTitle>
-                  {resolveMessage(
-                    'dashboard.settings.integrationsHub.aboutTitle',
-                    'About',
-                  )}
+                <CardTitle className="flex items-center gap-2">
+                  <InfoCircleIcon className="h-5 w-5 shrink-0" />
+                  {resolveMessage("dashboard.settings.integrationsHub.aboutTitle", "About")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5 text-sm">
@@ -501,9 +461,7 @@ export function IntegrationDetailView({
                       </h3>
                       <ul className="text-muted-foreground list-disc space-y-1.5 pl-5">
                         {section.bodyKeys.map((bodyKey) => (
-                          <li key={bodyKey}>
-                            {resolveMessage(bodyKey, bodyKey)}
-                          </li>
+                          <li key={bodyKey}>{resolveMessage(bodyKey, bodyKey)}</li>
                         ))}
                       </ul>
                     </section>
@@ -520,30 +478,25 @@ export function IntegrationDetailView({
 
         <Card className="h-fit">
           <CardHeader>
-            <CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <PuzzleIcon className="h-5 w-5 shrink-0" />
               {resolveMessage(
-                'dashboard.settings.integrationsHub.metadataTitle',
-                'Integration details',
+                "dashboard.settings.integrationsHub.metadataTitle",
+                "Integration details",
               )}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <div>
               <p className="text-muted-foreground text-xs tracking-wide uppercase">
-                {resolveMessage(
-                  'dashboard.settings.integrationsHub.metadata.provider',
-                  'Provider',
-                )}
+                {resolveMessage("dashboard.settings.integrationsHub.metadata.provider", "Provider")}
               </p>
               <p className="font-medium">{integration.providerName}</p>
             </div>
 
             <div>
               <p className="text-muted-foreground text-xs tracking-wide uppercase">
-                {resolveMessage(
-                  'dashboard.settings.integrationsHub.metadata.category',
-                  'Category',
-                )}
+                {resolveMessage("dashboard.settings.integrationsHub.metadata.category", "Category")}
               </p>
               <p className="font-medium">
                 {resolveMessage(
@@ -556,27 +509,23 @@ export function IntegrationDetailView({
             <div>
               <p className="text-muted-foreground text-xs tracking-wide uppercase">
                 {resolveMessage(
-                  'dashboard.settings.integrationsHub.metadata.resources',
-                  'Resources',
+                  "dashboard.settings.integrationsHub.metadata.resources",
+                  "Resources",
                 )}
               </p>
               <div className="mt-2 flex flex-col gap-2">
-                {integration.resourceLinks.map(
-                  (resource: { labelKey: string; url: string }) => (
-                    <a
-                      key={resource.url}
-                      href={resource.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary inline-flex items-center gap-1"
-                    >
-                      <span>
-                        {resolveMessage(resource.labelKey, resource.url)}
-                      </span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </a>
-                  ),
-                )}
+                {integration.resourceLinks.map((resource: { labelKey: string; url: string }) => (
+                  <a
+                    key={resource.url}
+                    href={resource.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary inline-flex items-center gap-1"
+                  >
+                    <span>{resolveMessage(resource.labelKey, resource.url)}</span>
+                    <ExternalLinkIcon className="h-3.5 w-3.5" />
+                  </a>
+                ))}
               </div>
             </div>
           </CardContent>

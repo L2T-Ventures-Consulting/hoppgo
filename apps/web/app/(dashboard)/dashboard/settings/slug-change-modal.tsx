@@ -1,7 +1,8 @@
 'use client'
 
 import { useDebounce } from '@/hooks/use-debounce'
-import { AlertTriangle, Check, Link2, Loader2, X } from 'lucide-react'
+import { LinkIcon, WarningIcon } from '@louez/ui/icons'
+import { Check, Loader2, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState, useTransition } from 'react'
@@ -168,7 +169,7 @@ export function SlugChangeModal({
       <DialogPopup className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Link2 className="h-5 w-5" />
+            <LinkIcon className="h-5 w-5" />
             {t('title')}
           </DialogTitle>
           <DialogDescription>
@@ -227,7 +228,7 @@ export function SlugChangeModal({
           ) : (
             <div className="flex flex-col gap-2">
               <Alert variant="warning">
-                <AlertTriangle className="h-4 w-4" />
+                <WarningIcon className="h-4 w-4" />
                 <AlertDescription className="ml-2">
                   <p className="font-medium">{t('warning.title')}</p>
                   <ul className="mt-2 list-disc pl-4 space-y-1 text-sm">

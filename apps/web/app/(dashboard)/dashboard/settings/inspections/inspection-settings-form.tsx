@@ -4,8 +4,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ClipboardCheck, Camera, PenLine, FileText, Settings2, FileCheck2 } from "lucide-react";
+import { PenLine } from "lucide-react";
 import { toastManager } from "@louez/ui";
+import { CameraIcon, ClipboardIcon, CogIcon, FileCheckIcon, FileTextIcon } from "@louez/ui/icons";
 import { useStore } from "@tanstack/react-form";
 
 import { Switch } from "@louez/ui";
@@ -100,7 +101,7 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-primary" />
+              <ClipboardIcon className="h-5 w-5 shrink-0" />
               {t("enableSection")}
             </CardTitle>
             <CardDescription>{t("enableSectionDescription")}</CardDescription>
@@ -119,7 +120,7 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings2 className="h-5 w-5 text-primary" />
+                <CogIcon className="h-5 w-5 shrink-0" />
                 {t("modeSection")}
               </CardTitle>
             </CardHeader>
@@ -188,7 +189,7 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileCheck2 className="h-5 w-5 text-primary" />
+                <FileCheckIcon className="h-5 w-5 shrink-0" />
                 {t("signatureSection")}
               </CardTitle>
             </CardHeader>
@@ -219,7 +220,7 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
                 {(field) => (
                   <div className="flex flex-row items-center justify-between rounded-lg border p-4">
                     <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-muted-foreground" />
+                      <FileTextIcon className="h-5 w-5 text-muted-foreground" />
                       <div className="space-y-0.5">
                         <Label htmlFor={field.name} className="text-base">
                           {t("autoGeneratePdf")}
@@ -245,7 +246,7 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Camera className="h-5 w-5 text-primary" />
+                <CameraIcon className="h-5 w-5 shrink-0" />
                 {t("maxPhotosPerItem")}
               </CardTitle>
             </CardHeader>

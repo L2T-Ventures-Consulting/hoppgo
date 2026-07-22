@@ -4,6 +4,8 @@
     "description": "Plateforme de location de matériel simple et moderne"
   },
   "common": {
+    "duration": "Durée",
+    "price": "Prix",
     "save": "Enregistrer",
     "unsavedChanges": "Modifications non enregistrées",
     "cancel": "Annuler",
@@ -1074,6 +1076,7 @@
         "productSection": "Produit",
         "productSectionDescription": "Nom, photos et description de votre produit",
         "addVideo": "Ajouter une vidéo YouTube",
+        "categories": "Catégories",
         "categorySearchPlaceholder": "Rechercher ou créer…",
         "categoryCreateOption": "Créer « {name} »",
         "categoryNoResults": "Aucune catégorie trouvée",
@@ -2417,6 +2420,21 @@
     },
     "settings": {
       "title": "Paramètres",
+      "settingsNavigation": {
+        "label": "Navigation des paramètres",
+        "mobileLabel": "Choisir une page de paramètres",
+        "search": {
+          "label": "Rechercher dans les paramètres",
+          "placeholder": "Rechercher un réglage…",
+          "noResults": "Aucun paramètre ne correspond à votre recherche."
+        },
+        "groups": {
+          "store": "Boutique",
+          "rental": "Locations",
+          "communication": "Communication",
+          "accountData": "Compte et données"
+        }
+      },
       "store": "Boutique",
       "appearance": "Apparence",
       "reservations": "Réservations",

@@ -1,29 +1,16 @@
-'use client';
+"use client";
 
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
-import { Label } from '@louez/ui';
-import { CountryFlag } from '@louez/ui/icons/flags';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@louez/ui';
+import { Label } from "@louez/ui";
+import { MapPinIcon } from "@louez/ui/icons";
+import { CountryFlag } from "@louez/ui/icons/flags";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
 
-import { getFieldError } from '@/hooks/form/form-context';
-import {
-  getCountriesSortedByName,
-  getCountryName,
-} from '@/lib/utils/countries';
+import { InfoCallout } from "@/components/dashboard/info-callout";
+import { getFieldError } from "@/hooks/form/form-context";
+import { getCountriesSortedByName, getCountryName } from "@/lib/utils/countries";
 
 interface StoreSettingsBillingSectionProps {
   form: any;
@@ -42,20 +29,23 @@ export function StoreSettingsBillingSection({
   billingPostalCode,
   billingCountry,
 }: StoreSettingsBillingSectionProps) {
-  const t = useTranslations('dashboard.settings');
+  const t = useTranslations("dashboard.settings");
 
   return (
     <Card className="min-w-0">
       <CardHeader>
-        <CardTitle>{t('billingAddress.title')}</CardTitle>
-        <CardDescription>{t('billingAddress.description')}</CardDescription>
+        <CardTitle className="flex items-center gap-2">
+          <MapPinIcon className="h-5 w-5 shrink-0" />
+          {t("billingAddress.title")}
+        </CardTitle>
+        <CardDescription>{t("billingAddress.description")}</CardDescription>
       </CardHeader>
-      <CardContent className="grid min-w-0 gap-4 p-4 sm:p-6">
+      <CardContent className="grid min-w-0 gap-4">
         <form.AppField name="billingAddressSameAsStore">
           {(field: any) => (
             <field.Checkbox
-              label={t('billingAddress.sameAsStore')}
-              description={t('billingAddress.sameAsStoreDescription')}
+              label={t("billingAddress.sameAsStore")}
+              description={t("billingAddress.sameAsStoreDescription")}
             />
           )}
         </form.AppField>
@@ -65,8 +55,8 @@ export function StoreSettingsBillingSection({
             <form.AppField name="billingAddress">
               {(field: any) => (
                 <field.Input
-                  label={t('billingAddress.address')}
-                  placeholder={t('billingAddress.addressPlaceholder')}
+                  label={t("billingAddress.address")}
+                  placeholder={t("billingAddress.addressPlaceholder")}
                 />
               )}
             </form.AppField>
@@ -75,8 +65,8 @@ export function StoreSettingsBillingSection({
               <form.AppField name="billingPostalCode">
                 {(field: any) => (
                   <field.Input
-                    label={t('billingAddress.postalCode')}
-                    placeholder={t('billingAddress.postalCodePlaceholder')}
+                    label={t("billingAddress.postalCode")}
+                    placeholder={t("billingAddress.postalCodePlaceholder")}
                   />
                 )}
               </form.AppField>
@@ -84,8 +74,8 @@ export function StoreSettingsBillingSection({
               <form.AppField name="billingCity">
                 {(field: any) => (
                   <field.Input
-                    label={t('billingAddress.city')}
-                    placeholder={t('billingAddress.cityPlaceholder')}
+                    label={t("billingAddress.city")}
+                    placeholder={t("billingAddress.cityPlaceholder")}
                   />
                 )}
               </form.AppField>
@@ -94,7 +84,7 @@ export function StoreSettingsBillingSection({
             <form.Field name="billingCountry">
               {(field: any) => (
                 <div className="grid min-w-0 gap-2">
-                  <Label htmlFor={field.name}>{t('billingAddress.country')}</Label>
+                  <Label htmlFor={field.name}>{t("billingAddress.country")}</Label>
                   <Select
                     onValueChange={(value) => {
                       if (value !== null) {
@@ -112,9 +102,7 @@ export function StoreSettingsBillingSection({
                               countryName={getCountryName(field.state.value)}
                               className="h-4 w-6 shrink-0 [&_img]:size-full [&_svg]:size-full"
                             />
-                            <span className="truncate">
-                              {getCountryName(field.state.value)}
-                            </span>
+                            <span className="truncate">{getCountryName(field.state.value)}</span>
                           </span>
                         )}
                       </SelectValue>
@@ -146,7 +134,7 @@ export function StoreSettingsBillingSection({
             {(billingAddress || billingCity) && (
               <div className="bg-muted/50 rounded-lg p-4 text-sm">
                 <p className="text-muted-foreground mb-1 font-medium">
-                  {t('billingAddress.preview')}
+                  {t("billingAddress.preview")}
                 </p>
                 <p>{billingAddress}</p>
                 {(billingPostalCode || billingCity) && (
@@ -160,13 +148,11 @@ export function StoreSettingsBillingSection({
           </div>
         )}
 
-        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 text-sm dark:border-blue-800 dark:bg-blue-950/50">
-          <p className="text-blue-800 dark:text-blue-200">
-            {billingAddressSameAsStore
-              ? t('billingAddress.infoSameAddress')
-              : t('billingAddress.infoDifferentAddress')}
-          </p>
-        </div>
+        <InfoCallout>
+          {billingAddressSameAsStore
+            ? t("billingAddress.infoSameAddress")
+            : t("billingAddress.infoDifferentAddress")}
+        </InfoCallout>
       </CardContent>
     </Card>
   );

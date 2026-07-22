@@ -1,25 +1,26 @@
-import { getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-import { getCurrentStore } from '@/lib/store-context'
-import { AppearanceForm } from './appearance-form'
+import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
+import { getCurrentStore } from "@/lib/store-context";
+import { AppearanceForm } from "./appearance-form";
 
 export default async function AppearancePage() {
-  const store = await getCurrentStore()
+  const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding')
+    redirect("/onboarding");
   }
 
-  const t = await getTranslations('dashboard.settings')
+  const t = await getTranslations("dashboard.settings");
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <p className="text-sm sm:text-base text-muted-foreground">
-        {t('appearanceSettings.description')}
-      </p>
-
+    <SettingsPageShell
+      title={t("appearance")}
+      description={t("appearanceSettings.description")}
+      width="wide"
+    >
       <AppearanceForm store={store} />
-    </div>
-  )
+    </SettingsPageShell>
+  );
 }

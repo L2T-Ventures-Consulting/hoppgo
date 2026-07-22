@@ -14,6 +14,7 @@ import {
   Input,
   Label,
 } from '@louez/ui'
+import { KeyIcon } from '@louez/ui/icons'
 
 interface TulipSetupSectionProps {
   connected: boolean
@@ -59,7 +60,10 @@ export function TulipSetupSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <KeyIcon className="h-5 w-5 shrink-0" />
+          {t('title')}
+        </CardTitle>
         <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

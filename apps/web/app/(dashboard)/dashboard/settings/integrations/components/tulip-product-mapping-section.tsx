@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 
-import { Pencil, RefreshCw, Search } from 'lucide-react';
+import { Pencil, RefreshCw } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
 import {
@@ -40,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from '@louez/ui';
+import { LinkIcon, SearchIcon } from '@louez/ui/icons';
 import { cn } from '@louez/utils';
 
 import type {
@@ -267,7 +268,10 @@ export function TulipProductMappingSection({
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
-            <CardTitle>{t('title')}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <LinkIcon className="h-5 w-5 shrink-0" />
+              {t('title')}
+            </CardTitle>
             <CardDescription>{t('description')}</CardDescription>
           </div>
           <Button
@@ -314,7 +318,7 @@ export function TulipProductMappingSection({
             ))}
           </div>
           <div className="relative">
-            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+            <SearchIcon className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder={t('searchPlaceholder')}
               className="w-full pl-9 sm:w-[250px]"
