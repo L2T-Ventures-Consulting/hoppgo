@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toastManager } from "@louez/ui";
 import Link from "next/link";
@@ -26,17 +27,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@louez
 import { PhoneInput } from "@/components/ui/phone-input";
 import { NotificationTemplateSheet } from "@/components/dashboard/notification-template-sheet";
 import { PushManageCard } from "@/components/dashboard/push-manage-card";
-import {
-  updateSinglePreference,
-  updateDiscordWebhook,
-  updateOwnerPhone,
-  testDiscordWebhook,
-  updateCustomerPreference,
-  updateCustomerTemplate,
-  getCustomerTemplate,
-  updateReminderSettings,
-  updateAdminReminderSettings,
-} from "./actions";
+import { orpc } from "@/lib/orpc/react";
+import { updateDiscordWebhook, updateOwnerPhone, testDiscordWebhook } from "./actions";
 import type {
   NotificationSettings,
   NotificationEventType,
@@ -109,7 +101,7 @@ const CUSTOMER_NOTIFICATION_EVENTS: CustomerNotificationEvent[] = [
   { type: "customer_reminder_return", category: "reminder" },
 ];
 
-export function NotificationsForm({
+export const NotificationsForm = ({
   settings: initialSettings,
   discordWebhookUrl: initialWebhookUrl,
   ownerPhone: initialOwnerPhone,
@@ -118,18 +110,40 @@ export function NotificationsForm({
   storeLocale,
   storeLanguageName,
   storeInfo,
-}: NotificationsFormProps) {
+}: NotificationsFormProps) => {
   const t = useTranslations("dashboard.settings.notifications");
   const tc = useTranslations("common");
+  const queryClient = useQueryClient();
+
+  const updateSinglePreferenceMutation = useMutation(
+    orpc.dashboard.notifications.updateSinglePreference.mutationOptions(),
+  );
+  const updateCustomerPreferenceMutation = useMutation(
+    orpc.dashboard.notifications.updateCustomerPreference.mutationOptions(),
+  );
+  const updateCustomerTemplateMutation = useMutation(
+    orpc.dashboard.notifications.updateCustomerTemplate.mutationOptions(),
+  );
+  const updateReminderSettingsMutation = useMutation(
+    orpc.dashboard.notifications.updateReminderSettings.mutationOptions(),
+  );
+  const updateAdminReminderSettingsMutation = useMutation(
+    orpc.dashboard.notifications.updateAdminReminderSettings.mutationOptions(),
+  );
+  const updateDiscordWebhookMutation = useMutation({
+    mutationFn: updateDiscordWebhook,
+  });
+  const testDiscordWebhookMutation = useMutation({
+    mutationFn: async () => testDiscordWebhook(),
+  });
+  const updateOwnerPhoneMutation = useMutation({
+    mutationFn: updateOwnerPhone,
+  });
 
   // Admin notification state
   const [settings, setSettings] = useState(initialSettings);
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState(initialWebhookUrl || "");
   const [ownerPhone, setOwnerPhone] = useState(initialOwnerPhone || "");
-  const [isPending, startTransition] = useTransition();
-  const [savingWebhook, setSavingWebhook] = useState(false);
-  const [savingPhone, setSavingPhone] = useState(false);
-  const [testingDiscord, setTestingDiscord] = useState(false);
   const [isDiscordConnected, setIsDiscordConnected] = useState(!!initialWebhookUrl);
   const [isSmsConfigured, setIsSmsConfigured] = useState(!!initialOwnerPhone);
 
@@ -148,7 +162,6 @@ export function NotificationsForm({
   const [returnReminderHours, setReturnReminderHours] = useState(
     initialCustomerSettings.reminderSettings?.returnReminderHours ?? 24,
   );
-  const [savingReminderSettings, setSavingReminderSettings] = useState(false);
 
   // Admin reminder timing state (independent of customer timing)
   const [adminPickupReminderHours, setAdminPickupReminderHours] = useState(
@@ -163,10 +176,10 @@ export function NotificationsForm({
   const [adminDigestHour, setAdminDigestHour] = useState(
     initialSettings.reminderSettings?.digestHour ?? 8,
   );
-  const [savingAdminReminderSettings, setSavingAdminReminderSettings] = useState(false);
-
   const smsLimitReached = !smsQuota.allowed;
   const smsLow = smsQuota.limit !== null && smsQuota.current >= smsQuota.limit * 0.8;
+  const isTogglePending =
+    updateSinglePreferenceMutation.isPending || updateCustomerPreferenceMutation.isPending;
 
   // Admin toggle handler
   const handleToggle = async (
@@ -182,19 +195,18 @@ export function NotificationsForm({
       },
     }));
 
-    startTransition(async () => {
-      const result = await updateSinglePreference({ eventType, channel, enabled });
-      if (result.error) {
-        setSettings((prev) => ({
-          ...prev,
-          [eventType]: {
-            ...prev[eventType],
-            [channel]: !enabled,
-          },
-        }));
-        toastManager.add({ title: t("saveError"), type: "error" });
-      }
-    });
+    try {
+      await updateSinglePreferenceMutation.mutateAsync({ eventType, channel, enabled });
+    } catch {
+      setSettings((prev) => ({
+        ...prev,
+        [eventType]: {
+          ...prev[eventType],
+          [channel]: !enabled,
+        },
+      }));
+      toastManager.add({ title: t("saveError"), type: "error" });
+    }
   };
 
   // Customer toggle handler
@@ -211,83 +223,89 @@ export function NotificationsForm({
       },
     }));
 
-    startTransition(async () => {
-      const result = await updateCustomerPreference({ eventType, channel, enabled });
-      if (result.error) {
-        setCustomerSettings((prev) => ({
-          ...prev,
-          [eventType]: {
-            ...prev[eventType],
-            [channel]: !enabled,
-          },
-        }));
-        toastManager.add({ title: t("saveError"), type: "error" });
-      }
-    });
+    try {
+      await updateCustomerPreferenceMutation.mutateAsync({ eventType, channel, enabled });
+    } catch {
+      setCustomerSettings((prev) => ({
+        ...prev,
+        [eventType]: {
+          ...prev[eventType],
+          [channel]: !enabled,
+        },
+      }));
+      toastManager.add({ title: t("saveError"), type: "error" });
+    }
   };
 
   const handleSaveWebhook = async () => {
-    setSavingWebhook(true);
-    const result = await updateDiscordWebhook(discordWebhookUrl || null);
-    setSavingWebhook(false);
-
-    if (result.error) {
-      toastManager.add({ title: t("discord.invalidUrl"), type: "error" });
-    } else {
+    try {
+      const result = await updateDiscordWebhookMutation.mutateAsync(discordWebhookUrl || null);
+      if (result.error) {
+        toastManager.add({ title: t("discord.invalidUrl"), type: "error" });
+        return;
+      }
       setIsDiscordConnected(!!discordWebhookUrl);
       toastManager.add({ title: t("discord.saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("discord.invalidUrl"), type: "error" });
     }
   };
 
   const handleTestDiscord = async () => {
-    setTestingDiscord(true);
-    const result = await testDiscordWebhook();
-    setTestingDiscord(false);
-
-    if (result.error) {
-      toastManager.add({ title: t("discord.testError"), type: "error" });
-    } else {
+    try {
+      const result = await testDiscordWebhookMutation.mutateAsync();
+      if (result.error) {
+        toastManager.add({ title: t("discord.testError"), type: "error" });
+        return;
+      }
       toastManager.add({ title: t("discord.testSuccess"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("discord.testError"), type: "error" });
     }
   };
 
   const handleSavePhone = async () => {
-    setSavingPhone(true);
-    const result = await updateOwnerPhone(ownerPhone || null);
-    setSavingPhone(false);
-
-    if (result.error) {
-      toastManager.add({ title: t("phone.invalidNumber"), type: "error" });
-    } else {
+    try {
+      const result = await updateOwnerPhoneMutation.mutateAsync(ownerPhone || null);
+      if (result.error) {
+        toastManager.add({ title: t("phone.invalidNumber"), type: "error" });
+        return;
+      }
       const hasPhone = !!result.phone;
       setIsSmsConfigured(hasPhone);
       if (result.phone) {
         setOwnerPhone(result.phone);
       }
       toastManager.add({ title: t("phone.saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("phone.invalidNumber"), type: "error" });
     }
   };
 
   const handleOpenTemplateModal = async (eventType: CustomerNotificationEventType) => {
     setEditingEventType(eventType);
-    const result = await getCustomerTemplate(eventType);
-    if (!result.error) {
-      setEditingTemplate(result.template || {});
+    try {
+      const result = await queryClient.fetchQuery(
+        orpc.dashboard.notifications.getCustomerTemplate.queryOptions({
+          input: { eventType },
+        }),
+      );
+      setEditingTemplate(result.template);
+    } catch {
+      setEditingTemplate(null);
+    } finally {
+      setTemplateModalOpen(true);
     }
-    setTemplateModalOpen(true);
   };
 
   const handleSaveTemplate = async (template: CustomerNotificationTemplate) => {
     if (!editingEventType) return;
 
-    const result = await updateCustomerTemplate({
-      eventType: editingEventType,
-      template,
-    });
-
-    if (result.error) {
-      toastManager.add({ title: t("saveError"), type: "error" });
-    } else {
+    try {
+      await updateCustomerTemplateMutation.mutateAsync({
+        eventType: editingEventType,
+        template,
+      });
       setCustomerSettings((prev) => ({
         ...prev,
         templates: {
@@ -296,10 +314,13 @@ export function NotificationsForm({
         },
       }));
       toastManager.add({ title: t("templateSaved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("saveError"), type: "error" });
+    } finally {
+      setTemplateModalOpen(false);
+      setEditingEventType(null);
+      setEditingTemplate(null);
     }
-    setTemplateModalOpen(false);
-    setEditingEventType(null);
-    setEditingTemplate(null);
   };
 
   // Handler for reminder timing changes
@@ -310,41 +331,36 @@ export function NotificationsForm({
       setReturnReminderHours(hours);
     }
 
-    setSavingReminderSettings(true);
-    const result = await updateReminderSettings({
-      pickupReminderHours: type === "pickup" ? hours : pickupReminderHours,
-      returnReminderHours: type === "return" ? hours : returnReminderHours,
-    });
-
-    if (result.error) {
-      toastManager.add({ title: t("saveError"), type: "error" });
-    } else {
+    try {
+      await updateReminderSettingsMutation.mutateAsync({
+        pickupReminderHours: type === "pickup" ? hours : pickupReminderHours,
+        returnReminderHours: type === "return" ? hours : returnReminderHours,
+      });
       toastManager.add({ title: t("saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("saveError"), type: "error" });
     }
-    setSavingReminderSettings(false);
   };
 
   // Persist admin reminder settings. Any field not being changed is resolved
-  // from current state, so the server action always gets a complete payload.
+  // from current state, so the procedure always gets a complete payload.
   const persistAdminReminderSettings = async (overrides: {
     pickupReminderHours?: number;
     returnReminderHours?: number;
     mode?: AdminReminderMode;
     digestHour?: number;
   }) => {
-    setSavingAdminReminderSettings(true);
-    const result = await updateAdminReminderSettings({
-      pickupReminderHours: overrides.pickupReminderHours ?? adminPickupReminderHours,
-      returnReminderHours: overrides.returnReminderHours ?? adminReturnReminderHours,
-      mode: overrides.mode ?? adminReminderMode,
-      digestHour: overrides.digestHour ?? adminDigestHour,
-    });
-    if (result.error) {
-      toastManager.add({ title: t("saveError"), type: "error" });
-    } else {
+    try {
+      await updateAdminReminderSettingsMutation.mutateAsync({
+        pickupReminderHours: overrides.pickupReminderHours ?? adminPickupReminderHours,
+        returnReminderHours: overrides.returnReminderHours ?? adminReturnReminderHours,
+        mode: overrides.mode ?? adminReminderMode,
+        digestHour: overrides.digestHour ?? adminDigestHour,
+      });
       toastManager.add({ title: t("saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("saveError"), type: "error" });
     }
-    setSavingAdminReminderSettings(false);
   };
 
   const handleAdminReminderTimingChange = (type: "pickup" | "return", hours: number) => {
@@ -421,8 +437,12 @@ export function NotificationsForm({
                     onChange={setOwnerPhone}
                     className="flex-1"
                   />
-                  <Button onClick={handleSavePhone} disabled={savingPhone}>
-                    {savingPhone ? <Loader2 className="h-4 w-4 animate-spin" /> : tc("save")}
+                  <Button onClick={handleSavePhone} disabled={updateOwnerPhoneMutation.isPending}>
+                    {updateOwnerPhoneMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      tc("save")
+                    )}
                   </Button>
                 </div>
 
@@ -512,18 +532,27 @@ export function NotificationsForm({
                       onChange={(e) => setDiscordWebhookUrl(e.target.value)}
                       className="flex-1 text-sm"
                     />
-                    <Button onClick={handleSaveWebhook} disabled={savingWebhook}>
-                      {savingWebhook ? <Loader2 className="h-4 w-4 animate-spin" /> : tc("save")}
+                    <Button
+                      onClick={handleSaveWebhook}
+                      disabled={updateDiscordWebhookMutation.isPending}
+                    >
+                      {updateDiscordWebhookMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        tc("save")
+                      )}
                     </Button>
                   </div>
                   {isDiscordConnected && (
                     <Button
                       variant="outline"
                       onClick={handleTestDiscord}
-                      disabled={testingDiscord}
+                      disabled={testDiscordWebhookMutation.isPending}
                       className="w-full"
                     >
-                      {testingDiscord ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                      {testDiscordWebhookMutation.isPending ? (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      ) : null}
                       {t("discord.test")}
                     </Button>
                   )}
@@ -577,7 +606,7 @@ export function NotificationsForm({
                     }
                     discordDisabled={!isDiscordConnected}
                     discordTooltip={!isDiscordConnected ? t("discord.required") : undefined}
-                    isPending={isPending}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -620,7 +649,7 @@ export function NotificationsForm({
                     }
                     discordDisabled={!isDiscordConnected}
                     discordTooltip={!isDiscordConnected ? t("discord.required") : undefined}
-                    isPending={isPending}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -646,7 +675,7 @@ export function NotificationsForm({
                     if (value === "per_reservation" || value === "daily_digest")
                       handleAdminModeChange(value);
                   }}
-                  disabled={savingAdminReminderSettings}
+                  disabled={updateAdminReminderSettingsMutation.isPending}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue>{t(`adminReminderMode.${adminReminderMode}`)}</SelectValue>
@@ -683,7 +712,7 @@ export function NotificationsForm({
                         if (value !== null)
                           handleAdminReminderTimingChange("pickup", parseInt(value, 10));
                       }}
-                      disabled={savingAdminReminderSettings}
+                      disabled={updateAdminReminderSettingsMutation.isPending}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue>
@@ -731,7 +760,7 @@ export function NotificationsForm({
                         if (value !== null)
                           handleAdminReminderTimingChange("return", parseInt(value, 10));
                       }}
-                      disabled={savingAdminReminderSettings}
+                      disabled={updateAdminReminderSettingsMutation.isPending}
                     >
                       <SelectTrigger className="w-full">
                         <SelectValue>
@@ -780,7 +809,7 @@ export function NotificationsForm({
                     onValueChange={(value) => {
                       if (value !== null) handleAdminDigestHourChange(parseInt(value, 10));
                     }}
-                    disabled={savingAdminReminderSettings}
+                    disabled={updateAdminReminderSettingsMutation.isPending}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue>{formatHour(adminDigestHour)}</SelectValue>
@@ -829,7 +858,7 @@ export function NotificationsForm({
                     }
                     discordDisabled={!isDiscordConnected}
                     discordTooltip={!isDiscordConnected ? t("discord.required") : undefined}
-                    isPending={isPending}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -883,7 +912,7 @@ export function NotificationsForm({
                     onEditTemplate={() => handleOpenTemplateModal(event.type)}
                     smsDisabled={smsLimitReached}
                     smsTooltip={smsLimitReached ? t("sms.limitReached") : undefined}
-                    isPending={isPending}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -909,7 +938,7 @@ export function NotificationsForm({
                     onValueChange={(value) => {
                       if (value !== null) handleReminderTimingChange("pickup", parseInt(value, 10));
                     }}
-                    disabled={savingReminderSettings}
+                    disabled={updateReminderSettingsMutation.isPending}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue>
@@ -954,7 +983,7 @@ export function NotificationsForm({
                     onValueChange={(value) => {
                       if (value !== null) handleReminderTimingChange("return", parseInt(value, 10));
                     }}
-                    disabled={savingReminderSettings}
+                    disabled={updateReminderSettingsMutation.isPending}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue>
@@ -1017,7 +1046,7 @@ export function NotificationsForm({
                     onEditTemplate={() => handleOpenTemplateModal(event.type)}
                     smsDisabled={smsLimitReached}
                     smsTooltip={smsLimitReached ? t("sms.limitReached") : undefined}
-                    isPending={isPending}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -1060,7 +1089,7 @@ export function NotificationsForm({
       </div>
     </TooltipProvider>
   );
-}
+};
 
 // ============================================================================
 // Admin Notification Row
@@ -1083,7 +1112,7 @@ interface NotificationRowProps {
   isPending?: boolean;
 }
 
-function NotificationRow({
+const NotificationRow = ({
   eventType,
   label,
   description,
@@ -1094,7 +1123,7 @@ function NotificationRow({
   discordDisabled,
   discordTooltip,
   isPending,
-}: NotificationRowProps) {
+}: NotificationRowProps) => {
   return (
     <div className="flex items-center justify-between py-2.5 border-b last:border-0">
       <div className="space-y-0.5 flex-1 min-w-0 pr-4">
@@ -1148,7 +1177,7 @@ function NotificationRow({
       </div>
     </div>
   );
-}
+};
 
 // ============================================================================
 // Customer Notification Row
@@ -1170,7 +1199,7 @@ interface CustomerNotificationRowProps {
   isPending?: boolean;
 }
 
-function CustomerNotificationRow({
+const CustomerNotificationRow = ({
   eventType,
   label,
   description,
@@ -1180,7 +1209,7 @@ function CustomerNotificationRow({
   smsDisabled,
   smsTooltip,
   isPending,
-}: CustomerNotificationRowProps) {
+}: CustomerNotificationRowProps) => {
   return (
     <div className="flex items-center justify-between py-2.5 border-b last:border-0">
       <div className="space-y-0.5 flex-1 min-w-0 pr-4">
@@ -1227,4 +1256,4 @@ function CustomerNotificationRow({
       </div>
     </div>
   );
-}
+};
