@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toastManager } from "@louez/ui";
 import Link from "next/link";
-import { Loader2, Pencil, Globe } from "lucide-react";
+import { Pencil, Globe } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
 import {
   CalendarCheckIcon,
@@ -20,7 +20,8 @@ import {
 import { Button } from "@louez/ui";
 import { Input } from "@louez/ui";
 import { Switch } from "@louez/ui";
-import { Alert, AlertDescription } from "@louez/ui";
+import { Alert, AlertDescription, AlertTitle } from "@louez/ui";
+import { Badge } from "@louez/ui";
 import { Separator } from "@louez/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@louez/ui";
@@ -422,10 +423,10 @@ export const NotificationsForm = ({
                     <CardDescription>{t("phone.description")}</CardDescription>
                   </div>
                   {isSmsConfigured && (
-                    <span className="text-xs text-green-600 flex items-center gap-1">
+                    <Badge variant="success" size="sm">
                       <CheckCircleIcon className="h-3 w-3" />
                       {t("phone.configured")}
-                    </span>
+                    </Badge>
                   )}
                 </div>
               </CardHeader>
@@ -437,12 +438,8 @@ export const NotificationsForm = ({
                     onChange={setOwnerPhone}
                     className="flex-1"
                   />
-                  <Button onClick={handleSavePhone} disabled={updateOwnerPhoneMutation.isPending}>
-                    {updateOwnerPhoneMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      tc("save")
-                    )}
+                  <Button onClick={handleSavePhone} isPending={updateOwnerPhoneMutation.isPending}>
+                    {tc("save")}
                   </Button>
                 </div>
 
@@ -462,22 +459,20 @@ export const NotificationsForm = ({
                     </Button>
                   </div>
                   {smsLimitReached ? (
-                    <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-                      <div className="flex items-center gap-2 text-destructive">
-                        <WarningIcon className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm font-medium">{t("sms.noCreditsLeft")}</span>
-                      </div>
-                      <p className="mt-1 text-xs text-destructive/80">
-                        {t("sms.noCreditsDescription")}
-                      </p>
-                      <Button
-                        variant="destructive"
-                        className="mt-2 w-full"
-                        render={<Link href="/dashboard/sms" />}
-                      >
-                        {t("sms.buyCredits")}
-                      </Button>
-                    </div>
+                    <Alert variant="error">
+                      <WarningIcon className="h-4 w-4" />
+                      <AlertTitle>{t("sms.noCreditsLeft")}</AlertTitle>
+                      <AlertDescription>
+                        <p>{t("sms.noCreditsDescription")}</p>
+                        <Button
+                          variant="destructive"
+                          className="w-full"
+                          render={<Link href="/dashboard/sms" />}
+                        >
+                          {t("sms.buyCredits")}
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
                   ) : (
                     <div className="rounded-lg border bg-muted/30 p-3">
                       <div className="flex items-baseline gap-1">
@@ -492,7 +487,7 @@ export const NotificationsForm = ({
                         </span>
                       </div>
                       {smsLow && (
-                        <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
+                        <p className="mt-1 text-xs text-warning flex items-center gap-1">
                           <WarningIcon className="h-3 w-3" />
                           {t("sms.lowWarning")}
                         </p>
@@ -515,10 +510,10 @@ export const NotificationsForm = ({
                     <CardDescription>{t("discord.description")}</CardDescription>
                   </div>
                   {isDiscordConnected && (
-                    <span className="text-xs text-green-600 flex items-center gap-1">
+                    <Badge variant="success" size="sm">
                       <CheckCircleIcon className="h-3 w-3" />
                       {t("discord.connected")}
-                    </span>
+                    </Badge>
                   )}
                 </div>
               </CardHeader>
@@ -534,25 +529,18 @@ export const NotificationsForm = ({
                     />
                     <Button
                       onClick={handleSaveWebhook}
-                      disabled={updateDiscordWebhookMutation.isPending}
+                      isPending={updateDiscordWebhookMutation.isPending}
                     >
-                      {updateDiscordWebhookMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        tc("save")
-                      )}
+                      {tc("save")}
                     </Button>
                   </div>
                   {isDiscordConnected && (
                     <Button
                       variant="outline"
                       onClick={handleTestDiscord}
-                      disabled={testDiscordWebhookMutation.isPending}
+                      isPending={testDiscordWebhookMutation.isPending}
                       className="w-full"
                     >
-                      {testDiscordWebhookMutation.isPending ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
                       {t("discord.test")}
                     </Button>
                   )}

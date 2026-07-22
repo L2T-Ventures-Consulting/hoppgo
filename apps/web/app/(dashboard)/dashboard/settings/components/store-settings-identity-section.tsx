@@ -6,20 +6,12 @@ import { useTranslations } from "next-intl";
 import { Button } from "@louez/ui";
 import { Label } from "@louez/ui";
 import { ExternalLinkIcon, StoreIcon } from "@louez/ui/icons";
-import { CountryFlag } from "@louez/ui/icons/flags";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
 
 import { AddressInput } from "@/components/ui/address-input";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { getFieldError } from "@/hooks/form/form-context";
-import { getCountriesSortedByName, getCountryName } from "@/lib/utils/countries";
-import {
-  type CurrencyCode,
-  SUPPORTED_CURRENCIES,
-  getCurrencyByCode,
-  getDefaultCurrencyForCountry,
-} from "@/lib/utils/currency";
+import { SUPPORTED_CURRENCIES, getDefaultCurrencyForCountry } from "@/lib/utils/currency";
 
 interface StoreSettingsIdentitySectionProps {
   form: any;
@@ -40,8 +32,7 @@ export function StoreSettingsIdentitySection({
 }: StoreSettingsIdentitySectionProps) {
   const t = useTranslations("dashboard.settings");
 
-  const handleCountryChange = (newCountry: string, fieldOnChange: (value: string) => void) => {
-    fieldOnChange(newCountry);
+  const handleCountryChange = (newCountry: string) => {
     form.setFieldValue("currency", getDefaultCurrencyForCountry(newCountry));
   };
 
@@ -120,105 +111,23 @@ export function StoreSettingsIdentitySection({
         </form.Field>
 
         <div className="grid min-w-0 gap-4 sm:grid-cols-2">
-          <form.Field name="country">
+          <form.AppField name="country">
             {(field: any) => (
-              <div className="grid min-w-0 gap-2">
-                <Label htmlFor={field.name}>{t("storeSettings.country")}</Label>
-                <Select
-                  onValueChange={(value) => {
-                    if (value !== null) {
-                      handleCountryChange(value, field.handleChange);
-                    }
-                  }}
-                  value={field.state.value}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue className="min-w-0">
-                      {field.state.value && (
-                        <span className="flex min-w-0 items-center gap-2">
-                          <CountryFlag
-                            country={field.state.value}
-                            countryName={getCountryName(field.state.value)}
-                            className="h-4 w-6 shrink-0 [&_img]:size-full [&_svg]:size-full"
-                          />
-                          <span className="truncate">{getCountryName(field.state.value)}</span>
-                        </span>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {getCountriesSortedByName().map((country) => (
-                      <SelectItem key={country.code} value={country.code}>
-                        <span className="flex items-center gap-2">
-                          <CountryFlag
-                            country={country.code}
-                            countryName={getCountryName(country.code)}
-                            className="h-4 w-6 shrink-0 [&_img]:size-full [&_svg]:size-full"
-                          />
-                          <span>{getCountryName(country.code)}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-destructive text-sm">
-                    {getFieldError(field.state.meta.errors[0])}
-                  </p>
-                )}
-              </div>
+              <field.CountrySelect
+                label={t("storeSettings.country")}
+                onValueChange={handleCountryChange}
+              />
             )}
-          </form.Field>
+          </form.AppField>
 
-          <form.Field name="currency">
+          <form.AppField name="currency">
             {(field: any) => (
-              <div className="grid min-w-0 gap-2">
-                <Label htmlFor={field.name}>{t("storeSettings.currency")}</Label>
-                <Select
-                  onValueChange={(value) => {
-                    if (value !== null) {
-                      field.handleChange(value);
-                    }
-                  }}
-                  value={field.state.value}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue className="min-w-0">
-                      {field.state.value && (
-                        <span className="flex min-w-0 items-center gap-2">
-                          <span className="shrink-0">
-                            {getCurrencyByCode(field.state.value as CurrencyCode)?.symbol ||
-                              field.state.value}
-                          </span>
-                          <span className="truncate">
-                            {getCurrencyByCode(field.state.value as CurrencyCode)?.name ||
-                              field.state.value}
-                          </span>
-                        </span>
-                      )}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    {SUPPORTED_CURRENCIES.map((currency) => (
-                      <SelectItem key={currency.code} value={currency.code}>
-                        <span className="flex items-center gap-2">
-                          <span className="w-8 text-center">{currency.symbol}</span>
-                          <span>
-                            {currency.name} ({currency.code})
-                          </span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {field.state.meta.errors.length > 0 && (
-                  <p className="text-destructive text-sm">
-                    {getFieldError(field.state.meta.errors[0])}
-                  </p>
-                )}
-              </div>
+              <field.CurrencySelect
+                label={t("storeSettings.currency")}
+                currencies={SUPPORTED_CURRENCIES}
+              />
             )}
-          </form.Field>
+          </form.AppField>
         </div>
 
         <div className="flex min-w-0 items-center justify-between rounded-lg border p-3">

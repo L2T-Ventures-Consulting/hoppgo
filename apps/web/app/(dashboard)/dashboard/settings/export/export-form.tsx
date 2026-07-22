@@ -1,38 +1,39 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useTranslations } from 'next-intl'
+import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-import { Button } from '@louez/ui'
 import {
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@louez/ui'
-import { RadioGroup, RadioGroupItem } from '@louez/ui'
-import { Label } from '@louez/ui'
-import { toastManager } from '@louez/ui'
-import { CalendarCheckIcon, DownloadIcon, PricingIcon, ProductIcon } from '@louez/ui/icons'
-import { DateTimePicker } from '@/components/ui/date-time-picker'
-import type { ExportFormat, ExportType } from '@/lib/export/types'
+  Label,
+  RadioGroup,
+  RadioGroupItem,
+  toastManager,
+} from "@louez/ui";
+import { CalendarCheckIcon, DownloadIcon, PricingIcon, ProductIcon } from "@louez/ui/icons";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
+import type { ExportFormat, ExportType } from "@/lib/export/types";
 
 interface ExportFormProps {
-  storeSlug: string
+  storeSlug: string;
 }
 
 export function ExportForm({ storeSlug }: ExportFormProps) {
-  const t = useTranslations('dashboard.settings.export')
+  const t = useTranslations("dashboard.settings.export");
 
   return (
     <div className="space-y-6">
       <ExportCard
         type="payments"
         icon={PricingIcon}
-        title={t('payments.title')}
-        description={t('payments.description')}
-        buttonLabel={t('payments.button')}
+        title={t("payments.title")}
+        description={t("payments.description")}
+        buttonLabel={t("payments.button")}
         storeSlug={storeSlug}
         showDateRange
       />
@@ -40,9 +41,9 @@ export function ExportForm({ storeSlug }: ExportFormProps) {
       <ExportCard
         type="reservations"
         icon={CalendarCheckIcon}
-        title={t('reservations.title')}
-        description={t('reservations.description')}
-        buttonLabel={t('reservations.button')}
+        title={t("reservations.title")}
+        description={t("reservations.description")}
+        buttonLabel={t("reservations.button")}
         storeSlug={storeSlug}
         showDateRange
       />
@@ -50,14 +51,14 @@ export function ExportForm({ storeSlug }: ExportFormProps) {
       <ExportCard
         type="products"
         icon={ProductIcon}
-        title={t('products.title')}
-        description={t('products.description')}
-        buttonLabel={t('products.button')}
+        title={t("products.title")}
+        description={t("products.description")}
+        buttonLabel={t("products.button")}
         storeSlug={storeSlug}
         showDateRange={false}
       />
     </div>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -65,13 +66,13 @@ export function ExportForm({ storeSlug }: ExportFormProps) {
 // ---------------------------------------------------------------------------
 
 interface ExportCardProps {
-  type: ExportType
-  icon: React.ElementType
-  title: string
-  description: string
-  buttonLabel: string
-  storeSlug: string
-  showDateRange: boolean
+  type: ExportType;
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  buttonLabel: string;
+  storeSlug: string;
+  showDateRange: boolean;
 }
 
 function ExportCard({
@@ -82,62 +83,62 @@ function ExportCard({
   buttonLabel,
   showDateRange,
 }: ExportCardProps) {
-  const t = useTranslations('dashboard.settings.export')
-  const [format, setFormat] = useState<ExportFormat>('csv')
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined)
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined)
-  const [isExporting, setIsExporting] = useState(false)
+  const t = useTranslations("dashboard.settings.export");
+  const [format, setFormat] = useState<ExportFormat>("csv");
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async () => {
     if (showDateRange && (!startDate || !endDate)) {
-      toastManager.add({ title: t('errors.dateRequired'), type: 'error' })
-      return
+      toastManager.add({ title: t("errors.dateRequired"), type: "error" });
+      return;
     }
 
     if (showDateRange && startDate && endDate && endDate < startDate) {
-      toastManager.add({ title: t('errors.invalidDateRange'), type: 'error' })
-      return
+      toastManager.add({ title: t("errors.invalidDateRange"), type: "error" });
+      return;
     }
 
     if (showDateRange && startDate && endDate) {
-      const diffMs = endDate.getTime() - startDate.getTime()
-      const oneYearMs = 365 * 24 * 60 * 60 * 1000
+      const diffMs = endDate.getTime() - startDate.getTime();
+      const oneYearMs = 365 * 24 * 60 * 60 * 1000;
       if (diffMs > oneYearMs) {
-        toastManager.add({ title: t('errors.maxRange'), type: 'error' })
-        return
+        toastManager.add({ title: t("errors.maxRange"), type: "error" });
+        return;
       }
     }
 
-    setIsExporting(true)
+    setIsExporting(true);
 
     try {
-      const params = new URLSearchParams({ type, format })
-      if (startDate) params.set('startDate', startDate.toISOString())
-      if (endDate) params.set('endDate', endDate.toISOString())
+      const params = new URLSearchParams({ type, format });
+      if (startDate) params.set("startDate", startDate.toISOString());
+      if (endDate) params.set("endDate", endDate.toISOString());
 
-      const response = await fetch(`/api/export?${params.toString()}`)
+      const response = await fetch(`/api/export?${params.toString()}`);
 
       if (!response.ok) {
-        throw new Error(response.statusText)
+        throw new Error(response.statusText);
       }
 
-      const blob = await response.blob()
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
       link.download =
-        response.headers.get('Content-Disposition')?.match(/filename="(.+)"/)?.[1] ??
-        `export.${format}`
-      document.body.appendChild(link)
-      link.click()
-      link.remove()
-      URL.revokeObjectURL(url)
+        response.headers.get("Content-Disposition")?.match(/filename="(.+)"/)?.[1] ??
+        `export.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
     } catch {
-      toastManager.add({ title: t('errors.exportFailed'), type: 'error' })
+      toastManager.add({ title: t("errors.exportFailed"), type: "error" });
     } finally {
-      setIsExporting(false)
+      setIsExporting(false);
     }
-  }
+  };
 
   return (
     <Card>
@@ -153,27 +154,19 @@ function ExportCard({
         {showDateRange && (
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label className="text-xs">{t('dateRange.startDate')}</Label>
-              <DateTimePicker
-                date={startDate}
-                setDate={setStartDate}
-                showTime={false}
-              />
+              <Label className="text-xs">{t("dateRange.startDate")}</Label>
+              <DateTimePicker date={startDate} setDate={setStartDate} showTime={false} />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs">{t('dateRange.endDate')}</Label>
-              <DateTimePicker
-                date={endDate}
-                setDate={setEndDate}
-                showTime={false}
-              />
+              <Label className="text-xs">{t("dateRange.endDate")}</Label>
+              <DateTimePicker date={endDate} setDate={setEndDate} showTime={false} />
             </div>
           </div>
         )}
 
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-2">
-            <Label className="text-xs">{t('format.label')}</Label>
+            <Label className="text-xs">{t("format.label")}</Label>
             <RadioGroup
               value={format}
               onValueChange={(value) => setFormat(value as ExportFormat)}
@@ -182,24 +175,29 @@ function ExportCard({
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="csv" id={`${type}-csv`} />
                 <Label htmlFor={`${type}-csv`} className="cursor-pointer font-normal">
-                  {t('format.csv')}
+                  {t("format.csv")}
                 </Label>
               </div>
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="json" id={`${type}-json`} />
                 <Label htmlFor={`${type}-json`} className="cursor-pointer font-normal">
-                  {t('format.json')}
+                  {t("format.json")}
                 </Label>
               </div>
             </RadioGroup>
           </div>
 
-          <Button onClick={handleExport} disabled={isExporting} className="shrink-0">
+          <Button
+            onClick={handleExport}
+            isPending={isExporting}
+            pendingContent={t("exporting")}
+            className="shrink-0"
+          >
             <DownloadIcon className="mr-2 h-4 w-4" />
-            {isExporting ? t('exporting') : buttonLabel}
+            {buttonLabel}
           </Button>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

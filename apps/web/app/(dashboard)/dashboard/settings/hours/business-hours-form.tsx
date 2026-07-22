@@ -1,35 +1,24 @@
-'use client';
+"use client";
 
-import { useCallback, useState, useTransition } from 'react';
+import { useCallback, useState, useTransition } from "react";
 
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
-import { useStore } from '@tanstack/react-form';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { Plus, Trash2 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useStore } from "@tanstack/react-form";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Plus, Trash2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import type { StoreSettings } from '@louez/types';
-import { toastManager } from '@louez/ui';
-import { CalendarIcon, CalendarXIcon, ClockIcon, WarningIcon } from '@louez/ui/icons';
-import { Button } from '@louez/ui';
-import { Input } from '@louez/ui';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@louez/ui';
-import { Switch } from '@louez/ui';
+import type { StoreSettings } from "@louez/types";
+import { toastManager } from "@louez/ui";
+import { CalendarIcon, CalendarXIcon, ClockIcon, WarningIcon } from "@louez/ui/icons";
+import { Button } from "@louez/ui";
+import { Input } from "@louez/ui";
+import { Label } from "@louez/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
+import { Switch } from "@louez/ui";
 import {
   Dialog,
   DialogDescription,
@@ -39,31 +28,28 @@ import {
   DialogPopup,
   DialogTitle,
   DialogTrigger,
-} from '@louez/ui';
-import { Alert, AlertDescription } from '@louez/ui';
-import { Badge } from '@louez/ui';
-import { Textarea } from '@louez/ui';
-import { normalizeDaySchedule } from '@louez/utils';
+} from "@louez/ui";
+import { Alert, AlertDescription } from "@louez/ui";
+import { Badge } from "@louez/ui";
+import { Textarea } from "@louez/ui";
+import { normalizeDaySchedule } from "@louez/utils";
 import {
   type BusinessHoursInput,
   businessHoursSchema,
   defaultBusinessHours,
-} from '@louez/validations';
+} from "@louez/validations";
 
-import { FloatingSaveBar } from '@/components/dashboard/floating-save-bar';
-import { ReservationDatePickerControl } from '@/components/form/form-reservation-date-picker';
-import { RootError } from '@/components/form/root-error';
+import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
+import { ReservationDatePickerControl } from "@/components/form/form-reservation-date-picker";
+import { RootError } from "@/components/form/root-error";
+import { EmptyState } from "@/components/ui/empty-state";
 
-import {
-  DAY_KEYS,
-  buildStoreDate,
-  generateTimeSlots,
-} from '@/lib/utils/business-hours';
-import { formatStoreDate } from '@/lib/utils/store-date';
+import { DAY_KEYS, buildStoreDate, generateTimeSlots } from "@/lib/utils/business-hours";
+import { formatStoreDate } from "@/lib/utils/store-date";
 
-import { useAppForm } from '@/hooks/form/form';
+import { useAppForm } from "@/hooks/form/form";
 
-import { updateBusinessHours } from './actions';
+import { updateBusinessHours } from "./actions";
 
 const MAX_RANGES_PER_DAY = 4;
 
@@ -80,13 +66,12 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [closureDialogOpen, setClosureDialogOpen] = useState(false);
-  const t = useTranslations('dashboard.settings.businessHours');
-  const tCommon = useTranslations('common');
+  const t = useTranslations("dashboard.settings.businessHours");
+  const tCommon = useTranslations("common");
 
   // Normalize legacy format: stores that still have { openTime, closeTime }
   // at the day level (instead of ranges[]) need conversion for the form.
-  const rawBusinessHours =
-    store.settings?.businessHours || defaultBusinessHours;
+  const rawBusinessHours = store.settings?.businessHours || defaultBusinessHours;
   const businessHours = {
     ...rawBusinessHours,
     schedule: Object.fromEntries(
@@ -109,7 +94,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
           setRootError(result.error);
           return;
         }
-        toastManager.add({ title: t('saved'), type: 'success' });
+        toastManager.add({ title: t("saved"), type: "success" });
         // Update the form baseline so isDirty becomes false
         form.options.defaultValues = value;
         form.reset();
@@ -126,7 +111,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
 
   const isEnabled = useStore(form.store, (s) => s.values.enabled);
 
-  const timeSlots = generateTimeSlots('00:00', '23:30', 30);
+  const timeSlots = generateTimeSlots("00:00", "23:30", 30);
   const timezone = store.settings?.timezone;
 
   const addClosurePeriod = (data: {
@@ -137,7 +122,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
     endTime?: string;
     reason?: string;
   }) => {
-    form.pushFieldValue('closurePeriods', {
+    form.pushFieldValue("closurePeriods", {
       id: crypto.randomUUID(),
       ...data,
     });
@@ -145,7 +130,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
   };
 
   const removeClosurePeriod = (index: number) => {
-    form.removeFieldValue('closurePeriods', index);
+    form.removeFieldValue("closurePeriods", index);
   };
 
   const closurePeriods = useStore(form.store, (s) => s.values.closurePeriods);
@@ -165,23 +150,19 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
                   <div className="min-w-0 space-y-1">
                     <CardTitle className="flex min-w-0 items-center gap-2">
                       <ClockIcon className="h-5 w-5 shrink-0" />
-                      {t('weeklySchedule')}
+                      {t("weeklySchedule")}
                     </CardTitle>
-                    <CardDescription>
-                      {t('weeklyScheduleDescription')}
-                    </CardDescription>
+                    <CardDescription>{t("weeklyScheduleDescription")}</CardDescription>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
                     <span className="text-muted-foreground hidden text-sm sm:inline">
-                      {isEnabled ? t('enabled') : t('disabled')}
+                      {isEnabled ? t("enabled") : t("disabled")}
                     </span>
                     <form.Field name="enabled">
                       {(field) => (
                         <Switch
                           checked={field.state.value}
-                          onCheckedChange={(checked) =>
-                            field.handleChange(checked)
-                          }
+                          onCheckedChange={(checked) => field.handleChange(checked)}
                         />
                       )}
                     </form.Field>
@@ -189,7 +170,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
                 </div>
               </CardHeader>
               <CardContent
-                className={`min-w-0 ${!isEnabled ? 'pointer-events-none opacity-50' : ''}`}
+                className={`min-w-0 ${!isEnabled ? "pointer-events-none opacity-50" : ""}`}
               >
                 <div className="min-w-0 divide-y">
                   {DAY_KEYS.map((dayKey) => (
@@ -212,11 +193,9 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
                   <div className="min-w-0 space-y-1">
                     <CardTitle className="flex min-w-0 items-center gap-2">
                       <CalendarXIcon className="h-5 w-5 shrink-0" />
-                      {t('closurePeriods')}
+                      {t("closurePeriods")}
                     </CardTitle>
-                    <CardDescription>
-                      {t('closurePeriodsDescription')}
-                    </CardDescription>
+                    <CardDescription>{t("closurePeriodsDescription")}</CardDescription>
                   </div>
                   <div className="shrink-0">
                     <ClosurePeriodDialog
@@ -232,17 +211,12 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
               </CardHeader>
               <CardContent className="min-w-0">
                 {closurePeriods.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-center">
-                    <div className="bg-muted mb-3 rounded-full p-3">
-                      <CalendarXIcon className="text-muted-foreground h-5 w-5" />
-                    </div>
-                    <p className="text-muted-foreground text-sm font-medium">
-                      {t('noClosure')}
-                    </p>
-                    <p className="text-muted-foreground mt-1 max-w-[220px] text-xs">
-                      {t('noClosureDescription')}
-                    </p>
-                  </div>
+                  <EmptyState
+                    icon={CalendarXIcon}
+                    title={t("noClosure")}
+                    description={t("noClosureDescription")}
+                    className="py-8"
+                  />
                 ) : (
                   <div className="space-y-2">
                     {closurePeriods.map((field, index) => (
@@ -253,31 +227,27 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
                         <div className="min-w-0 flex-1 space-y-1">
                           <div className="flex items-center gap-2">
                             <CalendarIcon className="text-muted-foreground h-4 w-4 shrink-0" />
-                            <span className="truncate text-sm font-medium">
-                              {field.name}
-                            </span>
+                            <span className="truncate text-sm font-medium">{field.name}</span>
                           </div>
                           <p className="text-muted-foreground text-xs">
-                            {format(new Date(field.startDate), 'dd MMM yyyy', {
+                            {format(new Date(field.startDate), "dd MMM yyyy", {
                               locale: fr,
                             })}
-                            {' - '}
-                            {format(new Date(field.endDate), 'dd MMM yyyy', {
+                            {" - "}
+                            {format(new Date(field.endDate), "dd MMM yyyy", {
                               locale: fr,
                             })}
                             {field.startTime && field.endTime && (
                               <>
-                                {' · '}
+                                {" · "}
                                 {field.startTime}
-                                {' - '}
+                                {" - "}
                                 {field.endTime}
                               </>
                             )}
                           </p>
                           {field.reason && (
-                            <p className="text-muted-foreground truncate text-xs">
-                              {field.reason}
-                            </p>
+                            <p className="text-muted-foreground truncate text-xs">{field.reason}</p>
                           )}
                         </div>
                         <Button
@@ -297,11 +267,7 @@ export function BusinessHoursForm({ store }: BusinessHoursFormProps) {
             </Card>
           </div>
 
-          <FloatingSaveBar
-            isDirty={isDirty}
-            isLoading={isPending}
-            onReset={handleReset}
-          />
+          <FloatingSaveBar isDirty={isDirty} isLoading={isPending} onReset={handleReset} />
         </form.Form>
       </form.AppForm>
     </div>
@@ -325,9 +291,7 @@ function DayScheduleRow({
   const schedule = useStore(form.store, (s: any) => s.values.schedule);
   const daySchedule = schedule[dayKey];
   const isOpen = daySchedule?.isOpen ?? false;
-  const ranges = daySchedule?.ranges ?? [
-    { openTime: '09:00', closeTime: '18:00' },
-  ];
+  const ranges = daySchedule?.ranges ?? [{ openTime: "09:00", closeTime: "18:00" }];
 
   const addRange = () => {
     if (ranges.length >= MAX_RANGES_PER_DAY) return;
@@ -335,13 +299,13 @@ function DayScheduleRow({
     // Compute a sensible default: start 1h after last close, end 2h later.
     // Clamp to valid hours and ensure open < close.
     const lastRange = ranges[ranges.length - 1];
-    const [lastHour] = lastRange.closeTime.split(':').map(Number);
+    const [lastHour] = lastRange.closeTime.split(":").map(Number);
     const openHour = Math.min(lastHour + 1, 22);
     const closeHour = Math.min(openHour + 2, 23);
 
     form.pushFieldValue(`schedule.${dayKey}.ranges`, {
-      openTime: `${openHour.toString().padStart(2, '0')}:00`,
-      closeTime: `${closeHour.toString().padStart(2, '0')}:00`,
+      openTime: `${openHour.toString().padStart(2, "0")}:00`,
+      closeTime: `${closeHour.toString().padStart(2, "0")}:00`,
     });
   };
 
@@ -363,7 +327,7 @@ function DayScheduleRow({
             )}
           </form.Field>
           <span
-            className={`min-w-0 truncate text-sm font-medium ${!isOpen ? 'text-muted-foreground' : ''}`}
+            className={`min-w-0 truncate text-sm font-medium ${!isOpen ? "text-muted-foreground" : ""}`}
           >
             {t(`days.${dayKey}`)}
           </span>
@@ -371,83 +335,65 @@ function DayScheduleRow({
 
         {isOpen ? (
           <div className="flex min-w-0 flex-1 flex-col gap-2">
-            {ranges.map(
-              (
-                _range: { openTime: string; closeTime: string },
-                rangeIndex: number,
-              ) => (
-                <div
-                  key={rangeIndex}
-                  className="flex min-w-0 items-center gap-2"
-                >
-                  <form.Field
-                    name={
-                      `schedule.${dayKey}.ranges[${rangeIndex}].openTime` as any
-                    }
-                  >
-                    {(field: any) => (
-                      <Select
-                        value={field.state.value}
-                        onValueChange={(value) => {
-                          if (value !== null) field.handleChange(value);
-                        }}
-                      >
-                        <SelectTrigger className="min-w-0 flex-1 sm:w-[100px] sm:flex-none">
-                          <SelectValue>{field.state.value}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {timeSlots.map((time) => (
-                            <SelectItem key={time} value={time} label={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </form.Field>
-                  <span className="text-muted-foreground shrink-0 text-sm">
-                    -
-                  </span>
-                  <form.Field
-                    name={
-                      `schedule.${dayKey}.ranges[${rangeIndex}].closeTime` as any
-                    }
-                  >
-                    {(field: any) => (
-                      <Select
-                        value={field.state.value}
-                        onValueChange={(value) => {
-                          if (value !== null) field.handleChange(value);
-                        }}
-                      >
-                        <SelectTrigger className="min-w-0 flex-1 sm:w-[100px] sm:flex-none">
-                          <SelectValue>{field.state.value}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {timeSlots.map((time) => (
-                            <SelectItem key={time} value={time} label={time}>
-                              {time}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    )}
-                  </form.Field>
-                  {ranges.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
-                      onClick={() => removeRange(rangeIndex)}
-                      aria-label={t('removeRange')}
+            {ranges.map((_range: { openTime: string; closeTime: string }, rangeIndex: number) => (
+              <div key={rangeIndex} className="flex min-w-0 items-center gap-2">
+                <form.Field name={`schedule.${dayKey}.ranges[${rangeIndex}].openTime` as any}>
+                  {(field: any) => (
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        if (value !== null) field.handleChange(value);
+                      }}
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
+                      <SelectTrigger className="min-w-0 flex-1 sm:w-[100px] sm:flex-none">
+                        <SelectValue>{field.state.value}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeSlots.map((time) => (
+                          <SelectItem key={time} value={time} label={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   )}
-                </div>
-              ),
-            )}
+                </form.Field>
+                <span className="text-muted-foreground shrink-0 text-sm">-</span>
+                <form.Field name={`schedule.${dayKey}.ranges[${rangeIndex}].closeTime` as any}>
+                  {(field: any) => (
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        if (value !== null) field.handleChange(value);
+                      }}
+                    >
+                      <SelectTrigger className="min-w-0 flex-1 sm:w-[100px] sm:flex-none">
+                        <SelectValue>{field.state.value}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {timeSlots.map((time) => (
+                          <SelectItem key={time} value={time} label={time}>
+                            {time}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </form.Field>
+                {ranges.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0"
+                    onClick={() => removeRange(rangeIndex)}
+                    aria-label={t("removeRange")}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                )}
+              </div>
+            ))}
             {ranges.length < MAX_RANGES_PER_DAY && (
               <Button
                 type="button"
@@ -457,13 +403,13 @@ function DayScheduleRow({
                 onClick={addRange}
               >
                 <Plus className="mr-1 h-3 w-3" />
-                {t('addRange')}
+                {t("addRange")}
               </Button>
             )}
           </div>
         ) : (
           <Badge variant="secondary" className="text-muted-foreground w-fit">
-            {t('closed')}
+            {t("closed")}
           </Badge>
         )}
       </div>
@@ -496,65 +442,61 @@ function ClosurePeriodDialog({
   tCommon: ReturnType<typeof useTranslations>;
   timezone?: string;
 }) {
-  const tValidation = useTranslations('validation');
-  const [name, setName] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
-  const [reason, setReason] = useState('');
-  const [error, setError] = useState('');
+  const tValidation = useTranslations("validation");
+  const [name, setName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [reason, setReason] = useState("");
+  const [error, setError] = useState("");
 
   const getClosureDateValue = (date: string, time: string) => {
     if (!date) return undefined;
 
-    return buildStoreDate(
-      new Date(`${date}T00:00:00`),
-      time || '00:00',
-      timezone,
-    );
+    return buildStoreDate(new Date(`${date}T00:00:00`), time || "00:00", timezone);
   };
 
   const handleStartDateChange = (date: Date | undefined) => {
     if (!date) {
-      setStartDate('');
-      setStartTime('');
+      setStartDate("");
+      setStartTime("");
       return;
     }
 
-    setStartDate(formatStoreDate(date, timezone, 'yyyy-MM-dd'));
-    setStartTime(formatStoreDate(date, timezone, 'TIME_ONLY'));
+    setStartDate(formatStoreDate(date, timezone, "yyyy-MM-dd"));
+    setStartTime(formatStoreDate(date, timezone, "TIME_ONLY"));
   };
 
   const handleEndDateChange = (date: Date | undefined) => {
     if (!date) {
-      setEndDate('');
-      setEndTime('');
+      setEndDate("");
+      setEndTime("");
       return;
     }
 
-    setEndDate(formatStoreDate(date, timezone, 'yyyy-MM-dd'));
-    setEndTime(formatStoreDate(date, timezone, 'TIME_ONLY'));
+    setEndDate(formatStoreDate(date, timezone, "yyyy-MM-dd"));
+    setEndTime(formatStoreDate(date, timezone, "TIME_ONLY"));
   };
 
   const handleSubmit = () => {
     if (!name || !startDate || !endDate) {
-      setError(tValidation('requiredFields'));
+      setError(tValidation("requiredFields"));
       return;
     }
 
     if (new Date(startDate) > new Date(endDate)) {
-      setError(tValidation('endDateBeforeStart'));
+      setError(tValidation("endDateBeforeStart"));
       return;
     }
 
     if ((startTime && !endTime) || (!startTime && endTime)) {
-      setError(t('closureForm.timeRangeRequired'));
+      setError(t("closureForm.timeRangeRequired"));
       return;
     }
 
     if (startTime && endTime && startTime >= endTime) {
-      setError(t('validation.closeAfterOpen'));
+      setError(t("validation.closeAfterOpen"));
       return;
     }
 
@@ -568,24 +510,24 @@ function ClosurePeriodDialog({
     });
 
     // Reset form
-    setName('');
-    setStartDate('');
-    setEndDate('');
-    setStartTime('');
-    setEndTime('');
-    setReason('');
-    setError('');
+    setName("");
+    setStartDate("");
+    setEndDate("");
+    setStartTime("");
+    setEndTime("");
+    setReason("");
+    setError("");
   };
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
-      setName('');
-      setStartDate('');
-      setEndDate('');
-      setStartTime('');
-      setEndTime('');
-      setReason('');
-      setError('');
+      setName("");
+      setStartDate("");
+      setEndDate("");
+      setStartTime("");
+      setEndTime("");
+      setReason("");
+      setError("");
     }
     onOpenChange(isOpen);
   };
@@ -594,14 +536,12 @@ function ClosurePeriodDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button type="button" variant="outline" />}>
         <Plus className="mr-2 h-4 w-4" />
-        {t('addClosure')}
+        {t("addClosure")}
       </DialogTrigger>
       <DialogPopup className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>{t('closureForm.title')}</DialogTitle>
-          <DialogDescription>
-            {t('closurePeriodsDescription')}
-          </DialogDescription>
+          <DialogTitle>{t("closureForm.title")}</DialogTitle>
+          <DialogDescription>{t("closurePeriodsDescription")}</DialogDescription>
         </DialogHeader>
 
         <DialogPanel className="space-y-3">
@@ -613,13 +553,11 @@ function ClosurePeriodDialog({
           )}
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">
-              {t('closureForm.name')} *
-            </label>
+            <Label>{t("closureForm.name")} *</Label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={t('closureForm.namePlaceholder')}
+              placeholder={t("closureForm.namePlaceholder")}
             />
           </div>
 
@@ -628,7 +566,7 @@ function ClosurePeriodDialog({
               id="closure-start-date"
               value={getClosureDateValue(startDate, startTime)}
               onChange={handleStartDateChange}
-              label={`${t('closureForm.startDate')} *`}
+              label={`${t("closureForm.startDate")} *`}
               minTime="00:00"
               maxTime="23:59"
               timeStep={30}
@@ -639,7 +577,7 @@ function ClosurePeriodDialog({
               id="closure-end-date"
               value={getClosureDateValue(endDate, endTime)}
               onChange={handleEndDateChange}
-              label={`${t('closureForm.endDate')} *`}
+              label={`${t("closureForm.endDate")} *`}
               minTime="00:00"
               maxTime="23:59"
               timeStep={30}
@@ -658,28 +596,22 @@ function ClosurePeriodDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium">
-              {t('closureForm.reason')}
-            </label>
+            <Label>{t("closureForm.reason")}</Label>
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder={t('closureForm.reasonPlaceholder')}
+              placeholder={t("closureForm.reasonPlaceholder")}
               rows={2}
             />
           </div>
         </DialogPanel>
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => handleOpenChange(false)}
-          >
-            {tCommon('cancel')}
+          <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+            {tCommon("cancel")}
           </Button>
           <Button type="button" onClick={handleSubmit}>
-            {t('closureForm.add')}
+            {t("closureForm.add")}
           </Button>
         </DialogFooter>
       </DialogPopup>

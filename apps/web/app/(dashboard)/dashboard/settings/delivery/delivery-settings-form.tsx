@@ -22,6 +22,8 @@ import { useStore } from "@tanstack/react-form";
 import { Button } from "@louez/ui";
 import { Input } from "@louez/ui";
 import { Alert, AlertDescription } from "@louez/ui";
+import { Badge } from "@louez/ui";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from "@louez/ui";
 import { Label } from "@louez/ui";
 import { Slider } from "@louez/ui";
 import {
@@ -35,9 +37,9 @@ import {
   DialogFooter,
 } from "@louez/ui";
 import { AddressInput } from "@/components/ui/address-input";
+import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
 import { calculateHaversineDistance } from "@/lib/utils/geo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
-import { RadioGroup, RadioGroupItem } from "@louez/ui";
 import { setStoreLocationActive, updateDeliverySettings, upsertStoreLocation } from "./actions";
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
 import { InfoCallout } from "@/components/dashboard/info-callout";
@@ -537,7 +539,7 @@ export function DeliverySettingsForm({
                           <p className="text-muted-foreground text-xs">{store.address}</p>
                         )}
                       </div>
-                      <span className="text-muted-foreground text-xs">{t("locationsPrimary")}</span>
+                      <Badge variant="secondary">{t("locationsPrimary")}</Badge>
                     </div>
                   </div>
 
@@ -548,9 +550,7 @@ export function DeliverySettingsForm({
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{location.name}</p>
                             {!location.isActive && (
-                              <span className="rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                                {t("locationsInactive")}
-                              </span>
+                              <Badge variant="secondary">{t("locationsInactive")}</Badge>
                             )}
                           </div>
                           <p className="text-muted-foreground text-xs">{location.address}</p>
@@ -634,76 +634,34 @@ export function DeliverySettingsForm({
             {isEnabled && (
               <form.Field name="mode">
                 {(field) => (
-                  <div className="grid gap-2">
-                    <Label htmlFor={field.name}>{t("modeSection")}</Label>
-                    <RadioGroup
-                      value={field.state.value}
-                      onValueChange={(val) => field.handleChange(val)}
-                      className="grid gap-3 sm:grid-cols-3"
-                    >
-                      {/* Optional - Customer chooses */}
-                      <label
-                        htmlFor="mode-optional"
-                        className={`relative flex flex-col gap-2 rounded-lg border p-4 cursor-pointer transition-colors ${
-                          field.state.value === "optional"
-                            ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "hover:bg-muted/50"
-                        }`}
-                      >
-                        <RadioGroupItem value="optional" id="mode-optional" className="sr-only" />
-                        <div className="flex items-center gap-2">
-                          <PackageIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-sm">{t("modeOptional")}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {t("modeOptionalDescription")}
-                        </p>
-                      </label>
-
-                      {/* Required - Delivery mandatory */}
-                      <label
-                        htmlFor="mode-required"
-                        className={`relative flex flex-col gap-2 rounded-lg border p-4 cursor-pointer transition-colors ${
-                          field.state.value === "required"
-                            ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "hover:bg-muted/50"
-                        }`}
-                      >
-                        <RadioGroupItem value="required" id="mode-required" className="sr-only" />
-                        <div className="flex items-center gap-2">
-                          <TruckIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-sm">{t("modeRequired")}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {t("modeRequiredDescription")}
-                        </p>
-                      </label>
-
-                      {/* Included - Free delivery mandatory */}
-                      <label
-                        htmlFor="mode-included"
-                        className={`relative flex flex-col gap-2 rounded-lg border p-4 cursor-pointer transition-colors ${
-                          field.state.value === "included"
-                            ? "border-primary bg-primary/5 ring-1 ring-primary"
-                            : "hover:bg-muted/50"
-                        }`}
-                      >
-                        <RadioGroupItem value="included" id="mode-included" className="sr-only" />
-                        <div className="flex items-center gap-2">
-                          <GiftIcon className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium text-sm">{t("modeIncluded")}</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          {t("modeIncludedDescription")}
-                        </p>
-                      </label>
-                    </RadioGroup>
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-destructive text-sm">
-                        {getFieldError(field.state.meta.errors[0])}
-                      </p>
-                    )}
-                  </div>
+                  <FormRadioCardGroup
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                    label={t("modeSection")}
+                    options={[
+                      {
+                        value: "optional",
+                        label: t("modeOptional"),
+                        description: t("modeOptionalDescription"),
+                        icon: PackageIcon,
+                      },
+                      {
+                        value: "required",
+                        label: t("modeRequired"),
+                        description: t("modeRequiredDescription"),
+                        icon: TruckIcon,
+                      },
+                      {
+                        value: "included",
+                        label: t("modeIncluded"),
+                        description: t("modeIncludedDescription"),
+                        icon: GiftIcon,
+                      },
+                    ]}
+                    columns={1}
+                    className="sm:grid-cols-3"
+                    errors={field.state.meta.errors}
+                  />
                 )}
               </form.Field>
             )}
@@ -729,8 +687,8 @@ export function DeliverySettingsForm({
                       {(field) => (
                         <div className="grid gap-2">
                           <Label htmlFor={field.name}>{t("pricePerKm")}</Label>
-                          <div className="flex items-center gap-2">
-                            <Input
+                          <InputGroup>
+                            <InputGroupInput
                               id={field.name}
                               type="number"
                               min={0}
@@ -739,10 +697,12 @@ export function DeliverySettingsForm({
                               value={field.state.value}
                               onChange={(e) => field.handleChange(parseFloat(e.target.value) || 0)}
                               onBlur={field.handleBlur}
-                              className="w-24"
+                              aria-invalid={field.state.meta.errors.length > 0}
                             />
-                            <span className="text-sm text-muted-foreground">{currency}/km</span>
-                          </div>
+                            <InputGroupAddon align="inline-end">
+                              <InputGroupText>{currency}/km</InputGroupText>
+                            </InputGroupAddon>
+                          </InputGroup>
                           <p className="text-muted-foreground text-sm">
                             {t("pricePerKmDescription")}
                           </p>
@@ -760,8 +720,8 @@ export function DeliverySettingsForm({
                       {(field) => (
                         <div className="grid gap-2">
                           <Label htmlFor={field.name}>{t("minimumFee")}</Label>
-                          <div className="flex items-center gap-2">
-                            <Input
+                          <InputGroup>
+                            <InputGroupInput
                               id={field.name}
                               type="number"
                               min={0}
@@ -770,10 +730,12 @@ export function DeliverySettingsForm({
                               value={field.state.value}
                               onChange={(e) => field.handleChange(parseFloat(e.target.value) || 0)}
                               onBlur={field.handleBlur}
-                              className="w-24"
+                              aria-invalid={field.state.meta.errors.length > 0}
                             />
-                            <span className="text-sm text-muted-foreground">{currency}</span>
-                          </div>
+                            <InputGroupAddon align="inline-end">
+                              <InputGroupText>{currency}</InputGroupText>
+                            </InputGroupAddon>
+                          </InputGroup>
                           <p className="text-muted-foreground text-sm">
                             {t("minimumFeeDescription")}
                           </p>
@@ -818,8 +780,8 @@ export function DeliverySettingsForm({
                               ({tCommon("optional")})
                             </span>
                           </Label>
-                          <div className="flex items-center gap-2">
-                            <Input
+                          <InputGroup>
+                            <InputGroupInput
                               id={field.name}
                               type="number"
                               min={1}
@@ -831,10 +793,12 @@ export function DeliverySettingsForm({
                                 field.handleChange(val === "" ? null : parseFloat(val));
                               }}
                               onBlur={field.handleBlur}
-                              className="w-24"
+                              aria-invalid={field.state.meta.errors.length > 0}
                             />
-                            <span className="text-sm text-muted-foreground">km</span>
-                          </div>
+                            <InputGroupAddon align="inline-end">
+                              <InputGroupText>km</InputGroupText>
+                            </InputGroupAddon>
+                          </InputGroup>
                           <p className="text-muted-foreground text-sm">
                             {t("maximumDistanceDescription")}
                           </p>
@@ -857,8 +821,8 @@ export function DeliverySettingsForm({
                               ({tCommon("optional")})
                             </span>
                           </Label>
-                          <div className="flex items-center gap-2">
-                            <Input
+                          <InputGroup>
+                            <InputGroupInput
                               id={field.name}
                               type="number"
                               min={0}
@@ -870,10 +834,12 @@ export function DeliverySettingsForm({
                                 field.handleChange(val === "" ? null : parseFloat(val));
                               }}
                               onBlur={field.handleBlur}
-                              className="w-28"
+                              aria-invalid={field.state.meta.errors.length > 0}
                             />
-                            <span className="text-sm text-muted-foreground">{currency}</span>
-                          </div>
+                            <InputGroupAddon align="inline-end">
+                              <InputGroupText>{currency}</InputGroupText>
+                            </InputGroupAddon>
+                          </InputGroup>
                           <p className="text-muted-foreground text-sm">
                             {t("freeDeliveryThresholdDescription")}
                           </p>
@@ -896,8 +862,8 @@ export function DeliverySettingsForm({
                               ({tCommon("optional")})
                             </span>
                           </Label>
-                          <div className="flex items-center gap-2">
-                            <Input
+                          <InputGroup>
+                            <InputGroupInput
                               id={field.name}
                               type="number"
                               min={0}
@@ -909,10 +875,12 @@ export function DeliverySettingsForm({
                                 field.handleChange(val === "" ? null : parseFloat(val));
                               }}
                               onBlur={field.handleBlur}
-                              className="w-28"
+                              aria-invalid={field.state.meta.errors.length > 0}
                             />
-                            <span className="text-sm text-muted-foreground">{currency}</span>
-                          </div>
+                            <InputGroupAddon align="inline-end">
+                              <InputGroupText>{currency}</InputGroupText>
+                            </InputGroupAddon>
+                          </InputGroup>
                           <p className="text-muted-foreground text-sm">
                             {t("minimumOrderAmountForDeliveryDescription")}
                           </p>
@@ -1062,7 +1030,7 @@ export function DeliverySettingsForm({
                         </span>
                       )}
                       {freeDeliveryThreshold && (
-                        <span className="text-green-600 font-medium">
+                        <span className="text-success font-medium">
                           {t("simulator.freeAbove", {
                             amount: formatCurrency(freeDeliveryThreshold, currency),
                           })}
@@ -1091,9 +1059,7 @@ export function DeliverySettingsForm({
                       </p>
                     )}
                     {simResult.reason === "threshold" && (
-                      <p className="text-xs text-green-600 dark:text-green-400">
-                        {t("simulator.freeDeliveryApplied")}
-                      </p>
+                      <p className="text-success text-xs">{t("simulator.freeDeliveryApplied")}</p>
                     )}
                     {simResult.reason === "calculated" && simResult.fee === minimumFee && (
                       <p className="text-xs text-muted-foreground">
@@ -1107,7 +1073,7 @@ export function DeliverySettingsForm({
                         {t("simulator.notAvailable")}
                       </span>
                     ) : simResult.isFree ? (
-                      <span className="text-lg font-semibold text-green-600 dark:text-green-400">
+                      <span className="text-success text-lg font-semibold">
                         {t("simulator.free")}
                       </span>
                     ) : (

@@ -5,15 +5,24 @@ import { useStore } from "@tanstack/react-form";
 import { useTransition, useState } from "react";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { toastManager } from "@louez/ui";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+  Label,
+  toastManager,
+} from "@louez/ui";
 import { InfoCircleIcon, PercentageIcon } from "@louez/ui/icons";
 
-import { Input } from "@louez/ui";
-import { Label } from "@louez/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
-import { RadioGroup, RadioGroupItem } from "@louez/ui";
 import { updateTaxSettings } from "./actions";
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
+import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
 import type { StoreSettings, TaxSettings } from "@louez/types";
 import { useAppForm } from "@/hooks/form/form";
 import { RootError } from "@/components/form/root-error";
@@ -135,8 +144,8 @@ export function TaxSettingsForm({ store }: TaxSettingsFormProps) {
                     {(field) => (
                       <div className="grid gap-2">
                         <Label htmlFor={field.name}>{t("defaultRate")}</Label>
-                        <div className="flex items-center gap-2">
-                          <Input
+                        <InputGroup className="w-fit">
+                          <InputGroupInput
                             id={field.name}
                             type="number"
                             min={0}
@@ -145,10 +154,13 @@ export function TaxSettingsForm({ store }: TaxSettingsFormProps) {
                             value={field.state.value}
                             onChange={(e) => field.handleChange(parseFloat(e.target.value) || 0)}
                             onBlur={field.handleBlur}
-                            className="w-24"
+                            aria-invalid={field.state.meta.errors.length > 0}
+                            className="w-24 flex-none"
                           />
-                          <span className="text-sm text-muted-foreground">%</span>
-                        </div>
+                          <InputGroupAddon align="inline-end">
+                            <InputGroupText>%</InputGroupText>
+                          </InputGroupAddon>
+                        </InputGroup>
                         <p className="text-muted-foreground text-sm">
                           {t("defaultRateDescription")}
                         </p>
@@ -164,56 +176,25 @@ export function TaxSettingsForm({ store }: TaxSettingsFormProps) {
                   {/* Display Mode */}
                   <form.Field name="displayMode">
                     {(field) => (
-                      <div className="grid gap-2">
-                        <Label htmlFor={field.name}>{t("displayModeSection")}</Label>
-                        <RadioGroup
-                          onValueChange={(val) => field.handleChange(val)}
-                          value={field.state.value}
-                          className="grid gap-2"
-                        >
-                          <label
-                            htmlFor="inclusive"
-                            className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
-                              field.state.value === "inclusive"
-                                ? "border-primary bg-primary/5"
-                                : "hover:bg-muted/50"
-                            }`}
-                          >
-                            <RadioGroupItem value="inclusive" id="inclusive" />
-                            <div className="grid gap-0.5">
-                              <span className="font-medium text-sm">
-                                {t("displayModeInclusive")}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {t("displayModeInclusiveDescription")}
-                              </span>
-                            </div>
-                          </label>
-                          <label
-                            htmlFor="exclusive"
-                            className={`flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors ${
-                              field.state.value === "exclusive"
-                                ? "border-primary bg-primary/5"
-                                : "hover:bg-muted/50"
-                            }`}
-                          >
-                            <RadioGroupItem value="exclusive" id="exclusive" />
-                            <div className="grid gap-0.5">
-                              <span className="font-medium text-sm">
-                                {t("displayModeExclusive")}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {t("displayModeExclusiveDescription")}
-                              </span>
-                            </div>
-                          </label>
-                        </RadioGroup>
-                        {field.state.meta.errors.length > 0 && (
-                          <p className="text-destructive text-sm">
-                            {getFieldError(field.state.meta.errors[0])}
-                          </p>
-                        )}
-                      </div>
+                      <FormRadioCardGroup
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        label={t("displayModeSection")}
+                        options={[
+                          {
+                            value: "inclusive",
+                            label: t("displayModeInclusive"),
+                            description: t("displayModeInclusiveDescription"),
+                          },
+                          {
+                            value: "exclusive",
+                            label: t("displayModeExclusive"),
+                            description: t("displayModeExclusiveDescription"),
+                          },
+                        ]}
+                        columns={1}
+                        errors={field.state.meta.errors}
+                      />
                     )}
                   </form.Field>
                 </div>
@@ -247,61 +228,25 @@ export function TaxSettingsForm({ store }: TaxSettingsFormProps) {
                     {t("optionalSection")}
                   </p>
                   <div className="grid gap-4 sm:grid-cols-2">
-                    <form.Field name="taxLabel">
+                    <form.AppField name="taxLabel">
                       {(field) => (
-                        <div className="grid gap-2">
-                          <Label htmlFor={field.name} className="flex items-center gap-2">
-                            {t("taxLabel")}
-                            <span className="text-xs text-muted-foreground font-normal">
-                              ({tCommon("optional")})
-                            </span>
-                          </Label>
-                          <Input
-                            id={field.name}
-                            placeholder={t("taxLabelPlaceholder")}
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            onBlur={field.handleBlur}
-                          />
-                          <p className="text-muted-foreground text-sm">
-                            {t("taxLabelDescription")}
-                          </p>
-                          {field.state.meta.errors.length > 0 && (
-                            <p className="text-destructive text-sm">
-                              {getFieldError(field.state.meta.errors[0])}
-                            </p>
-                          )}
-                        </div>
+                        <field.Input
+                          label={`${t("taxLabel")} (${tCommon("optional")})`}
+                          placeholder={t("taxLabelPlaceholder")}
+                          description={t("taxLabelDescription")}
+                        />
                       )}
-                    </form.Field>
+                    </form.AppField>
 
-                    <form.Field name="taxNumber">
+                    <form.AppField name="taxNumber">
                       {(field) => (
-                        <div className="grid gap-2">
-                          <Label htmlFor={field.name} className="flex items-center gap-2">
-                            {t("taxNumber")}
-                            <span className="text-xs text-muted-foreground font-normal">
-                              ({tCommon("optional")})
-                            </span>
-                          </Label>
-                          <Input
-                            id={field.name}
-                            placeholder={t("taxNumberPlaceholder")}
-                            value={field.state.value}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            onBlur={field.handleBlur}
-                          />
-                          <p className="text-muted-foreground text-sm">
-                            {t("taxNumberDescription")}
-                          </p>
-                          {field.state.meta.errors.length > 0 && (
-                            <p className="text-destructive text-sm">
-                              {getFieldError(field.state.meta.errors[0])}
-                            </p>
-                          )}
-                        </div>
+                        <field.Input
+                          label={`${t("taxNumber")} (${tCommon("optional")})`}
+                          placeholder={t("taxNumberPlaceholder")}
+                          description={t("taxNumberDescription")}
+                        />
                       )}
-                    </form.Field>
+                    </form.AppField>
                   </div>
                 </div>
               </div>

@@ -2,15 +2,11 @@
 
 import { useTranslations } from "next-intl";
 
-import { Label } from "@louez/ui";
 import { MapPinIcon } from "@louez/ui/icons";
-import { CountryFlag } from "@louez/ui/icons/flags";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
 
 import { InfoCallout } from "@/components/dashboard/info-callout";
-import { getFieldError } from "@/hooks/form/form-context";
-import { getCountriesSortedByName, getCountryName } from "@/lib/utils/countries";
+import { getCountryName } from "@/lib/utils/countries";
 
 interface StoreSettingsBillingSectionProps {
   form: any;
@@ -81,55 +77,9 @@ export function StoreSettingsBillingSection({
               </form.AppField>
             </div>
 
-            <form.Field name="billingCountry">
-              {(field: any) => (
-                <div className="grid min-w-0 gap-2">
-                  <Label htmlFor={field.name}>{t("billingAddress.country")}</Label>
-                  <Select
-                    onValueChange={(value) => {
-                      if (value !== null) {
-                        field.handleChange(value);
-                      }
-                    }}
-                    value={field.state.value}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue className="min-w-0">
-                        {field.state.value && (
-                          <span className="flex min-w-0 items-center gap-2">
-                            <CountryFlag
-                              country={field.state.value}
-                              countryName={getCountryName(field.state.value)}
-                              className="h-4 w-6 shrink-0 [&_img]:size-full [&_svg]:size-full"
-                            />
-                            <span className="truncate">{getCountryName(field.state.value)}</span>
-                          </span>
-                        )}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[300px]">
-                      {getCountriesSortedByName().map((country) => (
-                        <SelectItem key={country.code} value={country.code}>
-                          <span className="flex items-center gap-2">
-                            <CountryFlag
-                              country={country.code}
-                              countryName={getCountryName(country.code)}
-                              className="h-4 w-6 shrink-0 [&_img]:size-full [&_svg]:size-full"
-                            />
-                            <span>{getCountryName(country.code)}</span>
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-destructive text-sm">
-                      {getFieldError(field.state.meta.errors[0])}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
+            <form.AppField name="billingCountry">
+              {(field: any) => <field.CountrySelect label={t("billingAddress.country")} />}
+            </form.AppField>
 
             {(billingAddress || billingCity) && (
               <div className="bg-muted/50 rounded-lg p-4 text-sm">

@@ -7,14 +7,14 @@ import { revalidateLogic, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { ArrowRightIcon, CalendarIcon, ClockIcon, ImageIcon, SparklesIcon } from "@louez/ui/icons";
-import { Upload, X, Check, Sun, Moon, Plus, Loader2 } from "lucide-react";
-import { Button } from "@louez/ui";
+import { Upload, X, Check, Sun, Moon, Plus } from "lucide-react";
+import { Button, Spinner } from "@louez/ui";
 import { Label } from "@louez/ui";
-import { Switch } from "@louez/ui";
 import { Slider } from "@louez/ui";
 import { toastManager } from "@louez/ui";
 import { cn } from "@louez/utils";
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
+import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
 import { useAppForm } from "@/hooks/form/form";
 import { ImageUploadValidationError, useImageUpload } from "@/hooks/use-image-upload";
 import { orpc } from "@/lib/orpc/react";
@@ -488,7 +488,7 @@ export const AppearanceForm = ({ store }: AppearanceFormProps) => {
                         />
                         {isUploadingLogo && (
                           <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
-                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                            <Spinner className="h-5 w-5 text-primary" />
                           </div>
                         )}
                         {!isUploadingLogo && (
@@ -554,7 +554,7 @@ export const AppearanceForm = ({ store }: AppearanceFormProps) => {
                           />
                           {isUploadingDarkLogo && (
                             <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
-                              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                              <Spinner className="h-5 w-5 text-primary" />
                             </div>
                           )}
                           {!isUploadingDarkLogo && (
@@ -676,47 +676,24 @@ export const AppearanceForm = ({ store }: AppearanceFormProps) => {
                     <Label className="text-sm font-medium">{t("theme")}</Label>
                     <p className="text-xs text-muted-foreground mt-0.5">{t("themeDescription")}</p>
                   </div>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        field.handleChange("light");
+                  <FormRadioCardGroup
+                    value={field.state.value}
+                    onChange={(nextThemeMode) => {
+                      field.handleChange(nextThemeMode);
+                      if (nextThemeMode === "light") {
                         const baseline = form.options.defaultValues ?? defaultValues;
                         if (darkLogoUrl && darkLogoUrl !== baseline.darkLogoUrl) {
                           deletePendingUpload(darkLogoUrl);
                         }
                         form.setFieldValue("darkLogoUrl", null);
-                      }}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-2 rounded-lg border-2 py-2.5 px-3 transition-all",
-                        field.state.value === "light"
-                          ? "border-primary bg-primary/5"
-                          : "border-muted hover:border-muted-foreground/50",
-                      )}
-                    >
-                      <Sun className="h-4 w-4 text-amber-500" />
-                      <span className="text-sm font-medium">{t("themeLight")}</span>
-                      {field.state.value === "light" && (
-                        <Check className="h-4 w-4 text-primary ml-1" />
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => field.handleChange("dark")}
-                      className={cn(
-                        "flex-1 flex items-center justify-center gap-2 rounded-lg border-2 py-2.5 px-3 transition-all",
-                        field.state.value === "dark"
-                          ? "border-primary bg-primary/5"
-                          : "border-muted hover:border-muted-foreground/50",
-                      )}
-                    >
-                      <Moon className="h-4 w-4 text-slate-500" />
-                      <span className="text-sm font-medium">{t("themeDark")}</span>
-                      {field.state.value === "dark" && (
-                        <Check className="h-4 w-4 text-primary ml-1" />
-                      )}
-                    </button>
-                  </div>
+                      }
+                    }}
+                    options={[
+                      { value: "light", label: t("themeLight"), icon: Sun },
+                      { value: "dark", label: t("themeDark"), icon: Moon },
+                    ]}
+                    columns={2}
+                  />
                 </section>
               )}
             </form.Field>
@@ -769,7 +746,7 @@ export const AppearanceForm = ({ store }: AppearanceFormProps) => {
                       ))}
                       {isUploadingHero && (
                         <div className="flex aspect-[4/3] items-center justify-center rounded-lg border-2 border-dashed border-primary/50 bg-primary/5">
-                          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                          <Spinner className="h-5 w-5 text-primary" />
                         </div>
                       )}
                       {field.state.value.length < 5 && !isUploadingHero && (
@@ -792,21 +769,13 @@ export const AppearanceForm = ({ store }: AppearanceFormProps) => {
             </form.Field>
 
             {/* Max Discount Percent Section */}
-            <form.Field name="maxDiscountEnabled">
+            <form.AppField name="maxDiscountEnabled">
               {(enabledField) => (
                 <section className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <Label className="text-sm font-medium">{t("maxDiscount.title")}</Label>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {t("maxDiscount.description")}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={enabledField.state.value}
-                      onCheckedChange={(checked) => enabledField.handleChange(checked)}
-                    />
-                  </div>
+                  <enabledField.Switch
+                    label={t("maxDiscount.title")}
+                    description={t("maxDiscount.description")}
+                  />
                   {enabledField.state.value && (
                     <form.Field name="maxDiscountPercent">
                       {(percentField) => (
@@ -835,7 +804,7 @@ export const AppearanceForm = ({ store }: AppearanceFormProps) => {
                   )}
                 </section>
               )}
-            </form.Field>
+            </form.AppField>
 
             <FloatingSaveBar
               isDirty={isDirty}

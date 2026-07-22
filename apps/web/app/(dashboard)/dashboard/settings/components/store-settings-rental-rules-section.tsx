@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { Label } from "@louez/ui";
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText, Label } from "@louez/ui";
 import { Slider } from "@louez/ui";
 import { CalendarCheckIcon, InfoCircleIcon } from "@louez/ui/icons";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
@@ -288,7 +288,9 @@ export function StoreSettingsRentalRulesSection({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger
-                      render={<InfoCircleIcon className="text-muted-foreground h-3.5 w-3.5 cursor-help" />}
+                      render={
+                        <InfoCircleIcon className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
+                      }
                     />
                     <TooltipContent side="top" className="max-w-xs">
                       <p>{t("reservationSettings.turnoverBufferHelp")}</p>
@@ -296,15 +298,15 @@ export function StoreSettingsRentalRulesSection({
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="border-input dark:bg-input/30 has-[:focus]:border-ring has-[:focus]:ring-ring/50 flex h-9 max-w-xs rounded-md border bg-transparent shadow-xs has-[:focus]:ring-[3px]">
-                <input
+              <InputGroup className="max-w-xs">
+                <InputGroupInput
                   id={field.name}
                   type="number"
                   min={0}
                   max={10080}
                   step={1}
-                  className="min-w-0 flex-1 [appearance:textfield] rounded-l-md bg-transparent px-3 text-base outline-none md:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   value={field.state.value || ""}
+                  aria-invalid={field.state.meta.errors.length > 0}
                   onChange={(event) => {
                     const value = event.target.value;
                     if (value === "") {
@@ -318,10 +320,10 @@ export function StoreSettingsRentalRulesSection({
                     }
                   }}
                 />
-                <span className="border-input bg-muted/50 text-muted-foreground flex h-full items-center rounded-r-md border-l px-2.5 text-sm">
-                  min
-                </span>
-              </div>
+                <InputGroupAddon align="inline-end">
+                  <InputGroupText>min</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
               <p className="text-muted-foreground text-sm">
                 {t("reservationSettings.turnoverBufferDescription")}
               </p>

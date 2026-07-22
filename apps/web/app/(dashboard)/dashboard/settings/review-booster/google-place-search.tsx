@@ -1,32 +1,32 @@
-'use client'
+"use client";
 
-import { useState, useCallback, useEffect, useRef } from 'react'
-import { useTranslations } from 'next-intl'
-import Image from 'next/image'
-import { SearchIcon, StarIcon, StoreIcon } from '@louez/ui/icons'
-import { Loader2, X, Check } from 'lucide-react'
-import { Input } from '@louez/ui'
-import { Button } from '@louez/ui'
-import { searchGooglePlaces, fetchGooglePlaceDetails } from './actions'
-import type { PlaceSearchResult } from '@/lib/google-places'
+import { useState, useCallback, useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
+import Image from "next/image";
+import { SearchIcon, StarIcon, StoreIcon } from "@louez/ui/icons";
+import { X, Check } from "lucide-react";
+import { Input, Spinner } from "@louez/ui";
+import { Button } from "@louez/ui";
+import { searchGooglePlaces, fetchGooglePlaceDetails } from "./actions";
+import type { PlaceSearchResult } from "@/lib/google-places";
 
 interface GooglePlaceSearchProps {
   selectedPlace: {
-    placeId: string | null
-    name: string | null
-    address: string | null
-    rating: number | null
-    reviewCount: number | null
-  }
+    placeId: string | null;
+    name: string | null;
+    address: string | null;
+    rating: number | null;
+    reviewCount: number | null;
+  };
   onPlaceSelect: (place: {
-    placeId: string
-    name: string
-    address: string
-    rating: number | null
-    reviewCount: number | null
-  }) => void
-  onPlaceClear: () => void
-  disabled?: boolean
+    placeId: string;
+    name: string;
+    address: string;
+    rating: number | null;
+    reviewCount: number | null;
+  }) => void;
+  onPlaceClear: () => void;
+  disabled?: boolean;
 }
 
 export function GooglePlaceSearch({
@@ -35,15 +35,15 @@ export function GooglePlaceSearch({
   onPlaceClear,
   disabled = false,
 }: GooglePlaceSearchProps) {
-  const t = useTranslations('dashboard.settings.reviewBooster')
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<PlaceSearchResult[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const [isLoadingDetails, setIsLoadingDetails] = useState(false)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
+  const t = useTranslations("dashboard.settings.reviewBooster");
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<PlaceSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoadingDetails, setIsLoadingDetails] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -54,56 +54,56 @@ export function GooglePlaceSearch({
         inputRef.current &&
         !inputRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false)
+        setIsOpen(false);
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSearch = useCallback(async (searchQuery: string) => {
     if (searchQuery.length < 2) {
-      setResults([])
-      setIsOpen(false)
-      return
+      setResults([]);
+      setIsOpen(false);
+      return;
     }
 
-    setIsSearching(true)
+    setIsSearching(true);
     try {
-      const response = await searchGooglePlaces(searchQuery)
+      const response = await searchGooglePlaces(searchQuery);
       if (response.results) {
-        setResults(response.results)
-        setIsOpen(response.results.length > 0)
+        setResults(response.results);
+        setIsOpen(response.results.length > 0);
       }
     } catch (error) {
-      console.error('Error searching places:', error)
+      console.error("Error searching places:", error);
     } finally {
-      setIsSearching(false)
+      setIsSearching(false);
     }
-  }, [])
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setQuery(value)
+    const value = e.target.value;
+    setQuery(value);
 
     // Debounce search
     if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
+      clearTimeout(debounceRef.current);
     }
     debounceRef.current = setTimeout(() => {
-      handleSearch(value)
-    }, 300)
-  }
+      handleSearch(value);
+    }, 300);
+  };
 
   const handleSelectPlace = async (place: PlaceSearchResult) => {
-    setIsLoadingDetails(true)
-    setIsOpen(false)
-    setQuery('')
+    setIsLoadingDetails(true);
+    setIsOpen(false);
+    setQuery("");
 
     try {
       // Fetch full details including reviews
-      const response = await fetchGooglePlaceDetails(place.placeId)
+      const response = await fetchGooglePlaceDetails(place.placeId);
       if (response.details) {
         onPlaceSelect({
           placeId: response.details.placeId,
@@ -111,7 +111,7 @@ export function GooglePlaceSearch({
           address: response.details.address,
           rating: response.details.rating,
           reviewCount: response.details.reviewCount,
-        })
+        });
       } else {
         // Fallback to search result data
         onPlaceSelect({
@@ -120,10 +120,10 @@ export function GooglePlaceSearch({
           address: place.address,
           rating: place.rating || null,
           reviewCount: place.reviewCount || null,
-        })
+        });
       }
     } catch (error) {
-      console.error('Error fetching place details:', error)
+      console.error("Error fetching place details:", error);
       // Fallback to search result data
       onPlaceSelect({
         placeId: place.placeId,
@@ -131,11 +131,11 @@ export function GooglePlaceSearch({
         address: place.address,
         rating: place.rating || null,
         reviewCount: place.reviewCount || null,
-      })
+      });
     } finally {
-      setIsLoadingDetails(false)
+      setIsLoadingDetails(false);
     }
-  }
+  };
 
   // If a place is already selected, show the selected place card
   if (selectedPlace.placeId) {
@@ -149,13 +149,11 @@ export function GooglePlaceSearch({
             <div className="min-w-0 flex-1">
               <div className="flex min-w-0 items-center gap-2">
                 <h4 className="font-medium truncate">{selectedPlace.name}</h4>
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-500/10 flex-shrink-0">
-                  <Check className="h-3 w-3 text-green-600" />
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-success/10 flex-shrink-0">
+                  <Check className="h-3 w-3 text-success" />
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground truncate">
-                {selectedPlace.address}
-              </p>
+              <p className="text-sm text-muted-foreground truncate">{selectedPlace.address}</p>
               {selectedPlace.rating && (
                 <div className="mt-1 flex min-w-0 items-center gap-2">
                   <div className="flex shrink-0 items-center gap-1">
@@ -164,7 +162,7 @@ export function GooglePlaceSearch({
                   </div>
                   {selectedPlace.reviewCount && (
                     <span className="min-w-0 truncate text-sm text-muted-foreground">
-                      ({selectedPlace.reviewCount} {t('reviews')})
+                      ({selectedPlace.reviewCount} {t("reviews")})
                     </span>
                   )}
                 </div>
@@ -177,11 +175,11 @@ export function GooglePlaceSearch({
             disabled={disabled}
             className="w-fit flex-shrink-0"
           >
-            {t('changePlace')}
+            {t("changePlace")}
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -191,7 +189,7 @@ export function GooglePlaceSearch({
         <Input
           ref={inputRef}
           type="text"
-          placeholder={t('searchPlaceholder')}
+          placeholder={t("searchPlaceholder")}
           value={query}
           onChange={handleInputChange}
           onFocus={() => results.length > 0 && setIsOpen(true)}
@@ -199,15 +197,15 @@ export function GooglePlaceSearch({
           className="pl-10 pr-10"
         />
         {(isSearching || isLoadingDetails) && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+          <Spinner className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         )}
         {query && !isSearching && !isLoadingDetails && (
           <button
             type="button"
             onClick={() => {
-              setQuery('')
-              setResults([])
-              setIsOpen(false)
+              setQuery("");
+              setResults([]);
+              setIsOpen(false);
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           >
@@ -248,9 +246,7 @@ export function GooglePlaceSearch({
                     )}
                     <div className="min-w-0 flex-1">
                       <p className="font-medium truncate">{place.name}</p>
-                      <p className="text-sm text-muted-foreground truncate">
-                        {place.address}
-                      </p>
+                      <p className="text-sm text-muted-foreground truncate">{place.address}</p>
                       {place.rating && (
                         <div className="mt-1 flex min-w-0 items-center gap-1">
                           <StarIcon className="h-3.5 w-3.5 shrink-0 fill-amber-400 text-amber-400" />
@@ -277,11 +273,9 @@ export function GooglePlaceSearch({
           ref={dropdownRef}
           className="absolute z-50 mt-1 w-full rounded-lg border bg-popover p-4 shadow-lg"
         >
-          <p className="text-sm text-muted-foreground text-center">
-            {t('noResults')}
-          </p>
+          <p className="text-sm text-muted-foreground text-center">{t("noResults")}</p>
         </div>
       )}
     </div>
-  )
+  );
 }
