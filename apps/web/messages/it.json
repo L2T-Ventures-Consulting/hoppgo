@@ -779,7 +779,10 @@
         "save": "Salva",
         "unsavedChanges": "Modifiche non salvate",
         "createProduct": "Crea prodotto",
+        "createAndDuplicate": "Crea e duplica",
         "productCreated": "Prodotto creato",
+        "productCreatedCopyReady": "La copia precompilata è pronta per essere modificata.",
+        "copySuffix": "(copia)",
         "validationError": "Si prega di correggere gli errori prima di inviare",
         "productUpdated": "Prodotto aggiornato",
         "imagesHint": "{count, plural, =0 {Hai raggiunto il numero massimo di foto} one {Puoi aggiungere ancora # foto} other {Puoi aggiungere ancora # foto}}",
@@ -884,7 +887,7 @@
           "bookingAttributesEmpty": "Nessun attributo di prenotazione configurato. Tutte le unita tracciate condividono la combinazione predefinita.",
           "bookingAttributeValuePlaceholder": "Valore {label}",
           "combinationKey": "Combinazione",
-          "missingAttributesWarning": "{count, plural, one {# unita attiva non ha almeno un valore di attributo} other {# unita attive non hanno almeno un valore di attributo}}",
+          "missingAttributesWarning": "{count, plural, one {# unità non ha tutti i valori delle varianti} other {# unità non hanno tutti i valori delle varianti}}",
           "manageAttributes": "Gestisci attributi",
           "manageAttributesDescription": "Gli attributi permettono ai clienti di scegliere caratteristiche specifiche al momento della prenotazione (es. taglia, colore). Ogni unita e associata ai propri valori di attributo e il sistema assegna automaticamente un'unita corrispondente al checkout.",
           "manageAttributesExample": "Esempio: per un noleggio di kayak, aggiungi \"Taglia\" (S, M, L) e \"Colore\" (Rosso, Blu). Un cliente che prenota un kayak Medio Rosso ricevera un'unita disponibile corrispondente.",
@@ -903,7 +906,85 @@
           "openInventoryDetails": "Apri inventario",
           "benefitIdentify": "Identifica ogni esemplare con un numero di serie o un riferimento",
           "benefitAvailability": "Monitora la disponibilità e i noleggi di ogni esemplare",
-          "benefitInventory": "Registra prezzo e data di acquisto per il tuo inventario"
+          "benefitInventory": "Registra prezzo e data di acquisto per il tuo inventario",
+          "modeQuantity": "Quantità semplice",
+          "modeQuantityDescription": "Indica semplicemente quanti esemplari sono disponibili per il noleggio.",
+          "modeUnits": "Tracciamento per unità",
+          "modeUnitsDescription": "Ogni esemplare ha il proprio identificativo.",
+          "variantsTitle": "Varianti",
+          "variantsHelp": "Fino a 3 varianti (taglia, colore…). Ogni unità indica il suo valore e il cliente sceglie alla prenotazione.",
+          "variantsEmptyHint": "Crei un prodotto per ogni taglia? Aggiungi invece una variante «Taglia»: ogni unità porta la propria e il cliente sceglie alla prenotazione.",
+          "variantPlaceholder": "es.: Taglia",
+          "addVariant": "Aggiungi una variante",
+          "variantsMaxReached": "Massimo 3 varianti",
+          "defaultBadge": "Predefinito",
+          "advancedBadge": "Avanzato",
+          "learnMore": "Scopri di più",
+          "addRefPlaceholder": "Digita un riferimento e premi Invio",
+          "generateSeries": "Genera una serie",
+          "changeMode": "Cambia modalità",
+          "createVariantValue": "Crea «{value}» ({axis})",
+          "chooseColor": "Scegli un colore",
+          "colorPickerDescription": "Regola il colore o inserisci un valore esadecimale.",
+          "hexColor": "Colore esadecimale",
+          "presetSuggestions": "Suggerimenti",
+          "valuesCount": "{count, plural, one {# valore} other {# valori}}",
+          "presets": {
+            "size": {
+              "label": "Taglia"
+            },
+            "shoeSize": {
+              "label": "Numero di scarpe"
+            },
+            "color": {
+              "label": "Colore",
+              "values": {
+                "black": "Nero",
+                "white": "Bianco",
+                "gray": "Grigio",
+                "red": "Rosso",
+                "orange": "Arancione",
+                "yellow": "Giallo",
+                "green": "Verde",
+                "blue": "Blu",
+                "purple": "Viola",
+                "pink": "Rosa",
+                "brown": "Marrone",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Materiale",
+              "values": {
+                "cotton": "Cotone",
+                "leather": "Pelle",
+                "wood": "Legno",
+                "metal": "Metallo",
+                "plastic": "Plastica",
+                "aluminum": "Alluminio",
+                "carbon": "Carbonio"
+              }
+            }
+          },
+          "manageVariants": "Gestisci varianti",
+          "managerTitle": "Varianti",
+          "managerDescription": "Definizioni condivise tra tutti i tuoi prodotti (taglia, colore…).",
+          "activeVariantsCount": "{active} attive su {total}",
+          "variantActive": "Attiva",
+          "variantInactive": "Disattivata",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Nuova variante",
+          "newVariantDescription": "Crea una variante condivisa tra i tuoi prodotti (es.: Taglia).",
+          "editVariant": "Rinomina variante",
+          "editVariantDescription": "Il nome viene aggiornato nel catalogo condiviso.",
+          "editValue": "Modifica valore",
+          "editValueDescription": "L'etichetta viene aggiornata nel catalogo condiviso.",
+          "deleteVariantTitle": "Eliminare la variante?",
+          "deleteVariantDescription": "«{name}» e i suoi valori saranno rimossi dal catalogo. I prodotti che la usano mantengono i valori attuali.",
+          "addValuePlaceholder": "Nuovo valore…",
+          "noVariants": "Nessuna variante",
+          "variantsCount": "{count, plural, one {# variante} other {# varianti}}",
+          "unitImages": "Foto dell'unità"
         },
         "previewTitle": "Anteprima",
         "previewDescription": "Ecco come apparira il tuo prodotto nel catalogo",
@@ -1035,6 +1116,7 @@
         "categorySearchPlaceholder": "Cerca o crea…",
         "categoryCreateOption": "Crea «{name}»",
         "categoryNoResults": "Nessuna categoria trovata",
+        "manageCategories": "Gestisci categorie",
         "summary": {
           "checklistTitle": "Avanzamento",
           "required": "Obbligatorio"
@@ -5237,6 +5319,10 @@
     "noCategories": "Nessuna categoria",
     "noCategoriesDescription": "Crea la tua prima categoria per organizzare i tuoi prodotti",
     "emptyDescription": "Le categorie ti aiutano a organizzare i tuoi prodotti e facilitano la navigazione dei clienti.",
+    "searchPlaceholder": "Cerca categorie…",
+    "noSearchResults": "Nessuna categoria corrisponde alla ricerca.",
+    "totalCount": "{count, plural, =0 {Nessuna categoria} one {# categoria} other {# categorie}}",
+    "actionsFor": "Azioni per {name}",
     "newCategoryDescription": "Crea una nuova categoria per organizzare i tuoi prodotti",
     "editCategoryDescription": "Modifica il nome della categoria",
     "namePlaceholder": "Nome categoria",
@@ -5251,7 +5337,9 @@
       "title": "Eliminare questa categoria?",
       "description": "Questa azione e irreversibile. I prodotti in questa categoria non saranno eliminati.",
       "descriptionWithName": "Questa azione e irreversibile. La categoria \"{name}\" sara eliminata.",
-      "productsWarning": "{count, plural, one {Il prodotto in questa categoria sara spostato in \"Senza categoria\".} other {I # prodotti in questa categoria saranno spostati in \"Senza categoria\"."
+      "productsWarning": "{count, plural, one {Questa categoria verrà rimossa da # prodotto.} other {Questa categoria verrà rimossa da # prodotti.}}",
+      "reassignLabel": "Riassegna i prodotti a",
+      "keepExisting": "Mantieni le altre categorie"
     }
   },
   "emails": {

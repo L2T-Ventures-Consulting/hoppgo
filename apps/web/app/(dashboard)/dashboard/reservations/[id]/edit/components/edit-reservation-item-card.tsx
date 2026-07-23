@@ -218,7 +218,9 @@ export function EditReservationItemCard({
               <div className="flex items-center gap-1">
                 <InputPrice
                   value={displayedUnitPrice}
-                  onChange={(price) => onPriceChange(item.id, price, item.displayPricingMode)}
+                  onValueCommitted={(price) =>
+                    onPriceChange(item.id, price, item.displayPricingMode)
+                  }
                   suffix={`${currencySymbol}/${unitLabel}`}
                   ariaLabel={`${t("edit.unitPrice")}, ${item.productSnapshot.name}`}
                   className={cn(
@@ -265,7 +267,7 @@ export function EditReservationItemCard({
               </p>
               <InputPrice
                 value={item.depositPerUnit}
-                onChange={(depositPerUnit) => onDepositChange(item.id, depositPerUnit)}
+                onValueCommitted={(depositPerUnit) => onDepositChange(item.id, depositPerUnit)}
                 suffix={currencySymbol}
                 ariaLabel={`${t("edit.deposit")}, ${item.productSnapshot.name}`}
               />

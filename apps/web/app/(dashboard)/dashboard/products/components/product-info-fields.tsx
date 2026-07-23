@@ -1,37 +1,18 @@
 "use client";
 
 import type { ChangeEvent } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
-import { Info, Loader2, Plus } from "lucide-react";
+import { ChevronRight, FolderOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import {
-  Combobox,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxPopup,
-  Label,
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@louez/ui";
+import { Button, Label } from "@louez/ui";
 
+import { CategoryManagerDrawer } from "@/components/categories/category-manager-drawer";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { getFieldError } from "@/hooks/form/form-context";
 
 import type { Category, ProductFormComponentApi } from "../types";
-
-const CREATE_CATEGORY_VALUE = "__create__";
-
-interface CategoryComboboxItem {
-  label: string;
-  value: string;
-  kind?: "create";
-}
 
 export interface ProductInfoFieldsProps {
   form: ProductFormComponentApi;
@@ -52,19 +33,7 @@ export function ProductInfoFields({
   onNameInputChange,
 }: ProductInfoFieldsProps) {
   const t = useTranslations("dashboard.products.form");
-  const [categoryQuery, setCategoryQuery] = useState("");
-
-  const categoryItems = useMemo<CategoryComboboxItem[]>(() => {
-    const items: CategoryComboboxItem[] = categories.map((category) => ({
-      label: category.name,
-      value: category.id,
-    }));
-    const query = categoryQuery.trim();
-    if (query && !items.some((item) => item.label.toLowerCase() === query.toLowerCase())) {
-      items.push({ label: query, value: CREATE_CATEGORY_VALUE, kind: "create" });
-    }
-    return items;
-  }, [categories, categoryQuery]);
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
 
   return (
     <div className="space-y-5">
@@ -86,92 +55,52 @@ export function ProductInfoFields({
           )}
         </form.AppField>
 
-        <form.Field name="categoryId">
+        <form.AppField name="categoryIds">
           {(field) => (
-            <div className="flex flex-col gap-2">
-              <Label className="flex items-center gap-1.5">
-                {t("category")}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger
-                      render={
-                        <button
-                          type="button"
-                          className="text-muted-foreground hover:text-foreground inline-flex cursor-help transition-colors"
-                          aria-label={t("categoryOptional")}
-                        />
-                      }
-                    >
-                      <Info className="h-3.5 w-3.5" />
-                    </TooltipTrigger>
-                    <TooltipContent>{t("categoryOptional")}</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </Label>
-              <Combobox
-                items={categoryItems}
-                value={
-                  categoryItems.find(
-                    (item) => item.kind !== "create" && item.value === field.state.value,
-                  ) ?? null
+            <>
+              <field.Combobox
+                multiple
+                label={t("categories")}
+                labelHelper={t("categoryOptional")}
+                options={categories.map((category) => ({
+                  value: category.id,
+                  label: category.name,
+                }))}
+                placeholder={t("categorySearchPlaceholder")}
+                emptyText={t("categoryNoResults")}
+                onCreateOption={onCreateCategory}
+                isCreatingOption={isCreatingCategory}
+                getCreateOptionLabel={(name: string) => t("categoryCreateOption", { name })}
+                popupFooter={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-full justify-between text-muted-foreground hover:text-foreground"
+                    onClick={() => setCategoryManagerOpen(true)}
+                  >
+                    <span className="flex items-center  text gap-1 ">
+                      <FolderOpen data-slot="icon" className="size-4" />
+                      {t("manageCategories")}
+                    </span>
+                    <ChevronRight data-slot="icon" className="text-muted-foreground size-4" />
+                  </Button>
                 }
-                onValueChange={async (item: CategoryComboboxItem | null) => {
-                  if (!item) {
-                    field.handleChange(null);
-                    return;
-                  }
-                  if (item.kind === "create") {
-                    const createdId = await onCreateCategory(item.label);
-                    if (createdId) {
-                      field.handleChange(createdId);
-                      setCategoryQuery("");
-                    }
-                    return;
-                  }
-                  field.handleChange(item.value);
+              />
+              <CategoryManagerDrawer
+                open={categoryManagerOpen}
+                onOpenChange={setCategoryManagerOpen}
+                onCategoryDeleted={(categoryId) => {
+                  field.handleChange((current: string[]) =>
+                    Array.isArray(current)
+                      ? current.filter((selectedId) => selectedId !== categoryId)
+                      : [],
+                  );
                 }}
-              >
-                <ComboboxInput
-                  showTrigger
-                  showClear={Boolean(field.state.value)}
-                  placeholder={t("categorySearchPlaceholder")}
-                  disabled={isCreatingCategory}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                    setCategoryQuery(event.target.value)
-                  }
-                />
-                <ComboboxPopup>
-                  <ComboboxEmpty>{t("categoryNoResults")}</ComboboxEmpty>
-                  <ComboboxList>
-                    {(item: CategoryComboboxItem) =>
-                      item.kind === "create" ? (
-                        <ComboboxItem key={CREATE_CATEGORY_VALUE} value={item}>
-                          <span className="text-primary flex items-center gap-1.5 font-medium">
-                            {isCreatingCategory ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Plus className="h-3.5 w-3.5" />
-                            )}
-                            {t("categoryCreateOption", { name: item.label })}
-                          </span>
-                        </ComboboxItem>
-                      ) : (
-                        <ComboboxItem key={item.value} value={item}>
-                          {item.label}
-                        </ComboboxItem>
-                      )
-                    }
-                  </ComboboxList>
-                </ComboboxPopup>
-              </Combobox>
-              {field.state.meta.errors.length > 0 && (
-                <p className="text-destructive text-sm font-medium">
-                  {getFieldError(field.state.meta.errors[0])}
-                </p>
-              )}
-            </div>
+              />
+            </>
           )}
-        </form.Field>
+        </form.AppField>
       </div>
 
       <form.Field name="description">

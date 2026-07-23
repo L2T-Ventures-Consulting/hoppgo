@@ -1,6 +1,5 @@
 "use client";
 
-import { CheckCircle2, Circle, Package } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -11,10 +10,10 @@ import {
   CardHeader,
   CardTitle,
   Label,
-  RadioGroup,
-  RadioGroupItem,
+  Radio,
   Separator,
 } from "@louez/ui";
+import { CheckCircleIcon, CircleIcon, EyeIcon, ProductIcon } from "@louez/ui/icons";
 import { formatCurrency } from "@louez/utils";
 
 import type { Category, ProductFormComponentApi, ProductFormValues } from "../types";
@@ -23,7 +22,7 @@ interface ProductFormSummaryPanelProps {
   form: ProductFormComponentApi;
   watchedValues: ProductFormValues;
   imagesPreviews: string[];
-  selectedCategory: Category | undefined;
+  selectedCategories: Category[];
   priceLabel: string;
   currency: string;
 }
@@ -45,7 +44,7 @@ export function ProductFormSummaryPanel({
   form,
   watchedValues,
   imagesPreviews,
-  selectedCategory,
+  selectedCategories,
   priceLabel,
   currency,
 }: ProductFormSummaryPanelProps) {
@@ -68,8 +67,16 @@ export function ProductFormSummaryPanel({
       required: true,
     },
     { key: "photos", label: t("photos"), done: imagesPreviews.length > 0 },
-    { key: "description", label: t("description"), done: descriptionText.length > 0 },
-    { key: "category", label: t("category"), done: Boolean(watchedValues.categoryId) },
+    {
+      key: "description",
+      label: t("description"),
+      done: descriptionText.length > 0,
+    },
+    {
+      key: "category",
+      label: t("categories"),
+      done: (watchedValues.categoryIds?.length ?? 0) > 0,
+    },
     {
       key: "deposit",
       label: t("deposit"),
@@ -77,16 +84,33 @@ export function ProductFormSummaryPanel({
     },
   ];
   const doneCount = checklist.filter((item) => item.done).length;
+  const publicationOptions = [
+    {
+      value: "active",
+      label: t("statusActive"),
+      description: t("statusActiveDescription"),
+      recommended: true,
+    },
+    {
+      value: "draft",
+      label: t("statusDraft"),
+      description: t("statusDraftDescription"),
+      recommended: false,
+    },
+  ] as const;
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("previewTitle")}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <EyeIcon className="h-5 w-5 shrink-0" />
+          {t("previewTitle")}
+        </CardTitle>
         <CardDescription>{t("previewDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         {/* Live product preview */}
-        <div className="overflow-hidden rounded-lg border">
+        <div className="overflow-hidden rounded-lg border bg-background">
           {imagesPreviews.length > 0 ? (
             <div className="bg-muted relative aspect-[4/3]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -98,7 +122,7 @@ export function ProductFormSummaryPanel({
             </div>
           ) : (
             <div className="bg-muted flex aspect-[4/3] items-center justify-center">
-              <Package className="text-muted-foreground/60 h-10 w-10" />
+              <ProductIcon className="text-muted-foreground/60 h-10 w-10" />
             </div>
           )}
           <div className="space-y-1.5 p-3">
@@ -107,10 +131,14 @@ export function ProductFormSummaryPanel({
                 <h3 className="truncate text-sm font-semibold">
                   {watchedValues.name.trim() || t("noName")}
                 </h3>
-                {selectedCategory && (
-                  <Badge variant="secondary" className="mt-1">
-                    {selectedCategory.name}
-                  </Badge>
+                {selectedCategories.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {selectedCategories.map((category) => (
+                      <Badge key={category.id} variant="secondary">
+                        {category.name}
+                      </Badge>
+                    ))}
+                  </div>
                 )}
               </div>
               <div className="shrink-0 text-right">
@@ -138,9 +166,9 @@ export function ProductFormSummaryPanel({
             {checklist.map((item) => (
               <li key={item.key} className="flex items-center gap-2 text-sm">
                 {item.done ? (
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                  <CheckCircleIcon className="h-4 w-4 shrink-0 text-emerald-500" />
                 ) : (
-                  <Circle className="text-muted-foreground/40 h-4 w-4 shrink-0" />
+                  <CircleIcon className="text-muted-foreground/40 h-4 w-4 shrink-0" />
                 )}
                 <span className={item.done ? "" : "text-muted-foreground"}>{item.label}</span>
                 {item.required && !item.done && (
@@ -155,56 +183,34 @@ export function ProductFormSummaryPanel({
 
         <Separator />
 
-        {/* Publication status */}
         <form.Field name="status">
           {(field) => (
-            <div className="space-y-2.5">
-              <Label>{t("publication")}</Label>
-              <RadioGroup
-                value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as ProductFormValues["status"])}
-                className="gap-2"
-              >
-                <label
-                  htmlFor="status-active"
-                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
-                    field.state.value === "active"
-                      ? "border-primary bg-primary/5"
-                      : "hover:bg-muted/50"
-                  }`}
+            <form.RadioGroup
+              label={t("publication")}
+              value={field.state.value}
+              onValueChange={(value) => field.handleChange(value as ProductFormValues["status"])}
+              className="gap-2"
+            >
+              {publicationOptions.map((option) => (
+                <Label
+                  key={option.value}
+                  className="flex items-start gap-2 bg-background rounded-lg border p-3 hover:bg-accent/50 has-data-checked:border-primary/48 has-data-checked:bg-background"
                 >
-                  <RadioGroupItem value="active" id="status-active" className="mt-0.5" />
+                  <Radio value={option.value} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium">{t("statusActive")}</span>
-                      <Badge variant="default" className="h-5 px-1.5 text-[10px]">
-                        {t("recommended")}
-                      </Badge>
+                      <p className="text-sm font-semibold">{option.label}</p>
+                      {option.recommended && (
+                        <Badge variant="default" className="h-5 px-1.5 text-[10px]">
+                          {t("recommended")}
+                        </Badge>
+                      )}
                     </div>
-                    <p className="text-muted-foreground mt-0.5 text-xs">
-                      {t("statusActiveDescription")}
-                    </p>
+                    <p className="text-muted-foreground mt-1 text-xs">{option.description}</p>
                   </div>
-                </label>
-
-                <label
-                  htmlFor="status-draft"
-                  className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${
-                    field.state.value === "draft"
-                      ? "border-primary bg-primary/5"
-                      : "hover:bg-muted/50"
-                  }`}
-                >
-                  <RadioGroupItem value="draft" id="status-draft" className="mt-0.5" />
-                  <div className="min-w-0 flex-1">
-                    <span className="text-sm font-medium">{t("statusDraft")}</span>
-                    <p className="text-muted-foreground mt-0.5 text-xs">
-                      {t("statusDraftDescription")}
-                    </p>
-                  </div>
-                </label>
-              </RadioGroup>
-            </div>
+                </Label>
+              ))}
+            </form.RadioGroup>
           )}
         </form.Field>
       </CardContent>

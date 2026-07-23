@@ -1,16 +1,12 @@
-'use client'
+"use client"
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { Button } from '@louez/ui'
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@louez/ui'
-import { AlertTriangle, ArrowRight, ChevronDown, X } from 'lucide-react'
-import { cn } from '@louez/utils'
-import type { StorePlanLimit } from '@/lib/dashboard/multi-store-metrics'
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { Button } from "@louez/ui"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@louez/ui"
+import { AlertTriangle, ArrowRight, ChevronDown, X } from "lucide-react"
+import { cn } from "@louez/utils"
+import type { StorePlanLimit } from "@/lib/dashboard/multi-store-metrics"
 
 interface PlanLimitsAlertProps {
   limits: StorePlanLimit[]
@@ -25,12 +21,12 @@ interface PlanLimitsAlertProps {
 }
 
 const limitTypeLabels: Record<
-  StorePlanLimit['limitType'],
-  keyof PlanLimitsAlertProps['translations']
+  StorePlanLimit["limitType"],
+  keyof PlanLimitsAlertProps["translations"]
 > = {
-  products: 'products',
-  reservations: 'reservationsPerMonth',
-  customers: 'customers',
+  products: "products",
+  reservations: "reservationsPerMonth",
+  customers: "customers",
 }
 
 function setCurrentStoreCookie(storeId: string) {
@@ -38,9 +34,9 @@ function setCurrentStoreCookie(storeId: string) {
 }
 
 function getProgressColor(percent: number): string {
-  if (percent >= 100) return 'bg-red-500'
-  if (percent >= 90) return 'bg-amber-500'
-  return 'bg-amber-400'
+  if (percent >= 100) return "bg-red-500"
+  if (percent >= 90) return "bg-amber-500"
+  return "bg-amber-400"
 }
 
 function getDisplayPercent(percent: number): number {
@@ -58,7 +54,7 @@ export function PlanLimitsAlert({ limits, translations }: PlanLimitsAlertProps) 
 
   const handleUpgradeClick = (storeId: string) => {
     setCurrentStoreCookie(storeId)
-    router.push('/dashboard/subscription')
+    router.push("/dashboard/settings/subscription")
     router.refresh()
   }
 
@@ -76,23 +72,24 @@ export function PlanLimitsAlert({ limits, translations }: PlanLimitsAlertProps) 
                 {translations.title}
               </h4>
               <p className="text-sm text-amber-700/80 dark:text-amber-300/70">
-                {translations.description.replace('{count}', String(limits.length))}
+                {translations.description.replace("{count}", String(limits.length))}
               </p>
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <CollapsibleTrigger render={<Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-amber-700 hover:bg-amber-200/50 hover:text-amber-900 dark:text-amber-300 dark:hover:bg-amber-800/30"
-              />}>
-                <ChevronDown
-                  className={cn(
-                    'h-4 w-4 transition-transform duration-200',
-                    isOpen && 'rotate-180'
-                  )}
+            <CollapsibleTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-amber-700 hover:bg-amber-200/50 hover:text-amber-900 dark:text-amber-300 dark:hover:bg-amber-800/30"
                 />
-                <span className="sr-only">Toggle</span>
+              }
+            >
+              <ChevronDown
+                className={cn("h-4 w-4 transition-transform duration-200", isOpen && "rotate-180")}
+              />
+              <span className="sr-only">Toggle</span>
             </CollapsibleTrigger>
             <Button
               variant="ghost"
@@ -122,23 +119,25 @@ export function PlanLimitsAlert({ limits, translations }: PlanLimitsAlertProps) 
                       </span>
                       <span
                         className={cn(
-                          'text-xs font-medium whitespace-nowrap',
+                          "text-xs font-medium whitespace-nowrap",
                           limit.percentUsed >= 100
-                            ? 'text-red-600 dark:text-red-400'
-                            : 'text-muted-foreground'
+                            ? "text-red-600 dark:text-red-400"
+                            : "text-muted-foreground",
                         )}
                       >
-                        {limit.current}/{limit.limit}{' '}
+                        {limit.current}/{limit.limit}{" "}
                         {translations[limitTypeLabels[limit.limitType]]}
                       </span>
                     </div>
                     <div className="relative h-2 w-full overflow-hidden rounded-full bg-amber-100 dark:bg-amber-900/30">
                       <div
                         className={cn(
-                          'h-full rounded-full transition-all',
-                          getProgressColor(limit.percentUsed)
+                          "h-full rounded-full transition-all",
+                          getProgressColor(limit.percentUsed),
                         )}
-                        style={{ width: `${getDisplayPercent(limit.percentUsed)}%` }}
+                        style={{
+                          width: `${getDisplayPercent(limit.percentUsed)}%`,
+                        }}
                       />
                     </div>
                   </div>

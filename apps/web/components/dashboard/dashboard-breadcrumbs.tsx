@@ -18,9 +18,7 @@ const breadcrumbRoutes = [
   { href: '/dashboard/calendar', key: 'calendar' },
   { href: '/dashboard/analytics', key: 'analytics' },
   { href: '/dashboard/team', key: 'team' },
-  { href: '/dashboard/referrals', key: 'referrals' },
   { href: '/dashboard/sms', key: 'sms' },
-  { href: '/dashboard/subscription', key: 'subscription' },
   { href: '/dashboard/account', key: 'account' },
   { href: '/dashboard/settings/admin', key: 'settingsAdmin' },
   { href: '/dashboard/settings/api', key: 'settingsApi' },
@@ -36,6 +34,8 @@ const breadcrumbRoutes = [
   { href: '/dashboard/settings/payments', key: 'settingsPayments' },
   { href: '/dashboard/settings/promo-codes', key: 'settingsPromoCodes' },
   { href: '/dashboard/settings/review-booster', key: 'settingsReviewBooster' },
+  { href: '/dashboard/settings/referrals', key: 'referrals' },
+  { href: '/dashboard/settings/subscription', key: 'subscription' },
   { href: '/dashboard/settings/taxes', key: 'settingsTaxes' },
   { href: '/dashboard/settings', key: 'settings' },
 ] satisfies { href: string; key: string }[];
@@ -77,7 +77,10 @@ export const DashboardBreadcrumbs = () => {
   const dynamicLabel = getDynamicLabel(pathname, currentRoute, labels);
 
   return (
-    <nav aria-label={t('label')} className="ml-1 min-w-0 flex-1 overflow-hidden">
+    <nav
+      aria-label={t('label')}
+      className="ml-1 min-w-0 flex-1 overflow-hidden"
+    >
       <ol className="text-muted-foreground flex min-w-0 items-center gap-1.5 overflow-hidden text-sm">
         <li className="shrink-0">
           {currentRoute ? (

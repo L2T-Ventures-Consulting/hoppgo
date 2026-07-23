@@ -89,6 +89,8 @@ export type ReservationDatePickerControlProps = {
   inputClassName?: string;
   id?: string;
   referenceDate?: Date;
+  /** When false, the control is date-only: no time UI, date-only formatting. */
+  showTime?: boolean;
 };
 
 function generateTimeOptions(step = 30, minTime = "00:00", maxTime = "23:59") {
@@ -319,6 +321,7 @@ export function ReservationDatePickerControl({
   inputClassName,
   id,
   referenceDate,
+  showTime = true,
 }: ReservationDatePickerControlProps) {
   const t = useTranslations("common.dateTimePicker");
   const locale = useLocale();
@@ -424,10 +427,10 @@ export function ReservationDatePickerControl({
   const inputId = id ?? label;
   const formattedValue = React.useCallback(
     (date: Date) => {
-      const format = locale === "fr" ? "PPP 'à' HH:mm" : "PPP 'at' HH:mm";
+      const format = showTime ? (locale === "fr" ? "PPP 'à' HH:mm" : "PPP 'at' HH:mm") : "PPP";
       return formatStoreDate(date, resolvedTimezone, format, locale);
     },
-    [locale, resolvedTimezone],
+    [locale, resolvedTimezone, showTime],
   );
 
   React.useEffect(() => {
@@ -443,6 +446,11 @@ export function ReservationDatePickerControl({
     }
 
     onChange(buildStoreDate(selectedDate, fallbackTime, resolvedTimezone));
+
+    if (!showTime) {
+      setIsOpen(false);
+      onAutoClose?.();
+    }
   };
 
   const handleTimeChange = (time: string | null) => {

@@ -1,15 +1,5 @@
 import { tool } from 'ai';
-import {
-  and,
-  desc,
-  eq,
-  gte,
-  inArray,
-  like,
-  lte,
-  sql,
-  sum,
-} from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, like, lte, sql, sum } from 'drizzle-orm';
 import { z } from 'zod';
 
 import {
@@ -22,6 +12,7 @@ import {
   buildUnitRentableDuringPredicate,
   getBlockingReservationStatuses,
   payments,
+  productCategories,
   productStats,
   productUnits,
   products,
@@ -85,7 +76,16 @@ export function createAITools(ctx: AIChatContext) {
         const conditions = [eq(products.storeId, ctx.storeId)];
         if (status && status !== 'all')
           conditions.push(eq(products.status, status));
-        if (categoryId) conditions.push(eq(products.categoryId, categoryId));
+        if (categoryId)
+          conditions.push(
+            inArray(
+              products.id,
+              db
+                .select({ id: productCategories.productId })
+                .from(productCategories)
+                .where(eq(productCategories.categoryId, categoryId)),
+            ),
+          );
         if (search) conditions.push(like(products.name, `%${search}%`));
 
         const rows = await db
@@ -185,6 +185,14 @@ export function createAITools(ctx: AIChatContext) {
             status: 'active',
           })
           .$returningId();
+
+        if (categoryId) {
+          await db.insert(productCategories).values({
+            productId: created.id,
+            categoryId,
+            position: 0,
+          });
+        }
 
         return {
           id: created.id,
@@ -1152,7 +1160,7 @@ export function createAITools(ctx: AIChatContext) {
         const turnoverBufferMinutes =
           store?.settings?.turnoverBufferMinutes ?? 0;
         const blockingStatuses = getBlockingReservationStatuses(
-          (store?.settings?.pendingBlocksAvailability) ?? true,
+          store?.settings?.pendingBlocksAvailability ?? true,
         );
 
         const overlappingReservations = await db.query.reservations.findMany({

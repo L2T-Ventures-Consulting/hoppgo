@@ -57,7 +57,7 @@ export function UpgradeModal({
 
   const handleUpgrade = () => {
     setIsNavigating(true);
-    router.push("/dashboard/subscription");
+    router.push("/dashboard/settings/subscription");
   };
 
   // Limits only bite on Pro (Ultra and pay-as-you-go are unlimited), so a store
@@ -97,8 +97,14 @@ export function UpgradeModal({
               </DialogTitle>
               <DialogDescription className="text-center text-base">
                 {isOverLimit
-                  ? t(`${limitType}.overLimitDescription`, { count: currentCount, limit })
-                  : t(`${limitType}.limitReachedDescription`, { count: currentCount, limit })}
+                  ? t(`${limitType}.overLimitDescription`, {
+                      count: currentCount,
+                      limit,
+                    })
+                  : t(`${limitType}.limitReachedDescription`, {
+                      count: currentCount,
+                      limit,
+                    })}
               </DialogDescription>
             </DialogHeader>
           </div>

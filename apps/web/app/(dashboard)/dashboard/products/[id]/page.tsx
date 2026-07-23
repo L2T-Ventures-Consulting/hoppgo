@@ -1,32 +1,38 @@
 import { notFound, redirect } from 'next/navigation';
 
-import { and, eq, inArray, ne } from 'drizzle-orm';
-import { getTranslations } from 'next-intl/server';
+import { and, eq } from 'drizzle-orm';
+import { getLocale } from 'next-intl/server';
 
-import { db, getEffectiveProductQuantities } from '@louez/db';
-import {
-  categories,
-  getBlockingReservationStatuses,
-  products,
-  reservationItemUnits,
-  reservationItems,
-  reservations,
-} from '@louez/db';
+import { db } from '@louez/db';
+import { products } from '@louez/db';
 
 import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context';
 
 import { getCurrentStore } from '@/lib/store-context';
 
-import { ProductForm } from '../product-form';
+import { ProductActivityFeed } from './components/product-activity-feed';
+import { ProductHeader } from './components/product-header';
+import { ProductInfoSection } from './components/product-info-section';
+import { ProductInventorySection } from './components/product-inventory-section';
+import { ProductQuickFacts } from './components/product-quick-facts';
+import { ProductReservationsSection } from './components/product-reservations-section';
+import { ProductStatsSection } from './components/product-stats-section';
+import {
+  getProductInventoryDetail,
+  getProductReservationCounts,
+  getProductReservationsPage,
+  getProductRevenueStats,
+  getProductUnitActivity,
+  getProductUtilizationRate,
+} from './queries';
 
-interface EditProductPageProps {
+const RESERVATIONS_PAGE_SIZE = 10;
+
+interface ProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditProductPage({
-  params,
-}: EditProductPageProps) {
-  const t = await getTranslations('dashboard.products');
+export default async function ProductPage({ params }: ProductPageProps) {
   const store = await getCurrentStore();
 
   if (!store) {
@@ -34,12 +40,29 @@ export default async function EditProductPage({
   }
 
   const { id } = await params;
+  const locale = await getLocale();
 
   const product = await db.query.products.findFirst({
     where: and(eq(products.id, id), eq(products.storeId, store.id)),
     with: {
       category: true,
-      pricingTiers: true,
+      categoryLinks: {
+        orderBy: (links, { asc }) => [asc(links.position)],
+        with: {
+          category: true,
+        },
+      },
+      pricingTiers: {
+        orderBy: (tiers, { asc }) => [asc(tiers.displayOrder)],
+      },
+      seasonalPricings: {
+        orderBy: (pricing, { asc }) => [asc(pricing.startDate)],
+        with: {
+          tiers: {
+            orderBy: (tiers, { asc }) => [asc(tiers.displayOrder)],
+          },
+        },
+      },
       accessories: {
         orderBy: (acc, { asc }) => [asc(acc.displayOrder)],
         with: {
@@ -53,9 +76,7 @@ export default async function EditProductPage({
           },
         },
       },
-      units: {
-        orderBy: (units, { asc }) => [asc(units.identifier)],
-      },
+      tulipMapping: true,
     },
   });
 
@@ -63,95 +84,106 @@ export default async function EditProductPage({
     notFound();
   }
 
-  const categoriesList = await db.query.categories.findMany({
-    where: eq(categories.storeId, store.id),
-    orderBy: [categories.order],
-  });
+  const currency = store.settings?.currency || 'EUR';
 
-  // Get all active products for the accessories selector (excluding current product)
-  const availableAccessories = await db.query.products.findMany({
-    where: and(
-      eq(products.storeId, store.id),
-      eq(products.status, 'active'),
-      ne(products.id, id),
-    ),
-    columns: {
-      id: true,
-      name: true,
-      price: true,
-      images: true,
-    },
-    orderBy: (p, { asc }) => [asc(p.name)],
-  });
+  // categoryLinks mirrors products.categoryId (see `replaceProductCategories`
+  // in actions.ts) but legacy rows may only have the single `category`
+  // relation populated — fall back to that so the header always has
+  // something to show for categorized products.
+  const categories =
+    product.categoryLinks.length > 0
+      ? product.categoryLinks.flatMap((link) =>
+          link.category ? [link.category] : [],
+        )
+      : product.category
+        ? [product.category]
+        : [];
 
-  // Extract accessory IDs for the form
-  const accessoryIds = product.accessories.map((a) => a.accessoryId);
-  const editableUnits = product.units.filter(
-    (unit) => unit.lifecycleStatus === 'active',
-  );
-  const unitIds = editableUnits.map((unit) => unit.id);
-  const blockingStatuses = getBlockingReservationStatuses(
-    store.settings?.pendingBlocksAvailability ?? true,
-  );
-  const assignedUnitRows =
-    unitIds.length > 0
-      ? await db
-          .select({ productUnitId: reservationItemUnits.productUnitId })
-          .from(reservationItemUnits)
-          .innerJoin(
-            reservationItems,
-            eq(reservationItemUnits.reservationItemId, reservationItems.id),
-          )
-          .innerJoin(
-            reservations,
-            eq(reservationItems.reservationId, reservations.id),
-          )
-          .where(
-            and(
-              inArray(reservationItemUnits.productUnitId, unitIds),
-              eq(reservations.storeId, store.id),
-              inArray(reservations.status, blockingStatuses),
-            ),
-          )
-      : [];
-  const assignedUnitIds = new Set(
-    assignedUnitRows.flatMap((row) =>
-      row.productUnitId ? [row.productUnitId] : [],
-    ),
-  );
-  const effectiveQuantities = await getEffectiveProductQuantities(db, [
-    product.id,
+  const [
+    revenueStats,
+    reservationCounts,
+    inventoryDetail,
+    reservationsPage,
+    unitActivity,
+  ] = await Promise.all([
+    getProductRevenueStats({ storeId: store.id, productId: id }),
+    getProductReservationCounts({ storeId: store.id, productId: id }),
+    getProductInventoryDetail({
+      storeId: store.id,
+      productId: id,
+      trackUnits: product.trackUnits,
+    }),
+    getProductReservationsPage({
+      storeId: store.id,
+      productId: id,
+      page: 0,
+      pageSize: RESERVATIONS_PAGE_SIZE,
+    }),
+    product.trackUnits
+      ? getProductUnitActivity({ storeId: store.id, productId: id })
+      : Promise.resolve([]),
   ]);
-  const effectiveQuantity = product.trackUnits
-    ? effectiveQuantities.get(product.id) ?? 0
-    : product.quantity;
+
+  const activeUnitCount =
+    inventoryDetail.mode === 'tracked'
+      ? inventoryDetail.units.filter(
+          (unit) => unit.lifecycleStatus === 'active',
+        ).length
+      : 0;
+
+  const utilization = await getProductUtilizationRate({
+    storeId: store.id,
+    productId: id,
+    trackUnits: product.trackUnits,
+    totalUnits: product.trackUnits ? activeUnitCount : product.quantity,
+  });
 
   return (
     <div className="space-y-6">
       <DashboardBreadcrumbLabel label={product.name} />
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t('editProduct')}
-        </h1>
-        <p className="text-muted-foreground">{t('editProductDescription')}</p>
-      </div>
 
-      <ProductForm
+      <ProductHeader
         product={{
-          ...product,
-          quantity: effectiveQuantity,
-          accessoryIds,
-          units: editableUnits.map((unit) => ({
-            id: unit.id,
-            identifier: unit.identifier,
-            attributes: unit.attributes,
-            hasActiveAssignment: assignedUnitIds.has(unit.id),
-          })),
+          id: product.id,
+          name: product.name,
+          images: product.images,
+          status: product.status,
+          categories,
         }}
-        categories={categoriesList}
-        storeTaxSettings={store.settings?.tax}
-        availableAccessories={availableAccessories}
+        storeSlug={store.slug}
       />
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <ProductStatsSection
+            revenueStats={revenueStats}
+            reservationCounts={reservationCounts}
+            utilization={utilization}
+            inventoryDetail={inventoryDetail}
+            currency={currency}
+          />
+
+          <ProductInventorySection
+            productId={product.id}
+            inventoryDetail={inventoryDetail}
+          />
+
+          <ProductReservationsSection
+            reservationsPage={reservationsPage}
+            currency={currency}
+          />
+
+          <ProductInfoSection product={product} currency={currency} />
+        </div>
+
+        <div className="space-y-6">
+          <ProductQuickFacts product={product} currency={currency} />
+
+          {product.trackUnits && (
+            <ProductActivityFeed activity={unitActivity} locale={locale} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -34,6 +34,8 @@ import {
   generateProductSchema,
   getCanonicalUrl,
 } from '@/lib/seo';
+import { filterActiveVariantAxes } from '@/lib/util.variant-visibility';
+import { getStoreVariantActivity } from '@/lib/util.variant-visibility.server';
 import { getMinRentalMinutes } from '@/lib/utils/rental-duration';
 import { getCurrentDowntimeUnitIds } from '@/lib/utils/unit-current-downtime';
 
@@ -120,6 +122,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   if (!store) {
     notFound();
   }
+
+  const variantActivity = await getStoreVariantActivity(store.id);
 
   const storeSettings = (store.settings as StoreSettings) || {};
   const currency = storeSettings.currency || 'EUR';
@@ -294,13 +298,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
       ).length
     : effectiveQuantity;
   const isAvailable = effectiveQuantity > 0;
-  const storedBookingAttributeAxes = (
-    (product.bookingAttributeAxes as Array<{
+  const storedBookingAttributeAxes = [
+    ...((product.bookingAttributeAxes as Array<{
       key: string;
       label: string;
       position: number;
-    }> | null) || []
-  ).sort((a, b) => a.position - b.position);
+    }> | null) || []),
+  ].sort((a, b) => a.position - b.position);
   const inferredBookingAttributeAxes =
     storedBookingAttributeAxes.length > 0
       ? storedBookingAttributeAxes
@@ -326,7 +330,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
               position: index,
             }));
         })();
-  const bookingAttributeAxes = inferredBookingAttributeAxes;
+  const bookingAttributeAxes = filterActiveVariantAxes(
+    inferredBookingAttributeAxes,
+    variantActivity,
+  );
   const bookingAttributeValues = bookingAttributeAxes.reduce<
     Record<string, string[]>
   >((acc, axis) => {

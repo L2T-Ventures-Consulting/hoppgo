@@ -139,7 +139,7 @@ export function ProductMediaFields({
               {imagesPreviews.length < 5 && (
                 <label
                   className={cn(
-                    "group/add max-w-[49%] sm:max-w-48 w-full flex aspect-4/3 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors",
+                    "group/add max-w-[calc(50%-6px)]  sm:max-w-48 w-full flex aspect-4/3 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors",
                     isUploadingImages
                       ? "border-primary/40 bg-primary/5 cursor-wait"
                       : isDragging
@@ -300,7 +300,7 @@ function ProductVideoField({
           type="button"
           onClick={openDialog}
           title={t("addVideo")}
-          className="group/video border-input bg-background hover:border-muted-foreground/40 hover:bg-accent/50 flex aspect-4/3 w-full max-w-[49%] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors sm:max-w-48"
+          className="group/video border-input bg-background hover:border-muted-foreground/40 hover:bg-accent/50 flex aspect-4/3 w-full max-w-[calc(50%-6px)] cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed transition-colors sm:max-w-48"
         >
           <div className="bg-muted group-hover/video:bg-background group-hover/video:border-border flex size-8 items-center justify-center rounded-full border border-transparent transition-colors">
             <Video className="text-muted-foreground size-4" />

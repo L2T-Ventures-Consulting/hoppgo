@@ -1,9 +1,9 @@
 "use client";
 
-import { ImageIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { ImageIcon } from "@louez/ui/icons";
 
 import { ProductMediaFields, type ProductMediaFieldsProps } from "./product-media-fields";
 
@@ -16,7 +16,7 @@ export function ProductFormStepPhotos(props: ProductFormStepPhotosProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ImageIcon className="h-5 w-5" />
+          <ImageIcon className="h-5 w-5 shrink-0" />
           {t("photos")}
         </CardTitle>
         <CardDescription>{t("photosDescription")}</CardDescription>

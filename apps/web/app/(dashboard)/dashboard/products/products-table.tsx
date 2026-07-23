@@ -2,30 +2,12 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import {
-  MoreHorizontal,
-  Pencil,
-  Copy,
-  Archive,
-  Trash2,
-  Eye,
-  EyeOff,
-  Package,
-} from 'lucide-react'
-import { toastManager } from '@louez/ui'
+import { MoreHorizontal, Pencil, Copy, Archive, Trash2, Eye, EyeOff, Package } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import { Badge } from '@louez/ui'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@louez/ui'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@louez/ui'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,8 +25,9 @@ import {
   AlertDialogTitle,
 } from '@louez/ui'
 
-import { updateProductStatus, deleteProduct, duplicateProduct } from './actions'
 import { getCurrencySymbol } from '@louez/utils'
+
+import { useProductActions } from './[id]/hooks/use-product-actions'
 
 interface Product {
   id: string
@@ -65,11 +48,6 @@ interface ProductsTableProps {
   currency?: string
 }
 
-type ProductActionResult = {
-  error?: string
-  failedUnitIdentifiers?: string[]
-}
-
 const STATUS_STYLES = {
   active: 'bg-green-500/10 text-green-600 hover:bg-green-500/20',
   draft: 'bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20',
@@ -87,13 +65,7 @@ function ProductImage({ src, alt }: { src?: string; alt: string }) {
 
   return (
     <div className="relative aspect-4/3 h-12 overflow-hidden rounded-lg bg-muted">
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover"
-        sizes="64px"
-      />
+      <Image src={src} alt={alt} fill className="object-cover" sizes="64px" />
     </div>
   )
 }
@@ -101,109 +73,25 @@ function ProductImage({ src, alt }: { src?: string; alt: string }) {
 export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps) {
   const t = useTranslations('dashboard.products')
   const tCommon = useTranslations('common')
-  const tErrors = useTranslations('errors')
   const currencySymbol = getCurrencySymbol(currency)
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const getActionErrorMessage = (result: ProductActionResult) => {
-    const errorKey = result.error?.startsWith('errors.')
-      ? result.error.replace('errors.', '')
-      : null
-    const message = errorKey && result.error ? tErrors(errorKey) : result.error
-    const identifiers = result.failedUnitIdentifiers?.filter(Boolean)
-
-    if (identifiers && identifiers.length > 0) {
-      return `${message || tErrors('generic')} (${identifiers.join(', ')})`
-    }
-
-    return message || tErrors('generic')
-  }
-
-  const handleStatusToggle = async (product: Product) => {
-    const newStatus = product.status === 'active' ? 'draft' : 'active'
-    setIsLoading(true)
-    try {
-      const result = await updateProductStatus(product.id, newStatus)
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({
-          title: newStatus === 'active'
-            ? t('productPublished')
-            : t('productUnpublished'),
-          type: 'success',
-        })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleArchive = async (product: Product) => {
-    setIsLoading(true)
-    try {
-      const result = await updateProductStatus(product.id, 'archived')
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({ title: t('productArchived'), type: 'success' })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleDuplicate = async (product: Product) => {
-    setIsLoading(true)
-    try {
-      const result = await duplicateProduct(product.id)
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({ title: t('productDuplicated'), type: 'success' })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!productToDelete) return
-
-    setIsLoading(true)
-    try {
-      const result = await deleteProduct(productToDelete.id)
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({ title: t('productDeleted'), type: 'success' })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
-      setDeleteDialogOpen(false)
-      setProductToDelete(null)
-    }
-  }
+  const {
+    isLoading,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    handleStatusToggle,
+    handleArchive,
+    handleDuplicate,
+    requestDelete,
+    handleDelete,
+  } = useProductActions()
 
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
         <Package className="h-12 w-12 text-muted-foreground" />
         <h3 className="mt-4 text-lg font-semibold">{t('noProducts')}</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t('noProductsDescription')}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('noProductsDescription')}</p>
         <Button render={<Link href="/dashboard/products/new" />} className="mt-4">
           {t('addProduct')}
         </Button>
@@ -233,10 +121,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
               return (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <ProductImage
-                      src={product.images?.[0]}
-                      alt={product.name}
-                    />
+                    <ProductImage src={product.images?.[0]} alt={product.name} />
                   </TableCell>
                   <TableCell>
                     <Link
@@ -252,9 +137,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                   <TableCell className="text-right font-medium">
                     {parseFloat(product.price).toFixed(2)} {currencySymbol}
                   </TableCell>
-                  <TableCell className="text-center">
-                    {product.quantity}
-                  </TableCell>
+                  <TableCell className="text-center">{product.quantity}</TableCell>
                   <TableCell>
                     <Badge className={statusStyle}>
                       {t(`status.${product.status || 'draft'}`)}
@@ -262,29 +145,25 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                   </TableCell>
                   <TableCell>
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={<Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={isLoading}
-                        />}>
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">{tCommon('actions')}</span>
+                      <DropdownMenuTrigger
+                        render={<Button variant="ghost" size="icon" disabled={isLoading} />}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">{tCommon('actions')}</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem render={<Link href={`/dashboard/products/${product.id}`} />}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            {tCommon('edit')}
-                        </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDuplicate(product)}
+                          render={<Link href={`/dashboard/products/${product.id}/edit`} />}
                         >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          {tCommon('edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDuplicate(product)}>
                           <Copy className="mr-2 h-4 w-4" />
                           {t('duplicate')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => handleStatusToggle(product)}
-                        >
+                        <DropdownMenuItem onClick={() => handleStatusToggle(product)}>
                           {product.status === 'active' ? (
                             <>
                               <EyeOff className="mr-2 h-4 w-4" />
@@ -298,9 +177,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                           )}
                         </DropdownMenuItem>
                         {product.status !== 'archived' && (
-                          <DropdownMenuItem
-                            onClick={() => handleArchive(product)}
-                          >
+                          <DropdownMenuItem onClick={() => handleArchive(product)}>
                             <Archive className="mr-2 h-4 w-4" />
                             {t('archive')}
                           </DropdownMenuItem>
@@ -308,10 +185,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"
-                          onClick={() => {
-                            setProductToDelete(product)
-                            setDeleteDialogOpen(true)
-                          }}
+                          onClick={() => requestDelete(product)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           {tCommon('delete')}
@@ -330,15 +204,15 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('deleteConfirm.title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('deleteConfirm.description')}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{t('deleteConfirm.description')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>{tCommon('cancel')}</AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {tCommon('cancel')}
+            </AlertDialogClose>
             <AlertDialogClose
               render={<Button variant="destructive" />}
-              onClick={handleDelete}
+              onClick={() => handleDelete()}
             >
               {tCommon('delete')}
             </AlertDialogClose>

@@ -99,7 +99,7 @@ export const InventoryRowActions = ({
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
-          render={<Link href={`/dashboard/products/${row.productId}`} />}
+          render={<Link href={`/dashboard/products/${row.productId}/edit`} />}
         >
           <Pencil className="mr-2 h-4 w-4" />
           {t('editProduct')}

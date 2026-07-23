@@ -779,7 +779,10 @@
         "save": "Opslaan",
         "unsavedChanges": "Niet-opgeslagen wijzigingen",
         "createProduct": "Product aanmaken",
+        "createAndDuplicate": "Aanmaken en dupliceren",
         "productCreated": "Product aangemaakt",
+        "productCreatedCopyReady": "De vooraf ingevulde kopie kan worden bewerkt.",
+        "copySuffix": "(kopie)",
         "validationError": "Corrigeer de fouten voordat u indient",
         "productUpdated": "Product bijgewerkt",
         "imagesHint": "{count, plural, =0 {U heeft het maximale aantal foto's bereikt} one {U kunt nog # foto toevoegen} other {U kunt nog # foto's toevoegen}}",
@@ -884,7 +887,7 @@
           "bookingAttributesEmpty": "Geen boekingskenmerken geconfigureerd. Alle gevolgde eenheden delen de standaardcombinatie.",
           "bookingAttributeValuePlaceholder": "{label} waarde",
           "combinationKey": "Combinatie",
-          "missingAttributesWarning": "{count, plural, one {# actieve eenheid mist ten minste één kenmerkwaarde} other {# actieve eenheden missen ten minste één kenmerkwaarde}}",
+          "missingAttributesWarning": "{count, plural, one {# eenheid mist variantwaarden} other {# eenheden missen variantwaarden}}",
           "manageAttributes": "Kenmerken beheren",
           "manageAttributesDescription": "Met kenmerken kunnen klanten specifieke eigenschappen kiezen bij het boeken (bijv. maat, kleur). Elke eenheid wordt getagd met kenmerkwaarden en het systeem wijst automatisch een passende eenheid toe bij het afrekenen.",
           "manageAttributesExample": "Voorbeeld: voor een kajakhuurverhuur voegt u \"Maat\" (S, M, L) en \"Kleur\" (Rood, Blauw) toe. Een klant die een Medium Rode kajak boekt, krijgt een passende beschikbare eenheid toegewezen.",
@@ -903,7 +906,85 @@
           "openInventoryDetails": "Inventaris openen",
           "benefitIdentify": "Geef elk exemplaar een serienummer of referentie",
           "benefitAvailability": "Volg de beschikbaarheid en verhuur van elk exemplaar",
-          "benefitInventory": "Registreer aankoopprijs en -datum voor je inventaris"
+          "benefitInventory": "Registreer aankoopprijs en -datum voor je inventaris",
+          "modeQuantity": "Eenvoudige hoeveelheid",
+          "modeQuantityDescription": "Geef gewoon aan hoeveel exemplaren beschikbaar zijn voor verhuur.",
+          "modeUnits": "Per eenheid volgen",
+          "modeUnitsDescription": "Elk exemplaar krijgt een eigen kenmerk.",
+          "variantsTitle": "Varianten",
+          "variantsHelp": "Maximaal 3 varianten (maat, kleur…). Elke eenheid draagt haar waarde en de klant kiest bij het boeken.",
+          "variantsEmptyHint": "Maak je per maat een apart product aan? Voeg liever een variant \"Maat\" toe: elke eenheid draagt de hare en de klant kiest bij het boeken.",
+          "variantPlaceholder": "bijv. Maat",
+          "addVariant": "Variant toevoegen",
+          "variantsMaxReached": "Maximaal 3 varianten",
+          "defaultBadge": "Standaard",
+          "advancedBadge": "Geavanceerd",
+          "learnMore": "Meer informatie",
+          "addRefPlaceholder": "Typ een referentie en druk op Enter",
+          "generateSeries": "Reeks genereren",
+          "changeMode": "Modus wijzigen",
+          "createVariantValue": "\"{value}\" aanmaken ({axis})",
+          "chooseColor": "Kies een kleur",
+          "colorPickerDescription": "Pas de kleur aan of voer een hexadecimale waarde in.",
+          "hexColor": "Hexkleur",
+          "presetSuggestions": "Suggesties",
+          "valuesCount": "{count, plural, one {# waarde} other {# waarden}}",
+          "presets": {
+            "size": {
+              "label": "Maat"
+            },
+            "shoeSize": {
+              "label": "Schoenmaat"
+            },
+            "color": {
+              "label": "Kleur",
+              "values": {
+                "black": "Zwart",
+                "white": "Wit",
+                "gray": "Grijs",
+                "red": "Rood",
+                "orange": "Oranje",
+                "yellow": "Geel",
+                "green": "Groen",
+                "blue": "Blauw",
+                "purple": "Paars",
+                "pink": "Roze",
+                "brown": "Bruin",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Materiaal",
+              "values": {
+                "cotton": "Katoen",
+                "leather": "Leer",
+                "wood": "Hout",
+                "metal": "Metaal",
+                "plastic": "Plastic",
+                "aluminum": "Aluminium",
+                "carbon": "Carbon"
+              }
+            }
+          },
+          "manageVariants": "Varianten beheren",
+          "managerTitle": "Varianten",
+          "managerDescription": "Definities gedeeld door al je producten (maat, kleur…).",
+          "activeVariantsCount": "{active} van {total} actief",
+          "variantActive": "Actief",
+          "variantInactive": "Inactief",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Nieuwe variant",
+          "newVariantDescription": "Maak een variant die je producten delen (bijv. Maat).",
+          "editVariant": "Variant hernoemen",
+          "editVariantDescription": "De naam wordt bijgewerkt in de gedeelde catalogus.",
+          "editValue": "Waarde bewerken",
+          "editValueDescription": "Het label wordt bijgewerkt in de gedeelde catalogus.",
+          "deleteVariantTitle": "Variant verwijderen?",
+          "deleteVariantDescription": "\"{name}\" en de bijbehorende waarden worden uit de catalogus verwijderd. Producten die de variant gebruiken behouden hun huidige waarden.",
+          "addValuePlaceholder": "Nieuwe waarde…",
+          "noVariants": "Geen varianten",
+          "variantsCount": "{count, plural, one {# variant} other {# varianten}}",
+          "unitImages": "Foto's van de eenheid"
         },
         "previewTitle": "Voorbeeld",
         "previewDescription": "Zo verschijnt uw product in de catalogus",
@@ -1035,6 +1116,7 @@
         "categorySearchPlaceholder": "Zoeken of aanmaken…",
         "categoryCreateOption": "'{name}' aanmaken",
         "categoryNoResults": "Geen categorie gevonden",
+        "manageCategories": "Categorieën beheren",
         "summary": {
           "checklistTitle": "Voortgang",
           "required": "Verplicht"
@@ -5237,6 +5319,10 @@
     "noCategories": "Geen categorieën",
     "noCategoriesDescription": "Maak uw eerste categorie aan om uw producten te organiseren",
     "emptyDescription": "Categorieën helpen u uw producten te organiseren en maken het makkelijker voor klanten om te bladeren.",
+    "searchPlaceholder": "Categorieën zoeken…",
+    "noSearchResults": "Geen categorie komt overeen met uw zoekopdracht.",
+    "totalCount": "{count, plural, =0 {Geen categorieën} one {# categorie} other {# categorieën}}",
+    "actionsFor": "Acties voor {name}",
     "newCategoryDescription": "Maak een nieuwe categorie aan om uw producten te organiseren",
     "editCategoryDescription": "Bewerk de categorienaam",
     "namePlaceholder": "Categorienaam",
@@ -5251,7 +5337,9 @@
       "title": "Deze categorie verwijderen?",
       "description": "Deze actie is onomkeerbaar. Producten in deze categorie worden niet verwijderd.",
       "descriptionWithName": "Deze actie is onomkeerbaar. De categorie \"{name}\" wordt verwijderd.",
-      "productsWarning": "{count, plural, one {Het product in deze categorie wordt verplaatst naar \"Zonder categorie\".} other {De # producten in deze categorie worden verplaatst naar \"Zonder categorie\".}}"
+      "productsWarning": "{count, plural, one {Deze categorie wordt verwijderd van # product.} other {Deze categorie wordt verwijderd van # producten.}}",
+      "reassignLabel": "Producten opnieuw toewijzen aan",
+      "keepExisting": "Andere categorieën behouden"
     }
   },
   "emails": {

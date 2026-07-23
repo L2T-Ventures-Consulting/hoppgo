@@ -34,11 +34,15 @@ export * from './components/command'
 // Dialog
 export * from './components/dialog'
 
+// Drawer
+export * from './components/drawer'
+
 // Menu (replaces DropdownMenu)
 export * from './components/menu'
 
 // Input
 export * from './components/input'
+export * from './components/input-duration'
 export * from './components/input-group'
 export * from './components/input-otp'
 export * from './components/input-price'

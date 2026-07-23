@@ -26,6 +26,7 @@ type CloneTable =
   | 'store_members'
   | 'categories'
   | 'products'
+  | 'product_categories'
   | 'product_seasonal_pricing'
   | 'product_seasonal_pricing_tiers'
   | 'product_pricing_tiers'
@@ -85,6 +86,7 @@ const CATALOG_TABLE_ORDER: CloneTable[] = [
   'store_members',
   'categories',
   'products',
+  'product_categories',
   'product_seasonal_pricing',
   'product_seasonal_pricing_tiers',
   'product_pricing_tiers',
@@ -378,9 +380,7 @@ async function collectDataset(
     'product_id',
     productIds,
   )
-  const seasonalPricingIds = uniqueIds(
-    dataset.product_seasonal_pricing.map((row) => asId(row.id)),
-  )
+  const seasonalPricingIds = uniqueIds(dataset.product_seasonal_pricing.map((row) => asId(row.id)))
   dataset.product_seasonal_pricing_tiers = await fetchByIds(
     sourceConnection,
     'product_seasonal_pricing_tiers',
@@ -393,7 +393,18 @@ async function collectDataset(
     'product_id',
     productIds,
   )
-  dataset.product_units = await fetchByIds(sourceConnection, 'product_units', 'product_id', productIds)
+  dataset.product_categories = await fetchByIds(
+    sourceConnection,
+    'product_categories',
+    'product_id',
+    productIds,
+  )
+  dataset.product_units = await fetchByIds(
+    sourceConnection,
+    'product_units',
+    'product_id',
+    productIds,
+  )
 
   if (productIds.length > 0) {
     const productPlaceholders = productIds.map(() => '?').join(', ')
@@ -416,9 +427,7 @@ async function collectDataset(
     'SELECT * FROM inspection_templates WHERE store_id = ?',
     [sourceStoreId],
   )
-  const inspectionTemplateIds = uniqueIds(
-    dataset.inspection_templates.map((row) => asId(row.id)),
-  )
+  const inspectionTemplateIds = uniqueIds(dataset.inspection_templates.map((row) => asId(row.id)))
   dataset.inspection_template_fields = await fetchByIds(
     sourceConnection,
     'inspection_template_fields',
@@ -457,8 +466,18 @@ async function collectDataset(
     'reservation_item_id',
     reservationItemIds,
   )
-  dataset.payments = await fetchByIds(sourceConnection, 'payments', 'reservation_id', reservationIds)
-  dataset.documents = await fetchByIds(sourceConnection, 'documents', 'reservation_id', reservationIds)
+  dataset.payments = await fetchByIds(
+    sourceConnection,
+    'payments',
+    'reservation_id',
+    reservationIds,
+  )
+  dataset.documents = await fetchByIds(
+    sourceConnection,
+    'documents',
+    'reservation_id',
+    reservationIds,
+  )
   dataset.reservation_activity = await fetchByIds(
     sourceConnection,
     'reservation_activity',
@@ -635,9 +654,7 @@ function addSkip(
 ): void {
   skippedByTable[table] = (skippedByTable[table] ?? 0) + 1
   if (skippedDetails.length < MAX_SKIP_DETAILS) {
-    skippedDetails.push(
-      `${table}${rowId ? `#${rowId}` : ''}: ${reason}`,
-    )
+    skippedDetails.push(`${table}${rowId ? `#${rowId}` : ''}: ${reason}`)
   }
 }
 
@@ -684,10 +701,7 @@ function transformDataset(dataset: Dataset, context: TransformContext): Transfor
     return null
   }
 
-  const transformRows = (
-    table: CloneTable,
-    rows: SourceRow[] | undefined,
-  ): SourceRow[] => {
+  const transformRows = (table: CloneTable, rows: SourceRow[] | undefined): SourceRow[] => {
     if (!rows || rows.length === 0) {
       return []
     }
@@ -701,13 +715,7 @@ function transformDataset(dataset: Dataset, context: TransformContext): Transfor
       if (table !== 'store_members') {
         const mappedId = mapId(table, sourceRow.id)
         if (!mappedId) {
-          addSkip(
-            table,
-            sourceRowId,
-            'missing mapped id',
-            skippedByTable,
-            skippedDetails,
-          )
+          addSkip(table, sourceRowId, 'missing mapped id', skippedByTable, skippedDetails)
           continue
         }
         row.id = mappedId
@@ -752,6 +760,30 @@ function transformDataset(dataset: Dataset, context: TransformContext): Transfor
 
       if (table === 'products') {
         row.category_id = mapOptionalRef('categories', row.category_id)
+        transformedRows.push(row)
+        continue
+      }
+
+      if (table === 'product_categories') {
+        const mappedProductId = mapRequiredRef(
+          table,
+          sourceRowId,
+          'product_id',
+          'products',
+          row.product_id,
+        )
+        const mappedCategoryId = mapRequiredRef(
+          table,
+          sourceRowId,
+          'category_id',
+          'categories',
+          row.category_id,
+        )
+        if (!mappedProductId || !mappedCategoryId) {
+          continue
+        }
+        row.product_id = mappedProductId
+        row.category_id = mappedCategoryId
         transformedRows.push(row)
         continue
       }
@@ -1280,12 +1312,8 @@ async function insertRows(
       )
     }
 
-    const rowPlaceholders = batch
-      .map(() => `(${columns.map(() => '?').join(', ')})`)
-      .join(', ')
-    const values = batch.flatMap((row) =>
-      columns.map((column) => normalizeSqlValue(row[column])),
-    )
+    const rowPlaceholders = batch.map(() => `(${columns.map(() => '?').join(', ')})`).join(', ')
+    const values = batch.flatMap((row) => columns.map((column) => normalizeSqlValue(row[column])))
     const query = `
       INSERT INTO \`${table}\`
       (${columns.map((column) => `\`${column}\``).join(', ')})
@@ -1361,11 +1389,7 @@ async function main(): Promise<void> {
   const targetConnection = await mysql.createConnection(targetDbUrl)
 
   try {
-    const dataset = await collectDataset(
-      sourceConnection,
-      options.sourceStoreId,
-      options.scope,
-    )
+    const dataset = await collectDataset(sourceConnection, options.sourceStoreId, options.scope)
     const sourceStore = dataset.stores?.[0]
     if (!sourceStore) {
       throw new Error(`Store "${options.sourceStoreId}" not found in source database.`)
@@ -1376,9 +1400,7 @@ async function main(): Promise<void> {
     const sourceOwnerId = asId(sourceStore.user_id)
 
     if (!sourceOwnerId && !options.ownerUserId) {
-      throw new Error(
-        'Source store has no user_id and --owner-user-id was not provided.',
-      )
+      throw new Error('Source store has no user_id and --owner-user-id was not provided.')
     }
 
     const targetStoreId = options.targetStoreId ?? nanoid()
@@ -1414,15 +1436,11 @@ async function main(): Promise<void> {
       skippedRows: transformed.skippedByTable[table] ?? 0,
     }))
 
-    console.log(
-      `[store-clone] mode=${options.apply ? 'apply' : 'dry-run'} scope=${options.scope}`,
-    )
+    console.log(`[store-clone] mode=${options.apply ? 'apply' : 'dry-run'} scope=${options.scope}`)
     console.log(
       `[store-clone] sourceStore=${options.sourceStoreId} targetStore=${targetStoreId} owner=${ownerUserId}`,
     )
-    console.log(
-      `[store-clone] targetSlug=${targetStoreSlug} targetName="${targetStoreName}"`,
-    )
+    console.log(`[store-clone] targetSlug=${targetStoreSlug} targetName="${targetStoreName}"`)
     console.table(summary)
 
     if (transformed.skippedDetails.length > 0) {
@@ -1441,12 +1459,7 @@ async function main(): Promise<void> {
     try {
       const tableColumnsCache = new Map<CloneTable, Set<string>>()
       for (const table of tables) {
-        await insertRows(
-          targetConnection,
-          table,
-          transformed.rows[table] ?? [],
-          tableColumnsCache,
-        )
+        await insertRows(targetConnection, table, transformed.rows[table] ?? [], tableColumnsCache)
       }
       await targetConnection.commit()
     } catch (error) {

@@ -9,11 +9,9 @@ import {
   Check,
   Copy,
   Info,
-  Link2,
   Loader2,
   MoreHorizontal,
   Pencil,
-  Puzzle,
   Trash2,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -48,6 +46,7 @@ import {
   Separator,
   toastManager,
 } from "@louez/ui";
+import { ArrowLeftIcon, DatabaseIcon, LinkIcon, PricingIcon, PuzzleIcon } from "@louez/ui/icons";
 import { minutesToPriceDuration, priceDurationToMinutes } from "@louez/utils";
 
 import { AccessoriesSelector } from "@/components/dashboard/accessories-selector";
@@ -61,7 +60,10 @@ import {
   buildChartTicks,
   resolveChartMaxMinutes,
 } from "@/components/dashboard/rates-editor";
-import { UnitTrackingEditor } from "@/components/dashboard/unit-tracking-editor";
+import {
+  StockModeIndicator,
+  UnitTrackingEditor,
+} from "@/components/dashboard/unit-tracking-editor";
 import { PriceDurationInput, type PriceDurationValue } from "@/components/ui/price-duration-input";
 
 import { getFieldError } from "@/hooks/form/form-context";
@@ -93,6 +95,7 @@ interface ProductFormStepPricingProps {
   availableAccessories: AvailableAccessory[];
   showAccessories: boolean;
   showStock?: boolean;
+  showValidationErrors?: boolean;
   showUnitValidationErrors?: boolean;
   // Seasonal pricing props (optional - only passed in edit mode)
   productId?: string;
@@ -144,6 +147,7 @@ export function ProductFormStepPricing({
   availableAccessories,
   showAccessories,
   showStock = true,
+  showValidationErrors = false,
   showUnitValidationErrors = false,
   // Seasonal props
   productId,
@@ -154,9 +158,22 @@ export function ProductFormStepPricing({
   isLoadingSeasonalPricings = false,
 }: ProductFormStepPricingProps) {
   const t = useTranslations("dashboard.products.form");
+  const tUnitTracking = useTranslations("dashboard.products.form.unitTracking");
+  const tValidation = useTranslations("validation");
   const locale = useLocale();
   const calendarLocale = locale === "fr" ? fr : enUS;
   const [highlightBaseRate, setHighlightBaseRate] = useState(false);
+
+  // Stock mode stepper: the mode-choice screen only shows while no mode is
+  // established (fresh creation). Editing an existing product lands directly
+  // on the second step.
+  const [stockModeChosen, setStockModeChosen] = useState(
+    () =>
+      Boolean(productId) ||
+      Boolean(watchedValues.trackUnits) ||
+      (watchedValues.units?.length ?? 0) > 0 ||
+      (parseInt(watchedValues.quantity || "1", 10) || 1) > 1,
+  );
 
   // Seasonal inline editing state
   const [seasonalPriceDuration, setSeasonalPriceDuration] = useState<
@@ -533,7 +550,10 @@ export function ProductFormStepPricing({
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <CardTitle>{t("pricing")}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <PricingIcon className="h-5 w-5 shrink-0" />
+              {t("pricing")}
+            </CardTitle>
             <CardDescription className="mt-1.5">{t("pricingDescription")}</CardDescription>
           </div>
           {productId && (
@@ -587,8 +607,8 @@ export function ProductFormStepPricing({
               disabled={isSaving || isSavingSeasonal}
               hideProgressiveToggle
             />
-            {/* Seasonal pricing curve preview */}
-            {seasonalChartData.length > 0 && (
+            {/* Seasonal pricing curve preview (only meaningful with at least one tier) */}
+            {seasonalValidRates.length > 0 && seasonalChartData.length > 0 && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
                 <PricingChart
                   data={seasonalChartData}
@@ -653,11 +673,21 @@ export function ProductFormStepPricing({
                         : "day",
                 };
                 const baseRateValue = field.state.value ?? fallbackBaseRate;
-                const showBaseRateHighlight = highlightBaseRate && !hasValidBaseRate(baseRateValue);
+                const showBaseRateHighlight =
+                  (highlightBaseRate ||
+                    showValidationErrors ||
+                    field.state.meta.errors.length > 0) &&
+                  !hasValidBaseRate(baseRateValue);
+                const baseRateError =
+                  field.state.meta.errors.length > 0
+                    ? getFieldError(field.state.meta.errors[0])
+                    : showBaseRateHighlight
+                      ? tValidation("positive")
+                      : null;
 
                 return (
                   <div className="space-y-2">
-                    <Label>{t("baseRate")}</Label>
+                    <Label helper={t("baseRateDescription")}>{t("baseRate")}</Label>
                     <PriceDurationInput
                       value={baseRateValue}
                       onChange={(next) => {
@@ -672,12 +702,9 @@ export function ProductFormStepPricing({
                       disabled={isSaving}
                       invalid={showBaseRateHighlight}
                     />
-                    <p className="text-muted-foreground text-sm">{t("baseRateDescription")}</p>
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-destructive text-sm font-medium">
-                        {getFieldError(field.state.meta.errors[0])}
-                      </p>
-                    )}
+                    {baseRateError ? (
+                      <p className="text-destructive text-sm font-medium">{baseRateError}</p>
+                    ) : null}
                   </div>
                 );
               }}
@@ -765,17 +792,17 @@ export function ProductFormStepPricing({
               </>
             )}
             <Separator />
-            <div className="grid items-start gap-4 sm:grid-cols-2">
-              <form.AppField name="deposit">
-                {(field) => (
-                  <field.Input
-                    label={t("deposit")}
-                    suffix={currencySymbol}
-                    placeholder={t("depositPlaceholder")}
-                    description={t("depositHelp")}
-                  />
-                )}
-              </form.AppField>
+            <div className="space-y-2">
+              <Label htmlFor="deposit" helper={t("depositHelp")}>
+                {t("deposit")}
+              </Label>
+              <div className="w-44">
+                <form.AppField name="deposit">
+                  {(field) => (
+                    <field.Input suffix={currencySymbol} placeholder={t("depositPlaceholder")} />
+                  )}
+                </form.AppField>
+              </div>
             </div>
           </>
         )}
@@ -828,11 +855,37 @@ export function ProductFormStepPricing({
   const stockCard = (
     <Card>
       <CardHeader>
-        <CardTitle>{t("stock")}</CardTitle>
+        <div className="flex items-center gap-2">
+          {stockModeChosen ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-foreground h-6 w-6"
+              onClick={() => setStockModeChosen(false)}
+              aria-label={tUnitTracking("changeMode")}
+            >
+              <ArrowLeftIcon data-slot="icon" />
+            </Button>
+          ) : null}
+
+          <CardTitle className="flex items-center gap-2">
+            {" "}
+            <DatabaseIcon className="text-primary h-5 w-5 shrink-0 stroke-2" />
+            {t("stock")}
+          </CardTitle>
+          <StockModeIndicator
+            modeChosen={stockModeChosen}
+            trackUnits={watchedValues.trackUnits || false}
+            onBack={() => setStockModeChosen(false)}
+            disabled={isSaving}
+          />
+        </div>
         <CardDescription>{t("quantityHelp")}</CardDescription>
       </CardHeader>
       <CardContent>
         <UnitTrackingEditor
+          currency={currency}
           trackUnits={watchedValues.trackUnits || false}
           onTrackUnitsChange={(value) => form.setFieldValue("trackUnits", value)}
           bookingAttributeAxes={watchedValues.bookingAttributeAxes || []}
@@ -847,6 +900,8 @@ export function ProductFormStepPricing({
             }));
             form.setFieldValue("quantity", value);
           }}
+          modeChosen={stockModeChosen}
+          onModeChosenChange={setStockModeChosen}
           disabled={isSaving}
           showValidationErrors={showUnitValidationErrors}
           productId={productId}
@@ -859,7 +914,7 @@ export function ProductFormStepPricing({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Link2 className="h-5 w-5" />
+          <LinkIcon className="h-5 w-5 shrink-0" />
           {t("accessories")}
         </CardTitle>
         <CardDescription>{t("accessoriesDescription")}</CardDescription>
@@ -887,7 +942,7 @@ export function ProductFormStepPricing({
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="bg-muted mb-3 rounded-full p-3">
-              <Puzzle className="text-muted-foreground h-6 w-6" />
+              <PuzzleIcon className="text-muted-foreground h-6 w-6" />
             </div>
             <p className="text-sm font-medium">{t("noAccessoriesAvailable")}</p>
             <p className="text-muted-foreground mt-1 max-w-[260px] text-sm">

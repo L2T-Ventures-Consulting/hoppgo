@@ -27,6 +27,7 @@ import {
   Label,
   toastManager,
 } from '@louez/ui';
+import { ShieldCheckIcon } from '@louez/ui/icons';
 
 import { orpc } from '@/lib/orpc/react';
 
@@ -168,7 +169,10 @@ export const ProductAssuranceSection = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheckIcon className="h-5 w-5 shrink-0" />
+            {t('title')}
+          </CardTitle>
           <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -260,7 +264,10 @@ export const ProductAssuranceSection = ({
     <div id="section-assurance" className="scroll-mt-8">
       <Card>
         <CardHeader className="flex flex-row items-start justify-between gap-3 space-y-0">
-          <CardTitle>{t('title')}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheckIcon className="h-5 w-5 shrink-0" />
+            {t('title')}
+          </CardTitle>
           <Badge variant={state.connected ? 'success' : 'secondary'}>
             {state.connected ? t('statusConnected') : t('statusNotConnected')}
           </Badge>

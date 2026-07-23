@@ -26,7 +26,13 @@ export const pricingTierSchema = z.object({
 export const durationUnitSchema = z.enum(['minute', 'hour', 'day', 'week']);
 
 export const priceDurationSchema = z.object({
-  price: z.string().regex(/^\d+([.,]\d{1,2})?$/, 'validation.positive'),
+  price: z
+    .string()
+    .regex(/^\d+([.,]\d{1,2})?$/, 'validation.positive')
+    .refine(
+      (price) => Number.parseFloat(price.replace(',', '.')) > 0,
+      'validation.positive',
+    ),
   duration: z.number().int().min(1, 'validation.minValue'),
   unit: durationUnitSchema,
 });
@@ -73,6 +79,7 @@ const newProductUnitDetailsSchema = z.object({
   notes: z.string().max(1000).optional().or(z.literal('')),
   purchasePrice: optionalMoneyInputSchema,
   purchasedAt: optionalDateInputSchema,
+  images: z.array(z.string().max(2048)).max(4).optional(),
 });
 
 // Product unit schema for individual unit tracking
@@ -159,7 +166,7 @@ export const createProductSchema = (
         .min(2, t('minLength', { min: 2 }))
         .max(255, t('maxLength', { max: 255 })),
       description: z.string(),
-      categoryId: z.string().nullable(),
+      categoryIds: z.array(z.string()),
       price: z
         .string()
         .regex(/^\d+([.,]\d{1,2})?$/, t('positive'))
@@ -183,7 +190,13 @@ export const createProductSchema = (
       ),
       pricingMode: z.enum(['hour', 'day', 'week']),
       basePriceDuration: z.object({
-        price: z.string().regex(/^\d+([.,]\d{1,2})?$/, t('positive')),
+        price: z
+          .string()
+          .regex(/^\d+([.,]\d{1,2})?$/, t('positive'))
+          .refine(
+            (price) => Number.parseFloat(price.replace(',', '.')) > 0,
+            t('positive'),
+          ),
         duration: z
           .number()
           .int()
@@ -246,6 +259,7 @@ export const createProductSchema = (
               .or(z.literal('')),
             purchasePrice: optionalMoneyInputSchema,
             purchasedAt: optionalDateInputSchema,
+            images: z.array(z.string().max(2048)).max(4).optional(),
             attributes: z.record(z.string(), z.string()).optional(),
             hasActiveAssignment: z.boolean().optional(),
           }),
@@ -350,7 +364,9 @@ export const productSchema = z
       .min(2, 'validation.minLength')
       .max(255, 'validation.maxLength'),
     description: z.string().optional(),
+    // Legacy single category (kept for API/MCP backward compatibility).
     categoryId: z.string().optional().nullable(),
+    categoryIds: z.array(z.string()).optional(),
     price: z
       .string()
       .regex(/^\d+([.,]\d{1,2})?$/, 'validation.positive')

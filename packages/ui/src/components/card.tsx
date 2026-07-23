@@ -9,8 +9,7 @@ function Card({ className, render, ...props }: useRender.ComponentProps<"div">) 
   const defaultProps = {
     className: cn(
       "relative flex flex-col rounded-2xl border bg-card not-dark:bg-clip-padding text-card-foreground",
-      "bg-sidebar border-none! shadow-[0_0_1px_0px_rgba(0,0,0,0.1)]",
-
+      "bg-sidebar border-none! shadow-[0_0_1px_0px_rgba(0,0,0,0.1),0_0_0px_0.25px_rgba(0,0,0,0.1)]",
       className,
     ),
     "data-slot": "card",
@@ -109,7 +108,12 @@ function CardHeader({ className, render, ...props }: useRender.ComponentProps<"d
 
 function CardTitle({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
-    className: cn("font-semibold text-lg leading-none", className),
+    className: cn(
+      "font-semibold text-lg leading-none",
+      "[&_svg]:hidden",
+      "[&_svg]:text-primary [&_svg]:size-5 [&_svg]:stroke-2",
+      className,
+    ),
     "data-slot": "card-title",
   };
 

@@ -150,7 +150,7 @@ export function SubscriptionManagement({
   useEffect(() => {
     if (showSuccess || showCanceled) {
       const timeout = setTimeout(() => {
-        router.replace('/dashboard/subscription');
+        router.replace('/dashboard/settings/subscription');
       }, 5000);
       return () => clearTimeout(timeout);
     }
@@ -348,7 +348,7 @@ export function SubscriptionManagement({
       {/* Pay-as-you-go store here only to pick a subscription plan. */}
       {showBackToPayAsYouGo && (
         <Link
-          href="/dashboard/subscription"
+          href="/dashboard/settings/subscription"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           <ChevronRight className="h-4 w-4 rotate-180" />
@@ -619,7 +619,9 @@ export function SubscriptionManagement({
               pendingBillingMode !== 'pay_as_you_go' && (
                 <Button
                   variant="outline"
-                  render={<Link href="/dashboard/subscription?payg=1" />}
+                  render={
+                    <Link href="/dashboard/settings/subscription?payg=1" />
+                  }
                 >
                   <Zap className="mr-2 h-4 w-4" />
                   {t('payAsYouGo.switchCta')}

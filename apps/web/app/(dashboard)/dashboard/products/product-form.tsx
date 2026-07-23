@@ -5,13 +5,20 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { revalidateLogic, useStore } from "@tanstack/react-form";
-import { Check, Loader2 } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, ChevronDown, Copy } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { PricingMode } from "@louez/types";
-import { toastManager } from "@louez/ui";
-import { Button } from "@louez/ui";
-import { StepActions } from "@louez/ui";
+import {
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  StepActions,
+  toastManager,
+} from "@louez/ui";
 import { getCurrencySymbol, minutesToPriceDuration, priceDurationToMinutes } from "@louez/utils";
 import {
   type PricingTierInput as LegacyPricingTierInput,
@@ -23,6 +30,7 @@ import {
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
 
 import { useAppForm } from "@/hooks/form/form";
+import { orpc } from "@/lib/orpc/react";
 
 import { ProductAssuranceSection } from "./components/product-assurance-section";
 import { ProductFormEditToc } from "./components/product-form-edit-toc";
@@ -42,8 +50,46 @@ import type {
   Category,
   ProductFormComponentApi,
   ProductFormProps,
+  ProductFormValues,
   SeasonalPricingData,
 } from "./types";
+
+type ProductFormSubmitIntent = "save" | "save-and-duplicate";
+const PRODUCT_COPY_DRAFT_STORAGE_KEY = "louez:product-copy-draft";
+
+interface ProductFormSubmitMeta {
+  intent: ProductFormSubmitIntent;
+}
+
+function buildProductCopyDraft<T extends ProductFormValues>(value: T, copySuffix: string): T {
+  const copyName = value.name.endsWith(copySuffix) ? value.name : `${value.name} ${copySuffix}`;
+
+  return {
+    ...value,
+    name: copyName,
+    status: "active",
+    units: (value.units ?? []).map((unit) => {
+      if (!("purchasedAt" in unit) || !(unit.purchasedAt instanceof Date)) {
+        return unit;
+      }
+
+      return {
+        ...unit,
+        purchasedAt: unit.purchasedAt.toISOString().slice(0, 10),
+      };
+    }),
+  } as T;
+}
+
+function saveProductCopyDraft(value: ProductFormValues) {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.setItem(PRODUCT_COPY_DRAFT_STORAGE_KEY, JSON.stringify(value));
+}
+
+function clearProductCopyDraft() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(PRODUCT_COPY_DRAFT_STORAGE_KEY);
+}
 
 function pricingModeToUnit(mode: PricingMode): "hour" | "day" | "week" {
   if (mode === "hour") return "hour";
@@ -95,18 +141,42 @@ export function ProductForm({
   const currencySymbol = getCurrencySymbol(currency);
 
   const isEditMode = !!product;
-  const [localCategories, setLocalCategories] = useState<Category[]>([]);
+  const queryClient = useQueryClient();
   const {
     isSaving,
-    isCreatingCategory,
     submitProduct,
-    createCategoryByName,
+    markImagesPersisted,
     getActionErrorMessage,
     getActionErrorDetails,
   } = useProductFormMutations({
     productId: product?.id,
     initialImages: product?.images ?? [],
   });
+
+  // Categories live in the React Query cache, seeded with the server-rendered
+  // list; creations update the cache directly (no router.refresh needed).
+  const categoriesQuery = useQuery(
+    orpc.dashboard.categories.list.queryOptions({ initialData: categories }),
+  );
+  const allCategories: Category[] = categoriesQuery.data ?? categories;
+
+  const createCategoryMutation = useMutation(
+    orpc.dashboard.categories.create.mutationOptions({
+      onSuccess: (created) => {
+        queryClient.setQueryData(
+          orpc.dashboard.categories.list.key({ type: "query" }),
+          (prev: Category[] | undefined) => {
+            if (!prev) return [created];
+            return prev.some((category) => category.id === created.id) ? prev : [...prev, created];
+          },
+        );
+        void queryClient.invalidateQueries({
+          queryKey: orpc.dashboard.categories.key(),
+        });
+      },
+    }),
+  );
+  const isCreatingCategory = createCategoryMutation.isPending;
   const [duplicateRateTierIndexes, setDuplicateRateTierIndexes] = useState<number[]>([]);
   const [pendingDuplicateRateTierIndexes, setPendingDuplicateRateTierIndexes] = useState<
     number[] | null
@@ -210,13 +280,37 @@ export function ProductForm({
     })) ?? [];
 
   const productFormSchema = useMemo(() => createProductSchema(tValidation), [tValidation]);
+  const validationFieldLabels = useMemo(
+    () =>
+      new Map([
+        ["accessoryIds", t("accessories")],
+        ["basePriceDuration", t("baseRate")],
+        ["bookingAttributeAxes", t("stock")],
+        ["categoryIds", t("category")],
+        ["deposit", t("deposit")],
+        ["description", t("description")],
+        ["images", t("photos")],
+        ["name", t("name")],
+        ["quantity", t("stock")],
+        ["rateTiers", t("additionalRates")],
+        ["status", t("publication")],
+        ["units", t("stock")],
+        ["videoUrl", t("video")],
+      ]),
+    [t],
+  );
 
   const scrollToFirstError = useCallback(() => {
     if (typeof window === "undefined") return;
     window.setTimeout(() => {
-      document
-        .querySelector('[aria-invalid="true"], [data-invalid="true"], p.text-destructive')
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      const firstInvalidElement = document.querySelector<HTMLElement>(
+        '[aria-invalid="true"], [data-invalid="true"], p.text-destructive',
+      );
+      firstInvalidElement?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+      firstInvalidElement?.focus({ preventScroll: true });
     }, 50);
   }, []);
 
@@ -237,16 +331,18 @@ export function ProductForm({
     };
   })();
 
+  const defaultSubmitMeta: ProductFormSubmitMeta = { intent: "save" };
   const form = useAppForm({
+    onSubmitMeta: defaultSubmitMeta,
     defaultValues: {
       name: product?.name || "",
       description: product?.description || "",
-      categoryId: product?.categoryId ?? null,
+      categoryIds: product?.categoryIds ?? (product?.categoryId ? [product.categoryId] : []),
       price: product?.price || "",
       basePriceDuration: initialBasePriceDuration,
       deposit: product?.deposit ?? "",
       quantity: product?.quantity != null ? product.quantity.toString() : "1",
-      status: (product?.status ?? "draft") as "draft" | "active" | "archived",
+      status: (product?.status ?? "active") as "draft" | "active" | "archived",
       images: product?.images ?? [],
       pricingMode: (product?.pricingMode ?? "day") as PricingMode,
       pricingTiers: initialPricingTiers,
@@ -264,15 +360,59 @@ export function ProductForm({
       modeAfterSubmission: "change",
     }),
     validators: { onSubmit: productFormSchema },
-    onSubmitInvalid: () => {
+    onSubmitInvalid: ({ value }) => {
+      const validationResult = productFormSchema.safeParse(value);
+      const validationDetails = validationResult.success
+        ? []
+        : Array.from(
+            new Set(
+              validationResult.error.issues.map((issue) => {
+                const rootField = String(issue.path[0] ?? "");
+                const fieldLabel = validationFieldLabels.get(rootField);
+                return fieldLabel ? `${fieldLabel} : ${issue.message}` : issue.message;
+              }),
+            ),
+          );
+
+      toastManager.add({
+        title: t("validationError"),
+        description: validationDetails.slice(0, 3).join(" · ") || undefined,
+        type: "error",
+      });
       scrollToFirstError();
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: async ({ value, meta }) => {
+      const copyDraft =
+        meta.intent === "save-and-duplicate" ? buildProductCopyDraft(value, t("copySuffix")) : null;
+
+      if (copyDraft) {
+        saveProductCopyDraft(copyDraft);
+      } else {
+        clearProductCopyDraft();
+      }
+
       try {
         await submitProduct(value);
         markMediaUploadsPersistedRef.current();
         setDuplicateRateTierIndexes([]);
         setPendingDuplicateRateTierIndexes(null);
+
+        if (copyDraft) {
+          form.reset(copyDraft);
+          toastManager.add({
+            title: t("productCreated"),
+            description: t("productCreatedCopyReady"),
+            type: "success",
+          });
+          window.setTimeout(clearProductCopyDraft, 2000);
+          window.setTimeout(() => {
+            const nameInput = document.querySelector<HTMLInputElement>('input[name="name"]');
+            nameInput?.scrollIntoView({ behavior: "smooth", block: "center" });
+            nameInput?.focus({ preventScroll: true });
+            nameInput?.select();
+          }, 50);
+          return;
+        }
 
         toastManager.add({
           title: product ? t("productUpdated") : t("productCreated"),
@@ -280,6 +420,10 @@ export function ProductForm({
         });
         router.push("/dashboard/products");
       } catch (error) {
+        if (copyDraft) {
+          clearProductCopyDraft();
+        }
+
         const details = getActionErrorDetails(error);
         const isDuplicateRatePeriodsError =
           details?.code === "duplicate_rate_periods" &&
@@ -325,6 +469,29 @@ export function ProductForm({
     markMediaUploadsPersistedRef.current = media.markUploadsPersisted;
   }, [media.markUploadsPersisted]);
 
+  useEffect(() => {
+    if (product || typeof window === "undefined") return;
+
+    const storedDraft = window.sessionStorage.getItem(PRODUCT_COPY_DRAFT_STORAGE_KEY);
+    if (!storedDraft) return;
+
+    try {
+      const parsedDraft: unknown = JSON.parse(storedDraft);
+      const validationResult = productFormSchema.safeParse(parsedDraft);
+      if (!validationResult.success) {
+        clearProductCopyDraft();
+        return;
+      }
+
+      form.reset(validationResult.data);
+      markImagesPersisted(validationResult.data.images);
+      markMediaUploadsPersistedRef.current();
+      clearProductCopyDraft();
+    } catch {
+      clearProductCopyDraft();
+    }
+  }, [form, markImagesPersisted, product, productFormSchema]);
+
   const handleReset = useCallback(() => {
     form.reset();
   }, [form]);
@@ -335,36 +502,21 @@ export function ProductForm({
       if (!trimmed) return null;
 
       try {
-        const result = await createCategoryByName(trimmed);
-        const created =
-          result && typeof result === "object" && "category" in result && result.category
-            ? (result.category as Category)
-            : null;
-
-        if (created) {
-          setLocalCategories((prev) =>
-            prev.some((category) => category.id === created.id) ? prev : [...prev, created],
-          );
-        }
-
+        const created = await createCategoryMutation.mutateAsync({
+          name: trimmed,
+        });
         toastManager.add({ title: t("categoryCreated"), type: "success" });
-        router.refresh();
-        return created?.id ?? null;
+        return created.id;
       } catch (error) {
-        toastManager.add({ title: getActionErrorMessage(error), type: "error" });
+        toastManager.add({
+          title: getActionErrorMessage(error),
+          type: "error",
+        });
         return null;
       }
     },
-    [createCategoryByName, getActionErrorMessage, router, t],
+    [createCategoryMutation.mutateAsync, getActionErrorMessage, t],
   );
-
-  const allCategories = useMemo(() => {
-    const byId = new Map(categories.map((category) => [category.id, category]));
-    for (const category of localCategories) {
-      if (!byId.has(category.id)) byId.set(category.id, category);
-    }
-    return Array.from(byId.values());
-  }, [categories, localCategories]);
 
   const clearSubmitError = useCallback(
     (name: "name" | "price" | "quantity" | "units" | "rateTiers") => {
@@ -448,7 +600,9 @@ export function ProductForm({
     }
   }, [form, localDuplicateRateTierIndexes, submissionAttempts, t, rateTiersSubmitError]);
 
-  const selectedCategory = allCategories.find((c) => c.id === watchedValues.categoryId);
+  const selectedCategories = allCategories.filter((c) =>
+    (watchedValues.categoryIds ?? []).includes(c.id),
+  );
 
   const effectivePricingMode: PricingMode =
     watchedValues.basePriceDuration?.unit === "week"
@@ -463,10 +617,6 @@ export function ProductForm({
       : effectivePricingMode === "hour"
         ? t("pricePerHour")
         : t("pricePerWeek");
-  const cropPreviewProductName = watchedValues.name.trim() || t("namePlaceholder");
-  const cropPreviewPrice = watchedValues.basePriceDuration?.price?.trim()
-    ? `${currencySymbol}${watchedValues.basePriceDuration.price.trim().replace(",", ".")}`
-    : `${currencySymbol}0.00`;
 
   // Edit mode: single column with sticky TOC on desktop
   if (isEditMode) {
@@ -525,6 +675,7 @@ export function ProductForm({
                     availableAccessories={availableAccessories}
                     showAccessories={false}
                     showStock={false}
+                    showValidationErrors={submissionAttempts > 0}
                     showUnitValidationErrors={hasUnitsSubmitError || submissionAttempts > 0}
                     productId={product?.id}
                     seasonalPricings={seasonalPricings}
@@ -540,6 +691,7 @@ export function ProductForm({
                     form={form as unknown as ProductFormComponentApi}
                     productId={product.id}
                     watchedValues={watchedValues}
+                    currency={currency}
                     disabled={isSaving}
                     showValidationErrors={hasUnitsSubmitError || submissionAttempts > 0}
                   />
@@ -566,9 +718,6 @@ export function ProductForm({
           open={media.isCropDialogOpen}
           items={media.cropQueueItems}
           selectedIndex={media.selectedCropIndex}
-          previewProductName={cropPreviewProductName}
-          previewPrice={cropPreviewPrice}
-          previewPriceLabel={priceLabel}
           canGoToPrevious={media.canGoToPreviousCropItem}
           canGoToNext={media.canGoToNextCropItem}
           isUploading={media.isUploadingImages}
@@ -591,7 +740,7 @@ export function ProductForm({
   return (
     <>
       <form.AppForm>
-        <form.Form className="space-y-6">
+        <form.Form className="space-y-6 pb-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
             <div className="min-w-0 flex-1 space-y-6">
               <div id="section-product" className="scroll-mt-8">
@@ -634,6 +783,7 @@ export function ProductForm({
                   storeTaxSettings={storeTaxSettings}
                   availableAccessories={availableAccessories}
                   showAccessories={false}
+                  showValidationErrors={submissionAttempts > 0}
                   showUnitValidationErrors={hasUnitsSubmitError || submissionAttempts > 0}
                 />
               </div>
@@ -644,7 +794,7 @@ export function ProductForm({
                 form={form as unknown as ProductFormComponentApi}
                 watchedValues={watchedValues}
                 imagesPreviews={imagesPreviews}
-                selectedCategory={selectedCategory}
+                selectedCategories={selectedCategories}
                 priceLabel={priceLabel}
                 currency={currency}
               />
@@ -652,23 +802,49 @@ export function ProductForm({
           </div>
 
           {/* Actions */}
-          <StepActions>
+          <StepActions position="fixed" className="lg:left-64">
             <div>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push("/dashboard/products")}
+                size="lg"
+                onClick={() => {
+                  clearProductCopyDraft();
+                  router.push("/dashboard/products");
+                }}
               >
                 {tCommon("cancel")}
               </Button>
             </div>
 
-            <div className="flex gap-3">
-              <Button type="submit" disabled={isSaving}>
-                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                <Check className="mr-2 h-4 w-4" />
+            <div className="inline-flex">
+              <Button type="submit" size="lg" className="rounded-r-none" isPending={isSaving}>
+                <Check data-slot="icon" />
                 {t("createProduct")}
               </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      type="button"
+                      size="lg"
+                      className="rounded-l-none border-l-primary-foreground/20 px-2.5"
+                      aria-label={t("createAndDuplicate")}
+                      disabled={isSaving}
+                    />
+                  }
+                >
+                  <ChevronDown data-slot="icon" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuItem
+                    onClick={() => form.handleSubmit({ intent: "save-and-duplicate" })}
+                  >
+                    <Copy />
+                    {t("createAndDuplicate")}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </StepActions>
         </form.Form>
@@ -678,9 +854,6 @@ export function ProductForm({
         open={media.isCropDialogOpen}
         items={media.cropQueueItems}
         selectedIndex={media.selectedCropIndex}
-        previewProductName={cropPreviewProductName}
-        previewPrice={cropPreviewPrice}
-        previewPriceLabel={priceLabel}
         canGoToPrevious={media.canGoToPreviousCropItem}
         canGoToNext={media.canGoToNextCropItem}
         isUploading={media.isUploadingImages}

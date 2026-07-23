@@ -1,11 +1,11 @@
 import { getTranslations } from 'next-intl/server'
 import { db } from '@louez/db'
 import { getCurrentStore } from '@/lib/store-context'
-import { categories, products } from '@louez/db'
+import { categories, productCategories } from '@louez/db'
 import { eq, count } from 'drizzle-orm'
 import { redirect } from 'next/navigation'
 
-import { CategoriesList } from './categories-list'
+import { CategoryManager } from '@/components/categories/category-manager'
 
 async function getCategoriesWithCount(storeId: string) {
   const categoriesList = await db.query.categories.findMany({
@@ -14,21 +14,18 @@ async function getCategoriesWithCount(storeId: string) {
   })
 
   // Get product count for each category
-  const categoriesWithCount = await Promise.all(
-    categoriesList.map(async (category) => {
-      const productCount = await db
-        .select({ count: count() })
-        .from(products)
-        .where(eq(products.categoryId, category.id))
+  const counts = await db
+    .select({ categoryId: productCategories.categoryId, count: count() })
+    .from(productCategories)
+    .innerJoin(categories, eq(productCategories.categoryId, categories.id))
+    .where(eq(categories.storeId, storeId))
+    .groupBy(productCategories.categoryId)
+  const countByCategory = new Map(counts.map((row) => [row.categoryId, row.count]))
 
-      return {
-        ...category,
-        productCount: productCount[0]?.count || 0,
-      }
-    })
-  )
-
-  return categoriesWithCount
+  return categoriesList.map((category) => ({
+    ...category,
+    productCount: countByCategory.get(category.id) ?? 0,
+  }))
 }
 
 export default async function CategoriesPage() {
@@ -45,12 +42,10 @@ export default async function CategoriesPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground">
-          {t('description')}
-        </p>
+        <p className="text-muted-foreground">{t('description')}</p>
       </div>
 
-      <CategoriesList categories={categoriesList} />
+      <CategoryManager initialCategories={categoriesList} />
     </div>
   )
 }

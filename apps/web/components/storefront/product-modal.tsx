@@ -60,6 +60,7 @@ import {
   calculateDuration,
   getDetailedDuration,
 } from '@/lib/utils/duration';
+import { pickActiveVariantAttributes } from '@/lib/util.variant-visibility';
 
 import { useAnalytics } from '@/contexts/analytics-context';
 import { useCart } from '@/contexts/cart-context';
@@ -586,7 +587,10 @@ export function ProductModal({
             })),
             productPricingMode: product.pricingMode,
             seasonalPricings: product.seasonalPricings,
-            selectedAttributes: allocation.combination.selectedAttributes,
+            selectedAttributes: pickActiveVariantAttributes(
+              bookingAttributeAxes,
+              allocation.combination.selectedAttributes,
+            ),
           },
           storeSlug,
         );

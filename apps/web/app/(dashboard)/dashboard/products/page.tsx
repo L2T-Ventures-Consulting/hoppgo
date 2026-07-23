@@ -1,6 +1,6 @@
 import { Suspense } from 'react'
 import { db, effectiveProductQuantitySql } from '@louez/db'
-import { products, categories } from '@louez/db'
+import { products, categories, productCategories } from '@louez/db'
 import { eq, desc, asc, and, count, inArray } from 'drizzle-orm'
 
 import { getCurrentStore } from '@/lib/store-context'
@@ -16,7 +16,15 @@ async function getProducts(storeId: string, searchParams: { status?: string; cat
   }
 
   if (searchParams.category && searchParams.category !== 'all') {
-    conditions.push(eq(products.categoryId, searchParams.category))
+    conditions.push(
+      inArray(
+        products.id,
+        db
+          .select({ id: productCategories.productId })
+          .from(productCategories)
+          .where(eq(productCategories.categoryId, searchParams.category)),
+      ),
+    )
   }
 
   // Exclude archived from limit calculations
@@ -55,10 +63,15 @@ async function getProducts(storeId: string, searchParams: { status?: string; cat
     })
     .from(products)
     .leftJoin(categories, eq(products.categoryId, categories.id))
-    .where(inArray(products.id, productIds.map(p => p.id)))
+    .where(
+      inArray(
+        products.id,
+        productIds.map((p) => p.id),
+      ),
+    )
 
   // Create a map for O(1) lookup and preserve order from first query
-  const resultsMap = new Map(results.map(r => [r.id, r]))
+  const resultsMap = new Map(results.map((r) => [r.id, r]))
 
   // Transform to expected format, preserving original order
   return productIds
@@ -72,9 +85,8 @@ async function getProducts(storeId: string, searchParams: { status?: string; cat
       deposit: row.deposit,
       quantity: row.quantity,
       status: row.status,
-      category: row.categoryId && row.categoryName
-        ? { id: row.categoryId, name: row.categoryName }
-        : null,
+      category:
+        row.categoryId && row.categoryName ? { id: row.categoryId, name: row.categoryName } : null,
     }))
 }
 

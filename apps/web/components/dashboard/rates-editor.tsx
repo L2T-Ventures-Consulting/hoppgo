@@ -150,6 +150,11 @@ function formatDurationLong(
   return full("minute", minutes);
 }
 
+/** "1 400,00 €" → "1 400 €" — axis and dot labels don't need cents. */
+function formatCurrencyCompact(value: number, currency: string): string {
+  return formatCurrency(value, currency).replace(/[.,]00(?!\d)/, "");
+}
+
 const DURATION_MULTIPLIERS_BY_UNIT: Record<DurationUnit, number[]> = {
   minute: [1, 2, 6, 12, 24],
   hour: [1, 2, 4, 8, 24],
@@ -289,6 +294,21 @@ export function buildChartTicks(data: ChartDataPoint[]): number[] {
 
   if (lastTick && ticks[ticks.length - 1] !== lastTick) {
     ticks.push(lastTick);
+  }
+
+  // With few anchors the axis is nearly empty: densify with evenly spaced
+  // sample points, keeping a minimum gap so labels never overlap.
+  if (ticks.length < 4 && data.length >= 3) {
+    const first = data[0].durationMinutes;
+    const minGap = ((lastTick ?? first) - first) * 0.15;
+    const step = Math.max(1, Math.floor(data.length / 5));
+    for (let i = step; i < data.length; i += step) {
+      const candidate = data[i].durationMinutes;
+      if (ticks.every((tick) => Math.abs(tick - candidate) >= minGap)) {
+        ticks.push(candidate);
+      }
+    }
+    ticks.sort((a, b) => a - b);
   }
 
   return ticks;
@@ -433,6 +453,7 @@ export function RatesEditor({
 
   return (
     <div className="space-y-3">
+      <Label helper={t("additionalRatesDescription")}>{t("additionalRates")}</Label>
       {rates.map((rate, index) => {
         const isInvalidRate = invalidIndexes.has(index);
         const tierPrice = toNumber(rate.price);
@@ -534,15 +555,35 @@ export function RatesEditor({
         );
       })}
 
-      <div className="flex items-center gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={addRate} disabled={disabled}>
+      {rates.length === 0 ? (
+        <button
+          type="button"
+          onClick={addRate}
+          disabled={disabled}
+          className="border-muted-foreground/25 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground flex w-full flex-col items-center gap-1 rounded-lg border border-dashed px-4 py-5 transition-colors disabled:pointer-events-none disabled:opacity-50"
+        >
+          <span className="flex items-center gap-2 text-sm font-medium">
+            <Plus className="h-4 w-4" />
+            {t("addRate")}
+          </span>
+          <span className="text-xs">{t("additionalRatesDescription")}</span>
+        </button>
+      ) : (
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={addRate}
+          disabled={disabled}
+        >
           <Plus className="mr-2 h-4 w-4" />
           {t("addRate")}
         </Button>
-      </div>
+      )}
 
-      {hasBaseRate && !hideProgressiveToggle && (
-        <div className="rounded-lg border p-4">
+      {hasBaseRate && !hideProgressiveToggle && validRates.length > 0 && (
+        <div className="border-muted bg-muted/30 rounded-lg border px-3.5 py-3">
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0 space-y-0.5">
               <div className="flex items-center gap-1.5">
@@ -578,14 +619,14 @@ export function RatesEditor({
                             {t("pricingTiers.progressive.modal.withoutExample")}
                           </div>
                         </div>
-                        <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-3 dark:border-emerald-900 dark:bg-emerald-950/20">
-                          <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                        <div className="border-success/25 bg-success/5 dark:bg-success/10 rounded-lg border p-3">
+                          <p className="text-success text-sm font-medium">
                             {t("pricingTiers.progressive.modal.withTitle")}
                           </p>
                           <p className="text-muted-foreground mt-1 text-sm">
                             {t("pricingTiers.progressive.modal.withText")}
                           </p>
-                          <div className="mt-2 rounded-md bg-emerald-100/50 px-3 py-2 text-sm dark:bg-emerald-950/30">
+                          <div className="bg-success/10 dark:bg-success/20 mt-2 rounded-md px-3 py-2 text-sm">
                             {t("pricingTiers.progressive.modal.withExample")}
                           </div>
                         </div>
@@ -599,7 +640,7 @@ export function RatesEditor({
                   </DialogContent>
                 </Dialog>
               </div>
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-xs">
                 {t("pricingTiers.progressive.description")}
               </p>
             </div>
@@ -613,7 +654,7 @@ export function RatesEditor({
       )}
 
       {/* Base pricing chart */}
-      {hasBaseRate && !hideProgressiveToggle && chartData.length > 0 && (
+      {hasBaseRate && !hideProgressiveToggle && validRates.length > 0 && chartData.length > 0 && (
         <PricingChart
           data={chartData}
           anchorTicks={chartAnchorTicks}
@@ -793,7 +834,7 @@ export function PricingChart({
       </div>
       <div className="h-[200px] w-full px-2 pb-2 pt-1">
         <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
+          <AreaChart data={data} margin={{ top: 18, right: 14, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id={strictGradId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.2} />
@@ -819,30 +860,34 @@ export function PricingChart({
               tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(v: number) => formatCurrency(v, currency)}
-              width={65}
+              tickFormatter={(v: number) => formatCurrencyCompact(v, currency)}
+              width={52}
             />
             <RechartsTooltip content={renderTooltip} />
-            <Legend
-              verticalAlign="top"
-              height={28}
-              iconType="line"
-              formatter={(value: string) => (
-                <span className="text-xs text-muted-foreground">{value}</span>
-              )}
-            />
-            {/* Background: inactive mode */}
-            <Area
-              type={inactiveType as "linear" | "monotone"}
-              dataKey={inactiveKey}
-              name={inactiveName}
-              stroke={inactiveColor}
-              strokeWidth={1.5}
-              strokeDasharray="6 3"
-              fillOpacity={0}
-              dot={false}
-              activeDot={false}
-            />
+            {isProgressive && (
+              <Legend
+                verticalAlign="top"
+                height={28}
+                iconType="line"
+                formatter={(value: string) => (
+                  <span className="text-xs text-muted-foreground">{value}</span>
+                )}
+              />
+            )}
+            {/* Background: inactive mode, shown as reference only in progressive mode */}
+            {isProgressive && (
+              <Area
+                type={inactiveType as "linear" | "monotone"}
+                dataKey={inactiveKey}
+                name={inactiveName}
+                stroke={inactiveColor}
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                fillOpacity={0}
+                dot={false}
+                activeDot={false}
+              />
+            )}
             {/* Foreground: active mode */}
             <Area
               type={activeType as "linear" | "monotone"}
@@ -866,6 +911,13 @@ export function PricingChart({
                   fill={activeColor}
                   stroke="var(--background)"
                   strokeWidth={2}
+                  label={{
+                    value: formatCurrencyCompact(p[activeKey] as number, currency),
+                    position: "top",
+                    offset: 8,
+                    fontSize: 10,
+                    fill: "var(--muted-foreground)",
+                  }}
                 />
               ))}
           </AreaChart>

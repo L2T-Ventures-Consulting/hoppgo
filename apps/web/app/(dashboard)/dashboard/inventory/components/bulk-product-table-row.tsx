@@ -57,7 +57,9 @@ export const BulkProductTableRow = ({ row }: BulkProductTableRowProps) => {
           variant="outline"
           size="sm"
           render={
-            <Link href={`/dashboard/products/${row.productId}#section-stock`} />
+            <Link
+              href={`/dashboard/products/${row.productId}/edit#section-stock`}
+            />
           }
         >
           {t('bulk.enableTracking')}

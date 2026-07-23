@@ -779,7 +779,10 @@
         "save": "Zapisz",
         "unsavedChanges": "Niezapisane zmiany",
         "createProduct": "Utwórz produkt",
+        "createAndDuplicate": "Utwórz i zduplikuj",
         "productCreated": "Produkt utworzony",
+        "productCreatedCopyReady": "Wstępnie wypełniona kopia jest gotowa do edycji.",
+        "copySuffix": "(kopia)",
         "validationError": "Proszę poprawić błędy przed wysłaniem",
         "productUpdated": "Produkt zaktualizowany",
         "imagesHint": "{count, plural, =0 {Osiągnięto maksymalną liczbę zdjęć} one {Możesz dodać jeszcze # zdjęcie} few {Możesz dodać jeszcze # zdjęcia} many {Możesz dodać jeszcze # zdjęć} other {Możesz dodać jeszcze # zdjęć}}",
@@ -884,7 +887,7 @@
           "bookingAttributesEmpty": "Brak skonfigurowanych atrybutów rezerwacji. Wszystkie śledzone jednostki współdzielą domyślną kombinację.",
           "bookingAttributeValuePlaceholder": "Wartość {label}",
           "combinationKey": "Kombinacja",
-          "missingAttributesWarning": "{count, plural, one {# aktywna jednostka nie ma co najmniej jednej wartości atrybutu} few {# aktywne jednostki nie mają co najmniej jednej wartości atrybutu} many {# aktywnych jednostek nie ma co najmniej jednej wartości atrybutu} other {# aktywnych jednostek nie ma co najmniej jednej wartości atrybutu}}",
+          "missingAttributesWarning": "{count, plural, one {# egzemplarz nie ma wszystkich wartości wariantów} few {# egzemplarze nie mają wszystkich wartości wariantów} many {# egzemplarzy nie ma wszystkich wartości wariantów} other {# egzemplarza nie ma wszystkich wartości wariantów}}",
           "manageAttributes": "Zarządzaj atrybutami",
           "manageAttributesDescription": "Atrybuty pozwalają klientom wybrać konkretne cechy podczas rezerwacji (np. rozmiar, kolor).",
           "manageAttributesExample": "Przykład: dla wynajmu kajaka dodaj \"Rozmiar\" (S, M, L) i \"Kolor\" (Czerwony, Niebieski). Klient wybierze konkretną kombinację.",
@@ -903,7 +906,85 @@
           "openInventoryDetails": "Otwórz inwentarz",
           "benefitIdentify": "Oznacz każdy egzemplarz numerem seryjnym lub referencją",
           "benefitAvailability": "Śledź dostępność i wynajmy każdego egzemplarza",
-          "benefitInventory": "Zapisz cenę i datę zakupu do swojego inwentarza"
+          "benefitInventory": "Zapisz cenę i datę zakupu do swojego inwentarza",
+          "modeQuantity": "Prosta ilość",
+          "modeQuantityDescription": "Po prostu podaj, ile egzemplarzy jest dostępnych do wynajmu.",
+          "modeUnits": "Śledzenie egzemplarzy",
+          "modeUnitsDescription": "Każdy egzemplarz ma własny identyfikator.",
+          "variantsTitle": "Warianty",
+          "variantsHelp": "Do 3 wariantów (rozmiar, kolor…). Każdy egzemplarz ma swoją wartość, a klient wybiera przy rezerwacji.",
+          "variantsEmptyHint": "Tworzysz osobny produkt dla każdego rozmiaru? Dodaj zamiast tego wariant „Rozmiar”: każdy egzemplarz ma swój, a klient wybiera przy rezerwacji.",
+          "variantPlaceholder": "np. Rozmiar",
+          "addVariant": "Dodaj wariant",
+          "variantsMaxReached": "Maksymalnie 3 warianty",
+          "defaultBadge": "Domyślny",
+          "advancedBadge": "Zaawansowane",
+          "learnMore": "Dowiedz się więcej",
+          "addRefPlaceholder": "Wpisz numer referencyjny i naciśnij Enter",
+          "generateSeries": "Wygeneruj serię",
+          "changeMode": "Zmień tryb",
+          "createVariantValue": "Utwórz „{value}” ({axis})",
+          "chooseColor": "Wybierz kolor",
+          "colorPickerDescription": "Dostosuj kolor lub wpisz wartość szesnastkową.",
+          "hexColor": "Kolor szesnastkowy",
+          "presetSuggestions": "Sugestie",
+          "valuesCount": "{count, plural, one {# wartość} few {# wartości} many {# wartości} other {# wartości}}",
+          "presets": {
+            "size": {
+              "label": "Rozmiar"
+            },
+            "shoeSize": {
+              "label": "Rozmiar buta"
+            },
+            "color": {
+              "label": "Kolor",
+              "values": {
+                "black": "Czarny",
+                "white": "Biały",
+                "gray": "Szary",
+                "red": "Czerwony",
+                "orange": "Pomarańczowy",
+                "yellow": "Żółty",
+                "green": "Zielony",
+                "blue": "Niebieski",
+                "purple": "Fioletowy",
+                "pink": "Różowy",
+                "brown": "Brązowy",
+                "beige": "Beżowy"
+              }
+            },
+            "material": {
+              "label": "Materiał",
+              "values": {
+                "cotton": "Bawełna",
+                "leather": "Skóra",
+                "wood": "Drewno",
+                "metal": "Metal",
+                "plastic": "Plastik",
+                "aluminum": "Aluminium",
+                "carbon": "Karbon"
+              }
+            }
+          },
+          "manageVariants": "Zarządzaj wariantami",
+          "managerTitle": "Warianty",
+          "managerDescription": "Definicje współdzielone przez wszystkie Twoje produkty (rozmiar, kolor…).",
+          "activeVariantsCount": "{active} z {total} aktywne",
+          "variantActive": "Aktywny",
+          "variantInactive": "Nieaktywny",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Nowy wariant",
+          "newVariantDescription": "Utwórz wariant współdzielony przez produkty (np. Rozmiar).",
+          "editVariant": "Zmień nazwę wariantu",
+          "editVariantDescription": "Nazwa zostanie zaktualizowana we wspólnym katalogu.",
+          "editValue": "Edytuj wartość",
+          "editValueDescription": "Etykieta zostanie zaktualizowana we wspólnym katalogu.",
+          "deleteVariantTitle": "Usunąć wariant?",
+          "deleteVariantDescription": "„{name}” i jego wartości zostaną usunięte z katalogu. Produkty, które go używają, zachowają obecne wartości.",
+          "addValuePlaceholder": "Nowa wartość…",
+          "noVariants": "Brak wariantów",
+          "variantsCount": "{count, plural, one {# wariant} few {# warianty} many {# wariantów} other {# wariantu}}",
+          "unitImages": "Zdjęcia egzemplarza"
         },
         "previewTitle": "Podgląd",
         "previewDescription": "Zobacz jak produkt będzie wyglądał w katalogu",
@@ -1035,6 +1116,7 @@
         "categorySearchPlaceholder": "Szukaj lub utwórz…",
         "categoryCreateOption": "Utwórz „{name}”",
         "categoryNoResults": "Nie znaleziono kategorii",
+        "manageCategories": "Zarządzaj kategoriami",
         "summary": {
           "checklistTitle": "Postęp",
           "required": "Wymagane"
@@ -5237,6 +5319,10 @@
     "noCategories": "Brak kategorii",
     "noCategoriesDescription": "Utwórz pierwszą kategorię, aby uporządkować produkty",
     "emptyDescription": "Kategorie pomagają organizować produkty i ułatwiają klientom przeglądanie.",
+    "searchPlaceholder": "Szukaj kategorii…",
+    "noSearchResults": "Żadna kategoria nie pasuje do wyszukiwania.",
+    "totalCount": "{count, plural, =0 {Brak kategorii} one {# kategoria} few {# kategorie} many {# kategorii} other {# kategorii}}",
+    "actionsFor": "Działania dla {name}",
     "newCategoryDescription": "Utwórz nową kategorię, aby uporządkować produkty",
     "editCategoryDescription": "Edytuj nazwę kategorii",
     "namePlaceholder": "Nazwa kategorii",
@@ -5251,7 +5337,9 @@
       "title": "Usunąć tę kategorię?",
       "description": "Ta akcja jest nieodwracalna. Produkty w tej kategorii nie zostaną usunięte.",
       "descriptionWithName": "Ta akcja jest nieodwracalna. Kategoria \"{name}\" zostanie usunięta.",
-      "productsWarning": "{count, plural, one {Produkt w tej kategorii zostanie przeniesiony do \"Bez kategorii\".} few {# produkty w tej kategorii zostaną przeniesione do \"Bez kategorii\".} many {# produktów w tej kategorii zostanie przeniesionych do \"Bez kategorii\".} other {# produktów w tej kategorii zostanie przeniesionych do \"Bez kategorii\"."
+      "productsWarning": "{count, plural, one {Ta kategoria zostanie usunięta z # produktu.} few {Ta kategoria zostanie usunięta z # produktów.} many {Ta kategoria zostanie usunięta z # produktów.} other {Ta kategoria zostanie usunięta z # produktów.}}",
+      "reassignLabel": "Przypisz produkty ponownie do",
+      "keepExisting": "Zachowaj pozostałe kategorie"
     }
   },
   "emails": {

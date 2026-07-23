@@ -818,7 +818,10 @@
         "save": "Save",
         "unsavedChanges": "Unsaved changes",
         "createProduct": "Create product",
+        "createAndDuplicate": "Create and duplicate",
         "productCreated": "Product created",
+        "productCreatedCopyReady": "The pre-filled copy is ready to edit.",
+        "copySuffix": "(copy)",
         "validationError": "Please fix the errors before submitting",
         "productUpdated": "Product updated",
         "imagesHint": "{count, plural, =0 {You have reached the maximum number of photos} one {You can add # more photo} other {You can add # more photos}}",
@@ -902,7 +905,7 @@
           "bookingAttributesEmpty": "No booking attributes configured. All tracked units share the default combination.",
           "bookingAttributeValuePlaceholder": "{label} value",
           "combinationKey": "Combination",
-          "missingAttributesWarning": "{count, plural, one {# active unit is missing at least one attribute value} other {# active units are missing at least one attribute value}}",
+          "missingAttributesWarning": "{count, plural, one {# unit is missing variant values} other {# units are missing variant values}}",
           "manageAttributes": "Manage attributes",
           "manageAttributesDescription": "Attributes let customers choose specific characteristics when booking (e.g., size, color). Each unit is tagged with its attribute values, and the system automatically assigns a matching unit at checkout.",
           "manageAttributesExample": "Example: for a kayak rental, add \"Size\" (S, M, L) and \"Color\" (Red, Blue). A customer booking a Medium Red kayak will be assigned a matching available unit.",
@@ -942,7 +945,85 @@
           "openInventoryDetails": "Open inventory",
           "benefitIdentify": "Give each item a serial number or reference",
           "benefitAvailability": "Track each item's availability and rentals",
-          "benefitInventory": "Record purchase price and date for your inventory"
+          "benefitInventory": "Record purchase price and date for your inventory",
+          "modeQuantity": "Simple quantity",
+          "modeQuantityDescription": "Just set how many items are available to rent.",
+          "modeUnits": "Per-unit tracking",
+          "modeUnitsDescription": "Each item gets its own identifier.",
+          "variantsTitle": "Variants",
+          "variantsHelp": "Up to 3 variants (size, color…). Each unit sets its value and customers pick one when booking.",
+          "variantsEmptyHint": "Creating one product per size? Add a \"Size\" variant instead: each unit carries its own and customers choose when booking.",
+          "variantPlaceholder": "e.g. Size",
+          "addVariant": "Add a variant",
+          "variantsMaxReached": "Maximum 3 variants",
+          "defaultBadge": "Default",
+          "advancedBadge": "Advanced",
+          "learnMore": "Learn more",
+          "addRefPlaceholder": "Type a reference and press Enter",
+          "generateSeries": "Generate a series",
+          "changeMode": "Change mode",
+          "createVariantValue": "Create \"{value}\" ({axis})",
+          "chooseColor": "Choose a color",
+          "colorPickerDescription": "Adjust the color or enter a hexadecimal value.",
+          "hexColor": "Hex color",
+          "presetSuggestions": "Suggestions",
+          "valuesCount": "{count, plural, one {# value} other {# values}}",
+          "presets": {
+            "size": {
+              "label": "Size"
+            },
+            "shoeSize": {
+              "label": "Shoe size"
+            },
+            "color": {
+              "label": "Color",
+              "values": {
+                "black": "Black",
+                "white": "White",
+                "gray": "Gray",
+                "red": "Red",
+                "orange": "Orange",
+                "yellow": "Yellow",
+                "green": "Green",
+                "blue": "Blue",
+                "purple": "Purple",
+                "pink": "Pink",
+                "brown": "Brown",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Material",
+              "values": {
+                "cotton": "Cotton",
+                "leather": "Leather",
+                "wood": "Wood",
+                "metal": "Metal",
+                "plastic": "Plastic",
+                "aluminum": "Aluminum",
+                "carbon": "Carbon"
+              }
+            }
+          },
+          "manageVariants": "Manage variants",
+          "managerTitle": "Variants",
+          "managerDescription": "Definitions shared across all your products (size, color…).",
+          "activeVariantsCount": "{active} active out of {total}",
+          "variantActive": "Active",
+          "variantInactive": "Inactive",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "New variant",
+          "newVariantDescription": "Create a variant shared across your products (e.g. Size).",
+          "editVariant": "Rename variant",
+          "editVariantDescription": "The name is updated in the shared catalog.",
+          "editValue": "Edit value",
+          "editValueDescription": "The label is updated in the shared catalog.",
+          "deleteVariantTitle": "Delete this variant?",
+          "deleteVariantDescription": "\"{name}\" and its values will be removed from the catalog. Products using it keep their current values.",
+          "addValuePlaceholder": "New value…",
+          "noVariants": "No variants",
+          "variantsCount": "{count, plural, one {# variant} other {# variants}}",
+          "unitImages": "Unit photos"
         },
         "previewTitle": "Preview",
         "previewDescription": "Here's how your product will appear in the catalog",
@@ -1080,6 +1161,7 @@
         "categorySearchPlaceholder": "Search or create…",
         "categoryCreateOption": "Create “{name}”",
         "categoryNoResults": "No category found",
+        "manageCategories": "Manage categories",
         "summary": {
           "checklistTitle": "Progress",
           "required": "Required"
@@ -1092,6 +1174,80 @@
       "deleteConfirm": {
         "title": "Delete this product?",
         "description": "This action is irreversible. The product will be permanently deleted."
+      },
+      "detail": {
+        "viewOnStorefront": "View on storefront",
+        "stats": {
+          "revenue": "Revenue",
+          "vsLastMonth": "vs last month",
+          "reservations": "Reservations",
+          "reservationsSubtitle": "{upcoming} upcoming · {completed} completed",
+          "utilization": "Utilization",
+          "utilizationSubtitle": "Last 30 days",
+          "stock": "Stock",
+          "unitsActiveValue": "{active}/{total} active"
+        },
+        "inventory": {
+          "title": "Inventory",
+          "manageStock": "Manage stock",
+          "quantity": "Quantity",
+          "available": "Available",
+          "noUnits": "No units registered",
+          "identifier": "Identifier",
+          "attributes": "Attributes",
+          "unitStatus": "Status",
+          "lifecycle": "Lifecycle",
+          "inDowntime": "In maintenance",
+          "busyToday": "Busy today",
+          "active": "Active",
+          "retired": "Retired"
+        },
+        "reservations": {
+          "title": "Reservations",
+          "empty": "No reservations for this product yet",
+          "dates": "Dates",
+          "quantity": "Qty",
+          "viewAllHint": "Showing the 10 most recent of {total} reservations.",
+          "viewAllLink": "View all reservations"
+        },
+        "info": {
+          "title": "Product information",
+          "noDescription": "No description provided",
+          "seasonalPricing": "Seasonal pricing",
+          "accessories": "Accessories",
+          "noAccessories": "No accessories linked",
+          "gallery": "Photos",
+          "galleryImageAlt": "Photo {index}",
+          "noImages": "No photos added"
+        },
+        "quickFacts": {
+          "title": "Quick facts",
+          "createdAt": "Created",
+          "updatedAt": "Last updated",
+          "deposit": "Deposit",
+          "noDeposit": "No deposit",
+          "tax": "Tax",
+          "taxInherited": "Store default",
+          "taxCustomRate": "Custom rate ({rate}%)",
+          "bookingAxes": "Booking attributes"
+        },
+        "activity": {
+          "title": "Unit activity",
+          "empty": "No activity recorded yet",
+          "types": {
+            "created": "Unit created",
+            "deleted": "Unit deleted",
+            "downtime_declared": "Downtime declared",
+            "downtime_updated": "Downtime updated",
+            "downtime_closed": "Downtime closed",
+            "downtime_deleted": "Downtime deleted",
+            "retired": "Unit retired",
+            "reinstated": "Unit reinstated",
+            "assigned": "Assigned to reservation",
+            "unassigned": "Unassigned from reservation",
+            "updated": "Unit updated"
+          }
+        }
       }
     },
     "inventory": {
@@ -5350,6 +5506,10 @@
     "noCategories": "No categories",
     "noCategoriesDescription": "Create your first category to organize your products",
     "emptyDescription": "Categories help you organize your products and make it easier for customers to browse.",
+    "searchPlaceholder": "Search categories…",
+    "noSearchResults": "No category matches your search.",
+    "totalCount": "{count, plural, =0 {No categories} one {# category} other {# categories}}",
+    "actionsFor": "Actions for {name}",
     "newCategoryDescription": "Create a new category to organize your products",
     "editCategoryDescription": "Edit the category name",
     "namePlaceholder": "Category name",
@@ -5364,7 +5524,9 @@
       "title": "Delete this category?",
       "description": "This action is irreversible. Products in this category will not be deleted.",
       "descriptionWithName": "This action is irreversible. The category \"{name}\" will be deleted.",
-      "productsWarning": "{count, plural, one {The product in this category will be moved to \"Uncategorized\".} other {The # products in this category will be moved to \"Uncategorized\"."
+      "productsWarning": "{count, plural, one {This category will be removed from # product.} other {This category will be removed from # products.}}",
+      "reassignLabel": "Reassign products to",
+      "keepExisting": "Keep their other categories"
     }
   },
   "emails": {

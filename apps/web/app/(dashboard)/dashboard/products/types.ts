@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react";
 
+import type { FormRadioGroupProps } from "@/components/form/form-radio-group";
 import type { PricingMode, ProductTaxSettings, TaxSettings } from "@louez/types";
 import type { DurationUnit } from "@louez/utils";
 import type { ProductInput } from "@louez/validations";
@@ -67,6 +68,7 @@ export interface Product {
   name: string;
   description: string | null;
   categoryId: string | null;
+  categoryIds?: string[];
   price: string;
   deposit: string | null;
   pricingMode?: PricingMode | null;
@@ -112,6 +114,7 @@ export interface ProductFormComponentApi {
     name: any;
     children: (field: any) => ReactNode;
   }>;
+  RadioGroup: ComponentType<FormRadioGroupProps>;
   setFieldMeta: (name: any, updater: any) => void;
   setFieldValue: (name: any, value: any) => void;
 }

@@ -42,10 +42,7 @@ import {
 import { auth } from '@/lib/auth';
 import { getCurrentStore } from '@/lib/store-context';
 import { getUnitConflicts } from '@/lib/utils/unit-conflicts';
-import {
-  buildUnitEvent,
-  updateUnits,
-} from '@/lib/utils/unit-mutations';
+import { buildUnitEvent, updateUnits } from '@/lib/utils/unit-mutations';
 
 import {
   getUnitDowntimes as getUnitDowntimesQuery,
@@ -166,6 +163,7 @@ function revalidateInventoryPaths(productId?: string, reservationId?: string) {
 
   if (productId) {
     revalidatePath(`/dashboard/products/${productId}`);
+    revalidatePath(`/dashboard/products/${productId}/edit`);
   }
 
   if (reservationId) {
@@ -733,7 +731,10 @@ export async function reassignReservationItemUnit(
         .select({ id: reservations.id })
         .from(reservations)
         .where(
-          and(eq(reservations.id, item.reservationId), eq(reservations.storeId, store.id)),
+          and(
+            eq(reservations.id, item.reservationId),
+            eq(reservations.storeId, store.id),
+          ),
         )
         .for('update');
 

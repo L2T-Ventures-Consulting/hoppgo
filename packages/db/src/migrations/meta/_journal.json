@@ -386,6 +386,34 @@
       "when": 1784207037151,
       "tag": "0051_abnormal_wind_dancer",
       "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "5",
+      "when": 1784693149484,
+      "tag": "0052_add_product_categories",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "5",
+      "when": 1784711836517,
+      "tag": "0053_add_variant_definitions",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "5",
+      "when": 1784735195937,
+      "tag": "0054_add_unit_images",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "5",
+      "when": 1784789170166,
+      "tag": "0055_add_variant_active_state",
+      "breakpoints": true
     }
   ]
 }

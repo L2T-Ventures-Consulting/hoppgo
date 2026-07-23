@@ -775,6 +775,60 @@ export const categories = mysqlTable(
   }),
 );
 
+// ============================================================================
+// Variant Definitions (store-level shared catalog: Size, Color, Material...)
+// ============================================================================
+
+export const variantDefinitions = mysqlTable(
+  'variant_definitions',
+  {
+    id: id(),
+    storeId: varchar('store_id', { length: 21 }).notNull(),
+    // Canonical axis key (normalizeAxisKey of the label), matches
+    // products.bookingAttributeAxes[].key and product_units.attributes keys.
+    key: varchar('key', { length: 32 }).notNull(),
+    label: varchar('label', { length: 50 }).notNull(),
+    // Drives the presentation: color → swatches, size → ordered chips.
+    kind: mysqlEnum('kind', ['size', 'color', 'custom'])
+      .notNull()
+      .default('custom'),
+    isActive: boolean('is_active').notNull().default(true),
+    position: int('position').notNull().default(0),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (table) => ({
+    storeIdx: index('variant_definitions_store_idx').on(table.storeId),
+    uniqueStoreKey: unique('variant_definitions_store_key_unique').on(
+      table.storeId,
+      table.key,
+    ),
+  }),
+);
+
+export const variantValues = mysqlTable(
+  'variant_values',
+  {
+    id: id(),
+    definitionId: varchar('definition_id', { length: 21 }).notNull(),
+    // Stored label is the canonical value shared across products; units
+    // reference it by label in product_units.attributes.
+    label: varchar('label', { length: 100 }).notNull(),
+    colorHex: varchar('color_hex', { length: 7 }),
+    position: int('position').notNull().default(0),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (table) => ({
+    definitionIdx: index('variant_values_definition_idx').on(
+      table.definitionId,
+    ),
+    uniqueDefinitionLabel: unique('variant_values_unique').on(
+      table.definitionId,
+      table.label,
+    ),
+  }),
+);
+
 export const productStatus = mysqlEnum('product_status', [
   'draft',
   'active',
@@ -852,6 +906,33 @@ export const products = mysqlTable(
       table.storeId,
       table.status,
       table.name,
+    ),
+  }),
+);
+
+// ============================================================================
+// Product Categories (Many-to-Many)
+// ============================================================================
+
+// Products can belong to several categories. `products.category_id` is kept in
+// sync with the first (primary) category for backward compatibility with
+// consumers that expect a single category (analytics, exports, related
+// products, inspection templates).
+export const productCategories = mysqlTable(
+  'product_categories',
+  {
+    id: id(),
+    productId: varchar('product_id', { length: 21 }).notNull(),
+    categoryId: varchar('category_id', { length: 21 }).notNull(),
+    position: int('position').default(0),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (table) => ({
+    productIdx: index('product_categories_product_idx').on(table.productId),
+    categoryIdx: index('product_categories_category_idx').on(table.categoryId),
+    uniqueProductCategory: unique('product_categories_unique').on(
+      table.productId,
+      table.categoryId,
     ),
   }),
 );
@@ -1900,6 +1981,7 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
     references: [stores.id],
   }),
   products: many(products),
+  productLinks: many(productCategories),
 }));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
@@ -1911,6 +1993,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.categoryId],
     references: [categories.id],
   }),
+  categoryLinks: many(productCategories),
   reservationItems: many(reservationItems),
   pricingTiers: many(productPricingTiers),
   seasonalPricings: many(productSeasonalPricing),
@@ -1920,6 +2003,38 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   tulipMapping: one(productsTulip, {
     fields: [products.id],
     references: [productsTulip.productId],
+  }),
+}));
+
+export const productCategoriesRelations = relations(
+  productCategories,
+  ({ one }) => ({
+    product: one(products, {
+      fields: [productCategories.productId],
+      references: [products.id],
+    }),
+    category: one(categories, {
+      fields: [productCategories.categoryId],
+      references: [categories.id],
+    }),
+  }),
+);
+
+export const variantDefinitionsRelations = relations(
+  variantDefinitions,
+  ({ one, many }) => ({
+    store: one(stores, {
+      fields: [variantDefinitions.storeId],
+      references: [stores.id],
+    }),
+    values: many(variantValues),
+  }),
+);
+
+export const variantValuesRelations = relations(variantValues, ({ one }) => ({
+  definition: one(variantDefinitions, {
+    fields: [variantValues.definitionId],
+    references: [variantDefinitions.id],
   }),
 }));
 
@@ -2009,6 +2124,9 @@ export const productUnits = mysqlTable(
     // Optional internal notes (e.g., "Blue frame", "New battery 2025")
     notes: text('notes'),
 
+    // Unit-specific photos (URLs), shown alongside the product images
+    images: json('images').$type<string[]>().default([]),
+
     // Flexible attributes for the unit (size/color/etc)
     attributes: json('attributes').$type<UnitAttributes>(),
 
@@ -2095,7 +2213,9 @@ export const productUnitEvents = mysqlTable(
     id: id(),
     productUnitId: varchar('product_unit_id', { length: 21 }).references(
       () => productUnits.id,
-      { onDelete: 'set null' },
+      {
+        onDelete: 'set null',
+      },
     ),
     identifierSnapshot: varchar('identifier_snapshot', { length: 255 }),
     storeId: varchar('store_id', { length: 21 }).notNull(),

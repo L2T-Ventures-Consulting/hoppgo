@@ -4,25 +4,27 @@ import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { format } from 'date-fns'
 import { fr } from 'date-fns/locale'
-import { Mail, MoreHorizontal, UserPlus, Users, Clock, Send, X, Crown, User as UserIcon, Zap, Lock, ArrowRight } from 'lucide-react'
+import {
+  Mail,
+  MoreHorizontal,
+  UserPlus,
+  Users,
+  Clock,
+  Send,
+  X,
+  Crown,
+  User as UserIcon,
+  Zap,
+  Lock,
+  ArrowRight,
+} from 'lucide-react'
 import { toastManager } from '@louez/ui'
 import Link from 'next/link'
 
 import { Button } from '@louez/ui'
 import { Input } from '@louez/ui'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@louez/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@louez/ui'
 import { Badge } from '@louez/ui'
 import { Separator } from '@louez/ui'
 
@@ -80,10 +82,14 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
       const result = await addTeamMember(formData)
 
       if (result.error) {
-        const errorKey = result.error.startsWith('dashboard.') || result.error.startsWith('errors.')
-          ? result.error
-          : `errors.${result.error}`
-        toastManager.add({ title: t(errorKey.replace('dashboard.team.', '')) || tErrors('generic'), type: 'error' })
+        const errorKey =
+          result.error.startsWith('dashboard.') || result.error.startsWith('errors.')
+            ? result.error
+            : `errors.${result.error}`
+        toastManager.add({
+          title: t(errorKey.replace('dashboard.team.', '')) || tErrors('generic'),
+          type: 'error',
+        })
       } else {
         if (result.type === 'invited') {
           toastManager.add({ title: t('invitationSent'), type: 'success' })
@@ -100,7 +106,10 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
       const result = await removeMember(memberId)
 
       if (result.error) {
-        toastManager.add({ title: t(result.error.replace('dashboard.team.', '')) || tErrors('generic'), type: 'error' })
+        toastManager.add({
+          title: t(result.error.replace('dashboard.team.', '')) || tErrors('generic'),
+          type: 'error',
+        })
       } else {
         toastManager.add({ title: t('memberRemoved'), type: 'success' })
       }
@@ -153,7 +162,10 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
               {/* Show usage badge only when there's a positive limit */}
               {limits && limits.limit !== null && limits.limit > 0 && (
                 <Badge variant={canAddMore ? 'secondary' : 'warning'}>
-                  {t('limitBadge', { current: limits.current, limit: limits.limit })}
+                  {t('limitBadge', {
+                    current: limits.current,
+                    limit: limits.limit,
+                  })}
                 </Badge>
               )}
             </div>
@@ -172,7 +184,10 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
                       {t('featureNotAvailableDescription')}
                     </p>
                   </div>
-                  <Button render={<Link href="/dashboard/subscription" />} className="shrink-0 gap-2">
+                  <Button
+                    render={<Link href="/dashboard/settings/subscription" />}
+                    className="shrink-0 gap-2"
+                  >
                     <Zap className="h-4 w-4" />
                     {t('upgradeToPro')}
                     <ArrowRight className="h-4 w-4" />
@@ -187,12 +202,20 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
                     <Users className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div className="flex-1 space-y-2">
-                    <h3 className="font-semibold text-amber-700 dark:text-amber-300">{t('limitReachedTitle')}</h3>
+                    <h3 className="font-semibold text-amber-700 dark:text-amber-300">
+                      {t('limitReachedTitle')}
+                    </h3>
                     <p className="text-sm text-muted-foreground">
-                      {t('limitReachedDescription', { current: limits?.current ?? 0, limit: limits?.limit ?? 0 })}
+                      {t('limitReachedDescription', {
+                        current: limits?.current ?? 0,
+                        limit: limits?.limit ?? 0,
+                      })}
                     </p>
                   </div>
-                  <Button render={<Link href="/dashboard/subscription" />} className="shrink-0 gap-2">
+                  <Button
+                    render={<Link href="/dashboard/settings/subscription" />}
+                    className="shrink-0 gap-2"
+                  >
                     <Zap className="h-4 w-4" />
                     {t('upgradeForMore')}
                     <ArrowRight className="h-4 w-4" />
@@ -217,9 +240,7 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
                     {t('invite')}
                   </Button>
                 </form>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {t('addMemberHint')}
-                </p>
+                <p className="mt-3 text-sm text-muted-foreground">{t('addMemberHint')}</p>
               </>
             )}
           </CardContent>
@@ -254,7 +275,9 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
                       <p className="font-medium">{invitation.email}</p>
                       <p className="text-sm text-muted-foreground">
                         {t('invitedOn', {
-                          date: format(new Date(invitation.createdAt), 'dd MMM yyyy', { locale: fr }),
+                          date: format(new Date(invitation.createdAt), 'dd MMM yyyy', {
+                            locale: fr,
+                          }),
                         })}
                       </p>
                     </div>
@@ -314,9 +337,7 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
                       <UserAvatar src={member.user.image} seed={member.user.id} size={40} />
                       <div>
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">
-                            {member.user.name || member.user.email}
-                          </p>
+                          <p className="font-medium">{member.user.name || member.user.email}</p>
                           <Badge
                             variant={member.role === 'owner' ? 'default' : 'secondary'}
                             className="flex items-center gap-1"
@@ -330,9 +351,7 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
                           </Badge>
                         </div>
                         {member.user.name && (
-                          <p className="text-sm text-muted-foreground">
-                            {member.user.email}
-                          </p>
+                          <p className="text-sm text-muted-foreground">{member.user.email}</p>
                         )}
                         <p className="text-xs text-muted-foreground">
                           {t('addedOn', {

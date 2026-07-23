@@ -818,7 +818,10 @@
         "save": "Speichern",
         "unsavedChanges": "Nicht gespeicherte Änderungen",
         "createProduct": "Produkt erstellen",
+        "createAndDuplicate": "Erstellen und duplizieren",
         "productCreated": "Produkt erstellt",
+        "productCreatedCopyReady": "Die vorausgefüllte Kopie kann jetzt bearbeitet werden.",
+        "copySuffix": "(Kopie)",
         "validationError": "Bitte korrigieren Sie die Fehler vor dem Absenden",
         "productUpdated": "Produkt aktualisiert",
         "imagesHint": "{count, plural, =0 {Sie haben die maximale Anzahl an Fotos erreicht} one {Sie können noch # Foto hinzufügen} other {Sie können noch # Fotos hinzufügen}}",
@@ -902,7 +905,7 @@
           "bookingAttributesEmpty": "Keine Buchungsattribute konfiguriert. Alle verfolgten Einheiten teilen die Standardkombination.",
           "bookingAttributeValuePlaceholder": "{label} Wert",
           "combinationKey": "Kombination",
-          "missingAttributesWarning": "{count, plural, one {# aktive Einheit hat mindestens einen fehlenden Attributwert} other {# aktive Einheiten haben mindestens einen fehlenden Attributwert}}",
+          "missingAttributesWarning": "{count, plural, one {# Einheit hat nicht alle Variantenwerte} other {# Einheiten haben nicht alle Variantenwerte}}",
           "manageAttributes": "Attribute verwalten",
           "manageAttributesDescription": "Definieren Sie bis zu 3 Attributachsen (z.B. Größe, Farbe) für Einheitenkombinationen.",
           "pressEnterToCreate": "Enter drücken, um \"{value}\" zu erstellen",
@@ -942,7 +945,85 @@
           "openInventoryDetails": "Inventar öffnen",
           "benefitIdentify": "Kennzeichnen Sie jedes Exemplar mit Seriennummer oder Referenz",
           "benefitAvailability": "Verfolgen Sie Verfügbarkeit und Vermietungen jedes Exemplars",
-          "benefitInventory": "Erfassen Sie Kaufpreis und Kaufdatum für Ihr Inventar"
+          "benefitInventory": "Erfassen Sie Kaufpreis und Kaufdatum für Ihr Inventar",
+          "modeQuantity": "Einfache Menge",
+          "modeQuantityDescription": "Geben Sie einfach an, wie viele Exemplare zur Vermietung verfügbar sind.",
+          "modeUnits": "Einzelverfolgung",
+          "modeUnitsDescription": "Jedes Exemplar erhält eine eigene Kennung.",
+          "variantsTitle": "Varianten",
+          "variantsHelp": "Bis zu 3 Varianten (Größe, Farbe…). Jede Einheit trägt ihren Wert und Kunden wählen bei der Buchung.",
+          "variantsEmptyHint": "Sie legen pro Größe ein Produkt an? Fügen Sie stattdessen eine Variante „Größe“ hinzu: Jede Einheit trägt ihre eigene und Kunden wählen bei der Buchung.",
+          "variantPlaceholder": "z. B. Größe",
+          "addVariant": "Variante hinzufügen",
+          "variantsMaxReached": "Maximal 3 Varianten",
+          "defaultBadge": "Standard",
+          "advancedBadge": "Erweitert",
+          "learnMore": "Mehr erfahren",
+          "addRefPlaceholder": "Referenz eingeben und Enter drücken",
+          "generateSeries": "Serie generieren",
+          "changeMode": "Modus ändern",
+          "createVariantValue": "„{value}“ erstellen ({axis})",
+          "chooseColor": "Farbe auswählen",
+          "colorPickerDescription": "Passen Sie die Farbe an oder geben Sie einen Hexadezimalwert ein.",
+          "hexColor": "Hex-Farbe",
+          "presetSuggestions": "Vorschläge",
+          "valuesCount": "{count, plural, one {# Wert} other {# Werte}}",
+          "presets": {
+            "size": {
+              "label": "Größe"
+            },
+            "shoeSize": {
+              "label": "Schuhgröße"
+            },
+            "color": {
+              "label": "Farbe",
+              "values": {
+                "black": "Schwarz",
+                "white": "Weiß",
+                "gray": "Grau",
+                "red": "Rot",
+                "orange": "Orange",
+                "yellow": "Gelb",
+                "green": "Grün",
+                "blue": "Blau",
+                "purple": "Lila",
+                "pink": "Rosa",
+                "brown": "Braun",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Material",
+              "values": {
+                "cotton": "Baumwolle",
+                "leather": "Leder",
+                "wood": "Holz",
+                "metal": "Metall",
+                "plastic": "Kunststoff",
+                "aluminum": "Aluminium",
+                "carbon": "Carbon"
+              }
+            }
+          },
+          "manageVariants": "Varianten verwalten",
+          "managerTitle": "Varianten",
+          "managerDescription": "Definitionen, die alle Ihre Produkte teilen (Größe, Farbe…).",
+          "activeVariantsCount": "{active} von {total} aktiv",
+          "variantActive": "Aktiv",
+          "variantInactive": "Inaktiv",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Neue Variante",
+          "newVariantDescription": "Erstellen Sie eine produktübergreifende Variante (z. B. Größe).",
+          "editVariant": "Variante umbenennen",
+          "editVariantDescription": "Der Name wird im gemeinsamen Katalog aktualisiert.",
+          "editValue": "Wert bearbeiten",
+          "editValueDescription": "Die Bezeichnung wird im gemeinsamen Katalog aktualisiert.",
+          "deleteVariantTitle": "Variante löschen?",
+          "deleteVariantDescription": "„{name}“ und ihre Werte werden aus dem Katalog entfernt. Produkte, die sie verwenden, behalten ihre aktuellen Werte.",
+          "addValuePlaceholder": "Neuer Wert…",
+          "noVariants": "Keine Varianten",
+          "variantsCount": "{count, plural, one {# Variante} other {# Varianten}}",
+          "unitImages": "Fotos der Einheit"
         },
         "previewTitle": "Vorschau",
         "previewDescription": "So wird Ihr Produkt im Katalog erscheinen",
@@ -1074,6 +1155,7 @@
         "categorySearchPlaceholder": "Suchen oder erstellen…",
         "categoryCreateOption": "„{name}“ erstellen",
         "categoryNoResults": "Keine Kategorie gefunden",
+        "manageCategories": "Kategorien verwalten",
         "summary": {
           "checklistTitle": "Fortschritt",
           "required": "Erforderlich"
@@ -5237,6 +5319,10 @@
     "noCategories": "Keine Kategorien",
     "noCategoriesDescription": "Erstellen Sie Ihre erste Kategorie, um Ihre Produkte zu organisieren",
     "emptyDescription": "Kategorien helfen Ihnen, Ihre Produkte zu organisieren und erleichtern Kunden das Durchsuchen.",
+    "searchPlaceholder": "Kategorien suchen…",
+    "noSearchResults": "Keine Kategorie entspricht Ihrer Suche.",
+    "totalCount": "{count, plural, =0 {Keine Kategorien} one {# Kategorie} other {# Kategorien}}",
+    "actionsFor": "Aktionen für {name}",
     "newCategoryDescription": "Erstellen Sie eine neue Kategorie, um Ihre Produkte zu organisieren",
     "editCategoryDescription": "Bearbeiten Sie den Kategorienamen",
     "namePlaceholder": "Kategoriename",
@@ -5251,7 +5337,9 @@
       "title": "Diese Kategorie löschen?",
       "description": "Diese Aktion ist unwiderruflich. Produkte in dieser Kategorie werden nicht gelöscht.",
       "descriptionWithName": "Diese Aktion ist unwiderruflich. Die Kategorie \"{name}\" wird gelöscht.",
-      "productsWarning": "{count, plural, one {Das Produkt in dieser Kategorie wird zu \"Ohne Kategorie\" verschoben.} other {Die # Produkte in dieser Kategorie werden zu \"Ohne Kategorie\" verschoben.}}"
+      "productsWarning": "{count, plural, one {Diese Kategorie wird von # Produkt entfernt.} other {Diese Kategorie wird von # Produkten entfernt.}}",
+      "reassignLabel": "Produkte neu zuordnen zu",
+      "keepExisting": "Andere Kategorien beibehalten"
     }
   },
   "emails": {

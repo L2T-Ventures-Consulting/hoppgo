@@ -316,6 +316,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/referrals",
+        destination: "/dashboard/settings/referrals",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/subscription",
+        destination: "/dashboard/settings/subscription",
+        permanent: false,
+      },
+    ];
+  },
   // PostHog reverse proxy: route analytics through our domain to avoid CORS
   // issues and ad blockers. See https://posthog.com/docs/advanced/proxy/nextjs
   async rewrites() {
@@ -421,6 +435,7 @@ const nextConfig: NextConfig = {
     "*.feat-inventory.louez.localify",
     "worktree-onboarding-redesign.louez.localify",
     "*.worktree-onboarding-redesign.louez.localify",
+    "agent-redesign-product-creation-flow.louez.localify",
   ],
 };
 

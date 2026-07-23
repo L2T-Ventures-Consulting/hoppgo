@@ -1,4 +1,52 @@
-export { Star as StarIcon, StarSolid as StarSolidIcon } from "@mynaui/icons-react";
+export {
+  ActivitySquare as ActivityIcon,
+  Shield as AdminShieldIcon,
+  Sparkles as AccentSparklesIcon,
+  Users as AudienceIcon,
+  Bell as BellIcon,
+  CalendarCheck as CalendarCheckIcon,
+  CalendarX as CalendarXIcon,
+  Camera as CameraIcon,
+  ChatMessages as ChatIcon,
+  CheckCircle as CheckCircleIcon,
+  Circle as CircleIcon,
+  Clipboard as ClipboardIcon,
+  ClockCircle as ClockIcon,
+  Code as CodeIcon,
+  Cog as CogIcon,
+  CreditCard as PricingIcon,
+  Database as DatabaseIcon,
+  Download as DownloadIcon,
+  Eye as EyeIcon,
+  Zap as FastPaymentIcon,
+  FileCheck as FileCheckIcon,
+  FileText as FileTextIcon,
+  Image as ImageIcon,
+  InfoCircle as InfoCircleIcon,
+  Key as KeyIcon,
+  LinkTwo as LinkIcon,
+  ListCheck as ListCheckIcon,
+  Mail as MailIcon,
+  MapPin as MapPinIcon,
+  Mobile as MobileIcon,
+  Paint as PaintIcon,
+  Package as ProductIcon,
+  Percentage as PercentageIcon,
+  Puzzle as PuzzleIcon,
+  Gift as RewardIcon,
+  ShieldCheck as ShieldCheckIcon,
+  Search as SearchIcon,
+  Star as StarIcon,
+  StarSolid as StarSolidIcon,
+  Store as StoreIcon,
+  Tag as TagIcon,
+  Terminal as TerminalIcon,
+  Truck as TruckIcon,
+  Unlink as UnlinkIcon,
+  InfoTriangle as WarningIcon,
+  Wrench as WrenchIcon,
+  QuestionCircle as QuestionCircleIcon,
+} from "@mynaui/icons-react"
 
 export {
   BarChart3 as AnalyticsIcon,
@@ -23,6 +71,6 @@ export {
   Zap as ZapIcon,
   ArrowRight as ArrowRightIcon,
   ArrowLeft as ArrowLeftIcon,
-} from "lucide-react";
+} from "lucide-react"
 
-export { GoogleCalendar as GoogleCalendarIcon } from "./icon.google-calendar";
+export { GoogleCalendar as GoogleCalendarIcon } from "./icon.google-calendar"

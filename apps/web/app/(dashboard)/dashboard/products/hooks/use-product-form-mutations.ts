@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -7,7 +7,7 @@ import type { ProductInput } from "@louez/validations";
 
 import { useImageUpload } from "@/hooks/use-image-upload";
 
-import { createCategory, createProduct, updateProduct } from "../actions";
+import { createProduct, updateProduct } from "../actions";
 
 interface UseProductFormMutationsParams {
   productId?: string;
@@ -35,11 +35,13 @@ export function useProductFormMutations({
 }: UseProductFormMutationsParams) {
   const tErrors = useTranslations("errors");
   const { deleteImage } = useImageUpload("product");
+  const persistedImagesRef = useRef(initialImages);
 
   const productMutation = useMutation({
     mutationFn: async (value: ProductInput) => {
       const submittedImages = value.images ?? [];
-      const newImages = submittedImages.filter((image) => !initialImages.includes(image));
+      const persistedImages = persistedImagesRef.current;
+      const newImages = submittedImages.filter((image) => !persistedImages.includes(image));
 
       const result = productId ? await updateProduct(productId, value) : await createProduct(value);
 
@@ -52,22 +54,11 @@ export function useProductFormMutations({
       }
 
       if (productId) {
-        const removedImages = initialImages.filter((image) => !submittedImages.includes(image));
+        const removedImages = persistedImages.filter((image) => !submittedImages.includes(image));
         void Promise.allSettled(removedImages.map((image) => deleteImage(image)));
       }
 
-      return result;
-    },
-  });
-
-  const createCategoryMutation = useMutation({
-    mutationFn: async (name: string) => {
-      const result = await createCategory({ name });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
+      persistedImagesRef.current = submittedImages;
       return result;
     },
   });
@@ -109,19 +100,15 @@ export function useProductFormMutations({
     async (value: ProductInput) => productMutation.mutateAsync(value),
     [productMutation],
   );
-
-  const createCategoryByName = useCallback(
-    async (name: string) => createCategoryMutation.mutateAsync(name),
-    [createCategoryMutation],
-  );
+  const markImagesPersisted = useCallback((images: string[]) => {
+    persistedImagesRef.current = images;
+  }, []);
 
   return {
     productMutation,
-    createCategoryMutation,
     isSaving: productMutation.isPending,
-    isCreatingCategory: createCategoryMutation.isPending,
     submitProduct,
-    createCategoryByName,
+    markImagesPersisted,
     getActionErrorMessage,
     getActionErrorDetails,
   };

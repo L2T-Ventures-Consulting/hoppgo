@@ -1,0 +1,1 @@
+ALTER TABLE `product_units` ADD `images` json DEFAULT ('[]');

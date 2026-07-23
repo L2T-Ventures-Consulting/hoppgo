@@ -818,7 +818,10 @@
         "save": "Enregistrer",
         "unsavedChanges": "Modifications non enregistrées",
         "createProduct": "Créer le produit",
+        "createAndDuplicate": "Créer et dupliquer",
         "productCreated": "Produit créé",
+        "productCreatedCopyReady": "La copie préremplie est prête à être modifiée.",
+        "copySuffix": "(copie)",
         "validationError": "Veuillez corriger les erreurs avant de soumettre",
         "productUpdated": "Produit modifié",
         "imagesHint": "{count, plural, =0 {Vous avez atteint le maximum de photos} one {Vous pouvez encore ajouter # photo} other {Vous pouvez encore ajouter # photos}}",
@@ -902,13 +905,13 @@
           "bookingAttributesEmpty": "Aucun attribut configuré. Toutes les unités suivies partagent la combinaison par défaut.",
           "bookingAttributeValuePlaceholder": "Valeur {label}",
           "combinationKey": "Combinaison",
-          "missingAttributesWarning": "{count, plural, one {# unité active n'a pas toutes les valeurs d'attribut} other {# unités actives n'ont pas toutes les valeurs d'attribut}}",
+          "missingAttributesWarning": "{count, plural, one {# unité n'a pas toutes ses valeurs de variantes} other {# unités n'ont pas toutes leurs valeurs de variantes}}",
           "manageAttributes": "Gérer les attributs",
           "manageAttributesDescription": "Les attributs permettent aux clients de choisir des caractéristiques précises lors de la réservation (ex : taille, couleur). Chaque unité est associée à ses valeurs d'attribut, et le système attribue automatiquement une unité correspondante au moment du paiement.",
           "manageAttributesExample": "Exemple : pour une location de kayak, ajoutez « Taille » (S, M, L) et « Couleur » (Rouge, Bleu). Un client réservant un kayak Moyen Rouge se verra attribuer une unité disponible correspondante.",
           "manageAttributesMax": "Jusqu'à 3 attributs autorisés.",
           "pressEnterToCreate": "Appuyez sur Entrée pour créer « {value} »",
-          "addUnit": "Ajouter une unité",
+          "addUnit": "Ajouter",
           "addNotes": "Ajouter des notes",
           "identifier": "Identifiant",
           "identifierPlaceholder": "ex : VELO-01, SN-2024-001",
@@ -942,7 +945,85 @@
           "openInventoryDetails": "Ouvrir l'inventaire",
           "benefitIdentify": "Identifiez chaque exemplaire avec un numéro de série ou une référence",
           "benefitAvailability": "Suivez la disponibilité et les locations de chaque exemplaire",
-          "benefitInventory": "Renseignez le prix et la date d'achat pour votre inventaire"
+          "benefitInventory": "Renseignez le prix et la date d'achat pour votre inventaire",
+          "modeQuantity": "Quantité simple",
+          "modeQuantityDescription": "Indiquez simplement le nombre d'exemplaires disponibles à la location.",
+          "modeUnits": "Suivi par unité",
+          "modeUnitsDescription": "Chaque exemplaire a son propre identifiant.",
+          "variantsTitle": "Variantes",
+          "variantsHelp": "Jusqu'à 3 variantes (taille, couleur…). Chaque unité indique sa valeur et le client choisit à la réservation.",
+          "variantsEmptyHint": "Vous créez un produit par taille ? Ajoutez plutôt une variante « Taille » : chaque unité porte la sienne et le client choisit à la réservation.",
+          "variantPlaceholder": "ex : Taille",
+          "addVariant": "Ajouter une variante",
+          "variantsMaxReached": "Maximum 3 variantes",
+          "defaultBadge": "Par défaut",
+          "advancedBadge": "Avancé",
+          "learnMore": "En savoir plus",
+          "addRefPlaceholder": "Tapez une référence puis Entrée",
+          "generateSeries": "Générer une série",
+          "changeMode": "Changer de mode",
+          "createVariantValue": "Créer « {value} » ({axis})",
+          "chooseColor": "Choisir une couleur",
+          "colorPickerDescription": "Ajustez la couleur ou saisissez une valeur hexadécimale.",
+          "hexColor": "Couleur hexadécimale",
+          "presetSuggestions": "Suggestions",
+          "valuesCount": "{count, plural, one {# valeur} other {# valeurs}}",
+          "presets": {
+            "size": {
+              "label": "Taille"
+            },
+            "shoeSize": {
+              "label": "Pointure"
+            },
+            "color": {
+              "label": "Couleur",
+              "values": {
+                "black": "Noir",
+                "white": "Blanc",
+                "gray": "Gris",
+                "red": "Rouge",
+                "orange": "Orange",
+                "yellow": "Jaune",
+                "green": "Vert",
+                "blue": "Bleu",
+                "purple": "Violet",
+                "pink": "Rose",
+                "brown": "Marron",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Matière",
+              "values": {
+                "cotton": "Coton",
+                "leather": "Cuir",
+                "wood": "Bois",
+                "metal": "Métal",
+                "plastic": "Plastique",
+                "aluminum": "Aluminium",
+                "carbon": "Carbone"
+              }
+            }
+          },
+          "manageVariants": "Gérer les variantes",
+          "managerTitle": "Variantes",
+          "managerDescription": "Définitions partagées entre tous vos produits (taille, couleur…).",
+          "activeVariantsCount": "{active} actives sur {total}",
+          "variantActive": "Activée",
+          "variantInactive": "Désactivée",
+          "toggleVariant": "{name} : {status}",
+          "newVariant": "Nouvelle variante",
+          "newVariantDescription": "Créez une variante partagée entre vos produits (ex : Taille).",
+          "editVariant": "Renommer la variante",
+          "editVariantDescription": "Le nom est mis à jour dans le catalogue partagé.",
+          "editValue": "Modifier la valeur",
+          "editValueDescription": "Le libellé est mis à jour dans le catalogue partagé.",
+          "deleteVariantTitle": "Supprimer la variante ?",
+          "deleteVariantDescription": "« {name} » et ses valeurs seront retirées du catalogue. Les produits qui l'utilisent conservent leurs valeurs actuelles.",
+          "addValuePlaceholder": "Nouvelle valeur…",
+          "noVariants": "Aucune variante",
+          "variantsCount": "{count, plural, one {# variante} other {# variantes}}",
+          "unitImages": "Photos de l'unité"
         },
         "previewTitle": "Aperçu",
         "previewDescription": "Voici comment votre produit apparaîtra dans le catalogue",
@@ -1080,6 +1161,7 @@
         "categorySearchPlaceholder": "Rechercher ou créer…",
         "categoryCreateOption": "Créer « {name} »",
         "categoryNoResults": "Aucune catégorie trouvée",
+        "manageCategories": "Gérer les catégories",
         "summary": {
           "checklistTitle": "Progression",
           "required": "Requis"
@@ -1092,6 +1174,80 @@
       "deleteConfirm": {
         "title": "Supprimer ce produit ?",
         "description": "Cette action est irréversible. Le produit sera définitivement supprimé."
+      },
+      "detail": {
+        "viewOnStorefront": "Voir sur la boutique",
+        "stats": {
+          "revenue": "Chiffre d'affaires",
+          "vsLastMonth": "vs mois dernier",
+          "reservations": "Réservations",
+          "reservationsSubtitle": "{upcoming} à venir · {completed} terminées",
+          "utilization": "Taux d'utilisation",
+          "utilizationSubtitle": "30 derniers jours",
+          "stock": "Stock",
+          "unitsActiveValue": "{active}/{total} actives"
+        },
+        "inventory": {
+          "title": "Inventaire",
+          "manageStock": "Gérer le stock",
+          "quantity": "Quantité",
+          "available": "Disponible",
+          "noUnits": "Aucune unité enregistrée",
+          "identifier": "Identifiant",
+          "attributes": "Attributs",
+          "unitStatus": "Statut",
+          "lifecycle": "Cycle de vie",
+          "inDowntime": "En maintenance",
+          "busyToday": "Occupée aujourd'hui",
+          "active": "Active",
+          "retired": "Retirée"
+        },
+        "reservations": {
+          "title": "Réservations",
+          "empty": "Aucune réservation pour ce produit pour le moment",
+          "dates": "Dates",
+          "quantity": "Qté",
+          "viewAllHint": "Affichage des 10 réservations les plus récentes sur {total}.",
+          "viewAllLink": "Voir toutes les réservations"
+        },
+        "info": {
+          "title": "Informations produit",
+          "noDescription": "Aucune description renseignée",
+          "seasonalPricing": "Tarifs saisonniers",
+          "accessories": "Accessoires",
+          "noAccessories": "Aucun accessoire associé",
+          "gallery": "Photos",
+          "galleryImageAlt": "Photo {index}",
+          "noImages": "Aucune photo ajoutée"
+        },
+        "quickFacts": {
+          "title": "Informations clés",
+          "createdAt": "Créé le",
+          "updatedAt": "Mis à jour le",
+          "deposit": "Caution",
+          "noDeposit": "Aucune caution",
+          "tax": "TVA",
+          "taxInherited": "Par défaut de la boutique",
+          "taxCustomRate": "Taux personnalisé ({rate}%)",
+          "bookingAxes": "Attributs de réservation"
+        },
+        "activity": {
+          "title": "Activité des unités",
+          "empty": "Aucune activité enregistrée",
+          "types": {
+            "created": "Unité créée",
+            "deleted": "Unité supprimée",
+            "downtime_declared": "Indisponibilité déclarée",
+            "downtime_updated": "Indisponibilité modifiée",
+            "downtime_closed": "Indisponibilité terminée",
+            "downtime_deleted": "Indisponibilité supprimée",
+            "retired": "Unité retirée",
+            "reinstated": "Unité réactivée",
+            "assigned": "Assignée à une réservation",
+            "unassigned": "Désassignée d'une réservation",
+            "updated": "Unité modifiée"
+          }
+        }
       }
     },
     "inventory": {
@@ -5350,6 +5506,10 @@
     "noCategories": "Aucune catégorie",
     "noCategoriesDescription": "Créez votre première catégorie pour organiser vos produits",
     "emptyDescription": "Les catégories vous permettent d'organiser vos produits et facilitent la navigation pour vos clients.",
+    "searchPlaceholder": "Rechercher une catégorie…",
+    "noSearchResults": "Aucune catégorie ne correspond à votre recherche.",
+    "totalCount": "{count, plural, =0 {Aucune catégorie} one {# catégorie} other {# catégories}}",
+    "actionsFor": "Actions pour {name}",
     "newCategoryDescription": "Créez une nouvelle catégorie pour organiser vos produits",
     "editCategoryDescription": "Modifiez le nom de la catégorie",
     "namePlaceholder": "Nom de la catégorie",
@@ -5364,7 +5524,9 @@
       "title": "Supprimer cette catégorie ?",
       "description": "Cette action est irréversible. Les produits de cette catégorie ne seront pas supprimés.",
       "descriptionWithName": "Cette action est irréversible. La catégorie \"{name}\" sera supprimée.",
-      "productsWarning": "{count, plural, one {Le produit de cette catégorie sera déplacé vers \"Sans catégorie\".} other {Les # produits de cette catégorie seront déplacés vers \"Sans catégorie\".}}"
+      "productsWarning": "{count, plural, one {Cette catégorie sera retirée de # produit.} other {Cette catégorie sera retirée de # produits.}}",
+      "reassignLabel": "Réaffecter les produits à",
+      "keepExisting": "Conserver leurs autres catégories"
     }
   },
   "emails": {

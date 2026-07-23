@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent } from "react";
 
 import {
@@ -34,7 +34,6 @@ import {
   PRODUCT_IMAGE_ASPECT_RATIO,
   type ProductImagePercentCropRect,
   type ProductImagePixelCropRect,
-  createCroppedDataUrl,
   getCropSizePercentFromRect,
   getPixelCropFromPercentRect,
   normalizePercentCropRect,
@@ -49,9 +48,6 @@ interface ProductImageCropDialogProps {
   open: boolean;
   items: ProductImageCropQueueItem[];
   selectedIndex: number;
-  previewProductName: string;
-  previewPrice: string;
-  previewPriceLabel: string;
   canGoToPrevious: boolean;
   canGoToNext: boolean;
   isUploading: boolean;
@@ -99,9 +95,6 @@ export function ProductImageCropDialog({
   open,
   items,
   selectedIndex,
-  previewProductName,
-  previewPrice,
-  previewPriceLabel,
   canGoToPrevious,
   canGoToNext,
   isUploading,
@@ -121,16 +114,8 @@ export function ProductImageCropDialog({
   const currentItem = items[selectedIndex] ?? null;
   const isMultiImageSession = items.length > 1;
 
-  const previewFrameRef = useRef<HTMLDivElement | null>(null);
   const editorImageRef = useRef<HTMLImageElement | null>(null);
   const replaceImageInputRef = useRef<HTMLInputElement | null>(null);
-  const [previewFrameSize, setPreviewFrameSize] = useState({
-    width: 0,
-    height: 0,
-  });
-  const [committedPreviewCrop, setCommittedPreviewCrop] =
-    useState<ProductImagePixelCropRect | null>(null);
-  const [previewDataUrl, setPreviewDataUrl] = useState<string | null>(null);
   const lastCommittedCropRef = useRef<ProductImagePixelCropRect | null>(null);
 
   // Local crop state for smooth dragging — avoids parent re-renders per frame.
@@ -147,55 +132,15 @@ export function ProductImageCropDialog({
   }, [currentItem?.crop]);
 
   useEffect(() => {
-    const node = previewFrameRef.current;
-    if (!node) return;
-    const update = () => {
-      const rect = node.getBoundingClientRect();
-      setPreviewFrameSize({ width: rect.width, height: rect.height });
-    };
-    update();
-    const observer = new ResizeObserver(update);
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [currentItem?.id, open]);
-
-  useEffect(() => {
     const initialPreviewCrop = currentItem?.croppedAreaPixels ?? null;
     lastCommittedCropRef.current = initialPreviewCrop;
-    setCommittedPreviewCrop(initialPreviewCrop);
   }, [currentItem?.id, currentItem?.croppedAreaPixels]);
-
-  useEffect(() => {
-    if (!currentItem || !committedPreviewCrop) {
-      setPreviewDataUrl(null);
-      return;
-    }
-
-    let active = true;
-    void createCroppedDataUrl({
-      imageSrc: currentItem.originalDataUrl,
-      croppedAreaPixels: committedPreviewCrop,
-      mimeType: currentItem.mimeType,
-      quality: 0.88,
-    })
-      .then((nextPreviewDataUrl) => {
-        if (active) setPreviewDataUrl(nextPreviewDataUrl);
-      })
-      .catch(() => {
-        if (active) setPreviewDataUrl(null);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [committedPreviewCrop, currentItem]);
 
   const commitPreviewCrop = useCallback(
     (cropPixels: ProductImagePixelCropRect) => {
       if (!currentItem) return;
       if (isSamePixelCrop(lastCommittedCropRef.current, cropPixels)) return;
       lastCommittedCropRef.current = cropPixels;
-      setCommittedPreviewCrop(cropPixels);
       onCropComplete(currentItem.id, cropPixels);
     },
     [currentItem, onCropComplete],
@@ -304,31 +249,10 @@ export function ProductImageCropDialog({
     ],
   );
 
-  const previewImageStyle = useMemo(() => {
-    if (!currentItem) return null;
-    if (!committedPreviewCrop) return null;
-    if (previewFrameSize.width <= 0 || previewFrameSize.height <= 0) return null;
-
-    const area = committedPreviewCrop;
-    if (area.width <= 0 || area.height <= 0) return null;
-
-    const scale = previewFrameSize.width / area.width;
-    const width = currentItem.imageSize.width * scale;
-    const height = currentItem.imageSize.height * scale;
-    const x = -area.x * scale;
-    const y = -area.y * scale;
-
-    return {
-      width: `${width}px`,
-      height: `${height}px`,
-      transform: `translate3d(${x}px, ${y}px, 0)`,
-    };
-  }, [committedPreviewCrop, currentItem, previewFrameSize]);
-
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogPopup
-        className="flex max-h-[95dvh] w-[96vw] max-w-6xl flex-col gap-0 overflow-hidden p-0"
+        className="flex max-h-[95dvh] w-[96vw] max-w-5xl flex-col gap-0 overflow-hidden p-0"
         bottomStickOnMobile={false}
       >
         {/* Header with integrated navigation */}
@@ -495,71 +419,6 @@ export function ProductImageCropDialog({
                   </Button>
                 </div>
               </div>
-
-              {/* Preview sidebar (desktop) / stacked section (mobile) */}
-              <div className="flex w-fit flex-col border-t md:flex-[.65] lg:w-72 lg:border-t-0 lg:border-l xl:w-80">
-                <div className="flex flex-1 flex-col gap-3 p-4 sm:p-5">
-                  <div>
-                    <p className="text-sm font-semibold">{t("cropPreviewTitle")}</p>
-                    <p className="text-muted-foreground text-xs">{t("cropPreviewDescription")}</p>
-                  </div>
-
-                  {/* Storefront-style preview card */}
-                  <div className="bg-card max-w-[33%] min-w-2xs overflow-hidden rounded-xl border shadow-sm">
-                    <div
-                      ref={previewFrameRef}
-                      className="bg-muted relative aspect-[4/3] overflow-hidden"
-                    >
-                      {previewDataUrl ? (
-                        <>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={previewDataUrl}
-                            alt={t("cropThumbnailAlt", {
-                              index: selectedIndex + 1,
-                            })}
-                            className="size-full object-cover"
-                          />
-                          <div className="absolute inset-0 ring-1 ring-black/5 ring-inset" />
-                        </>
-                      ) : previewImageStyle ? (
-                        <>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={currentItem.originalDataUrl}
-                            alt={t("cropThumbnailAlt", {
-                              index: selectedIndex + 1,
-                            })}
-                            className="absolute top-0 left-0 max-w-none select-none"
-                            style={previewImageStyle}
-                          />
-                          <div className="absolute inset-0 ring-1 ring-black/5 ring-inset" />
-                        </>
-                      ) : (
-                        <>
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={currentItem.originalDataUrl}
-                            alt={t("cropThumbnailAlt", {
-                              index: selectedIndex + 1,
-                            })}
-                            className="size-full object-cover"
-                          />
-                          <div className="absolute inset-0 ring-1 ring-black/5 ring-inset" />
-                        </>
-                      )}
-                    </div>
-
-                    <div className="space-y-1 p-3">
-                      <p className="line-clamp-1 text-sm font-semibold">{previewProductName}</p>
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-primary text-sm font-bold">{previewPrice}</span>
-                        <span className="text-muted-foreground text-xs">{previewPriceLabel}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="text-muted-foreground flex min-h-40 flex-1 items-center justify-center gap-2">
@@ -570,7 +429,7 @@ export function ProductImageCropDialog({
         </div>
 
         {/* Sticky footer — always visible */}
-        <DialogFooter>
+        <DialogFooter className="px-2">
           <Button variant="outline" onClick={onSkipCrop} disabled={isUploading}>
             {t("cropSkip")}
           </Button>

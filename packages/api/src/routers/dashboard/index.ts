@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { dashboardProcedure } from '../../procedures';
 import { dashboardApiKeysRouter } from './api-keys';
+import { dashboardCategoriesRouter } from './categories';
 import { dashboardCustomersRouter } from './customers';
 import { dashboardIntegrationsRouter } from './integrations';
 import { dashboardNotificationsRouter } from './notifications';
@@ -9,6 +10,7 @@ import { dashboardOnboardingRouter } from './onboarding';
 import { dashboardReferralRouter } from './referral';
 import { dashboardReservationsRouter } from './reservations';
 import { dashboardSettingsRouter } from './settings';
+import { dashboardVariantsRouter } from './variants';
 
 /**
  * Example dashboard procedure for testing the setup
@@ -33,6 +35,7 @@ const ping = dashboardProcedure
 export const dashboardRouter = {
   ping,
   apiKeys: dashboardApiKeysRouter,
+  categories: dashboardCategoriesRouter,
   customers: dashboardCustomersRouter,
   integrations: dashboardIntegrationsRouter,
   settings: dashboardSettingsRouter,
@@ -40,4 +43,5 @@ export const dashboardRouter = {
   onboarding: dashboardOnboardingRouter,
   notifications: dashboardNotificationsRouter,
   referral: dashboardReferralRouter,
+  variants: dashboardVariantsRouter,
 };

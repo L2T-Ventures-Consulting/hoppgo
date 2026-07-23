@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { ProductIcon } from "@louez/ui/icons";
 
 import { ProductInfoFields, type ProductInfoFieldsProps } from "./product-info-fields";
 import { ProductMediaFields, type ProductMediaFieldsProps } from "./product-media-fields";
@@ -14,20 +15,15 @@ export function ProductFormSectionProduct(props: ProductFormSectionProductProps)
   const t = useTranslations("dashboard.products.form");
 
   return (
-    <Card className="">
+    <Card>
       <CardHeader>
-        <CardTitle>{t("productSection")}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <ProductIcon className="h-5 w-5 shrink-0" />
+          {t("productSection")}
+        </CardTitle>
         <CardDescription>{t("productSectionDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <ProductInfoFields
-          form={props.form}
-          categories={props.categories}
-          onCreateCategory={props.onCreateCategory}
-          isCreatingCategory={props.isCreatingCategory}
-          onNameInputChange={props.onNameInputChange}
-        />
-
         <ProductMediaFields
           form={props.form}
           imagesPreviews={props.imagesPreviews}
@@ -43,6 +39,14 @@ export function ProductFormSectionProduct(props: ProductFormSectionProductProps)
           recropImage={props.recropImage}
           canRecrop={props.canRecrop}
           showPhotosLabel
+        />
+
+        <ProductInfoFields
+          form={props.form}
+          categories={props.categories}
+          onCreateCategory={props.onCreateCategory}
+          isCreatingCategory={props.isCreatingCategory}
+          onNameInputChange={props.onNameInputChange}
         />
       </CardContent>
     </Card>

@@ -110,9 +110,13 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
                         count: PLAN_DETAILS.ultra.smsIncluded,
                       })}
                     </p>
-                    <Button variant="outline" className="h-7 border-primary/20 text-xs hover:bg-primary/5 hover:text-primary" render={<Link href="/dashboard/subscription" />}>
-                        {t('upsell.upgradeToUltra')}
-                        <ArrowRight className="ml-1.5 h-3 w-3" />
+                    <Button
+                      variant="outline"
+                      className="h-7 border-primary/20 text-xs hover:bg-primary/5 hover:text-primary"
+                      render={<Link href="/dashboard/settings/subscription" />}
+                    >
+                      {t('upsell.upgradeToUltra')}
+                      <ArrowRight className="ml-1.5 h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -134,7 +138,7 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
                       'relative flex flex-col items-center justify-center rounded-xl border p-4 transition-all',
                       isSelected
                         ? 'border-primary bg-gradient-to-br from-primary/5 to-primary/10 shadow-sm shadow-primary/10'
-                        : 'border-border bg-card hover:border-primary/30 hover:shadow-sm'
+                        : 'border-border bg-card hover:border-primary/30 hover:shadow-sm',
                     )}
                   >
                     {isPopular && (
@@ -149,7 +153,9 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
                         </div>
                       </div>
                     )}
-                    <span className={cn('text-2xl font-bold', isSelected && 'text-primary')}>{pkg}</span>
+                    <span className={cn('text-2xl font-bold', isSelected && 'text-primary')}>
+                      {pkg}
+                    </span>
                     <span className="text-xs text-muted-foreground">SMS</span>
                     <span className={cn('mt-2 font-semibold', isSelected && 'text-primary')}>
                       {formatPrice(totalCents)}
@@ -184,7 +190,11 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
               >
                 {t('cancel')}
               </Button>
-              <Button onClick={handlePurchase} disabled={loading} className="flex-1 shadow-sm shadow-primary/20">
+              <Button
+                onClick={handlePurchase}
+                disabled={loading}
+                className="flex-1 shadow-sm shadow-primary/20"
+              >
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -193,7 +203,9 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
                 ) : (
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
-                    {t('pay', { amount: formatPrice(selectedPackage * priceCents) })}
+                    {t('pay', {
+                      amount: formatPrice(selectedPackage * priceCents),
+                    })}
                   </>
                 )}
               </Button>
