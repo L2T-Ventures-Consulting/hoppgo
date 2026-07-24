@@ -20,6 +20,7 @@ import {
   ShieldCheckIcon,
 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { usePostHog } from 'posthog-js/react';
 
 import type { PricingMode, UnitAttributes } from '@louez/types';
 import { toastManager } from '@louez/ui';
@@ -58,6 +59,10 @@ import { invalidateReservationList } from '@/lib/orpc/invalidation';
 import { trackOpenReplayEvent } from '@/lib/openreplay/client';
 import { openReplayEvents } from '@/lib/openreplay/events';
 import { orpc } from '@/lib/orpc/react';
+import {
+  dashboardReservationAnalyticsBaseProperties,
+  productAnalyticsEvents,
+} from '@/lib/product-analytics/analytics-events';
 import { formatStoreDate } from '@/lib/utils/store-date';
 
 import { useAppForm } from '@/hooks/form/form';
@@ -152,6 +157,7 @@ export function NewReservationForm({
   const tCommon = useTranslations('common');
   const tErrors = useTranslations('errors');
   const tValidation = useTranslations('validation');
+  const posthog = usePostHog();
 
   useEffect(() => {
     trackOpenReplayEvent(
@@ -162,7 +168,15 @@ export function NewReservationForm({
         source: openReplaySource,
       },
     );
-  }, [openReplaySource]);
+
+    posthog.capture(
+      productAnalyticsEvents.dashboardReservationCreationStarted,
+      {
+        ...dashboardReservationAnalyticsBaseProperties,
+        source: openReplaySource,
+      },
+    );
+  }, [openReplaySource, posthog]);
 
   const dateLocale = locale === 'fr' ? fr : enUS;
   const getTimeSlotsForDate = (
@@ -275,9 +289,25 @@ export function NewReservationForm({
     return tErrors('generic');
   };
 
+  function trackStepValidationFailed(
+    stepId: string,
+    failedFields: string[],
+  ) {
+    posthog.capture(
+      productAnalyticsEvents.dashboardReservationStepValidationFailed,
+      {
+        ...dashboardReservationAnalyticsBaseProperties,
+        step: stepId,
+        failed_fields: failedFields,
+        source: openReplaySource,
+      },
+    );
+  }
+
   function validateCurrentStep(): boolean {
     let isValid = true;
     const stepId = currentStepId;
+    const failedFields: string[] = [];
 
     switch (stepId) {
       case 'customer':
@@ -288,6 +318,7 @@ export function NewReservationForm({
 
           if (!watchCustomerId?.trim()) {
             setStepFieldError('customerId', tValidation('required'));
+            failedFields.push('customerId');
             isValid = false;
           } else {
             clearStepFieldError('customerId');
@@ -299,9 +330,11 @@ export function NewReservationForm({
 
           if (!email?.trim()) {
             setStepFieldError('email', tValidation('required'));
+            failedFields.push('email');
             isValid = false;
           } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
             setStepFieldError('email', tValidation('email'));
+            failedFields.push('email');
             isValid = false;
           } else {
             clearStepFieldError('email');
@@ -309,6 +342,7 @@ export function NewReservationForm({
 
           if (!firstName?.trim()) {
             setStepFieldError('firstName', tValidation('required'));
+            failedFields.push('firstName');
             isValid = false;
           } else {
             clearStepFieldError('firstName');
@@ -316,6 +350,7 @@ export function NewReservationForm({
 
           if (!lastName?.trim()) {
             setStepFieldError('lastName', tValidation('required'));
+            failedFields.push('lastName');
             isValid = false;
           } else {
             clearStepFieldError('lastName');
@@ -323,6 +358,7 @@ export function NewReservationForm({
         }
 
         if (!isValid) {
+          trackStepValidationFailed('customer', failedFields);
           toastManager.add({
             title: t('fillCustomerInfoError'),
             type: 'error',
@@ -333,6 +369,7 @@ export function NewReservationForm({
       case 'period':
         if (!watchStartDate) {
           setStepFieldError('startDate', tValidation('required'));
+          failedFields.push('startDate');
           isValid = false;
         } else {
           clearStepFieldError('startDate');
@@ -340,26 +377,33 @@ export function NewReservationForm({
 
         if (!watchEndDate) {
           setStepFieldError('endDate', tValidation('required'));
+          failedFields.push('endDate');
           isValid = false;
         } else if (watchStartDate && watchEndDate < watchStartDate) {
           setStepFieldError('endDate', tValidation('endDateBeforeStart'));
+          failedFields.push('endDate');
           isValid = false;
         } else {
           clearStepFieldError('endDate');
         }
 
         if (!isValid) {
+          trackStepValidationFailed('period', failedFields);
           toastManager.add({ title: t('selectDatesError'), type: 'error' });
         }
 
         return isValid;
       case 'products':
         if (selectedProducts.length === 0 && customItems.length === 0) {
+          trackStepValidationFailed('products', ['items']);
           toastManager.add({ title: t('addProductError'), type: 'error' });
           return false;
         }
         return true;
       case 'delivery':
+        if (!delivery.canContinue) {
+          trackStepValidationFailed('delivery', ['delivery']);
+        }
         return delivery.canContinue;
       case 'confirm':
         return true;
@@ -380,6 +424,22 @@ export function NewReservationForm({
     validateCurrentStep,
     isDeliveryEnabled,
   });
+
+  useEffect(() => {
+    if (!currentStepId) return;
+
+    posthog.capture(productAnalyticsEvents.dashboardReservationStepViewed, {
+      ...dashboardReservationAnalyticsBaseProperties,
+      step: currentStepId,
+      step_index: currentStep,
+      steps_total: steps.length,
+      direction: stepDirection,
+      includes_delivery_step: isDeliveryEnabled,
+      source: openReplaySource,
+    });
+    // Only re-fire when the visible step actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, currentStepId, posthog]);
 
   const submitManualReservation = async (
     value: NewReservationFormValues,
@@ -469,6 +529,17 @@ export function NewReservationForm({
       });
 
       if (isInsufficientCapacityResult(result)) {
+        posthog.capture(
+          productAnalyticsEvents.dashboardReservationCapacityBlocked,
+          {
+            ...dashboardReservationAnalyticsBaseProperties,
+            shortfall_count: result.shortfalls.length,
+            shortfall_product_ids: result.shortfalls.map(
+              (shortfall) => shortfall.productId,
+            ),
+            source: openReplaySource,
+          },
+        );
         setOverbookingDialog({
           isOpen: true,
           shortfalls: result.shortfalls,
@@ -477,6 +548,14 @@ export function NewReservationForm({
       }
 
       if ('error' in result && result.error) {
+        posthog.capture(
+          productAnalyticsEvents.dashboardReservationCreationFailed,
+          {
+            ...dashboardReservationAnalyticsBaseProperties,
+            error_code: result.error,
+            source: openReplaySource,
+          },
+        );
         toastManager.add({
           title: tErrors(result.error.replace('errors.', '')),
           type: 'error',
@@ -501,6 +580,14 @@ export function NewReservationForm({
       });
       router.push(`/dashboard/reservations/${result.reservationId}`);
     } catch (error) {
+      posthog.capture(
+        productAnalyticsEvents.dashboardReservationCreationFailed,
+        {
+          ...dashboardReservationAnalyticsBaseProperties,
+          error_code: error instanceof Error ? error.message : 'unknown',
+          source: openReplaySource,
+        },
+      );
       toastManager.add({
         title: getActionErrorMessage(error),
         type: 'error',
@@ -2138,6 +2225,14 @@ export function NewReservationForm({
               variant="destructive"
               disabled={isSaving}
               onClick={async () => {
+                posthog.capture(
+                  productAnalyticsEvents.dashboardReservationOverbookingConfirmed,
+                  {
+                    ...dashboardReservationAnalyticsBaseProperties,
+                    shortfall_count: overbookingDialog.shortfalls.length,
+                    source: openReplaySource,
+                  },
+                );
                 setOverbookingDialog({ isOpen: false, shortfalls: [] });
                 await submitManualReservation(watchedValues, {
                   allowOverbooking: true,
