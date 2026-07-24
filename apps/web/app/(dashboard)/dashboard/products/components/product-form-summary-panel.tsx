@@ -134,7 +134,7 @@ export function ProductFormSummaryPanel({
                 {selectedCategories.length > 0 && (
                   <div className="mt-1 flex flex-wrap gap-1">
                     {selectedCategories.map((category) => (
-                      <Badge key={category.id} variant="secondary">
+                      <Badge key={category.id} variant="expired">
                         {category.name}
                       </Badge>
                     ))}
@@ -172,7 +172,7 @@ export function ProductFormSummaryPanel({
                 )}
                 <span className={item.done ? "" : "text-muted-foreground"}>{item.label}</span>
                 {item.required && !item.done && (
-                  <Badge variant="outline" className="ml-auto h-5 px-1.5 text-[10px]">
+                  <Badge variant="review" className="ml-auto h-5 px-1.5 text-[10px]">
                     {t("summary.required")}
                   </Badge>
                 )}
@@ -201,7 +201,7 @@ export function ProductFormSummaryPanel({
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-semibold">{option.label}</p>
                       {option.recommended && (
-                        <Badge variant="default" className="h-5 px-1.5 text-[10px]">
+                        <Badge variant="progress" className="h-5 px-1.5 text-[10px]">
                           {t("recommended")}
                         </Badge>
                       )}

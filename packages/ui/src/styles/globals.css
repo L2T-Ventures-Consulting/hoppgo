@@ -151,10 +151,20 @@
   --animate-skeleton: skeleton 2s -1s infinite linear;
 
   /* badges */
-  --color-badge-gray-background: var(--badge-gray-background);
-  --color-badge-gray-foreground: var(--badge-gray-foreground);
-  --color-badge-warning-background: var(--badge-warning-background);
-  --color-badge-warning-foreground: var(--badge-warning-foreground);
+  --color-badge-pending-background: var(--badge-pending-background);
+  --color-badge-pending-foreground: var(--badge-pending-foreground);
+  --color-badge-progress-background: var(--badge-progress-background);
+  --color-badge-progress-foreground: var(--badge-progress-foreground);
+  --color-badge-submitted-background: var(--badge-submitted-background);
+  --color-badge-submitted-foreground: var(--badge-submitted-foreground);
+  --color-badge-review-background: var(--badge-review-background);
+  --color-badge-review-foreground: var(--badge-review-foreground);
+  --color-badge-success-background: var(--badge-success-background);
+  --color-badge-success-foreground: var(--badge-success-foreground);
+  --color-badge-failed-background: var(--badge-failed-background);
+  --color-badge-failed-foreground: var(--badge-failed-foreground);
+  --color-badge-expired-background: var(--badge-expired-background);
+  --color-badge-expired-foreground: var(--badge-expired-foreground);
 
   --thumb-size: var(--spacing) * 5;
 
@@ -267,10 +277,20 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* badges */
-  --badge-gray-background: oklch(95.8% 0 0deg);
-  --badge-gray-foreground: oklch(56.9% 0 0deg);
-  --badge-warning-background: oklch(97.4% 0.0143 50.8deg);
-  --badge-warning-foreground: oklch(76.1% 0.127 64.2deg);
+  --badge-pending-background: rgb(255 244 238);
+  --badge-pending-foreground: rgb(247 158 87);
+  --badge-progress-background: rgb(229 243 254);
+  --badge-progress-foreground: rgb(0 140 255);
+  --badge-submitted-background: rgb(239 234 255);
+  --badge-submitted-foreground: rgb(103 54 254);
+  --badge-review-background: rgb(255 248 229);
+  --badge-review-foreground: rgb(245 184 59);
+  --badge-success-background: rgb(236 247 239);
+  --badge-success-foreground: rgb(78 191 110);
+  --badge-failed-background: rgb(253 239 238);
+  --badge-failed-foreground: rgb(231 102 80);
+  --badge-expired-background: rgb(241 241 241);
+  --badge-expired-foreground: rgb(120 120 120);
 }
 
 .dark {
@@ -361,6 +381,20 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --badge-pending-background: rgb(247 158 87 / 18%);
+  --badge-pending-foreground: rgb(253 186 116);
+  --badge-progress-background: rgb(0 140 255 / 18%);
+  --badge-progress-foreground: rgb(125 211 252);
+  --badge-submitted-background: rgb(103 54 254 / 18%);
+  --badge-submitted-foreground: rgb(196 181 253);
+  --badge-review-background: rgb(245 184 59 / 18%);
+  --badge-review-foreground: rgb(253 224 71);
+  --badge-success-background: rgb(78 191 110 / 18%);
+  --badge-success-foreground: rgb(134 239 172);
+  --badge-failed-background: rgb(231 102 80 / 18%);
+  --badge-failed-foreground: rgb(252 165 165);
+  --badge-expired-background: rgb(120 120 120 / 22%);
+  --badge-expired-foreground: rgb(212 212 216);
 }
 
 @layer base {

@@ -48,11 +48,11 @@ interface ProductsTableProps {
   currency?: string
 }
 
-const STATUS_STYLES = {
-  active: 'bg-green-500/10 text-green-600 hover:bg-green-500/20',
-  draft: 'bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20',
-  archived: 'bg-muted text-muted-foreground',
-}
+const STATUS_VARIANTS = {
+  active: 'success',
+  draft: 'pending',
+  archived: 'expired',
+} as const
 
 function ProductImage({ src, alt }: { src?: string; alt: string }) {
   if (!src) {
@@ -116,7 +116,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
           </TableHeader>
           <TableBody>
             {products.map((product) => {
-              const statusStyle = STATUS_STYLES[product.status || 'draft']
+              const statusVariant = STATUS_VARIANTS[product.status || 'draft']
 
               return (
                 <TableRow key={product.id}>
@@ -139,7 +139,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                   </TableCell>
                   <TableCell className="text-center">{product.quantity}</TableCell>
                   <TableCell>
-                    <Badge className={statusStyle}>
+                    <Badge variant={statusVariant}>
                       {t(`status.${product.status || 'draft'}`)}
                     </Badge>
                   </TableCell>

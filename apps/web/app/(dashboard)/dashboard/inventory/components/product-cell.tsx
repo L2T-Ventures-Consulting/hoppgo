@@ -32,7 +32,7 @@ export const ProductCell = ({ row }: ProductCellProps) => {
           <p className="text-muted-foreground text-xs">{attributes}</p>
         ) : null}
         {row.counters.reservedWithoutAssignment > 0 ? (
-          <Badge variant="secondary">
+          <Badge variant="pending">
             {t('counters.reservedWithoutAssignedUnit', {
               count: row.counters.reservedWithoutAssignment,
             })}

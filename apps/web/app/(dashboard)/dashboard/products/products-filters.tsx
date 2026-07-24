@@ -94,7 +94,7 @@ export function ProductsFilters({
               >
                 {option.label}
                 <Badge
-                  variant={isActive ? 'default' : 'secondary'}
+                  variant={isActive ? 'progress' : 'expired'}
                   className="ml-1 h-5 min-w-5 px-1.5"
                 >
                   {count}

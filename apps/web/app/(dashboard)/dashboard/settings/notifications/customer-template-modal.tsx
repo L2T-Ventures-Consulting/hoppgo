@@ -324,7 +324,7 @@ export function CustomerTemplateModal({
                   <div className="flex items-center gap-2">
                     {isSubjectCustomized ? (
                       <>
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="submitted" className="text-[10px] px-1.5 py-0">
                           {t('customized')}
                         </Badge>
                         <Tooltip>
@@ -342,7 +342,7 @@ export function CustomerTemplateModal({
                         </Tooltip>
                       </>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground">
+                      <Badge variant="submitted" className="text-[10px] px-1.5 py-0">
                         {t('default')}
                       </Badge>
                     )}
@@ -364,7 +364,7 @@ export function CustomerTemplateModal({
                   <Label className="text-xs">{t('additionalMessage')}</Label>
                   {isEmailMessageCustomized && (
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                      <Badge variant="expired" className="text-[10px] px-1.5 py-0">
                         {t('customized')}
                       </Badge>
                       <Tooltip>
@@ -409,7 +409,7 @@ export function CustomerTemplateModal({
                   <div className="flex items-center gap-2">
                     {isSmsCustomized ? (
                       <>
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="submitted" className="text-[10px] px-1.5 py-0">
                           {t('customized')}
                         </Badge>
                         <Tooltip>
@@ -427,7 +427,7 @@ export function CustomerTemplateModal({
                         </Tooltip>
                       </>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground">
+                      <Badge variant="expired" className="text-[10px] px-1.5 py-0">
                         {t('default')}
                       </Badge>
                     )}

@@ -36,11 +36,11 @@ import {
 
 import { useProductActions } from '../hooks/use-product-actions';
 
-const STATUS_STYLES = {
-  active: 'bg-green-500/10 text-green-600 hover:bg-green-500/20',
-  draft: 'bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20',
-  archived: 'bg-muted text-muted-foreground',
-};
+const STATUS_VARIANTS = {
+  active: 'success',
+  draft: 'pending',
+  archived: 'expired',
+} as const
 
 interface ProductHeaderProps {
   product: {
@@ -104,21 +104,13 @@ export function ProductHeader({ product, storeSlug }: ProductHeaderProps) {
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight">
-                {product.name}
-              </h1>
-              <Badge className={STATUS_STYLES[status]}>
-                {t(`status.${status}`)}
-              </Badge>
+              <h1 className="text-2xl font-bold tracking-tight">{product.name}</h1>
+              <Badge variant={STATUS_VARIANTS[status]}>{t(`status.${status}`)}</Badge>
             </div>
             {product.categories.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {product.categories.map((category) => (
-                  <Badge
-                    key={category.id}
-                    variant="secondary"
-                    className="font-normal"
-                  >
+                  <Badge key={category.id} variant="expired" className="font-normal">
                     {category.name}
                   </Badge>
                 ))}

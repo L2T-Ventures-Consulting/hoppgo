@@ -82,7 +82,7 @@ export function TopProductsAnalytics({
                   <span className="tabular-nums">{product.cartAdditions.toLocaleString()}</span>
                 </div>
 
-                <Badge variant="secondary" className="tabular-nums">
+                <Badge variant="expired" className="tabular-nums">
                   {conversionRate}%
                 </Badge>
               </div>

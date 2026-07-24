@@ -68,7 +68,7 @@ export function TulipSetupSection({
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant={connected ? 'success' : 'secondary'}>
+          <Badge variant={connected ? 'success' : 'expired'}>
             {connected ? t('statusConnected') : t('statusNotConnected')}
           </Badge>
 

@@ -2,16 +2,10 @@
 
 import { useMemo, useState } from 'react';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  ChevronDown,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { PencilSolidIcon, SpinnerSolidIcon, TrashSolidIcon } from '@louez/ui/icons'
+import { ChevronDown, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import {
   AlertDialog,
@@ -727,18 +721,13 @@ const VariantDefinitionRow = ({
               open && 'rotate-180',
             )}
           />
-          <span className="min-w-0 flex-1 truncate font-medium">
-            {variant.label}
-          </span>
-          <Badge variant="secondary" className="shrink-0">
+          <span className="min-w-0 flex-1 truncate font-medium">{variant.label}</span>
+          <Badge variant="expired" className="shrink-0">
             {t('valuesCount', { count: variant.values.length })}
           </Badge>
         </CollapsibleTrigger>
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <Badge
-            variant={variant.isActive ? 'success' : 'tertiary'}
-            className="shrink-0"
-          >
+          <Badge variant={variant.isActive ? 'success' : 'expired'} className="shrink-0">
             {variant.isActive ? t('variantActive') : t('variantInactive')}
           </Badge>
           <span
@@ -811,7 +800,7 @@ const VariantDefinitionRow = ({
                 return (
                   <Badge
                     key={valueId ?? `${variant.key}-${value.label}`}
-                    variant="secondary"
+                    variant="expired"
                     className="gap-1 pr-1"
                   >
                     {value.colorHex && (
@@ -822,7 +811,7 @@ const VariantDefinitionRow = ({
                     )}
                     {value.label}
                     {isOptimistic ? (
-                      <Loader2 className="size-3 animate-spin" />
+                      <SpinnerSolidIcon className="size-3 animate-spin" />
                     ) : (
                       <>
                         <button
@@ -832,7 +821,7 @@ const VariantDefinitionRow = ({
                           disabled={disabled || updateValueMutation.isPending}
                           aria-label={`${tCommon('edit')} ${value.label}`}
                         >
-                          <Pencil className="size-3" />
+                          <PencilSolidIcon className="size-3" />
                         </button>
                         <button
                           type="button"
@@ -841,7 +830,7 @@ const VariantDefinitionRow = ({
                           disabled={disabled || deleteValueMutation.isPending}
                           aria-label={`${tCommon('delete')} ${value.label}`}
                         >
-                          <Trash2 className="size-3" />
+                          <TrashSolidIcon className="size-3" />
                         </button>
                       </>
                     )}

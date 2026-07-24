@@ -1,5 +1,6 @@
 "use client";
 
+import { ShieldSolidIcon } from "@louez/ui/icons";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
@@ -386,11 +387,8 @@ export function ReservationDetailClient({
                                     <span>{item.productSnapshot?.name || item.product?.name}</span>
                                   )}
                                   {isTulipInsured && (
-                                    <Badge
-                                      variant="outline"
-                                      className="border-emerald-300 bg-emerald-50 text-emerald-700"
-                                    >
-                                      <Shield className="mr-1 h-3 w-3" />
+                                    <Badge variant="success" className="">
+                                      <ShieldSolidIcon className="mr-1 h-3 w-3" />
                                       {t("tulipInsuredBadge")}
                                     </Badge>
                                   )}
@@ -403,7 +401,7 @@ export function ReservationDetailClient({
                                       .map(([key, value]) => (
                                         <Badge
                                           key={`${item.id}-${key}`}
-                                          variant="outline"
+                                          variant="expired"
                                           className="text-xs"
                                         >
                                           {attributeLabelsByKey?.[key] || key}:{" "}
@@ -493,10 +491,7 @@ export function ReservationDetailClient({
                         <Tag className="h-3.5 w-3.5" />
                         {t("promoDiscount")}
                         {reservation.promoCodeSnapshot && (
-                          <Badge
-                            variant="secondary"
-                            className="ml-1 text-xs bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                          >
+                          <Badge variant="success" className="ml-1 text-xs">
                             {(reservation.promoCodeSnapshot as { code: string }).code}
                           </Badge>
                         )}

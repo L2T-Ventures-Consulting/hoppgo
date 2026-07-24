@@ -1,18 +1,11 @@
 'use client';
 
-import Link from 'next/link';
+import { TrendingDownSolidIcon, TrendingUpSolidIcon } from '@louez/ui/icons'
 
-import {
-  ArrowDownRight,
-  ArrowUpRight,
-  Clock,
-  Euro,
-  Package,
-  TrendingDown,
-  TrendingUp,
-  Users,
-} from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link'
+
+import { ArrowDownRight, ArrowUpRight, Clock, Euro, Package, Users } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@louez/ui';
 import { Badge } from '@louez/ui';
@@ -104,29 +97,19 @@ const StatCard = ({
         <div className="flex items-center gap-2">
           <span className="text-2xl font-bold">{value}</span>
           {badge && (
-            <Badge
-              variant="secondary"
-              className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-            >
+            <Badge variant="pending" className="">
               {badge}
             </Badge>
           )}
           {trend !== null && trend !== undefined && (
             <Badge
-              variant="secondary"
-              className={cn(
-                'gap-0.5',
-                trend > 0
-                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                  : trend < 0
-                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    : 'bg-muted text-muted-foreground',
-              )}
+              variant={trend > 0 ? 'success' : trend < 0 ? 'failed' : 'expired'}
+              className="gap-0.5"
             >
               {trend > 0 ? (
-                <TrendingUp className="h-3 w-3" />
+                <TrendingUpSolidIcon className="h-3 w-3" />
               ) : trend < 0 ? (
-                <TrendingDown className="h-3 w-3" />
+                <TrendingDownSolidIcon className="h-3 w-3" />
               ) : null}
               {trend > 0 ? '+' : ''}
               {trend}%

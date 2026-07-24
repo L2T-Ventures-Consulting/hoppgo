@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { toastManager } from "@louez/ui";
 import Link from "next/link";
-import { Pencil, Globe } from "lucide-react";
+import { Globe, Pencil } from "lucide-react";
+import { toastManager } from "@louez/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
 import {
   CalendarCheckIcon,
   ChatIcon,
-  CheckCircleIcon,
   ClockIcon,
   ExternalLinkIcon,
   FastPaymentIcon,
   MobileIcon,
+  SuccessSolidIcon,
   WarningIcon,
 } from "@louez/ui/icons";
 import { Button } from "@louez/ui";
@@ -424,7 +424,7 @@ export const NotificationsForm = ({
                   </div>
                   {isSmsConfigured && (
                     <Badge variant="success" size="sm">
-                      <CheckCircleIcon className="h-3 w-3" />
+                      <SuccessSolidIcon className="h-3 w-3" />
                       {t("phone.configured")}
                     </Badge>
                   )}
@@ -511,7 +511,7 @@ export const NotificationsForm = ({
                   </div>
                   {isDiscordConnected && (
                     <Badge variant="success" size="sm">
-                      <CheckCircleIcon className="h-3 w-3" />
+                      <SuccessSolidIcon className="h-3 w-3" />
                       {t("discord.connected")}
                     </Badge>
                   )}

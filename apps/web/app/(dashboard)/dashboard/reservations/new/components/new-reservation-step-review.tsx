@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { ShieldSolidIcon } from '@louez/ui/icons'
 
-import { format } from 'date-fns';
-import type { Locale } from 'date-fns';
-import { Check, MapPin, PenLine, Shield, Store, Truck } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react'
+
+import { format } from 'date-fns'
+import type { Locale } from 'date-fns'
+import { Check, MapPin, PenLine, Store, Truck } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import type { LegMethod } from '@louez/types';
 import {
@@ -18,8 +20,8 @@ import {
   CardTitle,
   Input,
   Separator,
-} from '@louez/ui';
-import { cn, formatCurrency } from '@louez/utils';
+} from '@louez/ui'
+import { formatCurrency } from '@louez/utils'
 
 import type {
   CustomItem,
@@ -265,15 +267,9 @@ export function NewReservationStepReview({
                   <p className="font-medium">
                     {values.firstName} {values.lastName}
                   </p>
-                  <p className="text-muted-foreground text-sm">
-                    {values.email}
-                  </p>
-                  {values.phone && (
-                    <p className="text-muted-foreground text-sm">
-                      {values.phone}
-                    </p>
-                  )}
-                  <Badge variant="secondary" className="mt-2">
+                  <p className="text-muted-foreground text-sm">{values.email}</p>
+                  {values.phone && <p className="text-muted-foreground text-sm">{values.phone}</p>}
+                  <Badge variant="progress" className="mt-2">
                     {t('newCustomerBadge')}
                   </Badge>
                 </div>
@@ -427,23 +423,19 @@ export function NewReservationStepReview({
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{product.name}</span>
                         {isProductInsured && (
-                          <Badge
-                            variant="outline"
-                            className="border-emerald-300 bg-emerald-50 text-emerald-700"
-                          >
-                            <Shield className="mr-1 h-3 w-3" />
+                          <Badge variant="success" className="">
+                            <ShieldSolidIcon className="mr-1 h-3 w-3" />
                             {t('tulipInsurance.assuredProduct')}
                           </Badge>
                         )}
                         {pricing.hasPriceOverride && (
                           <Badge
-                            variant="secondary"
-                            className={cn(
-                              'text-xs',
+                            variant={
                               pricing.effectivePrice < pricing.calculatedPrice
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-orange-100 text-orange-700',
-                            )}
+                                ? 'success'
+                                : 'pending'
+                            }
+                            className="text-xs"
                           >
                             {t('priceOverride.modified')}
                           </Badge>
@@ -460,7 +452,7 @@ export function NewReservationStepReview({
                               .map(([key, value]) => (
                                 <Badge
                                   key={`${item.lineId}-${key}`}
-                                  variant="outline"
+                                  variant="expired"
                                   className="text-xs"
                                 >
                                   {key}: {value}
@@ -486,7 +478,7 @@ export function NewReservationStepReview({
                 >
                   <div>
                     <span className="font-medium">{item.name}</span>
-                    <Badge variant="secondary" className="ml-2 text-xs">
+                    <Badge variant="expired" className="ml-2 text-xs">
                       {t('customItem.badge')}
                     </Badge>
                     <span className="text-muted-foreground ml-2">

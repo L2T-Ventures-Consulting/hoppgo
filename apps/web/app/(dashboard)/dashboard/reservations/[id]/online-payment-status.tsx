@@ -1,23 +1,13 @@
 'use client'
 
+import { ClockSolidIcon, SuccessSolidIcon } from '@louez/ui/icons'
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useQuery } from '@tanstack/react-query'
-import {
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Loader2,
-  Wifi,
-} from 'lucide-react'
+import { CreditCard, Loader2, Wifi } from 'lucide-react'
 
 import { Badge } from '@louez/ui'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui'
+import { Card, CardContent, CardHeader, CardTitle } from '@louez/ui'
 import { getCurrencySymbol } from '@louez/utils'
 
 import { formatStoreDate } from '@/lib/utils/store-date'
@@ -114,11 +104,8 @@ export function OnlinePaymentStatus({
               <Wifi className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               {t('title')}
             </CardTitle>
-            <Badge
-              variant="secondary"
-              className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-            >
-              <Clock className="h-3 w-3 mr-1" />
+            <Badge variant="pending" className="">
+              <ClockSolidIcon className="h-3 w-3 mr-1" />
               {t('pending')}
             </Badge>
           </div>
@@ -171,11 +158,8 @@ export function OnlinePaymentStatus({
               <Wifi className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
               {t('title')}
             </CardTitle>
-            <Badge
-              variant="secondary"
-              className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-            >
-              <CheckCircle className="h-3 w-3 mr-1" />
+            <Badge variant="success" className="">
+              <SuccessSolidIcon className="h-3 w-3 mr-1" />
               {t('received')}
             </Badge>
           </div>

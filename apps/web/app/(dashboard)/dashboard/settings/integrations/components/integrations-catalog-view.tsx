@@ -22,7 +22,7 @@ type BuiltInItem = {
   descriptionKey: string;
   badge?: {
     labelKey: string;
-    variant: "default" | "secondary" | "outline";
+    variant: "progress" | "expired";
   };
 };
 
@@ -35,7 +35,7 @@ const LOUEZ_ITEMS: BuiltInItem[] = [
     descriptionKey: "dashboard.settings.integrationsHub.builtIn.widget.description",
     badge: {
       labelKey: "dashboard.settings.integrationsHub.recommended",
-      variant: "default",
+      variant: "progress",
     },
   },
   {
@@ -53,7 +53,7 @@ const LOUEZ_ITEMS: BuiltInItem[] = [
     descriptionKey: "dashboard.settings.integrationsHub.builtIn.api.description",
     badge: {
       labelKey: "dashboard.settings.integrationsHub.comingSoon",
-      variant: "secondary",
+      variant: "expired",
     },
   },
 ];
@@ -76,7 +76,7 @@ function IntegrationItemCard({
   description: string;
   badge?: {
     label: string;
-    variant: "default" | "secondary" | "outline" | "success";
+    variant: "progress" | "expired" | "success";
   };
   onPrefetch?: () => void;
 }) {

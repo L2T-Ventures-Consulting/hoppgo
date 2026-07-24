@@ -1,9 +1,14 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Check, AlertTriangle, X, ShoppingCart } from "lucide-react";
 import { cn } from "@louez/utils";
 import { Badge } from "@louez/ui";
+import {
+  CartSolidIcon,
+  ReviewSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from "@louez/ui/icons";
 
 export type AvailabilityStatus = "available" | "limited" | "unavailable" | "in_cart";
 
@@ -30,36 +35,35 @@ export function AvailabilityBadge({
 
   const config = {
     available: {
-      icon: Check,
+      icon: SuccessSolidIcon,
       label:
         availableQuantity > 1 ? t("availableCount", { count: availableQuantity }) : t("available"),
-      className: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+      variant: "success" as const,
     },
     limited: {
-      icon: AlertTriangle,
+      icon: ReviewSolidIcon,
       label: t("limited", { count: availableQuantity }),
-      className: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+      variant: "review" as const,
     },
     unavailable: {
-      icon: X,
+      icon: XCircleSolidIcon,
       label: t("unavailable"),
-      className: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+      variant: "failed" as const,
     },
     in_cart: {
-      icon: ShoppingCart,
+      icon: CartSolidIcon,
       label: t("inCart"),
-      className: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+      variant: "progress" as const,
     },
   };
 
-  const { icon: Icon, label, className: statusClassName } = config[status];
+  const { icon: Icon, label, variant } = config[status];
 
   return (
     <Badge
-      variant="secondary"
+      variant={variant}
       className={cn(
         "font-medium",
-        statusClassName,
         size === "sm" ? "text-xs px-2 py-0.5" : "text-xs px-2.5 py-1",
         className,
       )}

@@ -70,14 +70,11 @@ function getPromoCodeStatus(code: PromoCode): PromoCodeStatus {
 function StatusBadge({ status }: { status: PromoCodeStatus }) {
   const t = useTranslations("dashboard.settings.promoCodes");
 
-  const variants: Record<
-    PromoCodeStatus,
-    { variant: "default" | "secondary" | "destructive" | "outline"; label: string }
-  > = {
-    active: { variant: "default", label: t("active") },
-    inactive: { variant: "secondary", label: t("inactive") },
-    expired: { variant: "destructive", label: t("expired") },
-    exhausted: { variant: "outline", label: t("exhausted") },
+  const variants: Record<PromoCodeStatus, { variant: "success" | "expired"; label: string }> = {
+    active: { variant: "success", label: t("active") },
+    inactive: { variant: "expired", label: t("inactive") },
+    expired: { variant: "expired", label: t("expired") },
+    exhausted: { variant: "expired", label: t("exhausted") },
   };
 
   const { variant, label } = variants[status];

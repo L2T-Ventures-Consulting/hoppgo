@@ -7,7 +7,6 @@ import {
   CreditCard,
   Shield,
   ShieldCheck,
-  ShieldX,
   Clock,
   Loader2,
   AlertTriangle,
@@ -21,12 +20,15 @@ import { fr } from 'date-fns/locale'
 import { Button } from '@louez/ui'
 import { Badge } from '@louez/ui'
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui'
+  CreditCardSolidIcon,
+  FailedSolidIcon,
+  PendingSolidIcon,
+  ShieldSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from '@louez/ui/icons'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
 import {
   Dialog,
   DialogPopup,
@@ -236,66 +238,58 @@ export function DepositSection({
     switch (status) {
       case 'none':
         return {
-          icon: Shield,
+          icon: ShieldSolidIcon,
           iconClass: 'text-muted-foreground',
-          badgeVariant: 'secondary' as const,
-          badgeClass: '',
+          badgeVariant: 'expired' as const,
           label: t('status.none'),
         }
       case 'pending':
         return {
-          icon: AlertTriangle,
+          icon: PendingSolidIcon,
           iconClass: 'text-amber-500',
-          badgeVariant: 'secondary' as const,
-          badgeClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+          badgeVariant: 'pending' as const,
           label: t('status.pending'),
         }
       case 'card_saved':
         return {
-          icon: CreditCard,
+          icon: CreditCardSolidIcon,
           iconClass: 'text-blue-500',
-          badgeVariant: 'secondary' as const,
-          badgeClass: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+          badgeVariant: 'submitted' as const,
           label: t('status.cardSaved'),
         }
       case 'authorized':
         return {
-          icon: ShieldCheck,
+          icon: SubmittedSolidIcon,
           iconClass: 'text-amber-500',
-          badgeVariant: 'secondary' as const,
-          badgeClass: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+          badgeVariant: 'submitted' as const,
           label: t('status.authorized'),
         }
       case 'captured':
         return {
-          icon: Banknote,
+          icon: FailedSolidIcon,
           iconClass: 'text-red-500',
-          badgeVariant: 'error' as const,
-          badgeClass: '',
+          badgeVariant: 'failed' as const,
           label: t('status.captured'),
         }
       case 'released':
         return {
-          icon: Check,
+          icon: SuccessSolidIcon,
           iconClass: 'text-emerald-500',
-          badgeVariant: 'secondary' as const,
-          badgeClass: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+          badgeVariant: 'success' as const,
           label: t('status.released'),
         }
       case 'failed':
         return {
-          icon: ShieldX,
+          icon: XCircleSolidIcon,
           iconClass: 'text-red-500',
-          badgeVariant: 'error' as const,
-          badgeClass: '',
+          badgeVariant: 'failed' as const,
           label: t('status.failed'),
         }
       default:
         return {
-          icon: Shield,
+          icon: ShieldSolidIcon,
           iconClass: 'text-muted-foreground',
-          badgeVariant: 'secondary' as const,
-          badgeClass: '',
+          badgeVariant: 'expired' as const,
           label: status,
         }
     }
@@ -313,7 +307,7 @@ export function DepositSection({
               <Shield className="h-4 w-4" />
               {t('title')}
             </CardTitle>
-            <Badge variant={statusConfig.badgeVariant} className={statusConfig.badgeClass}>
+            <Badge variant={statusConfig.badgeVariant}>
               <StatusIcon className="h-3 w-3 mr-1" />
               {statusConfig.label}
             </Badge>

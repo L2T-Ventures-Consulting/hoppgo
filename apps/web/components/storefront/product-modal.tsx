@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { TrendingDownSolidIcon } from '@louez/ui/icons'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 import Image from 'next/image';
 
@@ -15,23 +17,16 @@ import {
   Play,
   Plus,
   ShoppingCart,
-  TrendingDown,
-} from 'lucide-react';
-import { useTranslations } from 'next-intl';
+} from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
-import type { CombinationAvailability } from '@louez/types';
-import type { Rate } from '@louez/types';
-import { toastManager } from '@louez/ui';
-import { Button } from '@louez/ui';
-import { Dialog, DialogHeader, DialogPopup, DialogTitle } from '@louez/ui';
-import { Badge } from '@louez/ui';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@louez/ui';
+import type { CombinationAvailability } from '@louez/types'
+import type { Rate } from '@louez/types'
+import { toastManager } from '@louez/ui'
+import { Button } from '@louez/ui'
+import { Dialog, DialogHeader, DialogPopup, DialogTitle } from '@louez/ui'
+import { Badge } from '@louez/ui'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@louez/ui'
 import {
   allocateAcrossCombinations,
   buildCombinationKey,
@@ -985,7 +980,7 @@ export function ProductModal({
                     </h2>
                   </div>
                   <Badge
-                    variant={isUnavailable ? 'error' : 'secondary'}
+                    variant={isUnavailable ? 'failed' : 'expired'}
                     className="shrink-0 text-xs"
                   >
                     {availableQuantity}{' '}
@@ -1057,7 +1052,7 @@ export function ProductModal({
                             {tProduct('tieredPricing.ratesTitle')}
                           </span>
                           {activeSeasonalPricing && (
-                            <Badge variant="secondary" className="text-xs">
+                            <Badge variant="expired" className="text-xs">
                               {activeSeasonalPricing.name}
                             </Badge>
                           )}
@@ -1090,7 +1085,7 @@ export function ProductModal({
                                     })}
                                   </span>
                                   {isDiscountVisible(rate.reductionPercent) && (
-                                    <Badge className="bg-primary/10 text-primary text-xs font-semibold">
+                                    <Badge variant="progress" className="text-xs font-semibold">
                                       -{Math.floor(rate.reductionPercent)}%
                                     </Badge>
                                   )}
@@ -1172,15 +1167,12 @@ export function ProductModal({
                                               },
                                             )}
                                           </span>
-                                          {isDiscountVisible(
-                                            rate.reductionPercent,
-                                          ) && (
-                                            <Badge className="bg-primary/10 text-primary text-xs font-semibold">
-                                              -
-                                              {Math.floor(
-                                                rate.reductionPercent,
-                                              )}
-                                              %
+                                          {isDiscountVisible(rate.reductionPercent) && (
+                                            <Badge
+                                              variant="progress"
+                                              className="text-xs font-semibold"
+                                            >
+                                              -{Math.floor(rate.reductionPercent)}%
                                             </Badge>
                                           )}
                                         </div>
@@ -1337,7 +1329,7 @@ export function ProductModal({
                                     {tier.minDuration}+ {pricingUnitLabelPlural}
                                   </span>
                                   {isDiscountVisible(tier.discountPercent) && (
-                                    <Badge className="bg-primary/10 text-primary text-xs font-semibold">
+                                    <Badge variant="progress" className="text-xs font-semibold">
                                       -{Math.floor(tier.discountPercent)}%
                                     </Badge>
                                   )}
@@ -1396,13 +1388,12 @@ export function ProductModal({
                                             {tier.minDuration}+{' '}
                                             {pricingUnitLabelPlural}
                                           </span>
-                                          {isDiscountVisible(
-                                            tier.discountPercent,
-                                          ) && (
-                                            <Badge className="bg-primary/10 text-primary text-xs font-semibold">
-                                              -
-                                              {Math.floor(tier.discountPercent)}
-                                              %
+                                          {isDiscountVisible(tier.discountPercent) && (
+                                            <Badge
+                                              variant="progress"
+                                              className="text-xs font-semibold"
+                                            >
+                                              -{Math.floor(tier.discountPercent)}%
                                             </Badge>
                                           )}
                                         </div>
@@ -1556,14 +1547,12 @@ export function ProductModal({
                 </div>
               </div>
 
-              {savings > 0 &&
-                discountPercent &&
-                isDiscountVisible(discountPercent) && (
-                  <Badge className="bg-primary/10 text-primary px-3 py-1 text-sm font-semibold">
-                    <TrendingDown className="mr-1 h-3.5 w-3.5" />-
-                    {Math.floor(discountPercent)}%
-                  </Badge>
-                )}
+              {savings > 0 && discountPercent && isDiscountVisible(discountPercent) && (
+                <Badge variant="progress" className="px-3 py-1 text-sm font-semibold">
+                  <TrendingDownSolidIcon className="mr-1 h-3.5 w-3.5" />-
+                  {Math.floor(discountPercent)}%
+                </Badge>
+              )}
             </div>
 
             {/* Quantity and CTA row */}

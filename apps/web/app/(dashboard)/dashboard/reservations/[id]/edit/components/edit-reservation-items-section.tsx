@@ -152,12 +152,12 @@ function ProductAddCombobox({
                       {product.name}
                     </span>
                     {isUnavailable ? (
-                      <Badge variant="warning" size="default">
+                      <Badge variant="pending" size="default">
                         {unavailableLabel}
                       </Badge>
                     ) : (
                       remaining !== undefined && (
-                        <Badge variant="tertiary" className={cn("tabular-nums")}>
+                        <Badge variant="expired" className={cn("tabular-nums")}>
                           {remaining} {availableLabel}
                         </Badge>
                       )

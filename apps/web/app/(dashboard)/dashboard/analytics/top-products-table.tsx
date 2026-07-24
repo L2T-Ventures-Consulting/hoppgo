@@ -55,16 +55,7 @@ export function TopProductsTable({ products }: TopProductsTableProps) {
           <TableRow key={product.productId}>
             <TableCell className="font-medium">
               {index < 3 ? (
-                <Badge
-                  variant={index === 0 ? 'default' : 'secondary'}
-                  className={
-                    index === 0
-                      ? 'bg-yellow-500 dark:bg-yellow-600 text-yellow-950'
-                      : index === 1
-                        ? 'bg-gray-300 dark:bg-gray-500 text-gray-800 dark:text-gray-100'
-                        : 'bg-amber-600 dark:bg-amber-700 text-amber-50'
-                  }
-                >
+                <Badge variant={index === 0 ? 'review' : index === 1 ? 'expired' : 'pending'}>
                   {index + 1}
                 </Badge>
               ) : (
@@ -80,7 +71,7 @@ export function TopProductsTable({ products }: TopProductsTableProps) {
               </Link>
             </TableCell>
             <TableCell className="text-center">
-              <Badge variant="outline">{product.reservationCount}</Badge>
+              <Badge variant="expired">{product.reservationCount}</Badge>
             </TableCell>
             <TableCell className="text-center text-muted-foreground">
               {t('topProducts.units', { count: product.totalQuantity })}

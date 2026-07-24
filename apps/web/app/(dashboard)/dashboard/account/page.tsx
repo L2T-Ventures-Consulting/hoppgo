@@ -110,7 +110,7 @@ export default async function AccountSettingsPage() {
                 {t('accountSettings.connectedVia', { method: session.user.email?.includes('@') ? 'email' : 'OAuth' })}
               </p>
             </div>
-            <Badge variant="outline">{t('accountSettings.active')}</Badge>
+            <Badge variant="success">{t('accountSettings.active')}</Badge>
           </div>
 
           <div className="flex items-center justify-between rounded-lg border p-4">
@@ -120,7 +120,7 @@ export default async function AccountSettingsPage() {
                 {t('accountSettings.activeSessionsDescription')}
               </p>
             </div>
-            <Badge variant="secondary">{t('accountSettings.sessionCount', { count: 1 })}</Badge>
+            <Badge variant="expired">{t('accountSettings.sessionCount', { count: 1 })}</Badge>
           </div>
         </CardContent>
       </Card>

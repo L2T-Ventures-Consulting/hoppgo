@@ -201,7 +201,7 @@ export function ApiKeysPageContent() {
                   <div className="flex items-center gap-3">
                     <div className="hidden flex-wrap gap-1 sm:flex">
                       {DOMAINS.filter((d) => apiKey.permissions[d] !== "none").map((d) => (
-                        <Badge key={d} variant="secondary" className="text-xs">
+                        <Badge key={d} variant="expired" className="text-xs">
                           {d}:{apiKey.permissions[d]}
                         </Badge>
                       ))}
@@ -384,10 +384,10 @@ export function ApiKeysPageContent() {
                         <Badge
                           variant={
                             permissions[domain] === "write"
-                              ? "default"
+                              ? "progress"
                               : permissions[domain] === "read"
-                                ? "secondary"
-                                : "outline"
+                                ? "expired"
+                                : "expired"
                           }
                           className="text-xs"
                         >

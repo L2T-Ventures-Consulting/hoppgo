@@ -1,5 +1,6 @@
 "use client";
 
+import { TrendingDownSolidIcon } from "@louez/ui/icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Image from "next/image";
@@ -20,7 +21,6 @@ import {
   ImageIcon,
   Layers,
   Play,
-  TrendingDown,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -510,7 +510,7 @@ export function ProductPreviewModal({
                   </h2>
                 </div>
                 {product.quantity === 0 && (
-                  <Badge variant="error" className="shrink-0 text-xs">
+                  <Badge variant="failed" className="shrink-0 text-xs">
                     {tProduct("unavailable")}
                   </Badge>
                 )}
@@ -530,8 +530,8 @@ export function ProductPreviewModal({
                   / {formatPeriodLabel(displayPeriodMinutes)}
                 </span>
                 {modalDiscount > 0 && (
-                  <Badge className="ml-2 bg-primary/10 text-primary">
-                    <TrendingDown className="mr-1 h-3 w-3" />
+                  <Badge variant="progress" className="ml-2">
+                    <TrendingDownSolidIcon className="mr-1 h-3 w-3" />
                     {tProduct("tieredPricing.badge", {
                       percent: Math.floor(modalDiscount),
                     })}
@@ -587,7 +587,7 @@ export function ProductPreviewModal({
                               })}
                             </span>
                             {isDiscountVisible(rate.reductionPercent) && (
-                              <Badge className="bg-primary/10 text-xs font-semibold text-primary">
+                              <Badge variant="progress" className="text-xs font-semibold">
                                 -{Math.floor(rate.reductionPercent)}%
                               </Badge>
                             )}
@@ -633,7 +633,7 @@ export function ProductPreviewModal({
                                       })}
                                     </span>
                                     {isDiscountVisible(rate.reductionPercent) && (
-                                      <Badge className="bg-primary/10 text-xs font-semibold text-primary">
+                                      <Badge variant="progress" className="text-xs font-semibold">
                                         -{Math.floor(rate.reductionPercent)}%
                                       </Badge>
                                     )}

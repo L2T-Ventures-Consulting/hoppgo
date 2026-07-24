@@ -29,6 +29,8 @@ import {
   CheckCircleIcon,
   ExternalLinkIcon,
   FastPaymentIcon,
+  ReviewSolidIcon,
+  SuccessSolidIcon,
   UnlinkIcon,
   WarningIcon,
 } from "@louez/ui/icons";
@@ -133,15 +135,15 @@ export function StripeConnectCard({
             <CardDescription>{t("stripeConnectDescription")}</CardDescription>
           </div>
           {isConnected && (
-            <Badge variant={isActive ? "default" : "secondary"}>
+            <Badge variant={isActive ? "progress" : "expired"}>
               {isActive ? (
                 <>
-                  <CheckCircleIcon className="mr-1 h-3 w-3" />
+                  <SuccessSolidIcon className="mr-1 h-3 w-3" />
                   {t("status.active")}
                 </>
               ) : (
                 <>
-                  <WarningIcon className="mr-1 h-3 w-3" />
+                  <ReviewSolidIcon className="mr-1 h-3 w-3" />
                   {t("status.incomplete")}
                 </>
               )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Lightbulb } from "lucide-react";
 
@@ -21,11 +21,14 @@ import {
   CheckCircleIcon,
   ClockIcon,
   CreditCardIcon,
+  CreditCardSolidIcon,
   FastPaymentIcon,
   FileCheckIcon,
+  FileCheckSolidIcon,
   MailIcon,
+  ReviewSolidIcon,
   WarningIcon,
-  ZapIcon,
+  ZapSolidIcon,
 } from "@louez/ui/icons";
 
 interface PaymentFlowExplanationProps {
@@ -85,8 +88,8 @@ export function PaymentFlowExplanation({
               </CardTitle>
               <CardDescription>{t("subtitle")}</CardDescription>
             </div>
-            <Badge variant="secondary" className="gap-1">
-              <FileCheckIcon className="h-3 w-3" />
+            <Badge variant="expired" className="gap-1">
+              <FileCheckSolidIcon className="h-3 w-3" />
               {t("modes.request")}
             </Badge>
           </div>
@@ -155,12 +158,12 @@ export function PaymentFlowExplanation({
               <CardDescription>{t("subtitle")}</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Badge variant="secondary" className="gap-1">
-                <FileCheckIcon className="h-3 w-3" />
+              <Badge variant="expired" className="gap-1">
+                <FileCheckSolidIcon className="h-3 w-3" />
                 {t("modes.request")}
               </Badge>
-              <Badge variant="default" className="gap-1">
-                <CreditCardIcon className="h-3 w-3" />
+              <Badge variant="progress" className="gap-1">
+                <CreditCardSolidIcon className="h-3 w-3" />
                 {t("modes.stripeActive")}
               </Badge>
             </div>
@@ -227,8 +230,8 @@ export function PaymentFlowExplanation({
               </CardTitle>
               <CardDescription>{t("subtitle")}</CardDescription>
             </div>
-            <Badge variant="error" className="gap-1">
-              <WarningIcon className="h-3 w-3" />
+            <Badge variant="failed" className="gap-1">
+              <ReviewSolidIcon className="h-3 w-3" />
               {t("modes.configRequired")}
             </Badge>
           </div>
@@ -265,12 +268,12 @@ export function PaymentFlowExplanation({
             <CardDescription>{t("subtitle")}</CardDescription>
           </div>
           <div className="flex gap-2">
-            <Badge variant="default" className="gap-1">
-              <ZapIcon className="h-3 w-3" />
+            <Badge variant="progress" className="gap-1">
+              <ZapSolidIcon className="h-3 w-3" />
               {t("modes.instant")}
             </Badge>
-            <Badge variant="default" className="gap-1">
-              <CreditCardIcon className="h-3 w-3" />
+            <Badge variant="progress" className="gap-1">
+              <CreditCardSolidIcon className="h-3 w-3" />
               {t("modes.stripeActive")}
             </Badge>
           </div>

@@ -1,5 +1,6 @@
 'use client'
 
+import { GlobeSolidIcon, UserPlusSolidIcon } from '@louez/ui/icons'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import {
@@ -129,13 +130,13 @@ function parseActivityAmount(amount: unknown): number | null {
   return null
 }
 
-function getPaymentAmountClassName(
+function getPaymentAmountVariant(
   activityType: ActivityType,
   amount: number,
   isPaymentRequest: boolean,
 ) {
   if (isPaymentRequest) {
-    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    return 'progress'
   }
 
   if (
@@ -143,18 +144,18 @@ function getPaymentAmountClassName(
     activityType === 'payment_expired' ||
     activityType === 'deposit_failed'
   ) {
-    return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+    return 'failed'
   }
 
   if (activityType === 'payment_initiated' || activityType === 'deposit_authorized') {
-    return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+    return 'submitted'
   }
 
   if (amount < 0 || activityType === 'deposit_captured' || activityType === 'payment_updated') {
-    return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+    return 'review'
   }
 
-  return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+  return 'success'
 }
 
 const ACTIVITY_CONFIG: Record<
@@ -497,31 +498,24 @@ export function ActivityTimelineV2({
               {/* Source badge for creation events */}
               {activitySource && (
                 <Badge
-                  variant="secondary"
-                  className={
-                    activitySource === 'manual'
-                      ? 'text-[10px] px-1.5 py-0 h-4 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                      : 'text-[10px] px-1.5 py-0 h-4 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                  }
+                  variant={activitySource === 'manual' ? 'progress' : 'success'}
+                  className="h-4 px-1.5 py-0 text-[10px]"
                 >
                   {activitySource === 'manual' ? (
                     <>
-                      <UserPlus className="h-2.5 w-2.5 mr-0.5" />
+                      <UserPlusSolidIcon className="h-2.5 w-2.5 mr-0.5" />
                       {t('sourceManual')}
                     </>
                   ) : (
                     <>
-                      <Globe className="h-2.5 w-2.5 mr-0.5" />
+                      <GlobeSolidIcon className="h-2.5 w-2.5 mr-0.5" />
                       {t('sourceOnline')}
                     </>
                   )}
                 </Badge>
               )}
               {isOverbookedCreation && (
-                <Badge
-                  variant="secondary"
-                  className="text-[10px] px-1.5 py-0 h-4 bg-destructive/10 text-destructive border-0"
-                >
+                <Badge variant="failed" className="text-[10px] px-1.5 py-0 h-4 border-0">
                   {t('activity.overbooked')}
                 </Badge>
               )}
@@ -531,43 +525,37 @@ export function ActivityTimelineV2({
                 activity.activityType === 'payment_failed' ||
                 activity.activityType === 'payment_expired') &&
                 isStripePayment && (
-                  <Badge
-                    variant="secondary"
-                    className="text-[10px] px-1.5 py-0 h-4 bg-[#635BFF]/10 text-[#635BFF] border-0"
-                  >
+                  <Badge variant="submitted" className="text-[10px] px-1.5 py-0 h-4 border-0">
                     Stripe
                   </Badge>
                 )}
               {/* Payment amount badge */}
-              {paymentAmount !== null && PAYMENT_AMOUNT_ACTIVITY_TYPES.has(activity.activityType) && (
-                <Badge
-                  variant="secondary"
-                  className={cn(
-                    'text-[10px] px-1.5 py-0 h-4 font-mono',
-                    getPaymentAmountClassName(
+              {paymentAmount !== null &&
+                PAYMENT_AMOUNT_ACTIVITY_TYPES.has(activity.activityType) && (
+                  <Badge
+                    variant={getPaymentAmountVariant(
                       activity.activityType,
                       paymentAmount,
-                      isPaymentRequest
-                    )
-                  )}
-                >
-                  {showPositivePaymentPrefix ? '+' : ''}
-                  {paymentAmount.toFixed(2)} {paymentCurrency}
-                </Badge>
-              )}
+                      isPaymentRequest,
+                    )}
+                    className="h-4 px-1.5 py-0 font-mono text-[10px]"
+                  >
+                    {showPositivePaymentPrefix ? '+' : ''}
+                    {paymentAmount.toFixed(2)} {paymentCurrency}
+                  </Badge>
+                )}
               {/* Modified amount badge */}
               {activity.activityType === 'modified' &&
                 activity.metadata?.difference !== undefined && (
                   <Badge
-                    variant="secondary"
-                    className={cn(
-                      'text-[10px] px-1.5 py-0 h-4 font-mono',
+                    variant={
                       (activity.metadata.difference as number) > 0
-                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                        ? 'success'
                         : (activity.metadata.difference as number) < 0
-                          ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-                    )}
+                          ? 'failed'
+                          : 'expired'
+                    }
+                    className="h-4 px-1.5 py-0 font-mono text-[10px]"
                   >
                     {(activity.metadata.difference as number) >= 0 ? '+' : ''}
                     {(activity.metadata.difference as number).toFixed(2)} EUR
@@ -701,21 +689,17 @@ export function ActivityTimelineV2({
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-medium text-sm">{t('reservationCreated')}</p>
                       <Badge
-                        variant="secondary"
-                        className={
-                          isManualCreation
-                            ? 'text-[10px] px-1.5 py-0 h-4 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                            : 'text-[10px] px-1.5 py-0 h-4 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                        }
+                        variant={isManualCreation ? 'progress' : 'success'}
+                        className="h-4 px-1.5 py-0 text-[10px]"
                       >
                         {isManualCreation ? (
                           <>
-                            <UserPlus className="h-2.5 w-2.5 mr-0.5" />
+                            <UserPlusSolidIcon className="h-2.5 w-2.5 mr-0.5" />
                             {t('sourceManual')}
                           </>
                         ) : (
                           <>
-                            <Globe className="h-2.5 w-2.5 mr-0.5" />
+                            <GlobeSolidIcon className="h-2.5 w-2.5 mr-0.5" />
                             {t('sourceOnline')}
                           </>
                         )}

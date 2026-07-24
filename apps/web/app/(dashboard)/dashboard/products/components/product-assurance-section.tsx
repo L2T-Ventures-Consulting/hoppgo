@@ -268,7 +268,7 @@ export const ProductAssuranceSection = ({
             <ShieldCheckIcon className="h-5 w-5 shrink-0" />
             {t('title')}
           </CardTitle>
-          <Badge variant={state.connected ? 'success' : 'secondary'}>
+          <Badge variant={state.connected ? 'success' : 'expired'}>
             {state.connected ? t('statusConnected') : t('statusNotConnected')}
           </Badge>
         </CardHeader>
@@ -287,13 +287,8 @@ export const ProductAssuranceSection = ({
             <div className="flex flex-col gap-3 md:flex-row md:items-end">
               <div className="flex min-w-0 flex-1 flex-col gap-2">
                 <div className="flex items-center gap-2">
-                  <Label htmlFor={`product-tulip-mapping-${productId}`}>
-                    {t('mappingLabel')}
-                  </Label>
-                  <Badge
-                    variant={hasValidMapping ? 'success' : 'secondary'}
-                    size="sm"
-                  >
+                  <Label htmlFor={`product-tulip-mapping-${productId}`}>{t('mappingLabel')}</Label>
+                  <Badge variant={hasValidMapping ? 'success' : 'expired'} size="sm">
                     {hasValidMapping ? t('statusMapped') : t('statusNotMapped')}
                   </Badge>
                 </div>

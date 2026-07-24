@@ -1,3 +1,11 @@
+import {
+  ClockSolidIcon,
+  CreditCardSolidIcon,
+  ProductSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from '@louez/ui/icons'
 import Link from 'next/link'
 import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
@@ -13,7 +21,6 @@ import {
   Calendar,
   Clock,
   CheckCircle,
-  XCircle,
   Package,
   MapPin,
   Phone,
@@ -22,7 +29,6 @@ import {
   FileText,
   ArrowRight,
   CircleDot,
-  CreditCard,
   AlertCircle,
   History,
   Banknote,
@@ -72,22 +78,33 @@ export default async function ReservationDetailPage({
     storefrontRedirect(slug, '/account/login')
   }
 
-  type ReservationStatus = 'pending' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled' | 'rejected' | 'quote' | 'declined'
+  type ReservationStatus =
+    | 'pending'
+    | 'confirmed'
+    | 'ongoing'
+    | 'completed'
+    | 'cancelled'
+    | 'rejected'
+    | 'quote'
+    | 'declined'
 
-  const statusConfig: Record<ReservationStatus, {
-    label: string
-    description: string
-    variant: 'secondary' | 'default' | 'outline' | 'error'
-    icon: typeof Clock
-    color: string
-    bgColor: string
-    borderColor: string
-  }> = {
+  const statusConfig: Record<
+    ReservationStatus,
+    {
+      label: string
+      description: string
+      variant: 'pending' | 'progress' | 'submitted' | 'success' | 'failed' | 'expired'
+      icon: typeof ClockSolidIcon
+      color: string
+      bgColor: string
+      borderColor: string
+    }
+  > = {
     pending: {
       label: t('status.pendingFull'),
       description: t('status.pendingDescription'),
-      variant: 'secondary',
-      icon: Clock,
+      variant: 'pending',
+      icon: ClockSolidIcon,
       color: 'text-amber-600 dark:text-amber-400',
       bgColor: 'bg-amber-100 dark:bg-amber-950/50',
       borderColor: 'border-amber-200 dark:border-amber-800',
@@ -95,8 +112,8 @@ export default async function ReservationDetailPage({
     confirmed: {
       label: t('status.confirmed'),
       description: t('status.confirmedDescription'),
-      variant: 'default',
-      icon: CheckCircle,
+      variant: 'success',
+      icon: SuccessSolidIcon,
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-100 dark:bg-emerald-950/50',
       borderColor: 'border-emerald-200 dark:border-emerald-800',
@@ -104,8 +121,8 @@ export default async function ReservationDetailPage({
     ongoing: {
       label: t('status.ongoing'),
       description: t('status.ongoingDescription'),
-      variant: 'default',
-      icon: Package,
+      variant: 'progress',
+      icon: ProductSolidIcon,
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-100 dark:bg-blue-950/50',
       borderColor: 'border-blue-200 dark:border-blue-800',
@@ -113,8 +130,8 @@ export default async function ReservationDetailPage({
     completed: {
       label: t('status.completed'),
       description: t('status.completedDescription'),
-      variant: 'outline',
-      icon: CheckCircle,
+      variant: 'success',
+      icon: SuccessSolidIcon,
       color: 'text-gray-600 dark:text-gray-400',
       bgColor: 'bg-gray-100 dark:bg-gray-950/50',
       borderColor: 'border-gray-200 dark:border-gray-700',
@@ -122,8 +139,8 @@ export default async function ReservationDetailPage({
     cancelled: {
       label: t('status.cancelled'),
       description: t('status.cancelledDescription'),
-      variant: 'error',
-      icon: XCircle,
+      variant: 'failed',
+      icon: XCircleSolidIcon,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-100 dark:bg-red-950/50',
       borderColor: 'border-red-200 dark:border-red-800',
@@ -131,8 +148,8 @@ export default async function ReservationDetailPage({
     rejected: {
       label: t('status.rejected'),
       description: t('status.rejectedDescription'),
-      variant: 'error',
-      icon: XCircle,
+      variant: 'failed',
+      icon: XCircleSolidIcon,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-100 dark:bg-red-950/50',
       borderColor: 'border-red-200 dark:border-red-800',
@@ -140,8 +157,8 @@ export default async function ReservationDetailPage({
     quote: {
       label: t('status.quote'),
       description: t('status.quoteDescription'),
-      variant: 'secondary',
-      icon: FileText,
+      variant: 'submitted',
+      icon: SubmittedSolidIcon,
       color: 'text-violet-600 dark:text-violet-400',
       bgColor: 'bg-violet-100 dark:bg-violet-950/50',
       borderColor: 'border-violet-200 dark:border-violet-800',
@@ -149,8 +166,8 @@ export default async function ReservationDetailPage({
     declined: {
       label: t('status.declined'),
       description: t('status.declinedDescription'),
-      variant: 'outline',
-      icon: XCircle,
+      variant: 'expired',
+      icon: XCircleSolidIcon,
       color: 'text-slate-600 dark:text-slate-400',
       bgColor: 'bg-slate-100 dark:bg-slate-950/50',
       borderColor: 'border-slate-200 dark:border-slate-700',
@@ -251,8 +268,8 @@ export default async function ReservationDetailPage({
                       {isConfirmedAndPaid ? t('status.allSet') : config.label}
                     </h3>
                     {showPaymentRequired && (
-                      <Badge variant="warning" className="gap-1">
-                        <CreditCard className="h-3 w-3" />
+                      <Badge variant="pending" className="gap-1">
+                        <CreditCardSolidIcon className="h-3 w-3" />
                         {t('confirmedAwaitingPayment')}
                       </Badge>
                     )}
@@ -380,11 +397,8 @@ export default async function ReservationDetailPage({
                 {t('rentedItems')}
               </span>
               {/* Payment Status Badge */}
-              <Badge
-                variant={isPaid ? 'default' : 'secondary'}
-                className={`gap-1.5 ${isPaid ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-400'}`}
-              >
-                <CreditCard className="h-3.5 w-3.5" />
+              <Badge variant={isPaid ? 'success' : 'pending'} className="gap-1.5">
+                <CreditCardSolidIcon className="h-3.5 w-3.5" />
                 {isPaid ? t('paymentPaid') : t('paymentPending')}
               </Badge>
             </CardTitle>

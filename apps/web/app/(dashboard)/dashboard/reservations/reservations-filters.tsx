@@ -209,15 +209,12 @@ export const ReservationsFilters = ({
             >
               {getStatusLabel(key)}
               {key === 'pending' && count > 0 ? (
-                <Badge
-                  variant="default"
-                  className="ml-1 h-5 min-w-5 bg-orange-500 px-1.5"
-                >
+                <Badge variant="pending" className="ml-1 h-5 min-w-5 px-1.5">
                   {count}
                 </Badge>
               ) : (
                 <Badge
-                  variant={isActive ? 'default' : 'secondary'}
+                  variant={isActive ? 'progress' : 'expired'}
                   className="ml-1 h-5 min-w-5 px-1.5"
                 >
                   {count}

@@ -772,10 +772,7 @@ export function AddToCartForm({
               <span className="flex items-center gap-2">
                 {t('tieredPricing.discountApplied')}
                 {discountPercent && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-100 text-xs text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                  >
+                  <Badge variant="success" className="text-xs">
                     -{Math.floor(discountPercent)}%
                   </Badge>
                 )}

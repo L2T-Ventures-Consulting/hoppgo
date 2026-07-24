@@ -539,7 +539,7 @@ export function DeliverySettingsForm({
                           <p className="text-muted-foreground text-xs">{store.address}</p>
                         )}
                       </div>
-                      <Badge variant="secondary">{t("locationsPrimary")}</Badge>
+                      <Badge variant="progress">{t("locationsPrimary")}</Badge>
                     </div>
                   </div>
 
@@ -550,7 +550,7 @@ export function DeliverySettingsForm({
                           <div className="flex items-center gap-2">
                             <p className="text-sm font-medium">{location.name}</p>
                             {!location.isActive && (
-                              <Badge variant="secondary">{t("locationsInactive")}</Badge>
+                              <Badge variant="expired">{t("locationsInactive")}</Badge>
                             )}
                           </div>
                           <p className="text-muted-foreground text-xs">{location.address}</p>

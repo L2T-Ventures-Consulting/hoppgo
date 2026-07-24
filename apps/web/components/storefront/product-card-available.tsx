@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { TrendingDownSolidIcon } from '@louez/ui/icons'
+
+import { useState } from 'react'
 
 import Image from 'next/image';
 
-import { Check, ImageIcon, Minus, Plus, TrendingDown } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Check, ImageIcon, Minus, Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 import type { Rate } from '@louez/types';
 import type { CombinationAvailability } from '@louez/types';
@@ -531,11 +533,10 @@ export function ProductCardAvailable({
             {hasDiscount &&
               !inCart &&
               discountPercent != null &&
-              (maxDiscountPercent == null ||
-                discountPercent <= maxDiscountPercent) && (
-                <Badge className="bg-primary/10 text-primary shrink-0 text-xs">
-                  <TrendingDown className="mr-0.5 h-3 w-3" />-
-                  {Math.floor(discountPercent)}%
+              (maxDiscountPercent == null || discountPercent <= maxDiscountPercent) && (
+                <Badge variant="progress" className="shrink-0 text-xs">
+                  <TrendingDownSolidIcon className="mr-0.5 h-3 w-3" />-{Math.floor(discountPercent)}
+                  %
                 </Badge>
               )}
             {inCart && (

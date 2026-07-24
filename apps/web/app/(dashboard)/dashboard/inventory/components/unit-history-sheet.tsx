@@ -175,7 +175,16 @@ export const UnitHistorySheet = ({
                               : tDowntime('openEnded')}
                           </p>
                         </div>
-                        <Badge variant="outline" className="w-fit">
+                        <Badge
+                          variant={
+                            downtime.status === 'current'
+                              ? 'failed'
+                              : downtime.status === 'upcoming'
+                                ? 'pending'
+                                : 'expired'
+                          }
+                          className="w-fit"
+                        >
                           {t(`downtimes.status.${downtime.status}`)}
                         </Badge>
                       </div>

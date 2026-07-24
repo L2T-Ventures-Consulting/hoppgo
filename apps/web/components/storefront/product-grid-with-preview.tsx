@@ -1,9 +1,10 @@
 'use client'
 
+import { TrendingDownSolidIcon } from '@louez/ui/icons'
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
-import { ImageIcon, Calendar, TrendingDown } from 'lucide-react'
+import { ImageIcon, Calendar } from 'lucide-react'
 
 import { Card, CardContent } from '@louez/ui'
 import { Badge } from '@louez/ui'
@@ -104,7 +105,7 @@ function ProductCardInteractive({
           {/* Unavailable overlay */}
           {!isAvailable && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm">
-              <Badge variant="secondary" className="text-sm px-4 py-1.5">
+              <Badge variant="failed" className="text-sm px-4 py-1.5">
                 {tCatalog('unavailable')}
               </Badge>
             </div>
@@ -122,11 +123,8 @@ function ProductCardInteractive({
 
           {/* Discount badge */}
           {isAvailable && cardDiscount > 0 && product.quantity > 2 && (
-            <Badge
-              className="absolute top-3 left-3 text-xs font-medium bg-primary/10 text-primary"
-            >
-              <TrendingDown className="h-3 w-3 mr-1" />
-              -{Math.floor(cardDiscount)}%
+            <Badge variant="progress" className="absolute top-3 left-3 text-xs font-medium">
+              <TrendingDownSolidIcon className="h-3 w-3 mr-1" />-{Math.floor(cardDiscount)}%
             </Badge>
           )}
         </div>

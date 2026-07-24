@@ -281,7 +281,7 @@ export function TulipProductMappingSection({
               >
                 {t(`filters.${status}`)}
                 <Badge
-                  variant={statusFilter === status ? "default" : "secondary"}
+                  variant={statusFilter === status ? "progress" : "expired"}
                   className="ml-1.5 h-5 min-w-5 px-1.5"
                   size="sm"
                 >
@@ -406,7 +406,7 @@ export function TulipProductMappingSection({
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={hasValidMapping(product.tulipProductId) ? "success" : "secondary"}
+                      variant={hasValidMapping(product.tulipProductId) ? "success" : "expired"}
                       size="sm"
                     >
                       {hasValidMapping(product.tulipProductId)
@@ -444,7 +444,7 @@ export function TulipProductMappingSection({
                   {/* Current mapping status */}
                   <div className="flex items-center gap-2">
                     <Badge
-                      variant={editingProductHasValidMapping ? "success" : "secondary"}
+                      variant={editingProductHasValidMapping ? "success" : "expired"}
                       size="sm"
                     >
                       {editingProductHasValidMapping

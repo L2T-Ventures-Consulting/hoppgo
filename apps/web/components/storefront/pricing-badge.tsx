@@ -1,6 +1,7 @@
 'use client'
 
-import { TrendingDown } from 'lucide-react'
+import { TrendingDownSolidIcon } from '@louez/ui/icons'
+
 import { Badge } from '@louez/ui'
 
 interface PricingBadgeProps {
@@ -18,20 +19,15 @@ export function PricingBadge({
 
   if (variant === 'compact') {
     return (
-      <Badge
-        className={`bg-primary/10 text-primary text-xs font-medium ${className}`}
-      >
-        <TrendingDown className="h-3 w-3" />
-        -{maxDiscount}%
+      <Badge variant="progress" className={`text-xs font-medium ${className}`}>
+        <TrendingDownSolidIcon className="h-3 w-3" />-{maxDiscount}%
       </Badge>
     )
   }
 
   return (
-    <Badge
-      className={`bg-primary/10 text-primary gap-1 ${className}`}
-    >
-      <TrendingDown className="h-3 w-3" />
+    <Badge variant="progress" className={`gap-1 ${className}`}>
+      <TrendingDownSolidIcon className="h-3 w-3" />
       <span>Jusqu'à -{maxDiscount}%</span>
     </Badge>
   )

@@ -63,11 +63,11 @@ interface ComparisonViewProps {
   return_: InspectionData | null
 }
 
-const conditionColors: Record<ConditionRating, string> = {
-  excellent: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  good: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  fair: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  damaged: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+const CONDITION_VARIANTS: Record<ConditionRating, 'success' | 'progress' | 'review' | 'failed'> = {
+  excellent: 'success',
+  good: 'progress',
+  fair: 'review',
+  damaged: 'failed',
 }
 
 const formatInspectionItemName = (item: InspectionItem) =>
@@ -158,11 +158,13 @@ export function ComparisonView({
               {type === 'departure' ? t('comparison.departure') : t('comparison.return')}
             </CardTitle>
             <Badge
-              variant="secondary"
-              className={cn(
-                inspection.status === 'signed' && 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-                inspection.hasDamage && 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-              )}
+              variant={
+                inspection.hasDamage
+                  ? 'failed'
+                  : inspection.status === 'signed'
+                    ? 'success'
+                    : 'expired'
+              }
             >
               {inspection.hasDamage
                 ? t('wizard.damageDetected')
@@ -192,10 +194,8 @@ export function ComparisonView({
                 )}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium text-sm">
-                    {formatInspectionItemName(item)}
-                  </span>
-                  <Badge className={conditionColors[item.condition]}>
+                  <span className="font-medium text-sm">{formatInspectionItemName(item)}</span>
+                  <Badge variant={CONDITION_VARIANTS[item.condition]}>
                     {t(`conditions.${item.condition}`)}
                   </Badge>
                 </div>

@@ -1,15 +1,15 @@
 'use client'
 
-import { Check, AlertCircle, XCircle, Wallet } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Badge } from '@louez/ui'
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@louez/ui'
+  CreditCardSolidIcon,
+  ReviewSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from '@louez/ui/icons'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@louez/ui'
 import { cn, getCurrencySymbol } from '@louez/utils'
 
 interface PaymentStatusBadgeProps {
@@ -66,33 +66,33 @@ export function PaymentStatusBadge({
   const paymentStatusConfig = {
     paid: {
       label: t('paymentBadge.paid'),
-      icon: Check,
-      className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800',
+      icon: SuccessSolidIcon,
+      variant: 'success' as const,
     },
     partial: {
       label: t('paymentBadge.partial'),
-      icon: AlertCircle,
-      className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800',
+      icon: ReviewSolidIcon,
+      variant: 'pending' as const,
     },
     unpaid: {
       label: t('paymentBadge.unpaid'),
-      icon: XCircle,
-      className: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800',
+      icon: XCircleSolidIcon,
+      variant: 'failed' as const,
     },
   }
 
   const depositStatusConfig = {
     to_collect: {
       label: t('paymentBadge.depositToCollect'),
-      className: 'border-amber-300 text-amber-700 dark:border-amber-700 dark:text-amber-400',
+      variant: 'pending' as const,
     },
     to_return: {
       label: t('paymentBadge.depositToReturn'),
-      className: 'border-blue-300 text-blue-700 dark:border-blue-700 dark:text-blue-400',
+      variant: 'submitted' as const,
     },
     returned: {
       label: t('paymentBadge.depositReturned'),
-      className: 'border-gray-300 text-gray-500 dark:border-gray-600 dark:text-gray-400',
+      variant: 'success' as const,
     },
   }
 
@@ -134,15 +134,16 @@ export function PaymentStatusBadge({
       <div className={cn('flex items-center gap-1.5 flex-wrap', className)}>
         {/* Badge statut paiement principal */}
         <Tooltip>
-          <TooltipTrigger render={<Badge
-              variant="outline"
-              className={cn(
-                'cursor-default transition-colors',
-                currentPaymentConfig.className
-              )}
-            />}>
-              <PaymentIcon className="h-3 w-3" />
-              {currentPaymentConfig.label}
+          <TooltipTrigger
+            render={
+              <Badge
+                variant={currentPaymentConfig.variant}
+                className="cursor-default transition-colors"
+              />
+            }
+          >
+            <PaymentIcon className="h-3 w-3" />
+            {currentPaymentConfig.label}
           </TooltipTrigger>
           <TooltipContent side="bottom" className="max-w-xs">
             {tooltipContent}
@@ -152,15 +153,16 @@ export function PaymentStatusBadge({
         {/* Badge statut caution */}
         {showDetails && currentDepositConfig && (
           <Tooltip>
-            <TooltipTrigger render={<Badge
-                variant="outline"
-                className={cn(
-                  'cursor-default transition-colors',
-                  currentDepositConfig.className
-                )}
-              />}>
-                <Wallet className="h-3 w-3" />
-                {currentDepositConfig.label}
+            <TooltipTrigger
+              render={
+                <Badge
+                  variant={currentDepositConfig.variant}
+                  className="cursor-default transition-colors"
+                />
+              }
+            >
+              <CreditCardSolidIcon className="h-3 w-3" />
+              {currentDepositConfig.label}
             </TooltipTrigger>
             <TooltipContent side="bottom">
               {depositStatus === 'to_collect' && (

@@ -1,5 +1,7 @@
 'use client';
 
+import { ShieldSolidIcon } from '@louez/ui/icons';
+
 import { useMemo, useState } from 'react';
 
 import {
@@ -11,7 +13,6 @@ import {
   PackageX,
   PenLine,
   Plus,
-  Shield,
   ShoppingCart,
   Trash2,
 } from 'lucide-react';
@@ -411,11 +412,8 @@ export function NewReservationStepProducts({
                           {product.name}
                         </p>
                         {product.tulipInsurable && (
-                          <Badge
-                            variant="outline"
-                            className="shrink-0 border-emerald-300 bg-emerald-50 text-emerald-700"
-                          >
-                            <Shield className="mr-1 h-3 w-3" />
+                          <Badge variant="success" className="shrink-0">
+                            <ShieldSolidIcon className="mr-1 h-3 w-3" />
                             {t('tulipInsurance.insurableProduct')}
                           </Badge>
                         )}
@@ -471,7 +469,7 @@ export function NewReservationStepProducts({
                       </div>
                       <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                         {isOutOfStock ? (
-                          <Badge variant="error" className="text-xs">
+                          <Badge variant="failed" className="text-xs">
                             {t('outOfStock')}
                           </Badge>
                         ) : (
@@ -551,7 +549,7 @@ export function NewReservationStepProducts({
                                       .map(([key, value]) => (
                                         <Badge
                                           key={`${line.lineId}-${key}`}
-                                          variant="outline"
+                                          variant="expired"
                                           className="text-xs"
                                         >
                                           {key}: {value}
@@ -827,7 +825,7 @@ export function NewReservationStepProducts({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <p className="truncate font-medium">{item.name}</p>
-                        <Badge variant="secondary" className="text-xs">
+                        <Badge variant="expired" className="text-xs">
                           {t('customItem.badge')}
                         </Badge>
                       </div>

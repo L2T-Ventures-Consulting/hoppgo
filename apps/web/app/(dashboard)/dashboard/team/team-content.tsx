@@ -1,5 +1,6 @@
 'use client'
 
+import { StarSolidIcon, UserSolidIcon } from '@louez/ui/icons'
 import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { format } from 'date-fns'
@@ -12,8 +13,6 @@ import {
   Clock,
   Send,
   X,
-  Crown,
-  User as UserIcon,
   Zap,
   Lock,
   ArrowRight,
@@ -161,7 +160,7 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
               </div>
               {/* Show usage badge only when there's a positive limit */}
               {limits && limits.limit !== null && limits.limit > 0 && (
-                <Badge variant={canAddMore ? 'secondary' : 'warning'}>
+                <Badge variant={canAddMore ? 'progress' : 'review'}>
                   {t('limitBadge', {
                     current: limits.current,
                     limit: limits.limit,
@@ -254,7 +253,7 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
             <CardTitle className="flex items-center gap-2">
               <Clock className="h-5 w-5" />
               {t('pendingInvitations')}
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="expired" className="ml-2">
                 {invitations.length}
               </Badge>
             </CardTitle>
@@ -315,7 +314,7 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             {t('members')}
-            <Badge variant="secondary" className="ml-2">
+            <Badge variant="expired" className="ml-2">
               {members.length}
             </Badge>
           </CardTitle>
@@ -339,13 +338,13 @@ export function TeamContent({ members, invitations, canManageMembers, limits }: 
                         <div className="flex items-center gap-2">
                           <p className="font-medium">{member.user.name || member.user.email}</p>
                           <Badge
-                            variant={member.role === 'owner' ? 'default' : 'secondary'}
+                            variant={member.role === 'owner' ? 'progress' : 'expired'}
                             className="flex items-center gap-1"
                           >
                             {member.role === 'owner' ? (
-                              <Crown className="h-3 w-3" />
+                              <StarSolidIcon className="h-3 w-3" />
                             ) : (
-                              <UserIcon className="h-3 w-3" />
+                              <UserSolidIcon className="h-3 w-3" />
                             )}
                             {t(member.role === 'owner' ? 'ownerBadge' : 'memberBadge')}
                           </Badge>

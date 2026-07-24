@@ -1,5 +1,6 @@
 'use client'
 
+import { ZapSolidIcon } from '@louez/ui/icons'
 import { useState, useTransition } from 'react'
 
 import Link from 'next/link'
@@ -68,12 +69,12 @@ interface PayAsYouGoSummaryProps {
 
 const INVOICE_BADGE_VARIANT: Record<
   InvoiceSummary['status'],
-  'success' | 'warning' | 'destructive' | 'outline'
+  'success' | 'pending' | 'failed' | 'expired'
 > = {
   paid: 'success',
-  open: 'warning',
-  failed: 'destructive',
-  void: 'outline',
+  open: 'pending',
+  failed: 'failed',
+  void: 'expired',
 }
 
 const INVOICE_STATUS_KEY: Record<InvoiceSummary['status'], string> = {
@@ -206,7 +207,7 @@ export function PayAsYouGoSummary({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="gap-1">
-                <Zap className="h-3.5 w-3.5" />
+                <ZapSolidIcon className="h-3.5 w-3.5" />
                 {t('badge')}
               </Badge>
               <Button

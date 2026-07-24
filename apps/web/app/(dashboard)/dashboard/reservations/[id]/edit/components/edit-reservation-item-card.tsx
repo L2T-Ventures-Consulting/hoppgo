@@ -72,7 +72,7 @@ export function EditReservationItemCard({
       id={item.productId ? `edit-item-product-${item.productId}` : undefined}
       className={cn(
         "bg-background shadow-border rounded-lg p-2 transition-[border-color,box-shadow] duration-300",
-        warning && "border-badge-warning-foreground",
+        warning && "border-badge-review-foreground",
       )}
     >
       <div className="flex items-center gap-3">
@@ -93,7 +93,7 @@ export function EditReservationItemCard({
           </p>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
             {!item.product && (
-              <Badge variant="outline" className="shrink-0 text-[10px]">
+              <Badge variant="expired" className="shrink-0 text-[10px]">
                 {tForm("customItem.badge")}
               </Badge>
             )}
@@ -167,7 +167,7 @@ export function EditReservationItemCard({
         <div className="mt-2 flex items-center justify-between gap-2 text-sm">
           <span className="text-muted-foreground flex items-center gap-2 tabular-nums">
             {item.isManualPrice && item.product ? (
-              <Badge variant="warning" className="text-[10px]">
+              <Badge variant="pending" className="text-[10px]">
                 Manuel
               </Badge>
             ) : (

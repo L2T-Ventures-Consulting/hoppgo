@@ -163,9 +163,7 @@ export function CustomersTable({ customers }: CustomersTableProps) {
                   </div>
                 </TableCell>
                 <TableCell className="text-center">
-                  <Badge variant="secondary">
-                    {customer.reservationCount}
-                  </Badge>
+                  <Badge variant="expired">{customer.reservationCount}</Badge>
                 </TableCell>
                 <TableCell className="text-right font-medium">
                   {formatCurrency(parseFloat(customer.totalSpent))}

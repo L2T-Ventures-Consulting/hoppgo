@@ -290,7 +290,7 @@ function SpanningReservationBar({
               {formatCurrency(Number(reservation.totalAmount))}
             </div>
           )}
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="expired" className="text-xs">
             {t(`status.${reservation.status}`)}
           </Badge>
         </div>

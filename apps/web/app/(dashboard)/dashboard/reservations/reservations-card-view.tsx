@@ -1,25 +1,29 @@
 'use client'
 
+import {
+  CreditCardSolidIcon,
+  FailedSolidIcon,
+  PendingSolidIcon,
+  ProductSolidIcon,
+  ReviewSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from '@louez/ui/icons'
 import { formatStoreDateRange } from '@/lib/utils/store-date'
 import { getCurrencySymbol } from '@louez/utils'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 
 import {
-  AlertCircle,
   ArrowDownRight,
   ArrowUpRight,
-  Ban,
   Calendar,
   CheckCircle,
   ChevronRight,
-  Clock,
-  CreditCard,
   Loader2,
-  Package,
   User,
   XCircle,
-  FileText,
 } from 'lucide-react'
 
 import {
@@ -34,17 +38,17 @@ import {
 } from '@louez/ui'
 
 import type { Reservation, ReservationStatus } from './reservations-types'
-import { STATUS_CONFIG, getPaymentStatus, PAYMENT_STATUS_CLASSES } from './reservations-utils'
+import { PAYMENT_STATUS_VARIANTS, STATUS_CONFIG, getPaymentStatus } from './reservations-utils'
 
-const STATUS_ICON_MAP: Record<ReservationStatus, typeof Clock> = {
-  pending: Clock,
-  confirmed: CheckCircle,
-  ongoing: Package,
-  completed: CheckCircle,
-  cancelled: Ban,
-  rejected: XCircle,
-  quote: FileText,
-  declined: XCircle,
+const STATUS_ICON_MAP: Record<ReservationStatus, typeof PendingSolidIcon> = {
+  pending: PendingSolidIcon,
+  confirmed: SuccessSolidIcon,
+  ongoing: ProductSolidIcon,
+  completed: SuccessSolidIcon,
+  cancelled: FailedSolidIcon,
+  rejected: XCircleSolidIcon,
+  quote: SubmittedSolidIcon,
+  declined: FailedSolidIcon,
 }
 
 interface ReservationsCardViewProps {
@@ -117,8 +121,8 @@ export function ReservationsCardView({
                           #{reservation.number}
                         </span>
                         <Badge
-                          variant="secondary"
-                          className={`gap-1.5 ${statusConfig.bgClass} ${statusConfig.className} border-0 ${isPending ? 'animate-pulse' : ''}`}
+                          variant={statusConfig.badgeVariant}
+                          className={`gap-1.5 ${isPending ? 'animate-pulse' : ''}`}
                         >
                           <StatusIcon className="h-4 w-4" />
                           {t(`status.${status}`)}
@@ -126,16 +130,20 @@ export function ReservationsCardView({
                         {/* Payment Status Badge */}
                         {showPaymentStatus && (
                           <Tooltip>
-                            <TooltipTrigger render={<Badge
-                                variant="secondary"
-                                className={`gap-1 text-xs ${PAYMENT_STATUS_CLASSES[paymentInfo.status]}`}
-                              />}>
-                                {paymentInfo.status === 'paid' ? (
-                                  <CheckCircle className="h-3 w-3" />
-                                ) : (
-                                  <AlertCircle className="h-3 w-3" />
-                                )}
-                                {t(`paymentStatus.${paymentInfo.status}`)}
+                            <TooltipTrigger
+                              render={
+                                <Badge
+                                  variant={PAYMENT_STATUS_VARIANTS[paymentInfo.status]}
+                                  className="gap-1 text-xs"
+                                />
+                              }
+                            >
+                              {paymentInfo.status === 'paid' ? (
+                                <SuccessSolidIcon className="h-3 w-3" />
+                              ) : (
+                                <ReviewSolidIcon className="h-3 w-3" />
+                              )}
+                              {t(`paymentStatus.${paymentInfo.status}`)}
                             </TooltipTrigger>
                             <TooltipContent>
                               <div className="text-xs">
@@ -217,11 +225,8 @@ export function ReservationsCardView({
                       {/* Pending online payment indicator */}
                       {isPending && hasPendingOnlinePayment && (
                         <div className="flex items-center gap-1.5">
-                          <Badge
-                            variant="secondary"
-                            className="gap-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse"
-                          >
-                            <CreditCard className="h-3.5 w-3.5" />
+                          <Badge variant="progress" className="gap-1.5 animate-pulse">
+                            <CreditCardSolidIcon className="h-3.5 w-3.5" />
                             {t('paymentInProgress')}
                           </Badge>
                         </div>

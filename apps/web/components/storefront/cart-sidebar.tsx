@@ -130,7 +130,7 @@ export function CartSidebar({
             {' → '}
             {format(new Date(globalEndDate), 'dd MMM yyyy', { locale: fr })}
           </p>
-          <Badge variant="secondary" className="mt-2">
+          <Badge variant="expired" className="mt-2">
             {durationLabel}
           </Badge>
         </div>
@@ -354,9 +354,7 @@ export function CartSidebar({
               {t('title')}
             </span>
             {itemCount > 0 && (
-              <Badge variant="secondary">
-                {t('itemsPlural', { count: itemCount })}
-              </Badge>
+              <Badge variant="expired">{t('itemsPlural', { count: itemCount })}</Badge>
             )}
           </CardTitle>
         </CardHeader>
@@ -376,7 +374,7 @@ export function CartSidebar({
             <ShoppingCart className="mr-2 h-5 w-5" />
             {t('title')}
             {itemCount > 0 && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="expired" className="ml-2">
                 {itemCount}
               </Badge>
             )}
@@ -387,9 +385,7 @@ export function CartSidebar({
                 <ShoppingCart className="h-5 w-5" />
                 {t('title')}
                 {itemCount > 0 && (
-                  <Badge variant="secondary">
-                    {t('itemsPlural', { count: itemCount })}
-                  </Badge>
+                  <Badge variant="expired">{t('itemsPlural', { count: itemCount })}</Badge>
                 )}
               </SheetTitle>
             </SheetHeader>

@@ -74,15 +74,15 @@ export async function ProductUnitsTable({ units }: ProductUnitsTableProps) {
                       {unit.retiredAt ? ` · ${formatDate(unit.retiredAt)}` : ''}
                     </span>
                   ) : unit.currentDowntime ? (
-                    <Badge variant="warning">{t('inDowntime')}</Badge>
+                    <Badge variant="pending">{t('inDowntime')}</Badge>
                   ) : unit.isBusyToday ? (
-                    <Badge variant="info">{t('busyToday')}</Badge>
+                    <Badge variant="progress">{t('busyToday')}</Badge>
                   ) : (
                     <Badge variant="success">{t('available')}</Badge>
                   )}
                 </TableCell>
                 <TableCell>
-                  <Badge variant={isRetired ? 'secondary' : 'outline'}>
+                  <Badge variant={isRetired ? 'expired' : 'success'}>
                     {isRetired ? t('retired') : t('active')}
                   </Badge>
                 </TableCell>

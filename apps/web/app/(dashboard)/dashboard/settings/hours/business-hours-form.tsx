@@ -408,7 +408,7 @@ function DayScheduleRow({
             )}
           </div>
         ) : (
-          <Badge variant="secondary" className="text-muted-foreground w-fit">
+          <Badge variant="expired" className="w-fit">
             {t("closed")}
           </Badge>
         )}

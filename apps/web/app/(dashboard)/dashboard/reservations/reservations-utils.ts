@@ -7,47 +7,56 @@ import type {
 export const STATUS_CONFIG: Record<
   ReservationStatus,
   {
+    badgeVariant: "pending" | "progress" | "submitted" | "success" | "failed" | "expired";
     className: string;
     bgClass: string;
     borderClass: string;
   }
 > = {
   pending: {
+    badgeVariant: 'pending',
     className: 'text-reservation-pending-text',
     bgClass: 'bg-reservation-pending-soft',
     borderClass: 'border-l-reservation-pending',
   },
   confirmed: {
+    badgeVariant: 'success',
     className: 'text-reservation-confirmed-text',
     bgClass: 'bg-reservation-confirmed-soft',
     borderClass: 'border-l-reservation-confirmed',
   },
   ongoing: {
+    badgeVariant: 'progress',
     className: 'text-reservation-ongoing-text',
     bgClass: 'bg-reservation-ongoing-soft',
     borderClass: 'border-l-reservation-ongoing',
   },
   completed: {
+    badgeVariant: 'success',
     className: 'text-reservation-completed-text',
     bgClass: 'bg-reservation-completed-soft',
     borderClass: 'border-l-reservation-completed',
   },
   cancelled: {
+    badgeVariant: 'failed',
     className: 'text-reservation-cancelled-text',
     bgClass: 'bg-reservation-cancelled-soft',
     borderClass: 'border-l-reservation-cancelled',
   },
   rejected: {
+    badgeVariant: 'failed',
     className: 'text-reservation-rejected-text',
     bgClass: 'bg-reservation-rejected-soft',
     borderClass: 'border-l-reservation-rejected',
   },
   quote: {
+    badgeVariant: 'submitted',
     className: 'text-reservation-quote-text',
     bgClass: 'bg-reservation-quote-soft',
     borderClass: 'border-l-reservation-quote',
   },
   declined: {
+    badgeVariant: 'expired',
     className: 'text-reservation-declined-text',
     bgClass: 'bg-reservation-declined-soft',
     borderClass: 'border-l-reservation-declined',
@@ -91,9 +100,9 @@ export function getPaymentStatus(reservation: Reservation): {
   return { status, rentalPaid, depositCollected, totalDue, totalPaid };
 }
 
-export const PAYMENT_STATUS_CLASSES: Record<PaymentStatusType, string> = {
-  paid: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  partial:
-    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  unpaid: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-};
+export const PAYMENT_STATUS_VARIANTS: Record<PaymentStatusType, 'success' | 'pending' | 'failed'> =
+  {
+    paid: 'success',
+    partial: 'pending',
+    unpaid: 'failed',
+  }

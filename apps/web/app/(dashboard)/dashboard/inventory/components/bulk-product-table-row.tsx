@@ -42,7 +42,7 @@ export const BulkProductTableRow = ({ row }: BulkProductTableRowProps) => {
         </div>
       </TableCell>
       <TableCell>
-        <Badge variant="secondary">
+        <Badge variant="expired">
           {t('bulk.quantity', { count: row.quantity })}
         </Badge>
       </TableCell>

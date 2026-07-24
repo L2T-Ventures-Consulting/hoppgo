@@ -197,7 +197,7 @@ export function IntegrationDetailView({ integrationId }: IntegrationDetailViewPr
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={integration.enabled ? "success" : "secondary"}>
+              <Badge variant={integration.enabled ? "success" : "expired"}>
                 {integration.enabled
                   ? resolveMessage(
                       "dashboard.settings.integrationsHub.statusLabels.enabled",
@@ -209,7 +209,7 @@ export function IntegrationDetailView({ integrationId }: IntegrationDetailViewPr
                     )}
               </Badge>
               {!usesConnectionAsEnabledState && (
-                <Badge variant={integration.connected ? "success" : "secondary"}>
+                <Badge variant={integration.connected ? "success" : "expired"}>
                   {integration.connected
                     ? resolveMessage(
                         "dashboard.settings.integrationsHub.statusLabels.connected",
@@ -221,7 +221,7 @@ export function IntegrationDetailView({ integrationId }: IntegrationDetailViewPr
                       )}
                 </Badge>
               )}
-              <Badge variant="outline">
+              <Badge variant="expired">
                 {resolveMessage(
                   `dashboard.settings.integrationsHub.lifecycle.${integration.status}`,
                   integration.status,

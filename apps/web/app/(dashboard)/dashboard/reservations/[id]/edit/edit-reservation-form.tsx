@@ -1054,8 +1054,10 @@ export function EditReservationForm({
                 </Button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 min-w-0">
-                    <h1 className="text-base sm:text-lg font-semibold truncate">{t('edit.title')}</h1>
-                    <Badge variant="outline" className="font-mono shrink-0">
+                    <h1 className="text-base sm:text-lg font-semibold truncate">
+                      {t('edit.title')}
+                    </h1>
+                    <Badge variant="expired" className="font-mono shrink-0">
                       #{reservation.number}
                     </Badge>
                   </div>
@@ -1193,7 +1195,7 @@ export function EditReservationForm({
                   </div>
                   {newDuration > 0 && (
                     <div className="mt-4 flex items-center gap-2">
-                      <Badge variant="secondary" className="font-mono">
+                      <Badge variant="expired" className="font-mono">
                         {newDuration} {getDurationUnit('day')}
                       </Badge>
                       {newDuration !== originalDuration && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { StarSolidIcon, VideoSolidIcon } from "@louez/ui/icons";
 import type { ChangeEvent, DragEvent } from "react";
 import { useState } from "react";
 
@@ -126,10 +127,10 @@ export function ProductMediaFields({
                   </div>
                   {index === 0 && (
                     <Badge
-                      variant="secondary"
-                      className="bg-background/80 text-foreground absolute bottom-1.5 left-1.5 h-5 gap-1 px-1.5 text-[10px] shadow-xs backdrop-blur-sm"
+                      variant="expired"
+                      className="absolute bottom-1.5 left-1.5 h-5 gap-1 px-1.5 text-[10px] shadow-xs backdrop-blur-sm"
                     >
-                      <Star className="size-2.5 fill-current" />
+                      <StarSolidIcon className="size-2.5 fill-current" />
                       {t("mainBadge")}
                     </Badge>
                   )}
@@ -288,10 +289,10 @@ function ProductVideoField({
             </Button>
           </div>
           <Badge
-            variant="secondary"
-            className="bg-background/80 text-foreground absolute bottom-1.5 left-1.5 h-5 gap-1 px-1.5 text-[10px] shadow-xs backdrop-blur-sm"
+            variant="expired"
+            className="absolute bottom-1.5 left-1.5 h-5 gap-1 px-1.5 text-[10px] shadow-xs backdrop-blur-sm"
           >
-            <Video className="size-2.5" />
+            <VideoSolidIcon className="size-2.5" />
             YouTube
           </Badge>
         </div>

@@ -129,6 +129,8 @@ const AXIS_CHIP_CLASSES = [
   "bg-violet-500/10 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
 ];
 
+const AXIS_BADGE_VARIANTS = ["progress", "pending", "submitted"] as const;
+
 interface VariantItemData {
   value: string;
   label: string;
@@ -547,7 +549,7 @@ function UnitRow({
                 onManage={onManageVariants}
               />
             </div>
-            {hasActiveAssignment && <Badge variant="outline">{t("assignedUnit")}</Badge>}
+            {hasActiveAssignment && <Badge variant="expired">{t("assignedUnit")}</Badge>}
             <CollapsibleTrigger
               render={
                 <Button
@@ -773,7 +775,7 @@ export function StockModeIndicator({
   if (!modeChosen) return null;
   return (
     <span className="flex items-center gap-1">
-      <Badge variant={trackUnits ? "success" : "tertiary"} className="">
+      <Badge variant={trackUnits ? "success" : "expired"} className="">
         {t(trackUnits ? "advancedBadge" : "defaultBadge")}
       </Badge>
       {/* <Button
@@ -1210,7 +1212,7 @@ export function UnitTrackingEditor({
             />
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold">{t("modeUnits")}</p>
-              <Badge variant="secondary">{t("advancedBadge")}</Badge>
+              <Badge variant="expired">{t("advancedBadge")}</Badge>
             </div>
             <p className="text-muted-foreground mt-1 text-xs">{t("modeUnitsDescription")}</p>
             <Popover>
@@ -1268,7 +1270,7 @@ export function UnitTrackingEditor({
           {/* Units header: title + count, variant tools on the right */}
           <div className="flex flex-wrap items-center gap-2">
             <Label>{t("title")}</Label>
-            <Badge variant="tertiary" className="border">
+            <Badge variant="expired" className="border">
               {trackedUnitsCount}
             </Badge>
             <div className="ml-auto flex items-center gap-2">
@@ -1291,13 +1293,12 @@ export function UnitTrackingEditor({
               {activeBookingAttributeAxes.map((axis) => (
                 <Badge
                   key={axis.key}
-                  variant="secondary"
-                  className={cn(
-                    "gap-1 border-transparent pr-1",
-                    AXIS_CHIP_CLASSES[
-                      (registryByKey.get(axis.key)?.colorIndex ?? 0) % AXIS_CHIP_CLASSES.length
-                    ],
-                  )}
+                  variant={
+                    AXIS_BADGE_VARIANTS[
+                      (registryByKey.get(axis.key)?.colorIndex ?? 0) % AXIS_BADGE_VARIANTS.length
+                    ]
+                  }
+                  className="gap-1 pr-1"
                 >
                   {axis.label}
                   <button

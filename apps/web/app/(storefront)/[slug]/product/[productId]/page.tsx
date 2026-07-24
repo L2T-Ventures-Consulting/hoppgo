@@ -485,9 +485,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
           {/* Product Info */}
           <div className="space-y-6">
-            {product.category && (
-              <Badge variant="secondary">{product.category.name}</Badge>
-            )}
+            {product.category && <Badge variant="expired">{product.category.name}</Badge>}
 
             <h1 className="text-3xl font-bold">{product.name}</h1>
 
@@ -526,7 +524,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </span>
                 </>
               ) : (
-                <Badge variant="error">{tCatalog('unavailable')}</Badge>
+                <Badge variant="failed">{tCatalog('unavailable')}</Badge>
               )}
             </div>
 

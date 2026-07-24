@@ -160,7 +160,7 @@ export function CheckoutOrderSummary({
                   locale: dateLocale,
                 })}
               </span>
-              <Badge variant="secondary">{durationLabel}</Badge>
+              <Badge variant="expired">{durationLabel}</Badge>
             </div>
           )}
 
@@ -261,13 +261,10 @@ export function CheckoutOrderSummary({
                       </p>
                       {discountPercent != null && discountPercent > 0 &&
                         (maxDiscountPercent == null || discountPercent <= maxDiscountPercent) && (
-                        <Badge
-                          variant="secondary"
-                          className="mt-1 bg-green-100 text-xs text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                        >
-                          -{Math.floor(discountPercent)}%
-                        </Badge>
-                      )}
+                          <Badge variant="success" className="mt-1 text-xs">
+                            -{Math.floor(discountPercent)}%
+                          </Badge>
+                        )}
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">

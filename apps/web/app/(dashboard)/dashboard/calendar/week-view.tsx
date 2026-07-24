@@ -105,7 +105,7 @@ export function WeekView({ reservations, currentDate, selectedProductId }: WeekV
                     {day.getDate()}
                   </span>
                   {dayReservations.length > 0 && (
-                    <Badge variant="secondary" className="mt-1 text-xs">
+                    <Badge variant="expired" className="mt-1 text-xs">
                       {dayReservations.length}
                     </Badge>
                   )}

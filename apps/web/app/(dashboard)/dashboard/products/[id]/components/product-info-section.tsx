@@ -102,9 +102,7 @@ export async function ProductInfoSection({
             <p className="text-lg font-semibold">
               {formatCurrency(parseFloat(product.price), currency)}
             </p>
-            <Badge variant="secondary">
-              {tForm(`pricingModes.${product.pricingMode}`)}
-            </Badge>
+            <Badge variant="expired">{tForm(`pricingModes.${product.pricingMode}`)}</Badge>
           </div>
 
           {product.pricingTiers.length > 0 && (

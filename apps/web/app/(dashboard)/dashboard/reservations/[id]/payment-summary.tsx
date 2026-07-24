@@ -1,5 +1,6 @@
 "use client";
 
+import { CheckSolidIcon } from "@louez/ui/icons";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -380,16 +381,13 @@ export function PaymentSummary({
               </div>
             </div>
             {isRentalFullyPaid ? (
-              <Badge
-                variant="secondary"
-                className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-              >
-                <Check className="h-3 w-3 mr-1" />
+              <Badge variant="success" className="">
+                <CheckSolidIcon className="h-3 w-3 mr-1" />
                 {t("payment.paid")}
               </Badge>
             ) : (
               <div className="flex items-center gap-1.5">
-                <Badge variant="error" className="font-mono text-xs">
+                <Badge variant="failed" className="font-mono text-xs">
                   -{rentalRemaining.toFixed(2)}
                   {currencySymbol}
                 </Badge>
@@ -444,7 +442,7 @@ export function PaymentSummary({
               <div className="flex items-center gap-1.5">
                 {!isDepositFullyCollected ? (
                   <>
-                    <Badge variant="error" className="font-mono text-xs">
+                    <Badge variant="failed" className="font-mono text-xs">
                       -{depositRemaining.toFixed(2)}
                       {currencySymbol}
                     </Badge>
@@ -466,10 +464,7 @@ export function PaymentSummary({
                   </>
                 ) : depositToReturn > 0 ? (
                   <>
-                    <Badge
-                      variant="secondary"
-                      className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-mono text-xs"
-                    >
+                    <Badge variant="pending" className="font-mono text-xs">
                       {depositToReturn.toFixed(2)}
                       {currencySymbol}
                     </Badge>
@@ -490,11 +485,8 @@ export function PaymentSummary({
                     </Tooltip>
                   </>
                 ) : (
-                  <Badge
-                    variant="secondary"
-                    className="bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
-                  >
-                    <Check className="h-3 w-3 mr-1" />
+                  <Badge variant="expired" className="">
+                    <CheckSolidIcon className="h-3 w-3 mr-1" />
                     {t("payment.depositReturned")}
                   </Badge>
                 )}
@@ -516,10 +508,7 @@ export function PaymentSummary({
                   </p>
                 </div>
               </div>
-              <Badge
-                variant="secondary"
-                className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 font-mono"
-              >
+              <Badge variant="failed" className="font-mono">
                 +{damagesPaid.toFixed(2)}
                 {currencySymbol}
               </Badge>
@@ -599,34 +588,22 @@ export function PaymentSummary({
                         <div className="flex items-center gap-1.5">
                           <span className="font-medium">{getTypeLabel(payment.type)}</span>
                           {payment.method === "stripe" && (
-                            <Badge
-                              variant="secondary"
-                              className="h-4 px-1 text-[9px] bg-[#635BFF]/10 text-[#635BFF] border-0"
-                            >
+                            <Badge variant="submitted" className="h-4 px-1 text-[9px] border-0">
                               Stripe
                             </Badge>
                           )}
                           {payment.status === "authorized" && (
-                            <Badge
-                              variant="secondary"
-                              className="h-4 px-1 text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0"
-                            >
+                            <Badge variant="pending" className="h-4 px-1 text-[9px] border-0">
                               {t("payment.statusAuthorized")}
                             </Badge>
                           )}
                           {payment.status === "refunded" && (
-                            <Badge
-                              variant="secondary"
-                              className="h-4 px-1 text-[9px] bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-0"
-                            >
+                            <Badge variant="expired" className="h-4 px-1 text-[9px] border-0">
                               {t("payment.statusRefunded")}
                             </Badge>
                           )}
                           {payment.status === "cancelled" && (
-                            <Badge
-                              variant="secondary"
-                              className="h-4 px-1 text-[9px] bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-0"
-                            >
+                            <Badge variant="expired" className="h-4 px-1 text-[9px] border-0">
                               {t("payment.statusCancelled")}
                             </Badge>
                           )}
