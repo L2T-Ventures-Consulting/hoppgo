@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Reorder, useDragControls } from 'framer-motion'
 import { GripVertical, Loader2 } from 'lucide-react'
@@ -18,6 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@louez/ui'
+
+import { invalidateProductsList } from '@/lib/orpc/invalidation'
 
 import { updateProductsOrder } from './actions'
 
@@ -75,6 +78,7 @@ export function ProductsOrderDialog({
   const t = useTranslations('dashboard.products')
   const tCommon = useTranslations('common')
   const tErrors = useTranslations('errors')
+  const queryClient = useQueryClient()
 
   const [products, setProducts] = useState(initialProducts)
   const [isLoading, setIsLoading] = useState(false)
@@ -97,6 +101,7 @@ export function ProductsOrderDialog({
         toastManager.add({ title: tErrors(result.error), type: 'error' })
       } else {
         toastManager.add({ title: t('orderUpdated'), type: 'success' })
+        await invalidateProductsList(queryClient)
         onOpenChange(false)
       }
     } catch {

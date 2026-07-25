@@ -10,6 +10,37 @@ export interface Category {
   name: string;
 }
 
+export const PRODUCT_STATUS_FILTERS = ["all", "active", "draft", "archived"] as const;
+
+export type ProductStatusFilter = (typeof PRODUCT_STATUS_FILTERS)[number];
+
+/** A row of the products list, as returned by `dashboard.products.list`. */
+export interface ProductListItem {
+  id: string;
+  name: string;
+  images: string[] | null;
+  price: string;
+  deposit: string | null;
+  quantity: number;
+  status: "draft" | "active" | "archived" | null;
+  category: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export interface ProductCounts {
+  all: number;
+  active: number;
+  draft: number;
+  archived: number;
+}
+
+export interface ProductsList {
+  products: ProductListItem[];
+  counts: ProductCounts;
+}
+
 export interface SeasonalPricingData {
   id: string;
   name: string;

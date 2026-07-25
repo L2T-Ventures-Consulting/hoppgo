@@ -3,6 +3,7 @@
 import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { toastManager } from '@louez/ui';
@@ -12,6 +13,7 @@ import {
   duplicateProduct,
   updateProductStatus,
 } from '@/app/(dashboard)/dashboard/products/actions';
+import { invalidateProductsList } from '@/lib/orpc/invalidation';
 
 type ProductStatus = 'draft' | 'active' | 'archived' | null;
 
@@ -33,8 +35,18 @@ type ProductActionResult = {
  */
 export function useProductActions() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const t = useTranslations('dashboard.products');
   const tErrors = useTranslations('errors');
+
+  /**
+   * The list is served by React Query, the surrounding page (limits, banners)
+   * by the server — both need refreshing after a mutation.
+   */
+  const refreshProducts = async () => {
+    await invalidateProductsList(queryClient);
+    router.refresh();
+  };
 
   const [isLoading, setIsLoading] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -73,7 +85,7 @@ export function useProductActions() {
               : t('productUnpublished'),
           type: 'success',
         });
-        router.refresh();
+        await refreshProducts();
       }
     } catch {
       toastManager.add({ title: tErrors('generic'), type: 'error' });
@@ -93,7 +105,7 @@ export function useProductActions() {
         });
       } else {
         toastManager.add({ title: t('productArchived'), type: 'success' });
-        router.refresh();
+        await refreshProducts();
       }
     } catch {
       toastManager.add({ title: tErrors('generic'), type: 'error' });
@@ -113,7 +125,7 @@ export function useProductActions() {
         });
       } else {
         toastManager.add({ title: t('productDuplicated'), type: 'success' });
-        router.refresh();
+        await refreshProducts();
       }
     } catch {
       toastManager.add({ title: tErrors('generic'), type: 'error' });
@@ -146,9 +158,10 @@ export function useProductActions() {
       } else {
         toastManager.add({ title: t('productDeleted'), type: 'success' });
         if (options?.redirectTo) {
+          await invalidateProductsList(queryClient);
           router.push(options.redirectTo);
         } else {
-          router.refresh();
+          await refreshProducts();
         }
       }
     } catch {

@@ -7,11 +7,62 @@ import {
   getProductUnitActivityPage,
 } from "../../services/product-activity";
 import {
+  DASHBOARD_PRODUCT_STATUSES,
+  getDashboardProductsList,
+} from "../../services/products-dashboard";
+import {
   PRODUCT_UNIT_DOWNTIME_REASONS,
   PRODUCT_UNIT_DOWNTIME_STATUSES,
   PRODUCT_UNIT_EVENT_TYPES,
   getProductUnitHistory,
 } from "../../services/product-unit-history";
+
+const productListItemSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  images: z.array(z.string()).nullable(),
+  price: z.string(),
+  deposit: z.string().nullable(),
+  quantity: z.number(),
+  status: z.enum(DASHBOARD_PRODUCT_STATUSES).nullable(),
+  category: z
+    .object({
+      id: z.string(),
+      name: z.string(),
+    })
+    .nullable(),
+});
+
+const productCountsSchema = z.object({
+  all: z.number(),
+  active: z.number(),
+  draft: z.number(),
+  archived: z.number(),
+});
+
+const list = dashboardProcedure
+  .input(
+    z.object({
+      status: z.enum(["all", ...DASHBOARD_PRODUCT_STATUSES]).optional(),
+      /** Empty means "all categories"; a product matching any id is kept. */
+      categoryIds: z.array(z.string().min(1)).optional(),
+      limit: z.number().int().min(1).max(200).optional(),
+    }),
+  )
+  .output(
+    z.object({
+      products: z.array(productListItemSchema),
+      counts: productCountsSchema,
+    }),
+  )
+  .handler(({ context, input }) =>
+    getDashboardProductsList({
+      storeId: context.store.id,
+      status: input.status,
+      categoryIds: input.categoryIds,
+      limit: input.limit,
+    }),
+  );
 
 const activityCursorSchema = z.object({
   createdAt: z.string().datetime(),
@@ -118,6 +169,7 @@ const unitHistory = dashboardProcedure
   });
 
 export const dashboardProductsRouter = {
+  list,
   activity,
   unitHistory,
 };

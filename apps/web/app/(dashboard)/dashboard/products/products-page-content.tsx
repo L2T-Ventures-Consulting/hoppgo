@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Plus, FolderOpen, Lock, ArrowUpDown } from 'lucide-react'
 
 import { Button } from '@louez/ui'
+import { categoriesQueries } from '@/lib/queries/categories.queries'
+import { productsQueries } from '@/lib/queries/products.queries'
 import { ProductsTable } from './products-table'
-import { ProductsFilters } from './products-filters'
+import { ProductsFilters, useProductsFilters } from './products-filters'
 import { ProductsOrderDialog } from './products-order-dialog'
 import {
   UpgradeModal,
@@ -15,52 +18,25 @@ import {
   BlurOverlay,
 } from '@/components/dashboard/upgrade-modal'
 import type { LimitStatus } from '@/lib/plan-limits'
+import type { ProductStatusFilter, ProductsList } from './types'
 
-interface Product {
-  id: string
-  name: string
-  images: string[] | null
-  price: string
-  deposit: string | null
-  quantity: number
-  status: 'draft' | 'active' | 'archived' | null
-  category: {
-    id: string
-    name: string
-  } | null
-}
-
-interface Category {
-  id: string
-  name: string
-  storeId: string
-  order: number | null
-}
-
-interface ProductCounts {
-  all: number
-  active: number
-  draft: number
-  archived: number
-}
+const EMPTY_COUNTS = { all: 0, active: 0, draft: 0, archived: 0 }
 
 interface ProductsPageContentProps {
-  products: Product[]
-  categories: Category[]
-  counts: ProductCounts
-  currentStatus?: string
-  currentCategory?: string
+  initialData: ProductsList
+  /** Filters the server rendered `initialData` with. */
+  initialFilters: {
+    status: ProductStatusFilter
+    categoryIds: string[]
+  }
   limits: LimitStatus
   planSlug: string
   currency?: string
 }
 
 export function ProductsPageContent({
-  products,
-  categories,
-  counts,
-  currentStatus,
-  currentCategory,
+  initialData,
+  initialFilters,
   limits,
   planSlug,
   currency,
@@ -68,6 +44,24 @@ export function ProductsPageContent({
   const t = useTranslations('dashboard.products')
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showOrderDialog, setShowOrderDialog] = useState(false)
+  const { status, categoryIds } = useProductsFilters()
+
+  // Filter changes are shallow, so the server props keep describing the
+  // filters of the first render — only seed the cache while they still match.
+  const matchesInitialFilters =
+    status === initialFilters.status &&
+    categoryIds.join(',') === initialFilters.categoryIds.join(',')
+
+  const productsQuery = useQuery({
+    ...productsQueries.list({ status, categoryIds }),
+    initialData: matchesInitialFilters ? initialData : undefined,
+    // Keep the previous list on screen while the new filter loads
+    placeholderData: (previousData) => previousData,
+  })
+  const categoriesQuery = useQuery(categoriesQueries.list())
+
+  const products = productsQuery.data?.products ?? []
+  const counts = productsQuery.data?.counts ?? EMPTY_COUNTS
 
   // Determine which products to show vs blur
   const displayLimit = limits.limit
@@ -171,10 +165,9 @@ export function ProductsPageContent({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <ProductsFilters
-            categories={categories}
+            categories={categoriesQuery.data ?? []}
             counts={counts}
-            currentStatus={currentStatus}
-            currentCategory={currentCategory}
+            isLoadingCategories={categoriesQuery.isPending}
           />
         </div>
         {products.length > 1 && (
@@ -201,7 +194,15 @@ export function ProductsPageContent({
       </div>
 
       {/* Products Table - Visible */}
-      <ProductsTable products={visibleProducts} currency={currency} />
+      <div
+        className={
+          productsQuery.isPlaceholderData || productsQuery.isFetching
+            ? 'opacity-60 transition-opacity'
+            : 'transition-opacity'
+        }
+      >
+        <ProductsTable products={visibleProducts} currency={currency} />
+      </div>
 
       {/* Blurred Products Section */}
       {blurredProducts.length > 0 && (
