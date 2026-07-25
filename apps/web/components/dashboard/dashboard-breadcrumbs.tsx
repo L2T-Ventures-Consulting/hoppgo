@@ -15,7 +15,6 @@ const breadcrumbRoutes = [
   { href: '/dashboard/reservations', key: 'reservations' },
   { href: '/dashboard/customers/new', key: 'customersNew' },
   { href: '/dashboard/customers', key: 'customers' },
-  { href: '/dashboard/calendar', key: 'calendar' },
   { href: '/dashboard/analytics', key: 'analytics' },
   { href: '/dashboard/team', key: 'team' },
   { href: '/dashboard/sms', key: 'sms' },
@@ -69,12 +68,40 @@ const getDynamicLabel = (
   return labels[pathname] || null;
 };
 
+const getParentDynamicLabel = (
+  pathname: string,
+  route: { href: string; key: string } | null,
+  labels: Record<string, string>,
+) => {
+  if (!route || pathname === route.href) {
+    return null;
+  }
+
+  const parentPathname = pathname.slice(0, pathname.lastIndexOf('/'));
+
+  if (parentPathname === route.href) {
+    return null;
+  }
+
+  const label = labels[parentPathname];
+
+  return label ? { href: parentPathname, label } : null;
+};
+
 export const DashboardBreadcrumbs = () => {
   const pathname = usePathname();
   const t = useTranslations('dashboard.breadcrumbs');
   const { labels } = useDashboardBreadcrumbs();
   const currentRoute = getCurrentRoute(pathname);
   const dynamicLabel = getDynamicLabel(pathname, currentRoute, labels);
+  const parentDynamicLabel = getParentDynamicLabel(
+    pathname,
+    currentRoute,
+    labels,
+  );
+  const hasDynamicBreadcrumb = Boolean(
+    dynamicLabel || parentDynamicLabel,
+  );
 
   return (
     <nav
@@ -115,7 +142,7 @@ export const DashboardBreadcrumbs = () => {
               </>
             )}
             <li className="min-w-0">
-              {dynamicLabel ? (
+              {hasDynamicBreadcrumb ? (
                 <Link
                   href={currentRoute.href}
                   className="hover:text-foreground block truncate transition-colors"
@@ -128,6 +155,21 @@ export const DashboardBreadcrumbs = () => {
                 </span>
               )}
             </li>
+            {parentDynamicLabel && (
+              <>
+                <li aria-hidden="true" className="shrink-0">
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </li>
+                <li className="min-w-0">
+                  <Link
+                    href={parentDynamicLabel.href}
+                    className="hover:text-foreground block truncate transition-colors"
+                  >
+                    {parentDynamicLabel.label}
+                  </Link>
+                </li>
+              </>
+            )}
             {dynamicLabel && (
               <>
                 <li aria-hidden="true" className="shrink-0">

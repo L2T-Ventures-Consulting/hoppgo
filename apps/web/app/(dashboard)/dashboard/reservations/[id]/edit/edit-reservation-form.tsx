@@ -41,6 +41,7 @@ import {
 } from '@louez/ui'
 import { TooltipProvider } from '@louez/ui'
 import { Alert, AlertDescription } from '@louez/ui'
+import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context'
 import { ReservationDatePickerControl } from '@/components/form/form-reservation-date-picker'
 import { cn, formatCurrency, getCurrencySymbol, minutesToPriceDuration } from '@louez/utils'
 import { calculateDuration } from '@/lib/utils/duration'
@@ -259,6 +260,7 @@ export function EditReservationForm({
   const router = useRouter()
   const queryClient = useQueryClient()
   const t = useTranslations('dashboard.reservations')
+  const tBreadcrumbs = useTranslations('dashboard.breadcrumbs')
   const tForm = useTranslations('dashboard.reservations.manualForm')
   const tCommon = useTranslations('common')
   const tErrors = useTranslations('errors')
@@ -1043,6 +1045,11 @@ export function EditReservationForm({
 
   return (
     <TooltipProvider>
+      <DashboardBreadcrumbLabel
+        pathname={`/dashboard/reservations/${reservation.id}`}
+        label={`#${reservation.number}`}
+      />
+      <DashboardBreadcrumbLabel label={tBreadcrumbs('reservationsEdit')} />
       <div className="-mx-4 -my-6 sm:-mx-6 lg:-mx-8 min-h-screen bg-muted/30">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background border-b">
