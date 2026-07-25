@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { AlertTriangle, ChevronDown, ImageIcon, Lock, Trash2, Unlock } from "lucide-react";
+import { AlertTriangle, ChevronDown, Lock, Trash2, Unlock } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { PricingMode } from "@louez/types";
@@ -19,6 +19,8 @@ import {
   TooltipTrigger,
 } from "@louez/ui";
 import { cn } from "@louez/utils";
+
+import { ProductImage } from "@/components/product/product-image";
 
 import type { AvailabilityWarning, CalculatedEditableItem } from "../types";
 
@@ -76,17 +78,12 @@ export function EditReservationItemCard({
       )}
     >
       <div className="flex items-center gap-3">
-        <div className="bg-muted relative aspect-4/3 w-12 shrink-0 overflow-hidden rounded-md shadow-[0_0_0_1px_rgba(0,0,0,0.1)]">
-          {item.product?.images && item.product.images.length > 0 ? (
-            // Product thumbnails already use direct URLs in this feature.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.product.images[0]} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <ImageIcon className="text-muted-foreground h-4 w-4" />
-            </div>
-          )}
-        </div>
+        <ProductImage
+          src={item.product?.images?.[0]}
+          alt=""
+          sizes="48px"
+          containerClassName="w-12 shrink-0 rounded-md"
+        />
         <div className="min-w-0 flex-1">
           <p title={item.productSnapshot.name} className="truncate font-medium">
             {item.productSnapshot.name}

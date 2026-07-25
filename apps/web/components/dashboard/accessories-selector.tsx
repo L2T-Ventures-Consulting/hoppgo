@@ -19,6 +19,8 @@ import { ScrollArea } from '@louez/ui';
 import { formatCurrency } from '@louez/utils';
 import { cn } from '@louez/utils';
 
+import { ProductImage } from '@/components/product/product-image';
+
 interface Product {
   id: string;
   name: string;
@@ -127,19 +129,12 @@ export function AccessoriesSelector({
                 <GripVertical className="h-4 w-4" />
               </button>
 
-              <div className="bg-muted h-12 w-12 flex-shrink-0 overflow-hidden rounded-md">
-                {product.images && product.images[0] ? (
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="text-muted-foreground flex h-full w-full items-center justify-center">
-                    <span className="text-xs">No img</span>
-                  </div>
-                )}
-              </div>
+              <ProductImage
+                src={product.images?.[0]}
+                alt={product.name}
+                sizes="48px"
+                containerClassName="aspect-square h-12 w-12 shrink-0 rounded-md"
+              />
 
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{product.name}</p>
@@ -218,19 +213,12 @@ export function AccessoriesSelector({
                         setSearch('');
                       }}
                     >
-                      <div className="bg-muted h-10 w-10 flex-shrink-0 overflow-hidden rounded-md">
-                        {product.images && product.images[0] ? (
-                          <img
-                            src={product.images[0]}
-                            alt={product.name}
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <div className="text-muted-foreground flex h-full w-full items-center justify-center">
-                            <span className="text-[10px]">No img</span>
-                          </div>
-                        )}
-                      </div>
+                      <ProductImage
+                        src={product.images?.[0]}
+                        alt={product.name}
+                        sizes="40px"
+                        containerClassName="aspect-square h-10 w-10 shrink-0 rounded-md"
+                      />
 
                       <div className="min-w-0 flex-1">
                         <p className="truncate font-medium">{product.name}</p>

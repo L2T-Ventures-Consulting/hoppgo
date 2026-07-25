@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { format } from 'date-fns';
@@ -8,7 +7,6 @@ import { fr } from 'date-fns/locale';
 import {
   ArrowRight,
   CalendarDays,
-  ImageIcon,
   Minus,
   Plus,
   ShoppingCart,
@@ -43,6 +41,8 @@ import {
 } from '@louez/ui';
 import { Badge } from '@louez/ui';
 import { cn, formatCurrency } from '@louez/utils';
+
+import { ProductImage } from '@/components/product/product-image';
 
 import { calculateCartItemPrice } from '@/lib/utils/cart-pricing';
 
@@ -155,20 +155,12 @@ export function CartSidebar({
                   className="bg-muted/30 flex gap-3 rounded-lg p-3"
                 >
                   {/* Image */}
-                  <div className="bg-muted relative aspect-4/3 h-16 flex-shrink-0 overflow-hidden rounded-md">
-                    {item.productImage ? (
-                      <Image
-                        src={item.productImage}
-                        alt={item.productName}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <ImageIcon className="text-muted-foreground h-6 w-6" />
-                      </div>
-                    )}
-                  </div>
+                  <ProductImage
+                    src={item.productImage}
+                    alt={item.productName}
+                    sizes="88px"
+                    containerClassName="h-16 shrink-0 rounded-md"
+                  />
 
                   {/* Info */}
                   <div className="min-w-0 flex-1">

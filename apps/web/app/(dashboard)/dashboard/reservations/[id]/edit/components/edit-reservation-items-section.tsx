@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { ChevronsUpDown, ImageIcon, PenLine } from "lucide-react";
+import { ChevronsUpDown, PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { PricingMode } from "@louez/types";
@@ -22,6 +22,8 @@ import {
   PopoverTrigger,
 } from "@louez/ui";
 import { cn } from "@louez/utils";
+
+import { ProductImage } from "@/components/product/product-image";
 
 import type { AvailabilityWarning, Product, ReservationCalculations } from "../types";
 
@@ -124,24 +126,13 @@ function ProductAddCombobox({
                     }}
                     className="flex items-center gap-2"
                   >
-                    <div className="bg-muted relative h-auto aspect-4/3 w-8 shrink-0 overflow-hidden rounded-md">
-                      {product.images && product.images.length > 0 ? (
-                        // Product thumbnails already use direct URLs in this feature.
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={product.images[0]}
-                          alt=""
-                          className={cn(
-                            "h-full  w-full object-cover",
-                            isUnavailable && "opacity-40",
-                          )}
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                          <ImageIcon className="text-muted-foreground h-3.5 w-3.5" />
-                        </div>
-                      )}
-                    </div>
+                    <ProductImage
+                      src={product.images?.[0]}
+                      alt=""
+                      sizes="32px"
+                      className={cn(isUnavailable && "opacity-40")}
+                      containerClassName="w-8 shrink-0 rounded-md"
+                    />
 
                     <span
                       className={cn(

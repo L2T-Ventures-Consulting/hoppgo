@@ -2,14 +2,14 @@
 
 import { TrendingDownSolidIcon } from '@louez/ui/icons'
 import Link from 'next/link'
-import Image from 'next/image'
-import { ImageIcon, Calendar } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Card, CardContent } from '@louez/ui'
 import { Badge } from '@louez/ui'
 import { Button } from '@louez/ui'
 import { formatCurrency, minutesToPriceDuration } from '@louez/utils'
+import { ProductImage } from '@/components/product/product-image'
 import { useStoreCurrency, useStoreMaxDiscountPercent } from '@/contexts/store-context'
 import type { PricingMode } from '@louez/types'
 import { getStorefrontPricingSummary } from '@/lib/utils/storefront-pricing'
@@ -66,19 +66,14 @@ export function ProductCard({ product }: ProductCardProps) {
       <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-border/50 hover:border-primary/20 bg-card p-0 gap-0">
         {/* Image container - square aspect ratio */}
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-          {mainImage ? (
-            <Image
-              src={mainImage}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <ImageIcon className="h-12 w-12 text-muted-foreground/30" />
-            </div>
-          )}
+          <ProductImage
+            src={mainImage}
+            alt={product.name}
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+            inset={false}
+            className="transition-transform duration-500 group-hover:scale-105"
+            containerClassName="absolute inset-0 rounded-none"
+          />
 
           {/* Availability badge */}
           {!isAvailable && (

@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { MoreHorizontal, Pencil, Copy, Archive, Trash2, Eye, EyeOff, Package } from 'lucide-react'
 
@@ -26,6 +25,8 @@ import {
 } from '@louez/ui'
 
 import { getCurrencySymbol } from '@louez/utils'
+
+import { ProductImage } from '@/components/product/product-image'
 
 import { useProductActions } from './[id]/hooks/use-product-actions'
 
@@ -53,22 +54,6 @@ const STATUS_VARIANTS = {
   draft: 'pending',
   archived: 'expired',
 } as const
-
-function ProductImage({ src, alt }: { src?: string; alt: string }) {
-  if (!src) {
-    return (
-      <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-muted">
-        <Package className="h-5 w-5 text-muted-foreground" />
-      </div>
-    )
-  }
-
-  return (
-    <div className="relative aspect-4/3 h-12 overflow-hidden rounded-lg bg-muted">
-      <Image src={src} alt={alt} fill className="object-cover" sizes="64px" />
-    </div>
-  )
-}
 
 export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps) {
   const t = useTranslations('dashboard.products')
@@ -121,7 +106,12 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
               return (
                 <TableRow key={product.id}>
                   <TableCell>
-                    <ProductImage src={product.images?.[0]} alt={product.name} />
+                    <ProductImage
+                      src={product.images?.[0]}
+                      alt={product.name}
+                      sizes="64px"
+                      containerClassName="h-12 shrink-0"
+                    />
                   </TableCell>
                   <TableCell>
                     <Link

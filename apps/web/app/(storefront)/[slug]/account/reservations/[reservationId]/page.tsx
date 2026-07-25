@@ -7,7 +7,6 @@ import {
   XCircleSolidIcon,
 } from '@louez/ui/icons'
 import Link from 'next/link'
-import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { db } from '@louez/db'
 import { stores, reservations } from '@louez/db'
@@ -25,7 +24,6 @@ import {
   MapPin,
   Phone,
   Mail,
-  ImageIcon,
   FileText,
   ArrowRight,
   CircleDot,
@@ -44,6 +42,7 @@ import { getCustomerSession } from '../../actions'
 import { DownloadContractButton } from './download-contract-button'
 import { PayNowButton } from './pay-now-button'
 import { QuoteActions } from './quote-actions'
+import { ProductImage } from '@/components/product/product-image'
 import { ReviewPromptCard } from '@/components/storefront/review-prompt-card'
 import { buildReviewUrl } from '@/lib/google-places'
 import { formatStoreDate } from '@/lib/utils/store-date'
@@ -407,20 +406,12 @@ export default async function ReservationDetailPage({
             <div className="space-y-4">
               {reservation.items.map((item) => (
                 <div key={item.id} className="flex gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <div className="relative w-24 aspect-[4/3] flex-shrink-0 rounded-lg overflow-hidden bg-background border">
-                    {item.productSnapshot.images?.[0] ? (
-                      <Image
-                        src={item.productSnapshot.images[0]}
-                        alt={item.productSnapshot.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-                      </div>
-                    )}
-                  </div>
+                  <ProductImage
+                    src={item.productSnapshot.images?.[0]}
+                    alt={item.productSnapshot.name}
+                    sizes="96px"
+                    containerClassName="w-24 shrink-0 border bg-background"
+                  />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-base">{item.productSnapshot.name}</h4>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-sm text-muted-foreground">

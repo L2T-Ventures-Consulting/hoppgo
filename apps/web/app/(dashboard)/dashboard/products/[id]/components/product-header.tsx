@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { useTranslations } from 'next-intl';
@@ -12,7 +11,6 @@ import {
   Eye,
   EyeOff,
   MoreHorizontal,
-  Package,
   Pencil,
   Trash2,
 } from 'lucide-react';
@@ -33,6 +31,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@louez/ui';
+
+import { ProductImage } from '@/components/product/product-image';
 
 import { useProductActions } from '../hooks/use-product-actions';
 
@@ -86,21 +86,12 @@ export function ProductHeader({ product, storeSlug }: ProductHeaderProps) {
             <span className="sr-only">{tCommon('back')}</span>
           </Button>
 
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg bg-muted">
-            {image ? (
-              <Image
-                src={image}
-                alt={product.name}
-                fill
-                className="object-cover"
-                sizes="56px"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <Package className="h-6 w-6 text-muted-foreground" />
-              </div>
-            )}
-          </div>
+          <ProductImage
+            src={image}
+            alt={product.name}
+            sizes="56px"
+            containerClassName="aspect-square h-14 w-14 shrink-0"
+          />
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 flex-wrap">

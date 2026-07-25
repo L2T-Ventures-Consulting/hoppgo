@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react';
 
 import {
   AlertTriangle,
-  ImageIcon,
   Loader2,
   Minus,
   Package,
@@ -39,6 +38,7 @@ import {
 } from '@louez/ui';
 import { cn, formatCurrency, minutesToPriceDuration } from '@louez/utils';
 
+import { ProductImage } from '@/components/product/product-image';
 import { SearchInput } from '@/components/ui/search-input';
 
 import type { PeriodAvailability } from '../hooks/use-new-reservation-warnings';
@@ -391,21 +391,12 @@ export function NewReservationStepProducts({
               >
                 <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div className="flex min-w-0 items-start gap-3">
-                    <div className="bg-muted relative h-10 w-10 shrink-0 overflow-hidden rounded-md sm:h-12 sm:w-12">
-                      {product.images && product.images.length > 0 ? (
-                        // Product thumbnails already use direct URLs in this feature.
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={product.images[0]}
-                          alt={product.name}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                          <ImageIcon className="text-muted-foreground h-4 w-4" />
-                        </div>
-                      )}
-                    </div>
+                    <ProductImage
+                      src={product.images?.[0]}
+                      alt={product.name}
+                      sizes="48px"
+                      containerClassName="aspect-square h-10 w-10 shrink-0 rounded-md sm:h-12 sm:w-12"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex min-w-0 flex-wrap items-start gap-2">
                         <p className="min-w-0 flex-1 text-sm leading-tight font-medium sm:text-base">
