@@ -8,7 +8,7 @@ export const DashboardStatsSkeleton = () => {
           <CardPanel className="flex flex-col gap-3 p-4">
             <div className="flex items-start justify-between gap-2">
               <Skeleton className="h-4 w-24" />
-              <Skeleton className="size-8 rounded-xl" />
+              <Skeleton className="size-8 rounded-lg" />
             </div>
             <div className="space-y-1">
               <Skeleton className="h-7 w-16" />

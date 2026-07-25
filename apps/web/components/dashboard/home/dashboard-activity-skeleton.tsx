@@ -6,7 +6,7 @@ export const DashboardActivitySkeleton = () => {
       {Array.from({ length: 2 }, (_, sectionIndex) => (
         <Card key={sectionIndex}>
           <CardHeader className="flex flex-row items-center gap-3 p-4 sm:p-5">
-            <Skeleton className="size-9 shrink-0 rounded-xl" />
+            <Skeleton className="size-9 shrink-0 rounded-lg" />
             <div className="flex-1 space-y-1.5">
               <Skeleton className="h-4 w-32" />
               <Skeleton className="h-3 w-48" />

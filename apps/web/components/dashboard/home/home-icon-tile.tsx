@@ -22,7 +22,7 @@ export const HomeIconTile = ({
   <span
     aria-hidden="true"
     className={cn(
-      "flex shrink-0 items-center justify-center rounded-xl",
+      "flex shrink-0 items-center justify-center rounded-lg",
       size === "sm" ? "size-8" : "size-9",
       HOME_ACCENT_SURFACE[accent],
       className,
