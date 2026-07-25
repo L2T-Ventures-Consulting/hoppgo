@@ -26,13 +26,13 @@ import { toDatePickerValue } from '@louez/utils';
 
 import { DatePicker } from '@/components/ui/date-time-picker';
 
-import { updateUnitDetails } from '../actions';
-import type { InventoryUnitRow } from '../queries';
+import { updateUnitDetails } from '../../actions';
+import type { ProductInventoryUnit } from '../../queries';
 import { getTranslatedActionError } from './util.inventory-format';
 
 interface EditUnitDetailsDialogProps {
   open: boolean;
-  unit: InventoryUnitRow | null;
+  unit: ProductInventoryUnit | null;
   onOpenChange: (open: boolean) => void;
 }
 

@@ -12,3 +12,5 @@ export * from "./reservations-dashboard";
 export * from "./store-settings";
 export * from "./api-keys";
 export * from "./push-notifications";
+export * from "./product-activity";
+export * from "./product-unit-history";

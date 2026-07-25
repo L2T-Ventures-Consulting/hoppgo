@@ -78,6 +78,7 @@ interface RepairDowntimeSuggestionState {
     id: string;
     identifier: string;
     productName: string;
+    productId: string;
   }>;
 }
 

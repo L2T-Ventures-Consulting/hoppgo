@@ -1,23 +1,6 @@
-import {
-  endOfDay,
-  endOfMonth,
-  startOfMonth,
-  subDays,
-  subMonths,
-} from 'date-fns';
+import { endOfDay, subDays } from "date-fns";
 
-import {
-  and,
-  asc,
-  count,
-  desc,
-  eq,
-  gt,
-  inArray,
-  isNull,
-  or,
-  sql,
-} from 'drizzle-orm';
+import { and, asc, countDistinct, desc, eq, gt, inArray, isNull, or, sql } from "drizzle-orm";
 
 import {
   BLOCKING_RESERVATION_STATUSES,
@@ -34,7 +17,18 @@ import {
   reservationItems,
   reservations,
   stores,
-} from '@louez/db';
+  users,
+} from "@louez/db";
+import {
+  type GetUnitDowntimesInput,
+  type GetUnitTimelineInput,
+  getUnitDowntimesSchema,
+  getUnitTimelineSchema,
+} from "@louez/validations";
+
+import type { Reservation } from "@/app/(dashboard)/dashboard/reservations/reservations-types";
+import { getCurrentStore } from "@/lib/store-context";
+import { getUnitConflictFlags } from "@/lib/utils/unit-conflicts";
 
 /**
  * Read-only data-layer queries for the product dashboard (view) page.
@@ -50,8 +44,8 @@ import {
 
 export interface ProductRevenueStats {
   allTimeRevenue: number;
-  currentMonthRevenue: number;
-  lastMonthRevenue: number;
+  last30DaysRevenue: number;
+  previous30DaysRevenue: number;
   revenueGrowth: number;
   reservationCount: number;
 }
@@ -78,32 +72,22 @@ async function getProductRentalPaymentStats(params: {
   storeId: string;
   productId: string;
   startDate?: Date;
-  endDate?: Date;
+  endDateExclusive?: Date;
 }): Promise<ProductRentalPaymentStats> {
-  const { storeId, productId, startDate, endDate } = params;
+  const { storeId, productId, startDate, endDateExclusive } = params;
 
   const matchingReservationIds = db
     .select({ id: reservations.id })
     .from(reservations)
-    .innerJoin(
-      reservationItems,
-      eq(reservationItems.reservationId, reservations.id),
-    )
-    .where(
-      and(
-        eq(reservations.storeId, storeId),
-        eq(reservationItems.productId, productId),
-      ),
-    );
+    .innerJoin(reservationItems, eq(reservationItems.reservationId, reservations.id))
+    .where(and(eq(reservations.storeId, storeId), eq(reservationItems.productId, productId)));
 
   const dateConditions = [
     ...(startDate
-      ? [
-          sql`COALESCE(${payments.paidAt}, ${payments.createdAt}) >= ${startDate}`,
-        ]
+      ? [sql`COALESCE(${payments.paidAt}, ${payments.createdAt}) >= ${startDate}`]
       : []),
-    ...(endDate
-      ? [sql`COALESCE(${payments.paidAt}, ${payments.createdAt}) <= ${endDate}`]
+    ...(endDateExclusive
+      ? [sql`COALESCE(${payments.paidAt}, ${payments.createdAt}) < ${endDateExclusive}`]
       : []),
   ];
 
@@ -115,15 +99,15 @@ async function getProductRentalPaymentStats(params: {
     .from(payments)
     .where(
       and(
-        eq(payments.status, 'completed'),
-        eq(payments.type, 'rental'),
+        eq(payments.status, "completed"),
+        eq(payments.type, "rental"),
         inArray(payments.reservationId, matchingReservationIds),
         ...dateConditions,
       ),
     );
 
   return {
-    revenue: parseFloat(result[0]?.revenue || '0'),
+    revenue: parseFloat(result[0]?.revenue || "0"),
     reservationCount: result[0]?.reservationCount || 0,
   };
 }
@@ -134,34 +118,36 @@ export async function getProductRevenueStats(params: {
 }): Promise<ProductRevenueStats> {
   const { storeId, productId } = params;
   const now = new Date();
-  const currentMonthStart = startOfMonth(now);
-  const lastMonthStart = startOfMonth(subMonths(now, 1));
-  const lastMonthEnd = endOfMonth(subMonths(now, 1));
+  const last30DaysStart = subDays(now, 30);
+  const previous30DaysStart = subDays(now, 60);
 
-  const [currentMonth, lastMonth, allTime] = await Promise.all([
+  // Compare two contiguous rolling periods so the KPI is independent of
+  // calendar-month length and never counts a boundary payment twice.
+  const [last30Days, previous30Days, allTime] = await Promise.all([
     getProductRentalPaymentStats({
       storeId,
       productId,
-      startDate: currentMonthStart,
+      startDate: last30DaysStart,
+      endDateExclusive: now,
     }),
     getProductRentalPaymentStats({
       storeId,
       productId,
-      startDate: lastMonthStart,
-      endDate: lastMonthEnd,
+      startDate: previous30DaysStart,
+      endDateExclusive: last30DaysStart,
     }),
     getProductRentalPaymentStats({ storeId, productId }),
   ]);
 
   const revenueGrowth =
-    lastMonth.revenue > 0
-      ? ((currentMonth.revenue - lastMonth.revenue) / lastMonth.revenue) * 100
+    previous30Days.revenue > 0
+      ? ((last30Days.revenue - previous30Days.revenue) / previous30Days.revenue) * 100
       : 0;
 
   return {
     allTimeRevenue: allTime.revenue,
-    currentMonthRevenue: currentMonth.revenue,
-    lastMonthRevenue: lastMonth.revenue,
+    last30DaysRevenue: last30Days.revenue,
+    previous30DaysRevenue: previous30Days.revenue,
     revenueGrowth,
     reservationCount: allTime.reservationCount,
   };
@@ -172,14 +158,14 @@ export async function getProductRevenueStats(params: {
 // ============================================================================
 
 const RESERVATION_STATUSES = [
-  'pending',
-  'confirmed',
-  'ongoing',
-  'completed',
-  'cancelled',
-  'rejected',
-  'quote',
-  'declined',
+  "pending",
+  "confirmed",
+  "ongoing",
+  "completed",
+  "cancelled",
+  "rejected",
+  "quote",
+  "declined",
 ] as const;
 
 export type ProductReservationStatus = (typeof RESERVATION_STATUSES)[number];
@@ -203,21 +189,14 @@ export async function getProductReservationCounts(params: {
       count: sql<number>`COUNT(DISTINCT ${reservations.id})`,
     })
     .from(reservationItems)
-    .innerJoin(
-      reservations,
-      eq(reservationItems.reservationId, reservations.id),
-    )
-    .where(
-      and(
-        eq(reservations.storeId, storeId),
-        eq(reservationItems.productId, productId),
-      ),
-    )
+    .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
+    .where(and(eq(reservations.storeId, storeId), eq(reservationItems.productId, productId)))
     .groupBy(reservations.status);
 
-  const counts = Object.fromEntries(
-    RESERVATION_STATUSES.map((status) => [status, 0]),
-  ) as Record<ProductReservationStatus, number>;
+  const counts = Object.fromEntries(RESERVATION_STATUSES.map((status) => [status, 0])) as Record<
+    ProductReservationStatus,
+    number
+  >;
 
   for (const row of rows) {
     counts[row.status] = Number(row.count);
@@ -261,13 +240,7 @@ export async function getProductUtilizationRate(params: {
   totalUnits: number;
   windowDays?: number;
 }): Promise<ProductUtilizationRate> {
-  const {
-    storeId,
-    productId,
-    trackUnits,
-    totalUnits,
-    windowDays = 30,
-  } = params;
+  const { storeId, productId, trackUnits, totalUnits, windowDays = 30 } = params;
   const now = new Date();
   const windowStart = subDays(now, windowDays);
 
@@ -293,10 +266,7 @@ export async function getProductUtilizationRate(params: {
           reservationItems,
           eq(reservationItemUnits.reservationItemId, reservationItems.id),
         )
-        .innerJoin(
-          reservations,
-          eq(reservationItems.reservationId, reservations.id),
-        )
+        .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
         .where(
           and(
             eq(reservations.storeId, storeId),
@@ -309,10 +279,7 @@ export async function getProductUtilizationRate(params: {
           busyUnitDays: sql<string>`COALESCE(SUM(${reservationItems.quantity} * ${overlapDaysExpr}), 0)`,
         })
         .from(reservationItems)
-        .innerJoin(
-          reservations,
-          eq(reservationItems.reservationId, reservations.id),
-        )
+        .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
         .where(
           and(
             eq(reservations.storeId, storeId),
@@ -321,12 +288,9 @@ export async function getProductUtilizationRate(params: {
           ),
         );
 
-  const busyDays = parseFloat(row?.busyUnitDays || '0');
+  const busyDays = parseFloat(row?.busyUnitDays || "0");
   const totalCapacityDays = totalUnits * windowDays;
-  const rate =
-    totalCapacityDays > 0
-      ? Math.min(1, Math.max(0, busyDays / totalCapacityDays))
-      : 0;
+  const rate = totalCapacityDays > 0 ? Math.min(1, Math.max(0, busyDays / totalCapacityDays)) : 0;
 
   return { rate, busyDays, totalCapacityDays };
 }
@@ -335,29 +299,47 @@ export async function getProductUtilizationRate(params: {
 // 4. Inventory detail
 // ============================================================================
 
+export type InventoryDowntimeSummary = {
+  id: string;
+  reason: "maintenance" | "repair" | "other";
+  startsAt: Date;
+  endsAt: Date | null;
+  note: string | null;
+};
+
 export type ProductInventoryDetail =
   | {
-      mode: 'simple';
+      mode: "simple";
       quantity: number;
       effectiveQuantity: number;
     }
   | {
-      mode: 'tracked';
+      mode: "tracked";
       units: Array<{
         id: string;
         identifier: string;
         attributes: unknown;
-        lifecycleStatus: 'active' | 'retired';
+        lifecycleStatus: "active" | "retired";
         retiredAt: Date | null;
         retirementReason: string | null;
-        currentDowntime: {
-          reason: string;
-          startsAt: Date;
-          endsAt: Date | null;
-        } | null;
+        notes: string | null;
+        purchasePrice: string | null;
+        purchasedAt: Date | null;
+        currentDowntime: InventoryDowntimeSummary | null;
         isBusyToday: boolean;
+        hasConflicts: boolean;
       }>;
     };
+
+/**
+ * Shape of a single unit within `ProductInventoryDetail`'s `mode: 'tracked'`
+ * branch. Exported for reuse by the unit-lifecycle dialogs/cells under
+ * `./components/inventory/`.
+ */
+export type ProductInventoryUnit = Extract<
+  ProductInventoryDetail,
+  { mode: "tracked" }
+>["units"][number];
 
 /**
  * Full inventory view for a product (unlike the edit form, which only loads
@@ -381,7 +363,7 @@ export async function getProductInventoryDetail(params: {
       .where(and(eq(products.id, productId), eq(products.storeId, storeId)));
 
     const quantity = product?.quantity ?? 0;
-    return { mode: 'simple', quantity, effectiveQuantity: quantity };
+    return { mode: "simple", quantity, effectiveQuantity: quantity };
   }
 
   const units = await db
@@ -391,7 +373,7 @@ export async function getProductInventoryDetail(params: {
     .orderBy(asc(productUnits.identifier));
 
   if (units.length === 0) {
-    return { mode: 'tracked', units: [] };
+    return { mode: "tracked", units: [] };
   }
 
   const unitIds = units.map((unit) => unit.id);
@@ -409,10 +391,7 @@ export async function getProductInventoryDetail(params: {
         and(
           inArray(productUnitDowntimes.productUnitId, unitIds),
           eq(productUnitDowntimes.storeId, storeId),
-          or(
-            isNull(productUnitDowntimes.endsAt),
-            gt(productUnitDowntimes.endsAt, now),
-          ),
+          or(isNull(productUnitDowntimes.endsAt), gt(productUnitDowntimes.endsAt, now)),
         ),
       ),
   ]);
@@ -434,15 +413,43 @@ export async function getProductInventoryDetail(params: {
   });
 
   const openDowntimeByUnit = new Map<string, (typeof openDowntimes)[number]>();
+  const openDowntimesByUnit = new Map<string, typeof openDowntimes>();
   for (const downtime of openDowntimes) {
     if (!downtime.productUnitId) continue;
     if (!openDowntimeByUnit.has(downtime.productUnitId)) {
       openDowntimeByUnit.set(downtime.productUnitId, downtime);
     }
+
+    const list = openDowntimesByUnit.get(downtime.productUnitId) ?? [];
+    list.push(downtime);
+    openDowntimesByUnit.set(downtime.productUnitId, list);
   }
 
+  // Mirrors the old `dashboard/inventory` page's `getInventory` conflict-flag
+  // computation (deleted): retired units are treated as conflicting with any
+  // future assignment (open-ended window from now), while active units are
+  // checked against the windows of their current/upcoming (still-open)
+  // downtimes.
+  const conflictWindows = units.flatMap((unit) => {
+    if (unit.lifecycleStatus === "retired") {
+      return [{ unitId: unit.id, window: { start: now, end: null } }];
+    }
+
+    const unitOpenDowntimes = openDowntimesByUnit.get(unit.id) ?? [];
+    return unitOpenDowntimes.map((downtime) => ({
+      unitId: unit.id,
+      window: { start: downtime.startsAt, end: downtime.endsAt },
+    }));
+  });
+
+  const conflictFlags = await getUnitConflictFlags(conflictWindows, {
+    storeId,
+    pendingBlocksAvailability: store?.settings?.pendingBlocksAvailability,
+    turnoverBufferMinutes,
+  });
+
   return {
-    mode: 'tracked',
+    mode: "tracked",
     units: units.map((unit) => {
       const downtime = openDowntimeByUnit.get(unit.id);
 
@@ -453,14 +460,20 @@ export async function getProductInventoryDetail(params: {
         lifecycleStatus: unit.lifecycleStatus,
         retiredAt: unit.retiredAt,
         retirementReason: unit.retirementReason,
+        notes: unit.notes,
+        purchasePrice: unit.purchasePrice,
+        purchasedAt: unit.purchasedAt,
         currentDowntime: downtime
           ? {
+              id: downtime.id,
               reason: downtime.reason,
               startsAt: downtime.startsAt,
               endsAt: downtime.endsAt,
+              note: downtime.note,
             }
           : null,
         isBusyToday: busyUnitIds.has(unit.id),
+        hasConflicts: conflictFlags[unit.id] ?? false,
       };
     }),
   };
@@ -470,34 +483,18 @@ export async function getProductInventoryDetail(params: {
 // 5. Reservations page (paginated)
 // ============================================================================
 
-export interface ProductReservationsPageItem {
-  id: string;
-  number: string;
-  status: string;
-  startDate: Date;
-  endDate: Date;
-  quantity: number;
-  totalPrice: string;
-  customerFirstName: string | null;
-  customerLastName: string | null;
-}
-
 /**
- * Paginated list of reservations that include this product.
- *
- * A reservation can (rarely) contain more than one line item for the same
- * product (e.g. two variants of the same product booked together). This
- * intentionally returns ONE ROW PER LINE ITEM (not deduped per reservation),
- * so `quantity`/`totalPrice` accurately reflect what was booked for that
- * specific line item — `total` counts line items too, matching what's
- * returned. `page` is zero-indexed.
+ * Paginated list of reservations that include this product, ONE ROW PER
+ * RESERVATION, loaded with the full relational shape (`customer`, `items`,
+ * `payments`) so the section can render the shared `ReservationsCardView`
+ * users know from the reservations page. `page` is zero-indexed.
  */
 export async function getProductReservationsPage(params: {
   storeId: string;
   productId: string;
   page: number;
   pageSize: number;
-}): Promise<{ items: ProductReservationsPageItem[]; total: number }> {
+}): Promise<{ items: Reservation[]; total: number }> {
   const { storeId, productId, page, pageSize } = params;
 
   const whereClause = and(
@@ -505,86 +502,268 @@ export async function getProductReservationsPage(params: {
     eq(reservationItems.productId, productId),
   );
 
-  const [items, [{ total }]] = await Promise.all([
+  const [idRows, [{ total }]] = await Promise.all([
     db
-      .select({
+      .selectDistinct({
         id: reservations.id,
-        number: reservations.number,
-        status: reservations.status,
         startDate: reservations.startDate,
-        endDate: reservations.endDate,
-        quantity: reservationItems.quantity,
-        totalPrice: reservationItems.totalPrice,
-        customerFirstName: customers.firstName,
-        customerLastName: customers.lastName,
       })
       .from(reservationItems)
-      .innerJoin(
-        reservations,
-        eq(reservationItems.reservationId, reservations.id),
-      )
-      .innerJoin(customers, eq(reservations.customerId, customers.id))
+      .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
       .where(whereClause)
-      .orderBy(desc(reservations.startDate))
+      .orderBy(desc(reservations.startDate), desc(reservations.id))
       .limit(pageSize)
       .offset(page * pageSize),
     db
-      .select({ total: count() })
+      .select({ total: countDistinct(reservations.id) })
       .from(reservationItems)
-      .innerJoin(
-        reservations,
-        eq(reservationItems.reservationId, reservations.id),
-      )
+      .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
       .where(whereClause),
   ]);
 
-  return { items, total };
+  if (idRows.length === 0) {
+    return { items: [], total };
+  }
+
+  const items = await db.query.reservations.findMany({
+    where: inArray(
+      reservations.id,
+      idRows.map((row) => row.id),
+    ),
+    with: {
+      customer: true,
+      items: { with: { product: true } },
+      payments: true,
+    },
+    orderBy: (reservations, { desc }) => [
+      desc(reservations.startDate),
+      desc(reservations.id),
+    ],
+  });
+
+  return { items: items as unknown as Reservation[], total };
 }
 
 // ============================================================================
-// 6. Unit activity feed
+// 7. Unit timeline & downtimes (relocated from the deleted standalone
+//    `dashboard/inventory` page — unit-lifecycle detail reads used by the
+//    unit history sheet under `./components/inventory/`)
 // ============================================================================
 
-export interface ProductUnitActivityItem {
+export type UnitTimelineEntry =
+  | {
+      kind: "event";
+      id: string;
+      type: (typeof productUnitEvents.$inferSelect)["type"];
+      actorUserId: string | null;
+      actorName: string | null;
+      payload: Record<string, unknown> | null;
+      createdAt: Date;
+    }
+  | {
+      kind: "assignment";
+      id: string;
+      type: "assigned";
+      reservationId: string;
+      reservationNumber: string;
+      reservationItemId: string;
+      identifierSnapshot: string;
+      customerName: string | null;
+      startDate: Date;
+      endDate: Date;
+      createdAt: Date;
+    };
+
+export type UnitDowntimeStatus = "current" | "upcoming" | "past";
+
+export type UnitDowntimeEntry = {
   id: string;
-  productUnitId: string | null;
-  identifierSnapshot: string | null;
-  type: string;
-  actorUserId: string | null;
-  payload: Record<string, unknown> | null;
-  createdAt: Date;
+  reason: "maintenance" | "repair" | "other";
+  startsAt: Date;
+  endsAt: Date | null;
+  note: string | null;
+  status: UnitDowntimeStatus;
+};
+
+function getDowntimeStatus(
+  downtime: Pick<UnitDowntimeEntry, "startsAt" | "endsAt">,
+  now: Date,
+): UnitDowntimeStatus {
+  if (downtime.startsAt <= now && (!downtime.endsAt || downtime.endsAt > now)) {
+    return "current";
+  }
+
+  if (downtime.startsAt > now) {
+    return "upcoming";
+  }
+
+  return "past";
 }
 
-export async function getProductUnitActivity(params: {
-  storeId: string;
-  productId: string;
-  limit?: number;
-}): Promise<ProductUnitActivityItem[]> {
-  const { storeId, productId, limit = 15 } = params;
+function getDowntimeStatusOrder(status: UnitDowntimeStatus): number {
+  if (status === "current") {
+    return 0;
+  }
+
+  if (status === "upcoming") {
+    return 1;
+  }
+
+  return 2;
+}
+
+export async function getUnitTimeline(input: GetUnitTimelineInput) {
+  const store = await getCurrentStore();
+  if (!store) {
+    return { error: "errors.unauthorized" };
+  }
+
+  const validated = getUnitTimelineSchema.safeParse(input);
+  if (!validated.success) {
+    return { error: "errors.invalidData" };
+  }
+
+  const [unit] = await db
+    .select({ id: productUnits.id })
+    .from(productUnits)
+    .innerJoin(products, eq(productUnits.productId, products.id))
+    .where(and(eq(productUnits.id, validated.data.unitId), eq(products.storeId, store.id)))
+    .limit(1);
+
+  if (!unit) {
+    return { error: "errors.notFound" };
+  }
+
+  const [events, assignments] = await Promise.all([
+    db
+      .select({
+        id: productUnitEvents.id,
+        type: productUnitEvents.type,
+        actorUserId: productUnitEvents.actorUserId,
+        actorName: users.name,
+        payload: productUnitEvents.payload,
+        createdAt: productUnitEvents.createdAt,
+      })
+      .from(productUnitEvents)
+      .leftJoin(users, eq(productUnitEvents.actorUserId, users.id))
+      .where(
+        and(
+          eq(productUnitEvents.productUnitId, validated.data.unitId),
+          eq(productUnitEvents.storeId, store.id),
+        ),
+      )
+      .orderBy(desc(productUnitEvents.createdAt)),
+    db
+      .select({
+        id: reservationItemUnits.id,
+        reservationId: reservations.id,
+        reservationNumber: reservations.number,
+        reservationItemId: reservationItems.id,
+        identifierSnapshot: reservationItemUnits.identifierSnapshot,
+        customerName: sql<
+          string | null
+        >`NULLIF(TRIM(CONCAT(COALESCE(${customers.firstName}, ''), ' ', COALESCE(${customers.lastName}, ''))), '')`,
+        startDate: reservations.startDate,
+        endDate: reservations.endDate,
+        assignedAt: reservationItemUnits.assignedAt,
+      })
+      .from(reservationItemUnits)
+      .innerJoin(reservationItems, eq(reservationItemUnits.reservationItemId, reservationItems.id))
+      .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
+      .leftJoin(customers, eq(reservations.customerId, customers.id))
+      .where(
+        and(
+          eq(reservationItemUnits.productUnitId, validated.data.unitId),
+          eq(reservations.storeId, store.id),
+        ),
+      ),
+  ]);
+
+  const eventEntries: UnitTimelineEntry[] = events.map((event) => ({
+    kind: "event",
+    id: event.id,
+    type: event.type,
+    actorUserId: event.actorUserId,
+    actorName: event.actorName,
+    payload: event.payload ?? null,
+    createdAt: event.createdAt,
+  }));
+  const assignmentEntries: UnitTimelineEntry[] = assignments.map((assignment) => ({
+    kind: "assignment",
+    id: assignment.id,
+    type: "assigned",
+    reservationId: assignment.reservationId,
+    reservationNumber: assignment.reservationNumber,
+    reservationItemId: assignment.reservationItemId,
+    identifierSnapshot: assignment.identifierSnapshot,
+    customerName: assignment.customerName,
+    startDate: assignment.startDate,
+    endDate: assignment.endDate,
+    createdAt: assignment.assignedAt,
+  }));
+  const timeline = [...eventEntries, ...assignmentEntries].sort(
+    (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+  );
+
+  return { success: true, timeline };
+}
+
+export async function getUnitDowntimes(input: GetUnitDowntimesInput) {
+  const store = await getCurrentStore();
+  if (!store) {
+    return { error: "errors.unauthorized" };
+  }
+
+  const validated = getUnitDowntimesSchema.safeParse(input);
+  if (!validated.success) {
+    return { error: "errors.invalidData" };
+  }
+
+  const [unit] = await db
+    .select({ id: productUnits.id })
+    .from(productUnits)
+    .innerJoin(products, eq(productUnits.productId, products.id))
+    .where(and(eq(productUnits.id, validated.data.unitId), eq(products.storeId, store.id)))
+    .limit(1);
+
+  if (!unit) {
+    return { error: "errors.notFound" };
+  }
 
   const rows = await db
     .select({
-      id: productUnitEvents.id,
-      productUnitId: productUnitEvents.productUnitId,
-      identifierSnapshot: productUnitEvents.identifierSnapshot,
-      type: productUnitEvents.type,
-      actorUserId: productUnitEvents.actorUserId,
-      payload: productUnitEvents.payload,
-      createdAt: productUnitEvents.createdAt,
+      id: productUnitDowntimes.id,
+      reason: productUnitDowntimes.reason,
+      startsAt: productUnitDowntimes.startsAt,
+      endsAt: productUnitDowntimes.endsAt,
+      note: productUnitDowntimes.note,
     })
-    .from(productUnitEvents)
-    .innerJoin(
-      productUnits,
-      eq(productUnitEvents.productUnitId, productUnits.id),
-    )
+    .from(productUnitDowntimes)
     .where(
       and(
-        eq(productUnitEvents.storeId, storeId),
-        eq(productUnits.productId, productId),
+        eq(productUnitDowntimes.productUnitId, validated.data.unitId),
+        eq(productUnitDowntimes.storeId, store.id),
       ),
-    )
-    .orderBy(desc(productUnitEvents.createdAt))
-    .limit(limit);
+    );
 
-  return rows;
+  const now = new Date();
+  const downtimes: UnitDowntimeEntry[] = rows
+    .map((row) => ({
+      ...row,
+      status: getDowntimeStatus(row, now),
+    }))
+    .sort((a, b) => {
+      const statusOrder = getDowntimeStatusOrder(a.status) - getDowntimeStatusOrder(b.status);
+      if (statusOrder !== 0) {
+        return statusOrder;
+      }
+
+      if (a.status === "upcoming") {
+        return a.startsAt.getTime() - b.startsAt.getTime();
+      }
+
+      return b.startsAt.getTime() - a.startsAt.getTime();
+    });
+
+  return { success: true, downtimes };
 }

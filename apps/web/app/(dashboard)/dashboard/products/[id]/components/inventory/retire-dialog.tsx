@@ -27,20 +27,20 @@ import {
   toastManager,
 } from '@louez/ui';
 
-import { retireUnit } from '../actions';
-import type { InventoryUnitRow } from '../queries';
+import { retireUnit } from '../../actions';
+import type { ProductInventoryUnit } from '../../queries';
 import { ConflictsPanel } from './conflicts-panel';
-import type { InventoryConflict } from './inventory-types';
 import {
   RETIREMENT_REASON_OPTIONS,
   type RetirementReasonOption,
   isRetirementReasonOption,
 } from './inventory.constants';
+import type { InventoryConflict } from './unit-types';
 import { getTranslatedActionError } from './util.inventory-format';
 
 interface RetireDialogProps {
   open: boolean;
-  unit: InventoryUnitRow | null;
+  unit: ProductInventoryUnit | null;
   onOpenChange: (open: boolean) => void;
 }
 

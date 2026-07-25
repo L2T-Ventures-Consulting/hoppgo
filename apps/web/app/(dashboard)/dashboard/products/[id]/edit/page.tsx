@@ -26,7 +26,10 @@ interface EditProductPageProps {
 export default async function EditProductPage({
   params,
 }: EditProductPageProps) {
-  const t = await getTranslations('dashboard.products');
+  const [t, tBreadcrumbs] = await Promise.all([
+    getTranslations('dashboard.products'),
+    getTranslations('dashboard.breadcrumbs'),
+  ]);
   const store = await getCurrentStore();
 
   if (!store) {
@@ -131,7 +134,11 @@ export default async function EditProductPage({
 
   return (
     <div className="space-y-6">
-      <DashboardBreadcrumbLabel label={product.name} />
+      <DashboardBreadcrumbLabel
+        pathname={`/dashboard/products/${product.id}`}
+        label={product.name}
+      />
+      <DashboardBreadcrumbLabel label={tBreadcrumbs('productsEdit')} />
       <div>
         <h1 className="text-2xl font-bold tracking-tight">
           {t('editProduct')}

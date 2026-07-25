@@ -73,11 +73,9 @@ export function ProductFormSectionStock({
 
   return (
     <Card>
-      test
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            test
             {modeChosen ? (
               <Button
                 type="button"
@@ -109,7 +107,7 @@ export function ProductFormSectionStock({
             variant="outline"
             size="sm"
             render={
-              <Link href={`/dashboard/inventory?productId=${productId}`} />
+              <Link href={`/dashboard/products/${productId}`} />
             }
           >
             <DatabaseIcon className="h-4 w-4" />

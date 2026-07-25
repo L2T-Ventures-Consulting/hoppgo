@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-
 import {
   Archive,
   History,
@@ -22,20 +20,20 @@ import {
   DropdownMenuTrigger,
 } from '@louez/ui';
 
-import type { InventoryUnitRow } from '../queries';
+import type { ProductInventoryUnit } from '../../queries';
 
-interface InventoryRowActionsProps {
-  row: InventoryUnitRow;
+interface UnitRowActionsProps {
+  row: ProductInventoryUnit;
   disabled?: boolean;
-  onCloseDowntime: (row: InventoryUnitRow) => void;
-  onDeclareDowntime: (row: InventoryUnitRow) => void;
-  onEditDetails: (row: InventoryUnitRow) => void;
-  onReinstate: (row: InventoryUnitRow) => void;
-  onRetire: (row: InventoryUnitRow) => void;
-  onViewHistory: (row: InventoryUnitRow) => void;
+  onCloseDowntime: (row: ProductInventoryUnit) => void;
+  onDeclareDowntime: (row: ProductInventoryUnit) => void;
+  onEditDetails: (row: ProductInventoryUnit) => void;
+  onReinstate: (row: ProductInventoryUnit) => void;
+  onRetire: (row: ProductInventoryUnit) => void;
+  onViewHistory: (row: ProductInventoryUnit) => void;
 }
 
-export const InventoryRowActions = ({
+export const UnitRowActions = ({
   row,
   disabled = false,
   onCloseDowntime,
@@ -44,7 +42,7 @@ export const InventoryRowActions = ({
   onReinstate,
   onRetire,
   onViewHistory,
-}: InventoryRowActionsProps) => {
+}: UnitRowActionsProps) => {
   const t = useTranslations('dashboard.inventory.actions');
   const tCommon = useTranslations('common');
   const isRetired = row.lifecycleStatus === 'retired';
@@ -96,13 +94,6 @@ export const InventoryRowActions = ({
         <DropdownMenuItem onClick={() => onViewHistory(row)}>
           <History className="mr-2 h-4 w-4" />
           {t('viewHistory')}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          render={<Link href={`/dashboard/products/${row.productId}/edit`} />}
-        >
-          <Pencil className="mr-2 h-4 w-4" />
-          {t('editProduct')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

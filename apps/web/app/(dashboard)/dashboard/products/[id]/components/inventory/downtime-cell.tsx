@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 
 import { formatDateTime } from '@/lib/utils';
 
-import type { InventoryDowntimeSummary } from '../queries';
+import type { InventoryDowntimeSummary } from '../../queries';
 
 interface DowntimeCellProps {
   currentDowntime: InventoryDowntimeSummary | null;

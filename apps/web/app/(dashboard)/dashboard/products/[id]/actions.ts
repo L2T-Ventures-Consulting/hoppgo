@@ -44,11 +44,6 @@ import { getCurrentStore } from '@/lib/store-context';
 import { getUnitConflicts } from '@/lib/utils/unit-conflicts';
 import { buildUnitEvent, updateUnits } from '@/lib/utils/unit-mutations';
 
-import {
-  getUnitDowntimes as getUnitDowntimesQuery,
-  getUnitTimeline as getUnitTimelineQuery,
-} from './queries';
-
 async function getStoreForUser() {
   return getCurrentStore();
 }
@@ -158,7 +153,6 @@ async function getDowntimeForStore(downtimeId: string, storeId: string) {
 }
 
 function revalidateInventoryPaths(productId?: string, reservationId?: string) {
-  revalidatePath('/dashboard/inventory');
   revalidatePath('/dashboard/products');
 
   if (productId) {
@@ -986,12 +980,4 @@ export async function reassignReservationItemUnit(
 
   revalidateInventoryPaths(item.productId, item.reservationId);
   return { success: true };
-}
-
-export async function loadUnitTimeline(input: { unitId: string }) {
-  return getUnitTimelineQuery(input);
-}
-
-export async function loadUnitDowntimes(input: { unitId: string }) {
-  return getUnitDowntimesQuery(input);
 }

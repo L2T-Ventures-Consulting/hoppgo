@@ -446,7 +446,6 @@ export async function createProduct(data: ProductInput) {
   });
 
   revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/inventory");
   return { success: true, productId };
 }
 
@@ -831,7 +830,6 @@ export async function updateProduct(productId: string, data: ProductInput) {
   ).catch(() => {});
 
   revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/inventory");
   revalidatePath(`/dashboard/products/${productId}`);
   revalidatePath(`/dashboard/products/${productId}/edit`);
   return { success: true };

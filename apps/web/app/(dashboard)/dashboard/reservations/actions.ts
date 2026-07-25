@@ -5703,7 +5703,7 @@ export async function assignUnitsToReservationItem(
     });
 
     revalidatePath(`/dashboard/reservations/${item.reservationId}`);
-    revalidatePath('/dashboard/inventory');
+    revalidatePath(`/dashboard/products/${item.productId}`);
 
     return { success: true };
   } catch (error) {

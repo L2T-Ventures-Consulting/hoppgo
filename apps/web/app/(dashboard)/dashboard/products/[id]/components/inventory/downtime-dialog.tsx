@@ -17,7 +17,6 @@ import {
   DialogPanel,
   DialogPopup,
   DialogTitle,
-  Input,
   Label,
   Select,
   SelectContent,
@@ -29,24 +28,22 @@ import {
   toastManager,
 } from '@louez/ui';
 
-import { declareDowntime, updateDowntime } from '../actions';
-import type { InventoryUnitRow } from '../queries';
+import { ReservationDatePickerControl } from '@/components/form/form-reservation-date-picker';
+
+import { declareDowntime, updateDowntime } from '../../actions';
+import type { ProductInventoryUnit } from '../../queries';
 import { ConflictsPanel } from './conflicts-panel';
-import type { InventoryConflict } from './inventory-types';
 import {
   DOWNTIME_REASON_OPTIONS,
   type DowntimeReasonOption,
   isDowntimeReasonOption,
 } from './inventory.constants';
-import {
-  getTranslatedActionError,
-  parseOptionalDate,
-  toDateTimeLocalInputValue,
-} from './util.inventory-format';
+import type { InventoryConflict } from './unit-types';
+import { getTranslatedActionError } from './util.inventory-format';
 
 interface DowntimeDialogProps {
   open: boolean;
-  unit: InventoryUnitRow | null;
+  unit: ProductInventoryUnit | null;
   onOpenChange: (open: boolean) => void;
 }
 
@@ -60,10 +57,8 @@ export const DowntimeDialog = ({
   const tErrors = useTranslations('errors');
   const router = useRouter();
   const [reason, setReason] = useState<DowntimeReasonOption>('maintenance');
-  const [startsAt, setStartsAt] = useState(
-    toDateTimeLocalInputValue(new Date()),
-  );
-  const [endsAt, setEndsAt] = useState('');
+  const [startsAt, setStartsAt] = useState<Date | undefined>(() => new Date());
+  const [endsAt, setEndsAt] = useState<Date | undefined>();
   const [openEnded, setOpenEnded] = useState(true);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -77,10 +72,8 @@ export const DowntimeDialog = ({
     }
 
     setReason(currentDowntime?.reason ?? 'maintenance');
-    setStartsAt(
-      toDateTimeLocalInputValue(currentDowntime?.startsAt ?? new Date()),
-    );
-    setEndsAt(toDateTimeLocalInputValue(currentDowntime?.endsAt ?? null));
+    setStartsAt(currentDowntime?.startsAt ?? new Date());
+    setEndsAt(currentDowntime?.endsAt ?? undefined);
     setOpenEnded(currentDowntime?.endsAt == null);
     setNote(currentDowntime?.note ?? '');
     setIsSubmitting(false);
@@ -92,14 +85,16 @@ export const DowntimeDialog = ({
       return;
     }
 
-    const startsAtDate = parseOptionalDate(startsAt);
-    const endsAtDate =
-      openEnded || !endsAt.trim() ? null : parseOptionalDate(endsAt);
-
-    if (!startsAtDate || (!openEnded && endsAt.trim() && !endsAtDate)) {
+    if (
+      !startsAt ||
+      Number.isNaN(startsAt.getTime()) ||
+      (!openEnded && endsAt && Number.isNaN(endsAt.getTime()))
+    ) {
       toastManager.add({ title: tErrors('invalidData'), type: 'error' });
       return;
     }
+
+    const endsAtDate = openEnded ? null : (endsAt ?? null);
 
     setIsSubmitting(true);
     try {
@@ -107,14 +102,14 @@ export const DowntimeDialog = ({
         ? await updateDowntime({
             downtimeId: currentDowntime.id,
             reason,
-            startsAt: startsAtDate,
+            startsAt,
             endsAt: endsAtDate,
             note,
           })
         : await declareDowntime({
             unitId: unit.id,
             reason,
-            startsAt: startsAtDate,
+            startsAt,
             endsAt: endsAtDate,
             note,
           });
@@ -187,25 +182,22 @@ export const DowntimeDialog = ({
             </div>
 
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="grid gap-2">
-                <Label htmlFor="downtime-starts-at">{t('startsAt')}</Label>
-                <Input
-                  id="downtime-starts-at"
-                  type="datetime-local"
-                  value={startsAt}
-                  onChange={(event) => setStartsAt(event.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="downtime-ends-at">{t('endsAt')}</Label>
-                <Input
-                  id="downtime-ends-at"
-                  type="datetime-local"
-                  value={endsAt}
-                  onChange={(event) => setEndsAt(event.target.value)}
-                  disabled={openEnded}
-                />
-              </div>
+              <ReservationDatePickerControl
+                id="downtime-starts-at"
+                label={t('startsAt')}
+                value={startsAt}
+                onChange={setStartsAt}
+                timeStep={30}
+              />
+              <ReservationDatePickerControl
+                id="downtime-ends-at"
+                label={t('endsAt')}
+                value={endsAt}
+                onChange={setEndsAt}
+                timeStep={30}
+                referenceDate={startsAt}
+                disabled={openEnded}
+              />
             </div>
 
             <div className="flex items-center justify-between rounded-lg border p-3">

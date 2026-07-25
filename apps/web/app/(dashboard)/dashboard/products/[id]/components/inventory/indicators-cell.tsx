@@ -10,10 +10,10 @@ import {
   TooltipTrigger,
 } from '@louez/ui';
 
-import type { InventoryUnitRow } from '../queries';
+import type { ProductInventoryUnit } from '../../queries';
 
 interface IndicatorsCellProps {
-  row: InventoryUnitRow;
+  row: ProductInventoryUnit;
 }
 
 export const IndicatorsCell = ({ row }: IndicatorsCellProps) => {

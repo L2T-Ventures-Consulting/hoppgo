@@ -32,8 +32,8 @@ import {
 
 import { formatDateRange } from '@/lib/utils';
 
-import { reassignReservationItemUnit } from '../actions';
-import type { InventoryConflict } from './inventory-types';
+import { reassignReservationItemUnit } from '../../actions';
+import type { InventoryConflict } from './unit-types';
 import { getTranslatedActionError } from './util.inventory-format';
 
 interface ConflictsPanelProps {

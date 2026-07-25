@@ -504,9 +504,7 @@ function UnitRow({
   const hasPurchase =
     !!(typeof unit.purchasePrice === "string" && unit.purchasePrice.trim()) || !!unit.purchasedAt;
   const canApplyToAll = !isExistingUnit && unitCount > 1 && hasPurchase;
-  const inventoryHref = productId
-    ? `/dashboard/inventory?productId=${productId}`
-    : "/dashboard/inventory";
+  const inventoryHref = productId ? `/dashboard/products/${productId}` : null;
 
   return (
     <div
@@ -617,12 +615,14 @@ function UnitRow({
             {isExistingUnit ? (
               <p className="text-muted-foreground text-sm">
                 {t("existingUnitDetailsHint")}{" "}
-                <Link
-                  href={inventoryHref}
-                  className="text-primary font-medium underline-offset-4 hover:underline"
-                >
-                  {t("openInventoryDetails")}
-                </Link>
+                {inventoryHref && (
+                  <Link
+                    href={inventoryHref}
+                    className="text-primary font-medium underline-offset-4 hover:underline"
+                  >
+                    {t("openInventoryDetails")}
+                  </Link>
+                )}
               </p>
             ) : (
               <>
@@ -1197,17 +1197,29 @@ export function UnitTrackingEditor({
             type="button"
             onClick={() => chooseMode(false)}
             disabled={disabled}
-            className="hover:border-primary/48 hover:bg-accent/50 rounded-lg border p-4 text-left transition-colors disabled:pointer-events-none disabled:opacity-50"
+            aria-invalid={showValidationErrors || undefined}
+            className={cn(
+              "bg-background hover:border-primary/48 hover:bg-accent/50 rounded-lg border p-4 text-left transition-colors disabled:pointer-events-none disabled:opacity-50",
+              showValidationErrors &&
+                "border-destructive/32 bg-destructive/4 hover:border-destructive/48 hover:bg-destructive/8",
+            )}
           >
             <p className="text-sm font-semibold">{t("modeQuantity")}</p>
             <p className="text-muted-foreground mt-1 text-xs">{t("modeQuantityDescription")}</p>
           </button>
-          <div className="hover:border-primary/48 hover:bg-accent/50 relative rounded-lg border p-4 transition-colors">
+          <div
+            className={cn(
+              "bg-background hover:border-primary/48 hover:bg-accent/50 relative rounded-lg border p-4 transition-colors",
+              showValidationErrors &&
+                "border-destructive/32 bg-destructive/4 hover:border-destructive/48 hover:bg-destructive/8",
+            )}
+          >
             <button
               type="button"
               onClick={() => chooseMode(true)}
               disabled={disabled}
               aria-label={t("modeUnits")}
+              aria-invalid={showValidationErrors || undefined}
               className="absolute inset-0 rounded-lg disabled:pointer-events-none"
             />
             <div className="flex items-center gap-2">
@@ -1226,7 +1238,7 @@ export function UnitTrackingEditor({
               >
                 {t("learnMore")}
               </PopoverTrigger>
-              <PopoverContent className="w-80 p-4">
+              <PopoverContent className="w-80">
                 <div className="space-y-3">
                   <p className="text-sm font-medium">{t("modeUnits")}</p>
                   <p className="text-muted-foreground text-sm">{t("toggleDescription")}</p>

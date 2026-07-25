@@ -13,6 +13,7 @@ export const dashboardCreationSources = [
   "reservations_page",
   "customers_page",
   "command_palette",
+  "product_timeline",
 ] as const;
 
 export type DashboardCreationSource = (typeof dashboardCreationSources)[number];

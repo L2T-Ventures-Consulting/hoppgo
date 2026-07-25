@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Link from 'next/link';
 
 import { getTranslations } from 'next-intl/server';
 import { FileText, Package } from 'lucide-react';
@@ -13,8 +13,11 @@ import {
 } from '@louez/ui';
 import { formatCurrency } from '@louez/utils';
 
+import { ProductImage } from '@/components/product/product-image';
 import { EmptyState } from '@/components/ui/empty-state';
 import { formatDate } from '@/lib/utils';
+
+import { sanitizeProductDescriptionHtml } from './util.product-description';
 
 interface ProductInfoSectionPricingTier {
   id: string;
@@ -84,9 +87,12 @@ export async function ProductInfoSection({
         {/* Description */}
         <div>
           {product.description ? (
-            <p className="whitespace-pre-line text-sm text-muted-foreground">
-              {product.description}
-            </p>
+            <div
+              className="prose prose-sm dark:prose-invert prose-headings:text-foreground prose-a:text-primary prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-h1:text-xl prose-h2:text-lg prose-h3:text-base max-w-none text-sm text-muted-foreground break-words [&_a]:break-all [&_*]:min-w-0"
+              dangerouslySetInnerHTML={{
+                __html: sanitizeProductDescriptionHtml(product.description),
+              }}
+            />
           ) : (
             <p className="text-sm text-muted-foreground">
               {t('noDescription')}
@@ -175,25 +181,19 @@ export async function ProductInfoSection({
               {product.accessories.map((link) => {
                 const accessoryImage = link.accessory.images?.[0];
                 return (
-                  <div
+                  <Link
                     key={link.id}
-                    className="overflow-hidden rounded-lg border"
+                    href={`/dashboard/products/${link.accessory.id}`}
+                    className="group overflow-hidden rounded-lg border transition-colors hover:border-primary/50 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   >
-                    <div className="relative aspect-4/3 bg-muted">
-                      {accessoryImage ? (
-                        <Image
-                          src={accessoryImage}
-                          alt={link.accessory.name}
-                          fill
-                          className="object-cover"
-                          sizes="120px"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center">
-                          <Package className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
+                    <ProductImage
+                      src={accessoryImage}
+                      alt={link.accessory.name}
+                      sizes="120px"
+                      inset={false}
+                      className="transition-transform group-hover:scale-[1.02]"
+                      containerClassName="w-full rounded-none"
+                    />
                     <div className="p-2">
                       <p className="truncate text-xs font-medium">
                         {link.accessory.name}
@@ -205,7 +205,7 @@ export async function ProductInfoSection({
                         )}
                       </p>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -220,18 +220,13 @@ export async function ProductInfoSection({
               <p className="text-sm font-medium">{t('gallery')}</p>
               <div className="flex gap-3 overflow-x-auto pb-1">
                 {product.images.map((image, index) => (
-                  <div
+                  <ProductImage
                     key={image}
-                    className="relative h-20 w-28 shrink-0 overflow-hidden rounded-lg border bg-muted"
-                  >
-                    <Image
-                      src={image}
-                      alt={t('galleryImageAlt', { index: index + 1 })}
-                      fill
-                      className="object-cover"
-                      sizes="112px"
-                    />
-                  </div>
+                    src={image}
+                    alt={t('galleryImageAlt', { index: index + 1 })}
+                    sizes="112px"
+                    containerClassName="h-20 w-28 shrink-0 border"
+                  />
                 ))}
               </div>
             </div>

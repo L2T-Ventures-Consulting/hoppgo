@@ -1,30 +1,30 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound, redirect } from "next/navigation";
 
-import { and, eq } from 'drizzle-orm';
-import { getLocale } from 'next-intl/server';
+import { and, eq } from "drizzle-orm";
+import { getLocale } from "next-intl/server";
 
-import { db } from '@louez/db';
-import { products } from '@louez/db';
+import { db } from "@louez/db";
+import { products } from "@louez/db";
+import { PRODUCT_ACTIVITY_PAGE_SIZE, getProductUnitActivityPage } from "@louez/api/services";
 
-import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context';
+import { DashboardBreadcrumbLabel } from "@/components/dashboard/dashboard-breadcrumbs-context";
 
-import { getCurrentStore } from '@/lib/store-context';
+import { getCurrentStore } from "@/lib/store-context";
 
-import { ProductActivityFeed } from './components/product-activity-feed';
-import { ProductHeader } from './components/product-header';
-import { ProductInfoSection } from './components/product-info-section';
-import { ProductInventorySection } from './components/product-inventory-section';
-import { ProductQuickFacts } from './components/product-quick-facts';
-import { ProductReservationsSection } from './components/product-reservations-section';
-import { ProductStatsSection } from './components/product-stats-section';
+import { ProductActivityFeed } from "./components/product-activity-feed";
+import { ProductHeader } from "./components/product-header";
+import { ProductInfoSection } from "./components/product-info-section";
+import { ProductInventorySection } from "./components/product-inventory-section";
+import { ProductQuickFacts } from "./components/product-quick-facts";
+import { ProductReservationsSection } from "./components/product-reservations-section";
+import { ProductStatsSection } from "./components/product-stats-section";
 import {
   getProductInventoryDetail,
   getProductReservationCounts,
   getProductReservationsPage,
   getProductRevenueStats,
-  getProductUnitActivity,
   getProductUtilizationRate,
-} from './queries';
+} from "./queries";
 
 const RESERVATIONS_PAGE_SIZE = 10;
 
@@ -36,7 +36,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding');
+    redirect("/onboarding");
   }
 
   const { id } = await params;
@@ -84,7 +84,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const currency = store.settings?.currency || 'EUR';
+  const currency = store.settings?.currency || "EUR";
 
   // categoryLinks mirrors products.categoryId (see `replaceProductCategories`
   // in actions.ts) but legacy rows may only have the single `category`
@@ -92,43 +92,38 @@ export default async function ProductPage({ params }: ProductPageProps) {
   // something to show for categorized products.
   const categories =
     product.categoryLinks.length > 0
-      ? product.categoryLinks.flatMap((link) =>
-          link.category ? [link.category] : [],
-        )
+      ? product.categoryLinks.flatMap((link) => (link.category ? [link.category] : []))
       : product.category
         ? [product.category]
         : [];
 
-  const [
-    revenueStats,
-    reservationCounts,
-    inventoryDetail,
-    reservationsPage,
-    unitActivity,
-  ] = await Promise.all([
-    getProductRevenueStats({ storeId: store.id, productId: id }),
-    getProductReservationCounts({ storeId: store.id, productId: id }),
-    getProductInventoryDetail({
-      storeId: store.id,
-      productId: id,
-      trackUnits: product.trackUnits,
-    }),
-    getProductReservationsPage({
-      storeId: store.id,
-      productId: id,
-      page: 0,
-      pageSize: RESERVATIONS_PAGE_SIZE,
-    }),
-    product.trackUnits
-      ? getProductUnitActivity({ storeId: store.id, productId: id })
-      : Promise.resolve([]),
-  ]);
+  const [revenueStats, reservationCounts, inventoryDetail, reservationsPage, unitActivity] =
+    await Promise.all([
+      getProductRevenueStats({ storeId: store.id, productId: id }),
+      getProductReservationCounts({ storeId: store.id, productId: id }),
+      getProductInventoryDetail({
+        storeId: store.id,
+        productId: id,
+        trackUnits: product.trackUnits,
+      }),
+      getProductReservationsPage({
+        storeId: store.id,
+        productId: id,
+        page: 0,
+        pageSize: RESERVATIONS_PAGE_SIZE,
+      }),
+      product.trackUnits
+        ? getProductUnitActivityPage({
+            storeId: store.id,
+            productId: id,
+            limit: PRODUCT_ACTIVITY_PAGE_SIZE,
+          })
+        : Promise.resolve({ items: [], nextCursor: null }),
+    ]);
 
   const activeUnitCount =
-    inventoryDetail.mode === 'tracked'
-      ? inventoryDetail.units.filter(
-          (unit) => unit.lifecycleStatus === 'active',
-        ).length
+    inventoryDetail.mode === "tracked"
+      ? inventoryDetail.units.filter((unit) => unit.lifecycleStatus === "active").length
       : 0;
 
   const utilization = await getProductUtilizationRate({
@@ -163,14 +158,25 @@ export default async function ProductPage({ params }: ProductPageProps) {
             currency={currency}
           />
 
-          <ProductInventorySection
-            productId={product.id}
-            inventoryDetail={inventoryDetail}
-          />
+          <ProductInventorySection productId={product.id} inventoryDetail={inventoryDetail} />
 
           <ProductReservationsSection
             reservationsPage={reservationsPage}
             currency={currency}
+            timezone={store.settings?.timezone}
+            productId={product.id}
+            trackUnits={product.trackUnits}
+            units={
+              inventoryDetail.mode === "tracked"
+                ? inventoryDetail.units
+                    .filter((unit) => unit.lifecycleStatus === "active")
+                    .map((unit) => ({
+                      id: unit.id,
+                      identifier: unit.identifier,
+                    }))
+                : []
+            }
+            quantity={product.quantity}
           />
 
           <ProductInfoSection product={product} currency={currency} />
@@ -180,7 +186,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <ProductQuickFacts product={product} currency={currency} />
 
           {product.trackUnits && (
-            <ProductActivityFeed activity={unitActivity} locale={locale} />
+            <ProductActivityFeed
+              initialPage={unitActivity}
+              locale={locale}
+              productId={product.id}
+              referenceDate={new Date().toISOString()}
+            />
           )}
         </div>
       </div>

@@ -52,7 +52,7 @@ export async function ProductStatsSection({
         icon={Euro}
         trend={{
           value: revenueStats.revenueGrowth,
-          label: t('vsLastMonth'),
+          label: t('vsPrevious30Days'),
         }}
       />
       <ProductStatCard
