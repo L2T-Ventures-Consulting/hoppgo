@@ -465,6 +465,11 @@ export function ReservationDatePickerControl({
   };
 
   const commitInput = () => {
+    if (!inputValue.trim()) {
+      onChange(undefined);
+      return;
+    }
+
     const parsed = parseManualDate(
       inputValue,
       fallbackTime,
@@ -574,25 +579,27 @@ export function ReservationDatePickerControl({
               initialFocus
               locale={dateLocale}
             />
-            <div className="border-t p-3">
-              <div className="flex items-center gap-2">
-                <Clock className="text-muted-foreground h-4 w-4" />
-                <Label className="text-sm font-medium">{t("time")}</Label>
-                <Select value={currentTime} onValueChange={handleTimeChange} disabled={!value}>
-                  <SelectTrigger className="w-24">
-                    <SelectValue placeholder="--:--">{currentTime}</SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {timeOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value} label={option.label}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+            {showTime && (
+              <div className="border-t p-3">
+                <div className="flex items-center gap-2">
+                  <Clock className="text-muted-foreground h-4 w-4" />
+                  <Label className="text-sm font-medium">{t("time")}</Label>
+                  <Select value={currentTime} onValueChange={handleTimeChange} disabled={!value}>
+                    <SelectTrigger className="w-24">
+                      <SelectValue placeholder="--:--">{currentTime}</SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value} label={option.label}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-            </div>
-            {!autoCloseOnTimeSelect && (
+            )}
+            {showTime && !autoCloseOnTimeSelect && (
               <div className="flex justify-end border-t p-2">
                 <Button type="button" onClick={() => setIsOpen(false)} disabled={!value}>
                   {t("confirm")}

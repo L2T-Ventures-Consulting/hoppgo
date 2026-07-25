@@ -27,6 +27,7 @@ import {
 } from "@louez/ui";
 
 import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
+import { ReservationDatePickerControl } from "@/components/form/form-reservation-date-picker";
 
 import { createPromoCode, updatePromoCode } from "./actions";
 
@@ -57,20 +58,6 @@ function generateCode(): string {
     .replace(/[^A-Z0-9]/g, "X");
 }
 
-function formatDateForInput(date: Date | null): string {
-  if (!date) return "";
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
-function parseDateInput(value: string): Date | null {
-  if (!value) return null;
-  const date = new Date(value + "T00:00:00");
-  return isNaN(date.getTime()) ? null : date;
-}
-
 export function PromoCodeFormDialog({
   open,
   onOpenChange,
@@ -91,8 +78,8 @@ export function PromoCodeFormDialog({
   const [value, setValue] = useState("");
   const [minimumAmount, setMinimumAmount] = useState("");
   const [maxUsageCount, setMaxUsageCount] = useState("");
-  const [startsAt, setStartsAt] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
+  const [startsAt, setStartsAt] = useState<Date | undefined>();
+  const [expiresAt, setExpiresAt] = useState<Date | undefined>();
   const [isActive, setIsActive] = useState(true);
 
   // Reset form when dialog opens/closes or editingCode changes
@@ -109,8 +96,8 @@ export function PromoCodeFormDialog({
         setMaxUsageCount(
           editingCode.maxUsageCount !== null ? String(editingCode.maxUsageCount) : "",
         );
-        setStartsAt(formatDateForInput(editingCode.startsAt));
-        setExpiresAt(formatDateForInput(editingCode.expiresAt));
+        setStartsAt(editingCode.startsAt ?? undefined);
+        setExpiresAt(editingCode.expiresAt ?? undefined);
         setIsActive(editingCode.isActive);
       } else {
         setCode("");
@@ -119,8 +106,8 @@ export function PromoCodeFormDialog({
         setValue("");
         setMinimumAmount("");
         setMaxUsageCount("");
-        setStartsAt("");
-        setExpiresAt("");
+        setStartsAt(undefined);
+        setExpiresAt(undefined);
         setIsActive(true);
       }
       setErrors({});
@@ -144,9 +131,7 @@ export function PromoCodeFormDialog({
     }
 
     if (startsAt && expiresAt) {
-      const start = parseDateInput(startsAt);
-      const end = parseDateInput(expiresAt);
-      if (start && end && end <= start) {
+      if (expiresAt <= startsAt) {
         newErrors.expiresAt = t("validation.expiresAfterStarts");
       }
     }
@@ -167,8 +152,8 @@ export function PromoCodeFormDialog({
         value: parseFloat(value),
         minimumAmount: minimumAmount ? parseFloat(minimumAmount) : null,
         maxUsageCount: maxUsageCount ? parseInt(maxUsageCount) : null,
-        startsAt: parseDateInput(startsAt),
-        expiresAt: parseDateInput(expiresAt),
+        startsAt: startsAt ?? null,
+        expiresAt: expiresAt ?? null,
         isActive,
       };
 
@@ -309,26 +294,23 @@ export function PromoCodeFormDialog({
           </div>
 
           {/* Date range */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="promo-starts-at">{t("startsAt")}</Label>
-              <Input
-                id="promo-starts-at"
-                type="date"
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="promo-expires-at">{t("expiresAt")}</Label>
-              <Input
-                id="promo-expires-at"
-                type="date"
-                value={expiresAt}
-                onChange={(e) => setExpiresAt(e.target.value)}
-              />
-              {errors.expiresAt && <p className="text-sm text-destructive">{errors.expiresAt}</p>}
-            </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ReservationDatePickerControl
+              id="promo-starts-at"
+              label={t("startsAt")}
+              value={startsAt}
+              onChange={setStartsAt}
+              showTime={false}
+            />
+            <ReservationDatePickerControl
+              id="promo-expires-at"
+              label={t("expiresAt")}
+              value={expiresAt}
+              onChange={setExpiresAt}
+              showTime={false}
+              referenceDate={startsAt}
+              error={errors.expiresAt}
+            />
           </div>
 
           {/* Description */}
