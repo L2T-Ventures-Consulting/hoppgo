@@ -145,6 +145,7 @@ export const SettingsNav = ({ isPlatformAdmin = false }: SettingsNavProps) => {
           }}
         >
           <CommandInput
+            className={cn("border shadow-[0_0_1px_0.5px_var(--color-border)]")}
             aria-label={t("search.label")}
             autoFocus={false}
             placeholder={t("search.placeholder")}
@@ -155,9 +156,9 @@ export const SettingsNav = ({ isPlatformAdmin = false }: SettingsNavProps) => {
           />
 
           {hasSearch && (
-            <CommandPanel>
+            <CommandPanel className="mx-0 mt-1 rounded-xl border-b [clip-path:none] not-has-[+[data-slot=command-footer]]:mb-0 not-has-[+[data-slot=command-footer]]:rounded-b-xl not-has-[+[data-slot=command-footer]]:[clip-path:none]">
               <CommandEmpty>{t("search.noResults")}</CommandEmpty>
-              <CommandList className="max-h-96">
+              <CommandList>
                 {(group: SettingsSearchGroup, groupIndex: number) => (
                   <Fragment key={group.value}>
                     <CommandGroup items={group.items}>
