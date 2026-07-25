@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { NextIntlClientProvider } from 'next-intl';
@@ -8,6 +9,10 @@ import { ThemeProvider } from '@/components/theme-provider';
 
 import { auth } from '@/lib/auth';
 import { isCurrentUserPlatformAdmin } from '@/lib/platform-admin';
+import {
+  createLoginUrl,
+  LOGIN_CALLBACK_PATH_HEADER,
+} from '@/lib/utils/util.url';
 
 import { AdminHeader } from './_components/header';
 
@@ -25,7 +30,8 @@ export default async function AdminLayout({
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect('/login');
+    const callbackUrl = (await headers()).get(LOGIN_CALLBACK_PATH_HEADER);
+    redirect(createLoginUrl(callbackUrl));
   }
 
   // Hard gate: only platform admins may reach any /admin route.

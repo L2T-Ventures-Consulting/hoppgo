@@ -1,3 +1,4 @@
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { NextIntlClientProvider } from 'next-intl';
@@ -9,6 +10,10 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { auth } from '@/lib/auth';
 import { isCurrentUserPlatformAdmin } from '@/lib/platform-admin';
 import { getUserStores } from '@/lib/store-context';
+import {
+  createLoginUrl,
+  LOGIN_CALLBACK_PATH_HEADER,
+} from '@/lib/utils/util.url';
 
 import { MultiStoreHeader } from './_components/header';
 
@@ -20,7 +25,8 @@ export default async function MultiStoreLayout({
   const session = await auth();
 
   if (!session?.user?.id) {
-    redirect('/login');
+    const callbackUrl = (await headers()).get(LOGIN_CALLBACK_PATH_HEADER);
+    redirect(createLoginUrl(callbackUrl));
   }
 
   const stores = await getUserStores();

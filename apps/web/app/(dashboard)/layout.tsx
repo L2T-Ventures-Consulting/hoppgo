@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import { NextIntlClientProvider } from 'next-intl';
@@ -11,6 +12,11 @@ import { GleapProvider } from '@/components/dashboard/gleap-provider';
 import { OpenReplayProvider } from '@/components/openreplay-provider';
 import { PostHogProvider } from '@/components/posthog-provider';
 import { ThemeProvider } from '@/components/theme-provider';
+
+import {
+  createLoginUrl,
+  LOGIN_CALLBACK_PATH_HEADER,
+} from '@/lib/utils/util.url';
 
 // Make the dashboard installable as a PWA. Scoped to this route group only —
 // the customer storefront and the landing page intentionally stay non-installable.
@@ -43,7 +49,8 @@ export default async function DashboardLayout({
 
   // Redirect to login if not authenticated
   if (!session?.user) {
-    redirect('/login');
+    const callbackUrl = (await headers()).get(LOGIN_CALLBACK_PATH_HEADER);
+    redirect(createLoginUrl(callbackUrl));
   }
 
   const store = await getCurrentStore();
