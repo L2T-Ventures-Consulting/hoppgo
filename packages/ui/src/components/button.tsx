@@ -27,8 +27,9 @@ const buttonVariants = cva(
     "border bg-clip-padding",
     // typography
     "text-xs font-medium whitespace-nowrap",
-    // transitions
-    "transition-[color,background-color,border-color,box-shadow,opacity,padding]",
+    // transitions — no padding: the only place a button's padding changes is
+    // the sidebar collapsing to icon mode, which is meant to be instant.
+    "transition-[color,background-color,border-color,box-shadow,opacity]",
     // outline / ring (focus)
     "focus-visible:border-ring focus-visible:ring-ring/50 outline-none focus-visible:ring-1",
     // state: disabled
@@ -153,6 +154,14 @@ type ButtonProps = Omit<ButtonPrimitive.Props, MotionConflictingProps> &
     pendingContent?: ReactNode;
     pendingDisables?: boolean;
     style?: CSSProperties;
+    /**
+     * Motion's layout animation, on by default so the button can grow/shrink
+     * smoothly when its label swaps (e.g. entering the pending state). It also
+     * animates the button being *moved* by an ancestor, which is rarely wanted
+     * — pass `false` for buttons that get repositioned by a layout change, such
+     * as anything inside a collapsing sidebar.
+     */
+    layout?: boolean | "position" | "size";
   };
 
 function Button({

@@ -384,3 +384,113 @@
     font-size: 0.75rem;
   }
 }
+
+/* =============================================================================
+   Dashboard - Gradient Glow
+   Two radial "orbs" anchored to the left of the viewport: one spilling in from
+   the top, a cooler one at the bottom.
+
+   This is a *page-level* layer, not a sidebar-level one, and that's the whole
+   point. With variant="inset" the sidebar-coloured surface is made of several
+   boxes — the fixed sidebar column (with its own 8px padding), its inner
+   panel, and the 8px gutter SidebarInset's m-2 leaves above / right / below
+   the content panel. Painting the gradient on any subset of them leaves the
+   rest flat, and every boundary reads as a hard line. So one fixed full-screen
+   layer sits behind everything instead: the content panel is opaque, so the
+   orbs only actually show through the sidebar and the surrounding gutters, but
+   they do so continuously, with nothing to line up.
+
+   Consequences worth keeping in mind:
+     - the sidebar's inner panel has to be transparent to let the layer through
+     - the orbs are positioned in px, not %, so they stay put at any viewport
+       width and across the expand/collapse transition (the content panel just
+       crops more or less of them)
+     - position: fixed rather than an oversized absolute box means nothing
+       needs overflow: hidden anywhere
+   ============================================================================= */
+
+.dashboard [data-slot="sidebar-inner"] {
+  background-color: transparent;
+}
+
+/* Desktop only: below md the content panel is full-bleed and the sidebar is a
+   Sheet, so this layer would never be visible. */
+@media (min-width: 768px) {
+  .dashboard [data-slot="sidebar-wrapper"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-image:
+      radial-gradient(
+        circle 380px at 80px -10%,
+        color-mix(in oklab, var(--primary) 9%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 5%, transparent) 40%,
+        color-mix(in oklab, var(--primary) 2%, transparent) 70%,
+        transparent 100%
+      ),
+      radial-gradient(
+        circle 300px at 0 90%,
+        color-mix(in oklab, var(--primary) 5%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 2%, transparent) 50%,
+        transparent 100%
+      );
+  }
+
+  .dark .dashboard [data-slot="sidebar-wrapper"]::before,
+  .dashboard.dark [data-slot="sidebar-wrapper"]::before {
+    background-image:
+      radial-gradient(
+        circle 380px at 80px 130px,
+        color-mix(in oklab, var(--primary) 12%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 6%, transparent) 40%,
+        color-mix(in oklab, var(--primary) 2.5%, transparent) 70%,
+        transparent 100%
+      ),
+      radial-gradient(
+        circle 300px at 0 100%,
+        color-mix(in oklab, var(--primary) 6%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 2.5%, transparent) 50%,
+        transparent 100%
+      );
+  }
+}
+
+/* Mobile: the sheet is its own opaque panel, so the orbs go straight on it.
+   Not scoped under .dashboard — the sheet is portalled to <body>. */
+[data-slot="sidebar"][data-mobile="true"] {
+  background-image:
+    radial-gradient(
+      circle 380px at 80px -10%,
+      color-mix(in oklab, var(--primary) 9%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 5%, transparent) 40%,
+      color-mix(in oklab, var(--primary) 2%, transparent) 70%,
+      transparent 100%
+    ),
+    radial-gradient(
+      circle 300px at 0 90%,
+      color-mix(in oklab, var(--primary) 5%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 2%, transparent) 50%,
+      transparent 100%
+    );
+  background-repeat: no-repeat;
+}
+
+.dark [data-slot="sidebar"][data-mobile="true"] {
+  background-image:
+    radial-gradient(
+      circle 380px at 80px 130px,
+      color-mix(in oklab, var(--primary) 12%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 6%, transparent) 40%,
+      color-mix(in oklab, var(--primary) 2.5%, transparent) 70%,
+      transparent 100%
+    ),
+    radial-gradient(
+      circle 300px at 0 100%,
+      color-mix(in oklab, var(--primary) 6%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 2.5%, transparent) 50%,
+      transparent 100%
+    );
+}

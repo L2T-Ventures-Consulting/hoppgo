@@ -5,7 +5,6 @@ import { useMemo, useState, useTransition } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
-import { Building2, Check, ChevronsUpDown, Plus, Shield } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -21,6 +20,13 @@ import {
   PopoverPopup,
   PopoverTrigger,
 } from "@louez/ui";
+import {
+  AdminShieldIcon,
+  BuildingIcon,
+  CheckIcon,
+  ChevronsUpDownIcon,
+  PlusIcon,
+} from "@louez/ui/icons";
 import { cn } from "@louez/utils";
 
 import { switchStore } from "@/app/(dashboard)/dashboard/actions";
@@ -102,7 +108,7 @@ function RoleBadge({
   if (role === "platform_admin") {
     return (
       <span className="inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-500">
-        <Shield className="h-3 w-3" />
+        <AdminShieldIcon className="h-3 w-3" />
         {t("roles.platform_admin")}
       </span>
     );
@@ -173,6 +179,7 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
             role="combobox"
             aria-expanded={open}
             aria-label={t("selectStore")}
+            layout={false}
             className="h-auto w-full [&>span]:w-full justify-between px-3 py-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
             disabled={isPending}
           />
@@ -191,9 +198,9 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
             {currentStore && <RoleBadge role={currentStore.role} t={t} />}
           </div>
         </div>
-        <ChevronsUpDown className="ml-2 size-4 shrink-0 opacity-50 group-data-[collapsible=icon]:hidden" />
+        <ChevronsUpDownIcon className="ml-2 size-4 shrink-0 opacity-50 group-data-[collapsible=icon]:hidden" />
       </PopoverTrigger>
-      <PopoverPopup className="w-[260px] p-0 *:pt-0 *:pb-1.5" align="start" sideOffset={8}>
+      <PopoverPopup className="w-[260px] *:pt-0" align="start" sideOffset={8}>
         <Command open filter={null} autoHighlight={false} keepHighlight={false}>
           {stores.length > 5 && (
             <div className="border-b py-1.5">
@@ -204,7 +211,7 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
               />
             </div>
           )}
-          <CommandList className="max-h-[300px]">
+          <CommandList className="max-h-[300px] not-empty:p-0">
             {filteredStores.length === 0 && searchQuery && (
               <div className="text-muted-foreground py-6 text-center text-sm">
                 {t("noStoresFound")}
@@ -227,7 +234,7 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
                     <RoleBadge role={store.role} t={t} />
                   </div>
                   {store.id === currentStoreId && (
-                    <Check className="text-primary ml-2 h-4 w-4 shrink-0" />
+                    <CheckIcon className="text-primary ml-2 h-4 w-4 shrink-0" />
                   )}
                 </CommandItem>
               ))}
@@ -238,7 +245,7 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
                 <CommandGroup>
                   <CommandItem onClick={handleMultiStoreView} className="cursor-pointer py-2">
                     <div className="bg-primary/10 mr-3 flex size-6 items-center justify-center rounded-md md:size-8">
-                      <Building2 className="text-primary h-4" />
+                      <BuildingIcon className="text-primary h-4" />
                     </div>
                     <span className="text-sm">{t("multiStoreView")}</span>
                   </CommandItem>
@@ -249,7 +256,7 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
             <CommandGroup>
               <CommandItem onClick={handleCreateStore} className="cursor-pointer py-2">
                 <div className="mr-3 flex h-6 w-6 items-center justify-center rounded-md border border-dashed">
-                  <Plus className="h-3.5 w-3.5" />
+                  <PlusIcon className="h-3.5 w-3.5" />
                 </div>
                 <span className="text-sm">{t("createNewStore")}</span>
               </CommandItem>

@@ -63,7 +63,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
       timezone={settings.timezone}
     >
       <ReservationPollingProvider interval={30000}>
-        <div className="dashboard min-h-screen">
+        <div className="dashboard relative min-h-screen">
           <SidebarProvider>
             <DashboardBreadcrumbsProvider>
               <DashboardSidebar
@@ -76,7 +76,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                 userImage={session.user.image}
                 isPlatformAdmin={isPlatformAdmin}
               />
-              <SidebarInset className="overflow-x-hidden">
+              <SidebarInset className="min-w-0 overflow-x-clip">
                 <header className="bg-background/90 supports-backdrop-filter:bg-background/70 sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur">
                   <div className="flex min-w-0 flex-1 items-center gap-2">
                     <SidebarTrigger className="-ml-1 shrink-0" />
@@ -89,7 +89,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                     planSlug={planSlug}
                   />
                 </header>
-                <div data-dashboard-content className="px-4 py-6 sm:px-6 lg:px-8">
+                <div data-dashboard-content className="px-4 py-4 sm:px-6 md:py-6 lg:px-8">
                   {children}
                 </div>
               </SidebarInset>

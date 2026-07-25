@@ -33,20 +33,19 @@ import {
   Sidebar as UISidebar,
 } from "@louez/ui";
 import {
-  AnalyticsIcon,
-  CalendarDaysIcon,
-  CalendarIcon,
+  AccentSparklesIcon,
+  AdminShieldIcon,
+  AudienceIcon,
+  ChartColumnIcon,
+  CogIcon,
   CrownIcon,
-  ExternalLinkIcon,
-  HomeIcon,
-  LifeBuoyIcon,
-  LogOutIcon,
-  PackageIcon,
-  SettingsIcon,
-  ShieldIcon,
-  SparklesIcon,
-  UsersIcon,
-  WarehouseIcon,
+  DashboardIcon,
+  LogoutIcon,
+  OpenInNewIcon,
+  ProductIcon,
+  ReservationsIcon,
+  SupportIcon,
+  TeamIcon,
 } from "@louez/ui/icons";
 
 // import { ReferralSidebarWidget } from '@/components/dashboard/referral-sidebar-widget';
@@ -79,24 +78,20 @@ interface DashboardSidebarProps {
 }
 
 const mainNavigation = [
-  { key: "home", href: "/dashboard", icon: HomeIcon },
-  { key: "calendar", href: "/dashboard/calendar", icon: CalendarDaysIcon },
-  { key: "reservations", href: "/dashboard/reservations", icon: CalendarIcon },
-  { key: "customers", href: "/dashboard/customers", icon: UsersIcon },
+  { key: "home", href: "/dashboard", icon: DashboardIcon },
+  { key: "reservations", href: "/dashboard/reservations", icon: ReservationsIcon },
+  { key: "customers", href: "/dashboard/customers", icon: AudienceIcon },
 ];
 
-const catalogNavigation = [
-  { key: "products", href: "/dashboard/products", icon: PackageIcon },
-  { key: "inventory", href: "/dashboard/inventory", icon: WarehouseIcon },
-];
+const catalogNavigation = [{ key: "products", href: "/dashboard/products", icon: ProductIcon }];
 
 const analyticsNavigation = [
-  { key: "analytics", href: "/dashboard/analytics", icon: AnalyticsIcon },
+  { key: "analytics", href: "/dashboard/analytics", icon: ChartColumnIcon },
 ];
 
 const managementNavigation = [
-  { key: "team", href: "/dashboard/team", icon: UsersIcon },
-  { key: "settings", href: "/dashboard/settings", icon: SettingsIcon },
+  { key: "team", href: "/dashboard/team", icon: TeamIcon },
+  { key: "settings", href: "/dashboard/settings", icon: CogIcon },
 ];
 
 const navigationSections = [
@@ -133,9 +128,8 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
         render={<Link href={item.href} />}
         isActive={active}
         tooltip={t(item.key)}
-        className="text-sm [&_svg]:size-4"
       >
-        <item.icon className="" />
+        <item.icon />
         <span>{t(item.key)}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -180,8 +174,8 @@ const StoreHeader = ({
 }) => {
   const t = useTranslations("dashboard.sidebar");
   return (
-    <SidebarHeader className="border-sidebar-border gap-3 border-b px-0">
-      <div className="flex min-w-0 items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[state=expanded]:pl-4 max-md:pl-4">
+    <SidebarHeader className="border-sidebar-border gap-3 border-b px-0 max-md:px-2">
+      <div className="flex min-w-0 items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[state=expanded]:pl-4 max-md:pl-2">
         <div className="flex items-center gap-2">
           <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
             <Logo className="h-5 w-auto shrink-0 group-data-[collapsible=icon]:hidden" />
@@ -207,14 +201,14 @@ const StoreHeader = ({
                 />
               }
             >
-              <ExternalLinkIcon className="h-4 w-4" />
+              <OpenInNewIcon className="h-4 w-4" />
               <span className="sr-only">{t("viewStore")}</span>
             </TooltipTrigger>
             <TooltipContent side="right">{t("viewStore")}</TooltipContent>
           </Tooltip>
         )}
       </div>
-      <div className="mx-auto w-fit group-data-[state=expanded]:w-full">
+      <div className="mx-auto w-fit group-data-[state=expanded]:w-full max-md:w-full">
         <StoreSwitcher stores={stores} currentStoreId={currentStoreId} />
       </div>
     </SidebarHeader>
@@ -241,6 +235,7 @@ const UserMenu = ({
         render={
           <Button
             variant="ghost"
+            layout={false}
             className="hover:bg-sidebar-accent min-w-0 *:w-full h-12 w-full justify-start gap-3 px-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:px-0"
           />
         }
@@ -260,7 +255,7 @@ const UserMenu = ({
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem render={<Link href="/admin" />}>
-              <ShieldIcon className="mr-2 h-4 w-4" />
+              <AdminShieldIcon className="mr-2 h-4 w-4" />
               {t("administration")}
             </DropdownMenuItem>
           </>
@@ -278,7 +273,7 @@ const UserMenu = ({
           }
           className="text-destructive cursor-pointer"
         >
-          <LogOutIcon className="mr-2 h-4 w-4" />
+          <LogoutIcon className="mr-2 h-4 w-4" />
           {tAuth("logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -292,10 +287,11 @@ const HelpButton = () => {
   return (
     <Button
       variant="ghost"
+      layout={false}
       className="hover:bg-sidebar-accent h-auto w-full justify-start gap-3 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
       onClick={() => Gleap.open()}
     >
-      <LifeBuoyIcon className="text-sidebar-foreground/70 h-4 w-4 shrink-0" />
+      <SupportIcon className="text-sidebar-foreground/70 h-4 w-4 shrink-0" />
       <span className="min-w-0 group-data-[collapsible=icon]:hidden">
         <span className="block text-sm leading-none font-medium">{t("help")}</span>
         {/* <span className="text-muted-foreground mt-1 block truncate text-xs">
@@ -327,7 +323,8 @@ export const DashboardSidebar = ({
           storeSlug={storeSlug}
           planSlug={planSlug}
         />
-        <SidebarContent>
+
+        <SidebarContent className="max-md:px-2">
           {navigationSections.map((section, index) => (
             <div key={section.labelKey || "main"}>
               {index > 0 && <SidebarSeparator />}
@@ -364,7 +361,7 @@ function PlanBadge({ planSlug }: { planSlug?: string }) {
     pro: {
       label: "Pro",
       className: "bg-primary/10 text-primary hover:bg-primary/20",
-      icon: <SparklesIcon className="h-3 w-3" />,
+      icon: <AccentSparklesIcon className="h-3 w-3" />,
     },
     ultra: {
       label: "Ultra",
