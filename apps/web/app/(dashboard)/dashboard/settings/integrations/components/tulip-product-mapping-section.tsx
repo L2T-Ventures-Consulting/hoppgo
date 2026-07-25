@@ -13,6 +13,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  Tabs,
+  TabsList,
+  TabsTab,
 } from "@louez/ui";
 import {
   Combobox,
@@ -270,26 +273,21 @@ export function TulipProductMappingSection({
 
         {/* Filter bar */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="bg-muted/50 flex items-center gap-1 rounded-lg border p-1">
-            {(["all", "mapped", "unmapped"] as const).map((status) => (
-              <Button
-                key={status}
-                type="button"
-                variant={statusFilter === status ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setStatusFilter(status)}
-              >
-                {t(`filters.${status}`)}
-                <Badge
-                  variant={statusFilter === status ? "progress" : "expired"}
-                  className="ml-1.5 h-5 min-w-5 px-1.5"
-                  size="sm"
-                >
-                  {statusCounts[status]}
-                </Badge>
-              </Button>
-            ))}
-          </div>
+          <Tabs
+            value={statusFilter}
+            onValueChange={(value) => setStatusFilter(value as "all" | "mapped" | "unmapped")}
+          >
+            <TabsList variant="underline">
+              {(["all", "mapped", "unmapped"] as const).map((status) => (
+                <TabsTab key={status} value={status}>
+                  {t(`filters.${status}`)}
+                  <Badge variant={statusFilter === status ? "progress" : "expired"} size="sm">
+                    {statusCounts[status]}
+                  </Badge>
+                </TabsTab>
+              ))}
+            </TabsList>
+          </Tabs>
           <SearchInput
             placeholder={t("searchPlaceholder")}
             clearLabel={t("searchPlaceholder")}
