@@ -1,98 +1,89 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 
-import { ArrowRight, Package } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { ArrowRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { Button } from '@louez/ui';
+import { Button } from "@louez/ui";
+import { ProductSolidIcon } from "@louez/ui/icons";
 
-// Types defined inline to avoid server-only module import
-type StoreState = 'virgin' | 'building' | 'starting' | 'active' | 'established';
-
-interface StoreMetrics {
-  activeProductCount: number;
-  pendingReservations: number;
-  todaysDepartures: number;
-  todaysReturns: number;
-}
+import type { StoreMetrics, StoreState } from "./home-types";
 
 interface AdaptiveHeaderProps {
   firstName: string;
-  timeOfDay: 'morning' | 'afternoon' | 'evening';
+  timeOfDay: "morning" | "afternoon" | "evening";
   storeState: StoreState;
   metrics: StoreMetrics;
 }
 
-export function AdaptiveHeader({
+export const AdaptiveHeader = ({
   firstName,
   timeOfDay,
   storeState,
   metrics,
-}: AdaptiveHeaderProps) {
-  const t = useTranslations('dashboard.home');
+}: AdaptiveHeaderProps) => {
+  const t = useTranslations("dashboard.home");
 
-  // Determine greeting based on time of day and whether we have a name
   const greeting = firstName
     ? t(`header.greeting.${timeOfDay}`, { name: firstName })
     : t(`header.greeting.${timeOfDay}Anonymous`);
 
-  // Determine subtitle based on store state and metrics
   const getSubtitle = () => {
-    if (storeState === 'virgin') {
-      return t('header.subtitle.virgin');
+    if (storeState === "virgin") {
+      return t("header.subtitle.virgin");
     }
 
-    if (storeState === 'building') {
-      return t('header.subtitle.building', {
-        count: metrics.activeProductCount,
-      });
+    if (storeState === "building") {
+      return t("header.subtitle.building", { count: metrics.activeProductCount });
     }
 
     if (metrics.pendingReservations > 0) {
-      return t('header.subtitle.pending', {
-        count: metrics.pendingReservations,
-      });
+      return t("header.subtitle.pending", { count: metrics.pendingReservations });
     }
 
     const todayOperations = metrics.todaysDepartures + metrics.todaysReturns;
     if (todayOperations > 0) {
-      return t('header.subtitle.operations', { count: todayOperations });
+      return t("header.subtitle.operations", { count: todayOperations });
     }
 
-    return t('header.subtitle.calm');
+    return t("header.subtitle.calm");
   };
 
-  // Determine primary CTA based on state
   const getPrimaryCTA = () => {
-    if (storeState === 'virgin') {
+    if (storeState === "virgin") {
       return (
-        <Button render={<Link href="/dashboard/products/new" />}>
-          <Package className="mr-2 h-4 w-4" />
-          {t('header.cta.addFirstProduct')}
+        <Button className="w-full sm:w-auto" render={<Link href="/dashboard/products/new" />}>
+          <ProductSolidIcon />
+          {t("header.cta.addFirstProduct")}
         </Button>
       );
     }
 
     if (metrics.pendingReservations > 0) {
       return (
-        <Button render={<Link href="/dashboard/reservations?status=pending" />}>
-          {t('header.cta.handleRequests', {
-            count: metrics.pendingReservations,
-          })}
-          <ArrowRight className="ml-2 h-4 w-4" />
+        <Button
+          className="w-full sm:w-auto"
+          render={<Link href="/dashboard/reservations?status=pending" />}
+        >
+          {t("header.cta.handleRequests", { count: metrics.pendingReservations })}
+          <ArrowRight />
         </Button>
       );
     }
+
+    return null;
   };
 
+  const primaryCTA = getPrimaryCTA();
+
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">{greeting}</h1>
-        <p className="text-muted-foreground">{getSubtitle()}</p>
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="min-w-0 space-y-1">
+        <h1 className="truncate text-xl font-bold tracking-tight sm:text-2xl">{greeting}</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">{getSubtitle()}</p>
       </div>
-      {getPrimaryCTA()}
+      {primaryCTA && <div className="shrink-0">{primaryCTA}</div>}
     </div>
   );
-}
+};

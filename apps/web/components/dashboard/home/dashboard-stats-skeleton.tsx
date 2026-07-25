@@ -1,20 +1,22 @@
-import { Card, CardContent, CardHeader, Skeleton } from '@louez/ui'
+import { Card, CardPanel, Skeleton } from "@louez/ui";
 
 export const DashboardStatsSkeleton = () => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
       {Array.from({ length: 4 }, (_, index) => (
         <Card key={index}>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <Skeleton className="h-8 w-16" />
-            <Skeleton className="mt-1 h-3 w-20" />
-          </CardContent>
+          <CardPanel className="flex flex-col gap-3 p-4">
+            <div className="flex items-start justify-between gap-2">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="size-8 rounded-xl" />
+            </div>
+            <div className="space-y-1">
+              <Skeleton className="h-7 w-16" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </CardPanel>
         </Card>
       ))}
     </div>
-  )
-}
+  );
+};

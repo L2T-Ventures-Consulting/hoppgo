@@ -1,11 +1,5 @@
-import { DashboardHomeSkeleton } from '@/components/dashboard/home/dashboard-home-skeleton'
-import { GradientMesh } from '@/components/dashboard/home'
+import { DashboardHomeSkeleton } from "@/components/dashboard/home/dashboard-home-skeleton";
 
 export default function DashboardLoading() {
-  return (
-    <>
-      <GradientMesh />
-      <DashboardHomeSkeleton />
-    </>
-  )
+  return <DashboardHomeSkeleton />;
 }

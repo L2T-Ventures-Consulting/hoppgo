@@ -1,0 +1,83 @@
+import type { ComponentType, ReactNode } from "react";
+
+import Link from "next/link";
+
+import { Badge, Card, CardPanel } from "@louez/ui";
+import { TrendingDownSolidIcon, TrendingUpSolidIcon } from "@louez/ui/icons";
+import { cn } from "@louez/utils";
+
+import type { HomeAccent } from "./home-accent";
+import { HomeIconTile } from "./home-icon-tile";
+
+interface HomeStatCardProps {
+  title: string;
+  value: ReactNode;
+  icon: ComponentType<{ className?: string }>;
+  accent?: HomeAccent;
+  subtitle?: string;
+  /** Short qualifier rendered as a badge next to the value. */
+  badge?: string;
+  /** Growth in percent — `null`/`undefined` hides the trend badge. */
+  trend?: number | null;
+  href?: string;
+}
+
+/** Uniform KPI tile of the home page. */
+export const HomeStatCard = ({
+  title,
+  value,
+  icon,
+  accent = "neutral",
+  subtitle,
+  badge,
+  trend,
+  href,
+}: HomeStatCardProps) => {
+  const card = (
+    <Card
+      className={cn(
+        "h-full transition-colors",
+        href && "group-hover:border-primary/20 group-hover:bg-muted/50",
+      )}
+    >
+      <CardPanel className="flex h-full flex-col gap-3 p-4">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-muted-foreground min-w-0 text-xs font-medium sm:text-sm">{title}</p>
+          <HomeIconTile icon={icon} accent={accent} size="sm" />
+        </div>
+        <div className="mt-auto space-y-1">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="text-xl leading-tight font-bold tracking-tight tabular-nums sm:text-2xl">
+              {value}
+            </span>
+            {badge && <Badge variant="pending">{badge}</Badge>}
+            {trend !== null && trend !== undefined && (
+              <Badge
+                variant={trend > 0 ? "success" : trend < 0 ? "failed" : "expired"}
+                className="gap-0.5"
+              >
+                {trend > 0 ? <TrendingUpSolidIcon /> : trend < 0 ? <TrendingDownSolidIcon /> : null}
+                {trend > 0 ? "+" : ""}
+                {trend}%
+              </Badge>
+            )}
+          </div>
+          {subtitle && <p className="text-muted-foreground truncate text-xs">{subtitle}</p>}
+        </div>
+      </CardPanel>
+    </Card>
+  );
+
+  if (!href) {
+    return card;
+  }
+
+  return (
+    <Link
+      href={href}
+      className="group focus-visible:ring-ring block h-full rounded-2xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+    >
+      {card}
+    </Link>
+  );
+};

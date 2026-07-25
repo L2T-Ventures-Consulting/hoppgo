@@ -9,7 +9,7 @@ function Card({ className, render, ...props }: useRender.ComponentProps<"div">) 
   const defaultProps = {
     className: cn(
       "relative flex flex-col rounded-2xl border bg-card not-dark:bg-clip-padding text-card-foreground",
-      "bg-sidebar border-none! shadow-[0_0_1px_0px_rgba(0,0,0,0.1),0_0_0px_0.25px_rgba(0,0,0,0.1)]",
+      "border-none! shadow-[0_0_1px_0px_rgba(0,0,0,0.1),0_0_0px_0.25px_rgba(0,0,0,0.1)]",
       className,
     ),
     "data-slot": "card",

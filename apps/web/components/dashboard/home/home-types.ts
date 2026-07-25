@@ -1,0 +1,45 @@
+/**
+ * Client-side mirrors of the types produced by `@/lib/dashboard/metrics`.
+ *
+ * That module is server-only (it touches the database), so the home widgets —
+ * which are client components — redeclare the shapes they render instead of
+ * importing it. Keep in sync with `StoreMetrics` / `StoreState` there.
+ */
+export interface StoreMetrics {
+  productCount: number;
+  activeProductCount: number;
+  draftProductCount: number;
+  customerCount: number;
+  newCustomersThisMonth: number;
+  totalReservations: number;
+  completedReservations: number;
+  pendingReservations: number;
+  confirmedReservations: number;
+  ongoingReservations: number;
+  todaysDepartures: number;
+  todaysReturns: number;
+  monthlyRevenue: number;
+  lastMonthRevenue: number;
+  allTimeRevenue: number;
+}
+
+export type StoreState = "virgin" | "building" | "starting" | "active" | "established";
+
+/** Reservation shape rendered by the activity lists. */
+export interface HomeReservation {
+  id: string;
+  number: string;
+  startDate: Date;
+  endDate: Date;
+  totalAmount: string;
+  customer: {
+    firstName: string;
+    lastName: string;
+  };
+  items: Array<{
+    id: string;
+    product: {
+      name: string;
+    } | null;
+  }>;
+}
