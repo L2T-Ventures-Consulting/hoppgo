@@ -1,12 +1,14 @@
-import { Suspense } from 'react';
+import { Suspense } from "react";
 
-import { getDashboardReservationsList } from '@louez/api/services';
-import { Skeleton } from '@louez/ui';
+import { getDashboardReservationsList } from "@louez/api/services";
+import { Skeleton } from "@louez/ui";
 
-import { getStoreLimits, getStorePlan } from '@/lib/plan-limits';
-import { getCurrentStore } from '@/lib/store-context';
+import { getStoreLimits, getStorePlan } from "@/lib/plan-limits";
+import { getCurrentStore } from "@/lib/store-context";
 
-import { ReservationsPageContent } from './reservations-page-content';
+import { parseReservationView } from "./calendar/calendar-query";
+import { getCalendarProducts } from "./calendar/data";
+import { ReservationsPageContent } from "./reservations-page-content";
 
 function ReservationsTableSkeleton() {
   return (
@@ -34,6 +36,7 @@ function ReservationsTableSkeleton() {
 
 interface ReservationsPageProps {
   searchParams: Promise<{
+    view?: string;
     status?: string;
     period?: string;
     operation?: string;
@@ -42,19 +45,22 @@ interface ReservationsPageProps {
     sortDirection?: string;
     page?: string;
     pageSize?: string;
-    view?: string;
+    display?: string;
+    date?: string;
+    range?: string;
+    productId?: string;
   }>;
 }
 
 function normalizeStatus(value: string | undefined) {
   if (
-    value === 'all' ||
-    value === 'pending' ||
-    value === 'confirmed' ||
-    value === 'ongoing' ||
-    value === 'completed' ||
-    value === 'cancelled' ||
-    value === 'rejected'
+    value === "all" ||
+    value === "pending" ||
+    value === "confirmed" ||
+    value === "ongoing" ||
+    value === "completed" ||
+    value === "cancelled" ||
+    value === "rejected"
   ) {
     return value;
   }
@@ -62,38 +68,54 @@ function normalizeStatus(value: string | undefined) {
 }
 
 function normalizePeriod(value: string | undefined) {
-  if (value === 'today' || value === 'week' || value === 'month') return value;
+  if (value === "today" || value === "week" || value === "month") return value;
   return undefined;
 }
 
 function normalizeOperation(value: string | undefined) {
-  if (value === 'departure' || value === 'return') return value;
+  if (value === "departure" || value === "return") return value;
   return undefined;
 }
 
 function normalizeSort(value: string | undefined) {
-  if (
-    value === 'startDate' ||
-    value === 'amount' ||
-    value === 'status' ||
-    value === 'number'
-  )
+  if (value === "startDate" || value === "amount" || value === "status" || value === "number")
     return value;
   return undefined;
 }
 
 function normalizeSortDirection(value: string | undefined) {
-  if (value === 'asc' || value === 'desc') return value;
+  if (value === "asc" || value === "desc") return value;
   return undefined;
 }
 
-export default async function ReservationsPage({
-  searchParams,
-}: ReservationsPageProps) {
+export default async function ReservationsPage({ searchParams }: ReservationsPageProps) {
   const store = await getCurrentStore();
   if (!store) return null;
 
   const params = await searchParams;
+
+  // A bare reservations URL opens the calendar. Explicit view links win, while
+  // list-specific deep links from alerts and searches keep opening the list.
+  const hasListParams = Boolean(
+    params.status ||
+    params.period ||
+    params.operation ||
+    params.search ||
+    params.sort ||
+    params.sortDirection ||
+    params.page ||
+    params.pageSize ||
+    params.display,
+  );
+  const view = params.view
+    ? parseReservationView(params.view)
+    : hasListParams
+      ? "list"
+      : "calendar";
+
+  const currency = store.settings?.currency || "EUR";
+  const timezone = store.settings?.timezone;
+
   const status = normalizeStatus(params.status);
   const period = normalizePeriod(params.period);
   const operation = normalizeOperation(params.operation);
@@ -102,33 +124,41 @@ export default async function ReservationsPage({
   const sortDirection = normalizeSortDirection(params.sortDirection);
   const page = params.page ? parseInt(params.page, 10) : 1;
   const pageSize = params.pageSize ? parseInt(params.pageSize, 10) : 25;
-  const currency = store.settings?.currency || 'EUR';
-  const timezone = store.settings?.timezone;
 
-  const [limits, plan] = await Promise.all([
+  const initialDataPromise =
+    view === "list"
+      ? getDashboardReservationsList({
+          storeId: store.id,
+          status,
+          period,
+          operation,
+          limit: 100,
+          search,
+          sort,
+          sortDirection,
+          page,
+          pageSize,
+        })
+      : Promise.resolve(undefined);
+
+  // Fetch the shared catalog with the rest of the page data so switching to
+  // calendar or planning never needs another page navigation.
+  const [limits, plan, calendarProducts, initialData] = await Promise.all([
     getStoreLimits(store.id),
     getStorePlan(store.id),
+    getCalendarProducts(store.id),
+    initialDataPromise,
   ]);
-
-  const initialData = await getDashboardReservationsList({
-    storeId: store.id,
-    status,
-    period,
-    operation,
-    limit: 100,
-    search,
-    sort,
-    sortDirection,
-    page,
-    pageSize,
-  });
 
   return (
     <Suspense fallback={<ReservationsTableSkeleton />}>
       <ReservationsPageContent
+        view={view}
         currentStatus={status}
         currentPeriod={period}
         initialData={initialData}
+        calendarData={{ products: calendarProducts }}
+        storeId={store.id}
         limits={limits.reservationsThisMonth}
         planSlug={plan.slug}
         currency={currency}

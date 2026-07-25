@@ -1760,8 +1760,6 @@
       },
       "awaitingResponse": "Aguardando resposta",
       "itemsCount": "{count, plural, one {# item} other {# itens}}",
-      "viewTable": "Vista tabela",
-      "viewCards": "Vista cartões",
       "pagination": {
         "showing": "Mostrando {start} a {end} de {total}",
         "perPage": "Por página",
@@ -2125,7 +2123,13 @@
       },
       "tulipInsuredBadge": "Segurado Tulip",
       "tulipContractCardTitle": "Contrato de seguro",
-      "tulipContractCardDescription": "Abrir o contrato no Colibri."
+      "tulipContractCardDescription": "Abrir o contrato no Colibri.",
+      "views": {
+        "label": "Modo de visualização",
+        "list": "Lista",
+        "calendar": "Calendario",
+        "planning": "Planning"
+      }
     },
     "customers": {
       "title": "Clientes",
@@ -2293,39 +2297,49 @@
         "reservationsCount": "{count, plural, one {# reserva} other {# reservas}}"
       },
       "timeline": {
-        "products": "Produtos",
-        "quantity": "{count, plural, one {# unidade} other {# unidades}}",
-        "available": "Disponível",
-        "noProducts": "Nenhum produto para exibir"
+        "previous": "Período anterior",
+        "next": "Período seguinte",
+        "statusFilter": "Filtrar por estado",
+        "operationFilter": "Filtrar pela operação de hoje",
+        "allOperations": "Todas as operações",
+        "todaysDepartures": "Saídas de hoje",
+        "todaysReturns": "Devoluções de hoje",
+        "showAll": "Mostrar tudo",
+        "retry": "Tentar novamente",
+        "dragHint": "Dica: clique e arraste sobre um intervalo vazio para criar uma reserva pré-preenchida.",
+        "searchProductsPlaceholder": "Pesquisar em {count} produtos...",
+        "noProductsFound": "Nenhum produto encontrado",
+        "productsSelected": "{count} produtos"
       },
       "export": {
-        "button": "Exportar calendario",
-        "title": "Exportar para calendario",
-        "description": "Sincronize suas reservas com seu calendario favorito copiando o link abaixo.",
-        "urlLabel": "Link do calendario ICS",
-        "loading": "Carregando...",
-        "instructions": {
-          "title": "Como adicionar este calendario?",
-          "google": {
-            "step1": "Abra o Google Agenda",
-            "step2": "Clique no + ao lado de \"Outras agendas\" e depois em \"A partir do URL\"",
-            "step3": "Cole o link e clique em \"Adicionar agenda\"",
-            "openLink": "Abrir Google Agenda",
-            "freshnessNote": "Louez publica as alteracoes imediatamente e solicita atualizacao a cada 5 minutos. O Google ainda pode aplicar seu proprio atraso de sincronizacao."
-          },
-          "apple": {
-            "step1": "Abra o app Calendario no Mac ou iPhone",
-            "step2": "Arquivo > Nova Assinatura de Calendario (Mac) ou Adicionar Conta > Outra > Adicionar Calendario Assinado (iOS)",
-            "step3": "Cole o link e confirme"
-          },
-          "outlook": {
-            "step1": "Abra o Outlook Calendar",
-            "step2": "Clique em \"Adicionar calendario\" e depois em \"Assinar da web\"",
-            "step3": "Cole o link e de um nome ao calendario"
-          }
+        "button": "Sincronizar o calendário",
+        "title": "Sincronizar o calendário",
+        "description": "Adicione as suas reservas ao calendário que já utiliza.",
+        "loading": "A carregar...",
+        "done": "Concluído",
+        "cancel": "Cancelar",
+        "google": {
+          "title": "Google Calendar",
+          "recommended": "Recomendado",
+          "connected": "Ligado",
+          "connect": "Ligar",
+          "manage": "Gerir",
+          "help": "Sincronização automática: cores, visibilidade privada, disponibilidade e novas tentativas automáticas. A opção mais fiável."
         },
-        "regenerate": "Regenerar link",
-        "regenerateHint": "Regenerar o link invalidara links compartilhados anteriormente."
+        "subscribe": {
+          "title": "Subscrever com um link",
+          "help": "Subscrição só de leitura. A Louez publica as alterações de imediato, mas cada aplicação de calendário decide com que frequência atualiza.",
+          "apple": "Calendário Apple",
+          "outlook": "Outlook",
+          "google": "Google Calendar",
+          "copy": "Copiar o link",
+          "copied": "Copiado"
+        },
+        "regenerate": {
+          "action": "Regenerar o link",
+          "confirmTitle": "Regenerar o link?",
+          "hint": "Os links já partilhados deixarão de funcionar e cada calendário subscrito terá de ser adicionado novamente."
+        }
       }
     },
     "statistics": {
@@ -4297,6 +4311,8 @@
       "home": "Início",
       "products": "Produtos",
       "productsNew": "Novo produto",
+      "productsEdit": "Editar",
+      "reservationsEdit": "Editar",
       "reservations": "Reservas",
       "reservationsNew": "Nova reserva",
       "customers": "Clientes",

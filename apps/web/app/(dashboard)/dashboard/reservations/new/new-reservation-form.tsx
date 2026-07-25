@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useStore } from '@tanstack/react-form';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -150,6 +150,7 @@ export function NewReservationForm({
   storeLocations,
 }: NewReservationFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const locale = useLocale();
   const timezone = useStoreTimezone();
@@ -943,6 +944,34 @@ export function NewReservationForm({
       });
     });
   };
+
+  // Prefill from query params (e.g. drag-to-create on the product timeline):
+  // ?startDate=<ISO>&endDate=<ISO>&productId=<id>
+  const didPrefillRef = useRef(false);
+  useEffect(() => {
+    if (didPrefillRef.current) return;
+    didPrefillRef.current = true;
+
+    const parseDateParam = (key: string): Date | null => {
+      const value = searchParams.get(key);
+      if (!value) return null;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    };
+
+    const startDate = parseDateParam('startDate');
+    const endDate = parseDateParam('endDate');
+    if (startDate && endDate && startDate < endDate) {
+      form.setFieldValue('startDate', startDate);
+      form.setFieldValue('endDate', endDate);
+    }
+
+    const productId = searchParams.get('productId');
+    if (productId && products.some((product) => product.id === productId)) {
+      addProduct(productId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const updateQuantity = (lineId: string, delta: number) => {
     setSelectedProducts((prev) => {

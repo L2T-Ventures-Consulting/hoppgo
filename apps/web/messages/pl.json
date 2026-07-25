@@ -1769,8 +1769,6 @@
       },
       "awaitingResponse": "Oczekiwanie na odpowiedź",
       "itemsCount": "{count, plural, one {# przedmiot} few {# przedmioty} many {# przedmiotów} other {# przedmiotów}}",
-      "viewTable": "Widok tabeli",
-      "viewCards": "Widok kart",
       "pagination": {
         "showing": "Wyświetlanie {start} do {end} z {total}",
         "perPage": "Na stronę",
@@ -2125,7 +2123,13 @@
       },
       "tulipInsuredBadge": "Ubezpieczono Tulip",
       "tulipContractCardTitle": "Umowa ubezpieczeniowa",
-      "tulipContractCardDescription": "Otwórz umowę w Colibri."
+      "tulipContractCardDescription": "Otwórz umowę w Colibri.",
+      "views": {
+        "label": "Tryb widoku",
+        "list": "Lista",
+        "calendar": "Kalendarz",
+        "planning": "Planning"
+      }
     },
     "customers": {
       "title": "Klienci",
@@ -2293,39 +2297,49 @@
         "reservationsCount": "{count, plural, one {# rezerwacja} few {# rezerwacje} many {# rezerwacji} other {# rezerwacji}}"
       },
       "timeline": {
-        "products": "Produkty",
-        "quantity": "{count, plural, one {# jednostka} few {# jednostki} other {# jednostek}}",
-        "available": "Dostępny",
-        "noProducts": "Brak produktów do wyświetlenia"
+        "previous": "Poprzedni okres",
+        "next": "Następny okres",
+        "statusFilter": "Filtruj według statusu",
+        "operationFilter": "Filtruj według dzisiejszej operacji",
+        "allOperations": "Wszystkie operacje",
+        "todaysDepartures": "Dzisiejsze odbiory",
+        "todaysReturns": "Dzisiejsze zwroty",
+        "showAll": "Pokaż wszystko",
+        "retry": "Spróbuj ponownie",
+        "dragHint": "Wskazówka: kliknij i przeciągnij po pustym zakresie, aby utworzyć wstępnie wypełnioną rezerwację.",
+        "searchProductsPlaceholder": "Szukaj wsrod {count} produktow...",
+        "noProductsFound": "Nie znaleziono produktow",
+        "productsSelected": "{count} produktow"
       },
       "export": {
-        "button": "Eksportuj kalendarz",
-        "title": "Eksportuj do kalendarza",
-        "description": "Zsynchronizuj swoje rezerwacje z ulubionym kalendarzem, kopiujac ponizszy link.",
-        "urlLabel": "Link do kalendarza ICS",
-        "loading": "Ladowanie...",
-        "instructions": {
-          "title": "Jak dodac ten kalendarz?",
-          "google": {
-            "step1": "Otworz Kalendarz Google",
-            "step2": "Kliknij + obok \"Inne kalendarze\" i nastepnie \"Z adresu URL\"",
-            "step3": "Wklej link i kliknij \"Dodaj kalendarz\"",
-            "openLink": "Otworz Kalendarz Google",
-            "freshnessNote": "Louez publikuje zmiany natychmiast i prosi klientow o odswiezanie co 5 minut. Google moze jednak stosowac wlasne opoznienie synchronizacji."
-          },
-          "apple": {
-            "step1": "Otworz aplikacje Kalendarz na Macu lub iPhonie",
-            "step2": "Plik > Nowa subskrypcja kalendarza (Mac) lub Dodaj konto > Inne > Dodaj subskrybowany kalendarz (iOS)",
-            "step3": "Wklej link i potwierdz"
-          },
-          "outlook": {
-            "step1": "Otworz Kalendarz Outlook",
-            "step2": "Kliknij \"Dodaj kalendarz\" i nastepnie \"Subskrybuj z sieci\"",
-            "step3": "Wklej link i nadaj kalendarzowi nazwe"
-          }
+        "button": "Synchronizuj kalendarz",
+        "title": "Synchronizuj kalendarz",
+        "description": "Dodaj swoje rezerwacje do kalendarza, z którego już korzystasz.",
+        "loading": "Ładowanie...",
+        "done": "Gotowe",
+        "cancel": "Anuluj",
+        "google": {
+          "title": "Kalendarz Google",
+          "recommended": "Zalecane",
+          "connected": "Połączono",
+          "connect": "Połącz",
+          "manage": "Zarządzaj",
+          "help": "Automatyczna synchronizacja: kolory, prywatna widoczność, dostępność i automatyczne ponawianie. Najbardziej niezawodna opcja."
         },
-        "regenerate": "Wygeneruj nowy link",
-        "regenerateHint": "Wygenerowanie nowego linku uniewazni poprzednio udostepnione linki."
+        "subscribe": {
+          "title": "Subskrybuj za pomocą linku",
+          "help": "Subskrypcja tylko do odczytu. Louez publikuje zmiany natychmiast, ale każda aplikacja kalendarza sama decyduje, jak często je odświeża.",
+          "apple": "Kalendarz Apple",
+          "outlook": "Outlook",
+          "google": "Kalendarz Google",
+          "copy": "Kopiuj link",
+          "copied": "Skopiowano"
+        },
+        "regenerate": {
+          "action": "Wygeneruj nowy link",
+          "confirmTitle": "Wygenerować nowy link?",
+          "hint": "Wcześniej udostępnione linki przestaną działać, a każdy subskrybowany kalendarz trzeba będzie dodać ponownie."
+        }
       }
     },
     "statistics": {
@@ -4297,6 +4311,8 @@
       "home": "Strona główna",
       "products": "Produkty",
       "productsNew": "Nowy produkt",
+      "productsEdit": "Edytuj",
+      "reservationsEdit": "Edytuj",
       "reservations": "Rezerwacje",
       "reservationsNew": "Nowa rezerwacja",
       "customers": "Klienci",

@@ -37,7 +37,6 @@ import {
   SettingsIcon,
   SparklesIcon,
   UsersIcon,
-  WarehouseIcon,
 } from "@louez/ui/icons";
 
 import { useStore } from "@/contexts/store-context";
@@ -166,7 +165,7 @@ export const DashboardCommandPalette = ({
           keywords: "calendrier planning agenda schedule disponibilites",
           icon: CalendarDaysIcon,
           kind: "navigate",
-          href: "/dashboard/calendar",
+          href: "/dashboard/reservations?view=calendar",
         },
         {
           value: "reservations",
@@ -191,14 +190,6 @@ export const DashboardCommandPalette = ({
           icon: UsersIcon,
           kind: "navigate",
           href: "/dashboard/customers",
-        },
-        {
-          value: "inventory",
-          label: t("navigation.inventory"),
-          keywords: "inventaire stock unites materiel inventory equipment",
-          icon: WarehouseIcon,
-          kind: "navigate",
-          href: "/dashboard/inventory",
         },
         {
           value: "analytics",

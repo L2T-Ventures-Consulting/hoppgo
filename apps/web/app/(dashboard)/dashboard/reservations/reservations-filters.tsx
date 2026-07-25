@@ -1,68 +1,60 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { LayoutGrid, List } from 'lucide-react';
-import { useTranslations } from 'next-intl';
-import { useDebouncedCallback } from 'use-debounce';
+import { useTranslations } from "next-intl";
+import { useDebouncedCallback } from "use-debounce";
 
 import {
   Badge,
-  Button,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-  ToggleGroup,
-  ToggleGroupItem,
-} from '@louez/ui';
+  Tabs,
+  TabsList,
+  TabsTab,
+} from "@louez/ui";
 
-import { SearchInput } from '@/components/ui/search-input';
+import { SearchInput } from "@/components/ui/search-input";
 
-import type { ReservationCounts } from './reservations-types';
+import type { ReservationCounts } from "./reservations-types";
 
 interface ReservationsFiltersProps {
   counts: ReservationCounts;
   currentStatus?: string;
   currentPeriod?: string;
+  /** Rendered at the end of the search/period row (e.g. display-mode toggle) */
+  endSlot?: React.ReactNode;
 }
 
-const STATUS_KEYS = [
-  'all',
-  'pending',
-  'confirmed',
-  'ongoing',
-  'completed',
-  'cancelled',
-] as const;
-const PERIOD_KEYS = ['all', 'today', 'thisWeek', 'thisMonth'] as const;
+const STATUS_KEYS = ["all", "pending", "confirmed", "ongoing", "completed", "cancelled"] as const;
+const PERIOD_KEYS = ["all", "today", "thisWeek", "thisMonth"] as const;
 
 export const ReservationsFilters = ({
   counts,
-  currentStatus = 'all',
-  currentPeriod = 'all',
+  currentStatus = "all",
+  currentPeriod = "all",
+  endSlot,
 }: ReservationsFiltersProps) => {
-  const t = useTranslations('dashboard.reservations');
+  const t = useTranslations("dashboard.reservations");
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const currentView = searchParams.get('view') || 'cards';
-  const currentSearch = searchParams.get('search') || '';
+  const currentSearch = searchParams.get("search") || "";
   const [searchQuery, setSearchQuery] = useState(currentSearch);
   const pendingSearchParamsRef = useRef(new Set<string>());
   const latestSearchQueryRef = useRef(currentSearch);
-  const navigateToSearchRef = useRef<
-    (term: string, mode?: 'push' | 'replace') => void
-  >(() => {});
+  const navigateToSearchRef = useRef<(term: string, mode?: "push" | "replace") => void>(() => {});
 
   const createQueryString = useCallback(
     (updates: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams.toString());
       for (const [key, value] of Object.entries(updates)) {
-        if (value === null || value === '') {
+        if (value === null || value === "") {
           params.delete(key);
         } else {
           params.set(key, value);
@@ -74,7 +66,7 @@ export const ReservationsFilters = ({
   );
 
   const navigateToSearch = useCallback(
-    (term: string, mode: 'push' | 'replace' = 'push') => {
+    (term: string, mode: "push" | "replace" = "push") => {
       if (term === currentSearch) {
         return;
       }
@@ -85,7 +77,7 @@ export const ReservationsFilters = ({
         page: null,
       })}`;
 
-      if (mode === 'replace') {
+      if (mode === "replace") {
         router.replace(href);
         return;
       }
@@ -103,8 +95,8 @@ export const ReservationsFilters = ({
   // by this component so an older URL state cannot overwrite the local input.
   useEffect(() => {
     if (pendingSearchParamsRef.current.delete(currentSearch)) {
-      if (currentSearch !== '' && latestSearchQueryRef.current === '') {
-        navigateToSearchRef.current('', 'replace');
+      if (currentSearch !== "" && latestSearchQueryRef.current === "") {
+        navigateToSearchRef.current("", "replace");
       }
       return;
     }
@@ -116,7 +108,7 @@ export const ReservationsFilters = ({
   const handleStatusChange = (value: string) => {
     router.push(
       `/dashboard/reservations?${createQueryString({
-        status: value === 'all' ? null : value,
+        status: value === "all" ? null : value,
         operation: null,
         page: null, // reset page when changing filters
       })}`,
@@ -127,7 +119,7 @@ export const ReservationsFilters = ({
     if (value === null) return;
     router.push(
       `/dashboard/reservations?${createQueryString({
-        period: value === 'all' ? null : value,
+        period: value === "all" ? null : value,
         operation: null,
         page: null,
       })}`,
@@ -145,87 +137,73 @@ export const ReservationsFilters = ({
   };
 
   const clearSearchQuery = () => {
-    latestSearchQueryRef.current = '';
-    setSearchQuery('');
+    latestSearchQueryRef.current = "";
+    setSearchQuery("");
     handleSearch.cancel();
-    navigateToSearch('');
-  };
-
-  const handleViewChange = (value: string[]) => {
-    const selected = value[0];
-    if (!selected) return;
-    router.push(
-      `/dashboard/reservations?${createQueryString({
-        view: selected === 'cards' ? null : selected,
-      })}`,
-    );
+    navigateToSearch("");
   };
 
   const getCount = (status: string): number => {
-    if (status === 'all') return counts.all;
-    return counts[status as keyof Omit<ReservationCounts, 'all'>] || 0;
+    if (status === "all") return counts.all;
+    return counts[status as keyof Omit<ReservationCounts, "all">] || 0;
   };
 
   const getStatusLabel = (key: string): string => {
-    if (key === 'all') return t('filters.all');
+    if (key === "all") return t("filters.all");
     return t(`status.${key}`);
   };
 
   const getPeriodLabel = (key: string): string => {
-    if (key === 'all') return t('allPeriods');
+    if (key === "all") return t("allPeriods");
     return t(`filters.${key}`);
   };
 
   // Map period keys to URL values
   const periodUrlMap: Record<string, string> = {
-    all: 'all',
-    today: 'today',
-    thisWeek: 'week',
-    thisMonth: 'month',
+    all: "all",
+    today: "today",
+    thisWeek: "week",
+    thisMonth: "month",
   };
 
   // Map URL values back to keys for display
   const urlToPeriodMap: Record<string, string> = {
-    all: 'all',
-    today: 'today',
-    week: 'thisWeek',
-    month: 'thisMonth',
+    all: "all",
+    today: "today",
+    week: "thisWeek",
+    month: "thisMonth",
   };
 
   return (
     <div className="space-y-4">
-      {/* Row 1: Status Tabs */}
-      <div className="bg-muted/50 flex items-center gap-1 overflow-x-auto rounded-lg border p-1">
-        {STATUS_KEYS.map((key) => {
-          const count = getCount(key);
-          const isActive = currentStatus === key;
+      {/* Row 1: Status filter — underlined tabs, so it reads as "narrow the
+          data" next to the segmented view switcher above it */}
+      <div className="overflow-x-auto">
+        <Tabs value={currentStatus} onValueChange={(value) => handleStatusChange(value as string)}>
+          <TabsList variant="underline">
+            {STATUS_KEYS.map((key) => {
+              const count = getCount(key);
+              const isActive = currentStatus === key;
 
-          return (
-            <Button
-              key={key}
-              variant={isActive ? 'secondary' : 'ghost'}
-              className="shrink-0 gap-2"
-              onClick={() => handleStatusChange(key)}
-            >
-              {getStatusLabel(key)}
-              {key === 'pending' && count > 0 ? (
-                <Badge variant="pending" className="ml-1 h-5 min-w-5 px-1.5">
-                  {count}
-                </Badge>
-              ) : (
-                <Badge
-                  variant={isActive ? 'progress' : 'expired'}
-                  className="ml-1 h-5 min-w-5 px-1.5"
-                >
-                  {count}
-                </Badge>
-              )}
-            </Button>
-          );
-        })}
+              return (
+                <TabsTab key={key} value={key}>
+                  {getStatusLabel(key)}
+                  <Badge
+                    variant={
+                      key === "pending" && count > 0 ? "pending" : isActive ? "progress" : "expired"
+                    }
+                    size="sm"
+                  >
+                    {count}
+                  </Badge>
+                </TabsTab>
+              );
+            })}
+          </TabsList>
+        </Tabs>
       </div>
 
-      {/* Row 2: Search + Period + View Toggle */}
+      {/* Row 2: Search + Period */}
       <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
         {/* Search */}
         <div className="relative max-w-sm flex-1">
@@ -233,44 +211,28 @@ export const ReservationsFilters = ({
             value={searchQuery}
             onChange={(event) => updateSearchQuery(event.target.value)}
             onClear={clearSearchQuery}
-            placeholder={t('searchReservations')}
-            clearLabel={t('clearSearch')}
+            placeholder={t("searchReservations")}
+            clearLabel={t("clearSearch")}
           />
         </div>
 
         {/* Period Filter */}
         <Select value={currentPeriod} onValueChange={handlePeriodChange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder={t('period')}>
-              {getPeriodLabel(urlToPeriodMap[currentPeriod] || 'all')}
+          <SelectTrigger className="w-full sm:w-45">
+            <SelectValue placeholder={t("period")}>
+              {getPeriodLabel(urlToPeriodMap[currentPeriod] || "all")}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             {PERIOD_KEYS.map((key) => (
-              <SelectItem
-                key={key}
-                value={periodUrlMap[key]}
-                label={getPeriodLabel(key)}
-              >
+              <SelectItem key={key} value={periodUrlMap[key]} label={getPeriodLabel(key)}>
                 {getPeriodLabel(key)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
 
-        {/* View Toggle */}
-        <ToggleGroup
-          value={[currentView]}
-          onValueChange={handleViewChange}
-          className="hidden sm:flex"
-        >
-          <ToggleGroupItem value="cards" aria-label={t('viewCards')}>
-            <LayoutGrid className="h-4 w-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="table" aria-label={t('viewTable')}>
-            <List className="h-4 w-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
+        {endSlot}
       </div>
     </div>
   );

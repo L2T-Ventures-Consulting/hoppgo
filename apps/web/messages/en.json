@@ -1180,7 +1180,7 @@
         "viewOnStorefront": "View on storefront",
         "stats": {
           "revenue": "Revenue",
-          "vsLastMonth": "vs last month",
+          "vsPrevious30Days": "vs previous 30 days",
           "reservations": "Reservations",
           "reservationsSubtitle": "{upcoming} upcoming · {completed} completed",
           "utilization": "Utilization",
@@ -1209,7 +1209,20 @@
           "dates": "Dates",
           "quantity": "Qty",
           "viewAllHint": "Showing the 10 most recent of {total} reservations.",
-          "viewAllLink": "View all reservations"
+          "viewAllLink": "View all reservations",
+          "viewList": "List",
+          "viewCalendar": "Calendar",
+          "timeline": {
+            "stock": "Stock",
+            "statusFilter": "Filter by status",
+            "showAll": "Show all",
+            "previous": "Previous period",
+            "next": "Next period",
+            "retry": "Retry",
+            "noUnits": "No active units to display",
+            "availableOn": "{date}: {count, plural, =0 {fully booked} one {# unit available} other {# units available}}",
+            "dragHint": "Tip: click and drag on an empty range to create a prefilled reservation."
+          }
         },
         "info": {
           "title": "Product information",
@@ -1899,8 +1912,6 @@
       },
       "awaitingResponse": "Awaiting response",
       "itemsCount": "{count, plural, one {# item} other {# items}}",
-      "viewTable": "Table view",
-      "viewCards": "Card view",
       "pagination": {
         "showing": "Showing {start} to {end} of {total}",
         "perPage": "Per page",
@@ -2262,7 +2273,15 @@
         "smsSendSuccess": "Access link sent via SMS",
         "smsSendError": "Failed to send SMS",
         "noPhone": "Customer has no phone number"
-      }
+      },
+      "views": {
+        "label": "View mode",
+        "list": "List",
+        "calendar": "Calendar",
+        "planning": "Planning"
+      },
+      "displayCards": "Card view",
+      "displayTable": "Table view"
     },
     "customers": {
       "title": "Customers",
@@ -2430,48 +2449,49 @@
         "reservationsCount": "{count, plural, one {# reservation} other {# reservations}}"
       },
       "timeline": {
-        "products": "Products",
-        "quantity": "{count, plural, one {# unit} other {# units}}",
-        "available": "Available",
-        "noProducts": "No products to display"
+        "previous": "Previous period",
+        "next": "Next period",
+        "statusFilter": "Filter by status",
+        "operationFilter": "Filter by today's operation",
+        "allOperations": "All operations",
+        "todaysDepartures": "Today's departures",
+        "todaysReturns": "Today's returns",
+        "showAll": "Show all",
+        "retry": "Retry",
+        "dragHint": "Tip: click and drag on an empty range to create a prefilled reservation.",
+        "searchProductsPlaceholder": "Search in {count} products...",
+        "noProductsFound": "No products found",
+        "productsSelected": "{count} products"
       },
       "export": {
         "button": "Sync calendar",
         "title": "Sync calendar",
-        "description": "Connect a calendar integration or use the universal ICS link.",
-        "integration": {
-          "title": "Recommended calendar integration",
-          "description": "Connect Google Calendar to sync reservations automatically, with colors, private visibility, availability and retries.",
-          "button": "Configure Google Calendar"
-        },
-        "ics": {
-          "title": "Universal ICS link",
-          "description": "Compatible with Apple Calendar, Outlook and other calendars. Freshness depends on the subscribed app."
-        },
-        "urlLabel": "ICS calendar link",
+        "description": "Add your reservations to the calendar you already use.",
         "loading": "Loading...",
-        "instructions": {
-          "title": "Add the ICS link manually",
-          "google": {
-            "step1": "Open Google Calendar",
-            "step2": "Click the + next to \"Other calendars\" then \"From URL\"",
-            "step3": "Paste the link and click \"Add calendar\"",
-            "openLink": "Open Google Calendar",
-            "freshnessNote": "Louez publishes changes immediately and asks clients to refresh every 5 minutes. Google may still apply its own sync delay."
-          },
-          "apple": {
-            "step1": "Open the Calendar app on Mac or iPhone",
-            "step2": "File > New Calendar Subscription (Mac) or Add Account > Other > Add Subscribed Calendar (iOS)",
-            "step3": "Paste the link and confirm"
-          },
-          "outlook": {
-            "step1": "Open Outlook Calendar",
-            "step2": "Click \"Add calendar\" then \"Subscribe from web\"",
-            "step3": "Paste the link and give the calendar a name"
-          }
+        "done": "Done",
+        "cancel": "Cancel",
+        "google": {
+          "title": "Google Calendar",
+          "recommended": "Recommended",
+          "connected": "Connected",
+          "connect": "Connect",
+          "manage": "Manage",
+          "help": "Automatic sync: colors, private visibility, availability and automatic retries. The most reliable option."
         },
-        "regenerate": "Regenerate link",
-        "regenerateHint": "Regenerating the link will invalidate previously shared links."
+        "subscribe": {
+          "title": "Subscribe with a link",
+          "help": "Read-only subscription. Louez publishes changes immediately, but each calendar app decides how often it refreshes.",
+          "apple": "Apple Calendar",
+          "outlook": "Outlook",
+          "google": "Google Calendar",
+          "copy": "Copy link",
+          "copied": "Copied"
+        },
+        "regenerate": {
+          "action": "Regenerate link",
+          "confirmTitle": "Regenerate the link?",
+          "hint": "Previously shared links will stop working and every subscribed calendar will have to be added again."
+        }
       }
     },
     "statistics": {
@@ -4025,9 +4045,8 @@
             "note": "Return inspection - reservation #{reservationNumber}",
             "noneSelected": "Select at least one unit",
             "createdToast": "{count, plural, one {Repair downtime created} other {Repair downtimes created}}",
-            "conflictsToast": "Conflicts detected - manage them in Inventory",
-            "conflictsDescription": "Conflicts detected. Manage them in Inventory.",
-            "openInventory": "Open Inventory",
+            "conflictsToast": "Conflicts detected - manage them from the product page",
+            "conflictsDescription": "Conflicts detected. Manage them from the affected product's page.",
             "skip": "Skip",
             "submit": "Create repair downtime",
             "done": "Done"
@@ -4478,6 +4497,8 @@
       "home": "Home",
       "products": "Products",
       "productsNew": "New product",
+      "productsEdit": "Edit",
+      "reservationsEdit": "Edit",
       "reservations": "Reservations",
       "reservationsNew": "New reservation",
       "customers": "Customers",

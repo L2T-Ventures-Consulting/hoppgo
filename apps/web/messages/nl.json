@@ -1769,8 +1769,6 @@
       },
       "awaitingResponse": "Wacht op reactie",
       "itemsCount": "{count, plural, one {# artikel} other {# artikelen}}",
-      "viewTable": "Tabelweergave",
-      "viewCards": "Kaartweergave",
       "pagination": {
         "showing": "Toont {start} tot {end} van {total}",
         "perPage": "Per pagina",
@@ -2125,7 +2123,13 @@
       },
       "tulipInsuredBadge": "Tulip verzekerd",
       "tulipContractCardTitle": "Verzekeringscontract",
-      "tulipContractCardDescription": "Open het contract in Colibri."
+      "tulipContractCardDescription": "Open het contract in Colibri.",
+      "views": {
+        "label": "Weergavemodus",
+        "list": "Lijst",
+        "calendar": "Kalender",
+        "planning": "Planning"
+      }
     },
     "customers": {
       "title": "Klanten",
@@ -2293,39 +2297,49 @@
         "reservationsCount": "{count, plural, one {# reservering} other {# reserveringen}}"
       },
       "timeline": {
-        "products": "Producten",
-        "quantity": "{count, plural, one {# eenheid} other {# eenheden}}",
-        "available": "Beschikbaar",
-        "noProducts": "Geen producten om weer te geven"
+        "previous": "Vorige periode",
+        "next": "Volgende periode",
+        "statusFilter": "Filteren op status",
+        "operationFilter": "Filteren op handeling van vandaag",
+        "allOperations": "Alle handelingen",
+        "todaysDepartures": "Vertrekken vandaag",
+        "todaysReturns": "Retours vandaag",
+        "showAll": "Alles tonen",
+        "retry": "Opnieuw proberen",
+        "dragHint": "Tip: klik en sleep over een leeg bereik om een vooraf ingevulde reservering te maken.",
+        "searchProductsPlaceholder": "Zoeken in {count} producten...",
+        "noProductsFound": "Geen producten gevonden",
+        "productsSelected": "{count} producten"
       },
       "export": {
-        "button": "Kalender exporteren",
-        "title": "Exporteren naar kalender",
-        "description": "Synchroniseer uw reserveringen met uw favoriete kalender door de link hieronder te kopieren.",
-        "urlLabel": "ICS-kalenderlink",
+        "button": "Agenda synchroniseren",
+        "title": "Agenda synchroniseren",
+        "description": "Voeg je reserveringen toe aan de agenda die je al gebruikt.",
         "loading": "Laden...",
-        "instructions": {
-          "title": "Hoe voeg ik deze kalender toe?",
-          "google": {
-            "step1": "Open Google Agenda",
-            "step2": "Klik op het + naast \"Andere agenda's\" en dan op \"Via URL\"",
-            "step3": "Plak de link en klik op \"Agenda toevoegen\"",
-            "openLink": "Google Agenda openen",
-            "freshnessNote": "Louez publiceert wijzigingen onmiddellijk en vraagt clients om elke 5 minuten te vernieuwen. Google kan toch zijn eigen synchronisatievertraging toepassen."
-          },
-          "apple": {
-            "step1": "Open de Agenda-app op Mac of iPhone",
-            "step2": "Archief > Nieuw agenda-abonnement (Mac) of Voeg account toe > Overige > Agenda-abonnement toevoegen (iOS)",
-            "step3": "Plak de link en bevestig"
-          },
-          "outlook": {
-            "step1": "Open Outlook Agenda",
-            "step2": "Klik op \"Agenda toevoegen\" en dan op \"Abonneren vanaf web\"",
-            "step3": "Plak de link en geef de kalender een naam"
-          }
+        "done": "Klaar",
+        "cancel": "Annuleren",
+        "google": {
+          "title": "Google Agenda",
+          "recommended": "Aanbevolen",
+          "connected": "Verbonden",
+          "connect": "Verbinden",
+          "manage": "Beheren",
+          "help": "Automatische synchronisatie: kleuren, privézichtbaarheid, beschikbaarheid en automatische nieuwe pogingen. De betrouwbaarste optie."
         },
-        "regenerate": "Link opnieuw genereren",
-        "regenerateHint": "Het opnieuw genereren van de link maakt eerder gedeelde links ongeldig."
+        "subscribe": {
+          "title": "Abonneren met een link",
+          "help": "Alleen-lezen abonnement. Louez publiceert wijzigingen direct, maar elke agenda-app bepaalt zelf hoe vaak die vernieuwt.",
+          "apple": "Apple Agenda",
+          "outlook": "Outlook",
+          "google": "Google Agenda",
+          "copy": "Link kopiëren",
+          "copied": "Gekopieerd"
+        },
+        "regenerate": {
+          "action": "Link opnieuw genereren",
+          "confirmTitle": "Link opnieuw genereren?",
+          "hint": "Eerder gedeelde links werken niet meer en elke geabonneerde agenda moet opnieuw worden toegevoegd."
+        }
       }
     },
     "statistics": {
@@ -4297,6 +4311,8 @@
       "home": "Home",
       "products": "Producten",
       "productsNew": "Nieuw product",
+      "productsEdit": "Bewerken",
+      "reservationsEdit": "Bewerken",
       "reservations": "Reserveringen",
       "reservationsNew": "Nieuwe reservering",
       "customers": "Klanten",

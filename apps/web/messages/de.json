@@ -1799,8 +1799,6 @@
       },
       "awaitingResponse": "Warten auf Antwort",
       "itemsCount": "{count, plural, one {# Artikel} other {# Artikel}}",
-      "viewTable": "Tabellenansicht",
-      "viewCards": "Kartenansicht",
       "pagination": {
         "showing": "Zeige {start} bis {end} von {total}",
         "perPage": "Pro Seite",
@@ -2164,7 +2162,13 @@
       },
       "tulipInsuredBadge": "Tulip-versichert",
       "tulipContractCardTitle": "Versicherungsvertrag",
-      "tulipContractCardDescription": "Vertrag in Colibri öffnen."
+      "tulipContractCardDescription": "Vertrag in Colibri öffnen.",
+      "views": {
+        "label": "Ansichtsmodus",
+        "list": "Liste",
+        "calendar": "Kalender",
+        "planning": "Planning"
+      }
     },
     "customers": {
       "title": "Kunden",
@@ -2332,39 +2336,49 @@
         "reservationsCount": "{count, plural, one {# Reservierung} other {# Reservierungen}}"
       },
       "timeline": {
-        "products": "Produkte",
-        "quantity": "{count, plural, one {# Einheit} other {# Einheiten}}",
-        "available": "Verfügbar",
-        "noProducts": "Keine Produkte anzuzeigen"
+        "previous": "Vorheriger Zeitraum",
+        "next": "Nächster Zeitraum",
+        "statusFilter": "Nach Status filtern",
+        "operationFilter": "Nach heutigem Vorgang filtern",
+        "allOperations": "Alle Vorgänge",
+        "todaysDepartures": "Heutige Abholungen",
+        "todaysReturns": "Heutige Rückgaben",
+        "showAll": "Alle anzeigen",
+        "retry": "Erneut versuchen",
+        "dragHint": "Tipp: Klicken und ziehen Sie über einen leeren Bereich, um eine vorausgefüllte Reservierung zu erstellen.",
+        "searchProductsPlaceholder": "In {count} Produkten suchen...",
+        "noProductsFound": "Keine Produkte gefunden",
+        "productsSelected": "{count} Produkte"
       },
       "export": {
-        "button": "Kalender exportieren",
-        "title": "In Kalender exportieren",
-        "description": "Synchronisieren Sie Ihre Reservierungen mit Ihrem Lieblingskalender, indem Sie den Link unten kopieren.",
-        "urlLabel": "ICS-Kalender-Link",
-        "loading": "Laden...",
-        "instructions": {
-          "title": "Wie fuege ich diesen Kalender hinzu?",
-          "google": {
-            "step1": "Oeffnen Sie Google Kalender",
-            "step2": "Klicken Sie auf das + neben \"Weitere Kalender\" und dann auf \"Per URL\"",
-            "step3": "Fuegen Sie den Link ein und klicken Sie auf \"Kalender hinzufuegen\"",
-            "openLink": "Google Kalender oeffnen",
-            "freshnessNote": "Louez veroeffentlicht Aenderungen sofort und fordert eine Aktualisierung alle 5 Minuten an. Google kann trotzdem eine eigene Synchronisierungsverzoegerung anwenden."
-          },
-          "apple": {
-            "step1": "Oeffnen Sie die Kalender-App auf Mac oder iPhone",
-            "step2": "Ablage > Neues Kalenderabonnement (Mac) oder Konto hinzufuegen > Andere > Kalenderabonnement hinzufuegen (iOS)",
-            "step3": "Fuegen Sie den Link ein und bestaetigen Sie"
-          },
-          "outlook": {
-            "step1": "Oeffnen Sie Outlook Kalender",
-            "step2": "Klicken Sie auf \"Kalender hinzufuegen\" und dann auf \"Aus dem Web abonnieren\"",
-            "step3": "Fuegen Sie den Link ein und geben Sie dem Kalender einen Namen"
-          }
+        "button": "Kalender synchronisieren",
+        "title": "Kalender synchronisieren",
+        "description": "Fügen Sie Ihre Reservierungen dem Kalender hinzu, den Sie bereits nutzen.",
+        "loading": "Wird geladen...",
+        "done": "Fertig",
+        "cancel": "Abbrechen",
+        "google": {
+          "title": "Google Kalender",
+          "recommended": "Empfohlen",
+          "connected": "Verbunden",
+          "connect": "Verbinden",
+          "manage": "Verwalten",
+          "help": "Automatische Synchronisierung: Farben, private Sichtbarkeit, Verfügbarkeit und automatische Wiederholungen. Die zuverlässigste Option."
         },
-        "regenerate": "Link neu generieren",
-        "regenerateHint": "Das Neugenerieren des Links macht zuvor geteilte Links ungueltig."
+        "subscribe": {
+          "title": "Mit einem Link abonnieren",
+          "help": "Abonnement mit Lesezugriff. Louez veröffentlicht Änderungen sofort, aber jede Kalender-App bestimmt selbst, wie oft sie aktualisiert.",
+          "apple": "Apple Kalender",
+          "outlook": "Outlook",
+          "google": "Google Kalender",
+          "copy": "Link kopieren",
+          "copied": "Kopiert"
+        },
+        "regenerate": {
+          "action": "Link neu erzeugen",
+          "confirmTitle": "Link neu erzeugen?",
+          "hint": "Bereits geteilte Links funktionieren nicht mehr und jeder abonnierte Kalender muss erneut hinzugefügt werden."
+        }
       }
     },
     "statistics": {
@@ -4297,6 +4311,8 @@
       "home": "Startseite",
       "products": "Produkte",
       "productsNew": "Neues Produkt",
+      "productsEdit": "Bearbeiten",
+      "reservationsEdit": "Bearbeiten",
       "reservations": "Reservierungen",
       "reservationsNew": "Neue Reservierung",
       "customers": "Kunden",

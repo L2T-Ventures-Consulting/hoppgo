@@ -599,7 +599,7 @@ async function processAdminDigest(
     dateLabel: formatStoreDate(now, timezone, 'FULL_DATE', locale),
     pickups,
     returns,
-    dashboardUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/calendar`,
+    dashboardUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/reservations?view=calendar`,
     channels: {
       email: claimedChannels.includes('email'),
       sms: claimedChannels.includes('sms'),
