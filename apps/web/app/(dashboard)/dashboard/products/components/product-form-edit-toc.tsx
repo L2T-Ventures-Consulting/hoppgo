@@ -155,8 +155,11 @@ export function ProductFormEditToc() {
   };
 
   return (
-    <nav className="hidden w-48 shrink-0 xl:block" aria-label="Form navigation">
-      <div className="sticky top-4">
+    <nav
+      className="sticky top-20 hidden w-48 shrink-0 self-start xl:block"
+      aria-label="Form navigation"
+    >
+      <div>
         <ul className="border-border relative space-y-0.5 border-l">
           {sections
             .filter((section) => availableIds.includes(section.id))

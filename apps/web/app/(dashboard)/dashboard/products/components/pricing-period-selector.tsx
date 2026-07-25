@@ -96,8 +96,8 @@ export function PricingPeriodSelector({
         <span className="max-w-[160px] truncate">{triggerLabel}</span>
         <ChevronsUpDown className="h-3.5 w-3.5 opacity-50" />
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72 p-0">
-        <div className="p-1">
+      <PopoverContent align="end" className="w-72">
+        <div>
           {/* Base pricing option */}
           <PopoverClose
             render={

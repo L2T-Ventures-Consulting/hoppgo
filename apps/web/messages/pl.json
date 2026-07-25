@@ -926,6 +926,7 @@
           "createVariantValue": "Utwórz „{value}” ({axis})",
           "chooseColor": "Wybierz kolor",
           "colorPickerDescription": "Dostosuj kolor lub wpisz wartość szesnastkową.",
+          "colorHue": "Odcień",
           "hexColor": "Kolor szesnastkowy",
           "presetSuggestions": "Sugestie",
           "valuesCount": "{count, plural, one {# wartość} few {# wartości} many {# wartości} other {# wartości}}",

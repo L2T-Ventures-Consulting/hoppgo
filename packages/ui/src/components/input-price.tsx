@@ -16,9 +16,14 @@ interface InputPriceProps {
   /** Unit hint rendered inside the field (e.g. "€", "€/j") */
   suffix: string;
   ariaLabel: string;
+  placeholder?: string;
   "aria-invalid"?: boolean;
   disabled?: boolean;
   autoFocus?: boolean;
+  /** Keeps an intentionally empty price visually empty instead of formatting it as zero. */
+  displayEmpty?: boolean;
+  /** Called when an empty value is committed. Without it, empty values still commit as zero. */
+  onEmptyCommitted?: () => void;
   /** Called when the user cancels with Escape (the draft is discarded) */
   onCancel?: () => void;
   className?: string;
@@ -29,22 +34,31 @@ function InputPrice({
   onValueCommitted,
   suffix,
   ariaLabel,
+  placeholder,
   "aria-invalid": ariaInvalid,
   disabled,
   autoFocus,
+  displayEmpty = false,
+  onEmptyCommitted,
   onCancel,
   className,
 }: InputPriceProps) {
-  const [localValue, setLocalValue] = useState(value.toFixed(2));
+  const [localValue, setLocalValue] = useState(displayEmpty ? "" : value.toFixed(2));
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (document.activeElement !== inputRef.current) {
-      setLocalValue(value.toFixed(2));
+      setLocalValue(displayEmpty ? "" : value.toFixed(2));
     }
-  }, [value]);
+  }, [displayEmpty, value]);
 
   function commit() {
+    if (localValue.trim() === "" && onEmptyCommitted) {
+      setLocalValue("");
+      onEmptyCommitted();
+      return;
+    }
+
     const parsed = parseFloat(localValue.replace(",", "."));
     const final = Number.isNaN(parsed) ? 0 : parsed;
     setLocalValue(final.toFixed(2));
@@ -67,6 +81,7 @@ function InputPrice({
         ref={inputRef}
         inputMode="decimal"
         value={localValue}
+        placeholder={placeholder}
         onChange={(event) => {
           const raw = event.target.value;
           if (raw === "" || /^\d*[.,]?\d{0,2}$/.test(raw)) {
@@ -77,7 +92,7 @@ function InputPrice({
         onKeyDown={(event) => {
           if (event.key === "Escape") {
             event.preventDefault();
-            setLocalValue(value.toFixed(2));
+            setLocalValue(displayEmpty ? "" : value.toFixed(2));
             onCancel?.();
             return;
           }

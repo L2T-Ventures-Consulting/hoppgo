@@ -926,6 +926,7 @@
           "createVariantValue": "\"{value}\" aanmaken ({axis})",
           "chooseColor": "Kies een kleur",
           "colorPickerDescription": "Pas de kleur aan of voer een hexadecimale waarde in.",
+          "colorHue": "Tint",
           "hexColor": "Hexkleur",
           "presetSuggestions": "Suggesties",
           "valuesCount": "{count, plural, one {# waarde} other {# waarden}}",

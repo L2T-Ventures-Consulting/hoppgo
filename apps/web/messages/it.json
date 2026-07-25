@@ -926,6 +926,7 @@
           "createVariantValue": "Crea «{value}» ({axis})",
           "chooseColor": "Scegli un colore",
           "colorPickerDescription": "Regola il colore o inserisci un valore esadecimale.",
+          "colorHue": "Tonalità",
           "hexColor": "Colore esadecimale",
           "presetSuggestions": "Suggerimenti",
           "valuesCount": "{count, plural, one {# valore} other {# valori}}",

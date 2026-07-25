@@ -965,6 +965,7 @@
           "createVariantValue": "Crear «{value}» ({axis})",
           "chooseColor": "Elegir un color",
           "colorPickerDescription": "Ajusta el color o introduce un valor hexadecimal.",
+          "colorHue": "Tono",
           "hexColor": "Color hexadecimal",
           "presetSuggestions": "Sugerencias",
           "valuesCount": "{count, plural, one {# valor} other {# valores}}",
