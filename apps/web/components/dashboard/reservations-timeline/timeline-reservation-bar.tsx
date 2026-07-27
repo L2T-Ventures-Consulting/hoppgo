@@ -21,14 +21,22 @@ type KnownStatus =
   | "declined";
 
 const BAR_COLORS: Record<KnownStatus, string> = {
-  pending: "bg-reservation-pending-soft text-reservation-pending hover:brightness-[0.97]",
-  confirmed: "bg-reservation-confirmed-soft text-reservation-confirmed hover:brightness-[0.97]",
-  ongoing: "bg-reservation-ongoing-soft text-reservation-ongoing hover:brightness-[0.97]",
-  completed: "bg-reservation-completed-soft text-reservation-completed hover:brightness-[0.97]",
-  cancelled: "bg-reservation-cancelled-soft text-reservation-cancelled hover:brightness-[0.97]",
-  rejected: "bg-reservation-rejected-soft text-reservation-rejected hover:brightness-[0.97]",
-  quote: "bg-reservation-quote-soft text-reservation-quote hover:brightness-[0.97]",
-  declined: "bg-reservation-declined-soft text-reservation-declined hover:brightness-[0.97]",
+  pending:
+    "bg-reservation-pending-soft text-reservation-pending hover:brightness-[0.97] dark:hover:brightness-[1.2]",
+  confirmed:
+    "bg-reservation-confirmed-soft text-reservation-confirmed hover:brightness-[0.97] dark:hover:brightness-[1.2]",
+  ongoing:
+    "bg-reservation-ongoing-soft text-reservation-ongoing hover:brightness-[0.97] dark:hover:brightness-[1.2]",
+  completed:
+    "bg-reservation-completed-soft text-reservation-completed hover:brightness-[0.97] dark:hover:brightness-[1.2]",
+  cancelled:
+    "bg-reservation-cancelled-soft text-reservation-cancelled hover:brightness-[0.97] dark:hover:brightness-[1.2]",
+  rejected:
+    "bg-reservation-rejected-soft text-reservation-rejected hover:brightness-[0.97] dark:hover:brightness-[1.2]",
+  quote:
+    "bg-reservation-quote-soft text-reservation-quote hover:brightness-[0.97] dark:hover:brightness-[1.2]",
+  declined:
+    "bg-reservation-declined-soft text-reservation-declined hover:brightness-[0.97] dark:hover:brightness-[1.2]",
 };
 
 const DOT_COLORS: Record<KnownStatus, string> = {
@@ -177,7 +185,7 @@ export function TimelineReservationBar({
               "absolute z-5 flex items-center gap-1 overflow-hidden rounded-md px-2 text-xs font-medium transition-[filter]",
               "focus-visible:ring-ring focus-visible:z-10 focus-visible:ring-2 focus-visible:outline-none ",
               // "shadow-[0_0_1px_0px_var(--color-border)]",
-              "shadow-[0_0_0.5px_0.5px_currentColor]",
+              "shadow-[0_0_0.5px_0.5px_currentColor] dark:shadow-[0_0_1px_0px_currentColor]",
               colorClass,
               isConflict && "ring-destructive/60 ring-1 ring-inset",
             )}
