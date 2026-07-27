@@ -26,6 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -35,17 +36,17 @@ import {
 import {
   AccentSparklesIcon,
   AdminShieldIcon,
-  AudienceIcon,
-  ChartColumnIcon,
-  CogIcon,
+  AudienceSolidIcon,
+  ChartColumnSolidIcon,
+  CogSolidIcon,
   CrownIcon,
-  DashboardIcon,
+  DashboardSolidIcon,
   LogoutIcon,
   OpenInNewIcon,
-  ProductIcon,
-  ReservationsIcon,
-  SupportIcon,
-  TeamIcon,
+  ProductSolidIcon,
+  ReservationsSolidIcon,
+  SupportSolidIcon,
+  TeamSolidIcon,
 } from "@louez/ui/icons";
 
 // import { ReferralSidebarWidget } from '@/components/dashboard/referral-sidebar-widget';
@@ -78,20 +79,22 @@ interface DashboardSidebarProps {
 }
 
 const mainNavigation = [
-  { key: "home", href: "/dashboard", icon: DashboardIcon },
-  { key: "reservations", href: "/dashboard/reservations", icon: ReservationsIcon },
-  { key: "customers", href: "/dashboard/customers", icon: AudienceIcon },
+  { key: "home", href: "/dashboard", icon: DashboardSolidIcon },
+  { key: "reservations", href: "/dashboard/reservations", icon: ReservationsSolidIcon },
+  { key: "customers", href: "/dashboard/customers", icon: AudienceSolidIcon },
 ];
 
-const catalogNavigation = [{ key: "products", href: "/dashboard/products", icon: ProductIcon }];
+const catalogNavigation = [
+  { key: "products", href: "/dashboard/products", icon: ProductSolidIcon },
+];
 
 const analyticsNavigation = [
-  { key: "analytics", href: "/dashboard/analytics", icon: ChartColumnIcon },
+  { key: "analytics", href: "/dashboard/analytics", icon: ChartColumnSolidIcon },
 ];
 
 const managementNavigation = [
-  { key: "team", href: "/dashboard/team", icon: TeamIcon },
-  { key: "settings", href: "/dashboard/settings", icon: CogIcon },
+  { key: "team", href: "/dashboard/team", icon: TeamSolidIcon },
+  { key: "settings", href: "/dashboard/settings", icon: CogSolidIcon },
 ];
 
 const navigationSections = [
@@ -110,6 +113,23 @@ interface NavigationItem {
   icon: React.ComponentType<{ className?: string }>;
 }
 
+const SidebarLink = ({ onClick, ...props }: React.ComponentProps<typeof Link>) => {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  return (
+    <Link
+      {...props}
+      onClick={(event) => {
+        onClick?.(event);
+
+        if (isMobile && !event.defaultPrevented) {
+          setOpenMobile(false);
+        }
+      }}
+    />
+  );
+};
+
 const isNavigationItemActive = (pathname: string, href: string) => {
   if (href === "/dashboard") {
     return pathname === "/dashboard";
@@ -125,7 +145,7 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        render={<Link href={item.href} />}
+        render={<SidebarLink href={item.href} />}
         isActive={active}
         tooltip={t(item.key)}
       >
@@ -177,7 +197,7 @@ const StoreHeader = ({
     <SidebarHeader className="border-sidebar-border gap-3 border-b px-0 max-md:px-2">
       <div className="flex min-w-0 items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[state=expanded]:pl-4 max-md:pl-2">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
+          <SidebarLink href="/dashboard" className="flex min-w-0 items-center gap-2">
             <Logo className="h-5 w-auto shrink-0 group-data-[collapsible=icon]:hidden" />
             <Image
               src={"/favicon.svg"}
@@ -186,7 +206,7 @@ const StoreHeader = ({
               alt="Logo"
               className="hidden size-8 shrink-0 group-data-[collapsible=icon]:block"
             />
-          </Link>
+          </SidebarLink>
           <PlanBadge planSlug={planSlug} />
         </div>
 
@@ -194,7 +214,7 @@ const StoreHeader = ({
           <Tooltip>
             <TooltipTrigger
               render={
-                <Link
+                <SidebarLink
                   href={`https://${storeSlug}.${env.NEXT_PUBLIC_APP_DOMAIN}`}
                   target="_blank"
                   className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex size-8 shrink-0 items-center justify-center rounded-md transition-colors group-data-[collapsible=icon]:hidden"
@@ -235,7 +255,6 @@ const UserMenu = ({
         render={
           <Button
             variant="ghost"
-            layout={false}
             className="hover:bg-sidebar-accent min-w-0 *:w-full h-12 w-full justify-start gap-3 px-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:px-0"
           />
         }
@@ -248,13 +267,13 @@ const UserMenu = ({
       <DropdownMenuContent align="start" className="w-56">
         <ThemeMenuSub />
         <LanguageMenuSub />
-        <DropdownMenuItem render={<Link href="/dashboard/account" />}>
+        <DropdownMenuItem render={<SidebarLink href="/dashboard/account" />}>
           {t("title")}
         </DropdownMenuItem>
         {isPlatformAdmin && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem render={<Link href="/admin" />}>
+            <DropdownMenuItem render={<SidebarLink href="/admin" />}>
               <AdminShieldIcon className="mr-2 h-4 w-4" />
               {t("administration")}
             </DropdownMenuItem>
@@ -287,11 +306,10 @@ const HelpButton = () => {
   return (
     <Button
       variant="ghost"
-      layout={false}
       className="hover:bg-sidebar-accent h-auto w-full justify-start gap-3 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
       onClick={() => Gleap.open()}
     >
-      <SupportIcon className="text-sidebar-foreground/70 h-4 w-4 shrink-0" />
+      <SupportSolidIcon className="text-sidebar-foreground/70 h-4 w-4 shrink-0" />
       <span className="min-w-0 group-data-[collapsible=icon]:hidden">
         <span className="block text-sm leading-none font-medium">{t("help")}</span>
         {/* <span className="text-muted-foreground mt-1 block truncate text-xs">

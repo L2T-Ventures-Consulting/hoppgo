@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  type CSSProperties,
-  Children,
-  Fragment,
-  type ReactElement,
-  type ReactNode,
-  isValidElement,
-} from "react";
+import { Children, Fragment, type ReactElement, type ReactNode, isValidElement } from "react";
 
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { type VariantProps, cva } from "class-variance-authority";
@@ -138,30 +131,12 @@ function splitChildren(children: ReactNode): {
 
 const slotTransition = { type: "spring", duration: 0.3, bounce: 0 } as const;
 
-// Motion animates the button's own width (layout), so the primitive is
-// wrapped once at module level.
-const MotionButtonPrimitive = motion.create(ButtonPrimitive);
-
-// These props collide with motion's own props on the wrapped primitive, so
-// they are excluded from the public API (`style` is re-added below without
-// Base UI's state-callback form, which motion cannot handle).
-type MotionConflictingProps = "onAnimationStart" | "onDrag" | "onDragStart" | "onDragEnd" | "style";
-
-type ButtonProps = Omit<ButtonPrimitive.Props, MotionConflictingProps> &
+type ButtonProps = ButtonPrimitive.Props &
   VariantProps<typeof buttonVariants> & {
     isPending?: boolean;
     /** Replaces the label while `isPending` is true. */
     pendingContent?: ReactNode;
     pendingDisables?: boolean;
-    style?: CSSProperties;
-    /**
-     * Motion's layout animation, on by default so the button can grow/shrink
-     * smoothly when its label swaps (e.g. entering the pending state). It also
-     * animates the button being *moved* by an ancestor, which is rarely wanted
-     * — pass `false` for buttons that get repositioned by a layout change, such
-     * as anything inside a collapsing sidebar.
-     */
-    layout?: boolean | "position" | "size";
   };
 
 function Button({
@@ -216,14 +191,10 @@ function Button({
       ? pendingContent
       : idleLabel;
   const hasLabel = Array.isArray(content) ? content.length > 0 : content != null;
-
-  const layout = shouldReduceMotion ? false : ("position" as const);
   const hidden = (x: number) => (shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x });
 
   return (
-    <MotionButtonPrimitive
-      layout={shouldReduceMotion ? false : true}
-      transition={slotTransition}
+    <ButtonPrimitive
       data-slot="button"
       data-icon-start={startSlot ? true : undefined}
       data-icon-end={endSlot ? true : undefined}
@@ -238,7 +209,6 @@ function Button({
         {startSlot ? (
           <motion.span
             key="start"
-            layout={layout}
             initial={hidden(-6)}
             animate={{ opacity: 1, x: 0 }}
             exit={hidden(-6)}
@@ -251,7 +221,6 @@ function Button({
         {hasLabel ? (
           <motion.span
             key="label"
-            layout={layout}
             transition={slotTransition}
             className="flex items-center gap-[inherit]"
           >
@@ -261,7 +230,6 @@ function Button({
         {endSlot ? (
           <motion.span
             key="end"
-            layout={layout}
             initial={hidden(6)}
             animate={{ opacity: 1, x: 0 }}
             exit={hidden(6)}
@@ -272,7 +240,7 @@ function Button({
           </motion.span>
         ) : null}
       </AnimatePresence>
-    </MotionButtonPrimitive>
+    </ButtonPrimitive>
   );
 }
 

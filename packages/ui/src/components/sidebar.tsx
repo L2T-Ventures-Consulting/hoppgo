@@ -254,9 +254,6 @@ function SidebarTrigger({ className, onClick, ...props }: React.ComponentProps<t
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon-sm"
-      // The sidebar collapsing shifts this button sideways; without opting out,
-      // motion's layout animation would spring it into place.
-      layout={false}
       className={cn(className)}
       onClick={(event) => {
         onClick?.(event);

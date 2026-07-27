@@ -179,7 +179,6 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
             role="combobox"
             aria-expanded={open}
             aria-label={t("selectStore")}
-            layout={false}
             className="h-auto w-full [&>span]:w-full justify-between px-3 py-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
             disabled={isPending}
           />
