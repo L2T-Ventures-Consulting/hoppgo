@@ -2,11 +2,13 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Plus, FolderOpen, Lock, ArrowUpDown } from 'lucide-react'
 
 import { Button } from '@louez/ui'
+import { CategoryManagerDrawer } from '@/components/categories/category-manager-drawer'
+import { invalidateProductsList } from '@/lib/orpc/invalidation'
 import { categoriesQueries } from '@/lib/queries/categories.queries'
 import { productsQueries } from '@/lib/queries/products.queries'
 import { ProductsTable } from './products-table'
@@ -42,9 +44,11 @@ export function ProductsPageContent({
   currency,
 }: ProductsPageContentProps) {
   const t = useTranslations('dashboard.products')
+  const queryClient = useQueryClient()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showOrderDialog, setShowOrderDialog] = useState(false)
-  const { status, categoryIds } = useProductsFilters()
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
+  const { status, categoryIds, setCategoryIds } = useProductsFilters()
 
   // Filter changes are shallow, so the server props keep describing the
   // filters of the first render — only seed the cache while they still match.
@@ -77,6 +81,17 @@ export function ProductsPageContent({
     ? products.slice(displayLimit)
     : []
 
+  /**
+   * Deleting a category reassigns (or unlinks) its products, so the list and
+   * the filter selection both have to let go of it.
+   */
+  const handleCategoryDeleted = (categoryId: string) => {
+    if (categoryIds.includes(categoryId)) {
+      setCategoryIds(categoryIds.filter((id) => id !== categoryId))
+    }
+    void invalidateProductsList(queryClient)
+  }
+
   const handleAddProductClick = (e: React.MouseEvent) => {
     if (isAtLimit) {
       e.preventDefault()
@@ -98,14 +113,14 @@ export function ProductsPageContent({
             size="icon"
             className="sm:hidden"
             title={t('manageCategories')}
-            render={<Link href="/dashboard/categories" />}
+            onClick={() => setCategoryManagerOpen(true)}
           >
             <FolderOpen className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             className="hidden sm:inline-flex"
-            render={<Link href="/dashboard/categories" />}
+            onClick={() => setCategoryManagerOpen(true)}
           >
             <FolderOpen className="mr-2 h-4 w-4" />
             {t('manageCategories')}
@@ -229,6 +244,13 @@ export function ProductsPageContent({
         currentCount={limits.current}
         limit={limits.limit || 5}
         currentPlan={planSlug}
+      />
+
+      {/* Category management — drawer only, there is no categories page */}
+      <CategoryManagerDrawer
+        open={categoryManagerOpen}
+        onOpenChange={setCategoryManagerOpen}
+        onCategoryDeleted={handleCategoryDeleted}
       />
 
       {/* Products Order Dialog */}
