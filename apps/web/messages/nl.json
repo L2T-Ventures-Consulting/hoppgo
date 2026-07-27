@@ -4449,9 +4449,13 @@
           "unlinkConfirmBody": "Het nummer {number} wordt ontkoppeld van je spraakagent. Je behoudt het nummer bij je provider.",
           "searching": "Beschikbare nummers zoeken…",
           "searchHint": "Kies een land en zoek een beschikbaar nummer om te voorzien.",
-          "areaCodePlaceholder": "bijv. 20",
+          "areaCodePlaceholder": "bijv. 415",
           "manualSetup": "Een bestaand nummer koppelen",
-          "copy": "Kopiëren"
+          "copy": "Kopiëren",
+          "areaCodeHint": "Filtert nummers op regionaal netnummer (bijv. 415 voor San Francisco).",
+          "contains": "Gewenste cijfers (optioneel)",
+          "containsPlaceholder": "bijv. 06",
+          "containsHint": "Toont alleen nummers die deze cijferreeks bevatten."
         },
         "notConfigured": {
           "title": "Telefonie niet geconfigureerd",

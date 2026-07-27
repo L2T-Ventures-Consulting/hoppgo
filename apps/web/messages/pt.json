@@ -4449,9 +4449,13 @@
           "unlinkConfirmBody": "O número {number} será desassociado do seu agente de voz. Mantém o número com o seu fornecedor.",
           "searching": "A procurar números disponíveis…",
           "searchHint": "Escolha um país e procure um número disponível para provisionar.",
-          "areaCodePlaceholder": "ex. 21",
+          "areaCodePlaceholder": "ex. 415",
           "manualSetup": "Como associar um número existente",
-          "copy": "Copiar"
+          "copy": "Copiar",
+          "areaCodeHint": "Filtra os números por código de área (ex. 415 para São Francisco).",
+          "contains": "Dígitos pretendidos (opcional)",
+          "containsPlaceholder": "ex. 06",
+          "containsHint": "Mostra apenas os números que contêm esta sequência de dígitos."
         },
         "notConfigured": {
           "title": "Telefonia não configurada",

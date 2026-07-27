@@ -4449,9 +4449,13 @@
           "unlinkConfirmBody": "Il numero {number} verrà scollegato dal tuo agente vocale. Mantieni il numero presso il tuo fornitore.",
           "searching": "Ricerca di numeri disponibili…",
           "searchHint": "Scegli un paese e cerca un numero disponibile da attivare.",
-          "areaCodePlaceholder": "es. 06",
+          "areaCodePlaceholder": "es. 415",
           "manualSetup": "Come collegare un numero esistente",
-          "copy": "Copia"
+          "copy": "Copia",
+          "areaCodeHint": "Filtra i numeri per prefisso regionale (es. 415 per San Francisco).",
+          "contains": "Cifre desiderate (facoltativo)",
+          "containsPlaceholder": "es. 06",
+          "containsHint": "Mostra solo i numeri che contengono questa sequenza di cifre."
         },
         "notConfigured": {
           "title": "Telefonia non configurata",

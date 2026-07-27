@@ -4635,9 +4635,13 @@
           "unlinkConfirmBody": "Le numéro {number} sera détaché de votre agent vocal. Vous conservez le numéro chez votre fournisseur.",
           "searching": "Recherche de numéros disponibles…",
           "searchHint": "Choisissez un pays et recherchez un numéro disponible à provisionner.",
-          "areaCodePlaceholder": "ex. 75",
+          "areaCodePlaceholder": "ex. 415",
           "manualSetup": "Comment relier un numéro existant",
-          "copy": "Copier"
+          "copy": "Copier",
+          "areaCodeHint": "Filtre les numéros par indicatif régional (ex. 415 pour San Francisco).",
+          "contains": "Chiffres souhaités (facultatif)",
+          "containsPlaceholder": "ex. 06",
+          "containsHint": "N'affiche que les numéros contenant cette suite de chiffres."
         },
         "notConfigured": {
           "title": "Téléphonie non configurée",

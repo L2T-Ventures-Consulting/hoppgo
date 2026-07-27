@@ -4635,9 +4635,13 @@
           "unlinkConfirmBody": "The number {number} will be unlinked from your voice agent. You keep the number with your provider.",
           "searching": "Searching for available numbers…",
           "searchHint": "Choose a country and search for an available number to provision.",
-          "areaCodePlaceholder": "e.g. 75",
+          "areaCodePlaceholder": "e.g. 415",
           "manualSetup": "How to link an existing number",
-          "copy": "Copy"
+          "copy": "Copy",
+          "areaCodeHint": "Filters numbers by regional area code (e.g. 415 for San Francisco).",
+          "contains": "Preferred digits (optional)",
+          "containsPlaceholder": "e.g. 06",
+          "containsHint": "Only shows numbers containing this digit sequence."
         },
         "notConfigured": {
           "title": "Telephony not configured",

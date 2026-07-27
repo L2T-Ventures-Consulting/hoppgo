@@ -4455,9 +4455,13 @@
           "unlinkConfirmBody": "El número {number} se desvinculará de tu agente de voz. Conservas el número con tu proveedor.",
           "searching": "Buscando números disponibles…",
           "searchHint": "Elige un país y busca un número disponible para aprovisionar.",
-          "areaCodePlaceholder": "ej. 91",
+          "areaCodePlaceholder": "p. ej. 415",
           "manualSetup": "Cómo vincular un número existente",
-          "copy": "Copiar"
+          "copy": "Copiar",
+          "areaCodeHint": "Filtra los números por código de área (p. ej. 415 para San Francisco).",
+          "contains": "Dígitos deseados (opcional)",
+          "containsPlaceholder": "p. ej. 06",
+          "containsHint": "Solo muestra los números que contienen esta secuencia de dígitos."
         },
         "notConfigured": {
           "title": "Telefonía no configurada",

@@ -4449,9 +4449,13 @@
           "unlinkConfirmBody": "Numer {number} zostanie odłączony od agenta głosowego. Zachowasz numer u swojego dostawcy.",
           "searching": "Wyszukiwanie dostępnych numerów…",
           "searchHint": "Wybierz kraj i wyszukaj dostępny numer do udostępnienia.",
-          "areaCodePlaceholder": "np. 22",
+          "areaCodePlaceholder": "np. 415",
           "manualSetup": "Jak podłączyć istniejący numer",
-          "copy": "Kopiuj"
+          "copy": "Kopiuj",
+          "areaCodeHint": "Filtruje numery według regionalnego numeru kierunkowego (np. 415 dla San Francisco).",
+          "contains": "Preferowane cyfry (opcjonalnie)",
+          "containsPlaceholder": "np. 06",
+          "containsHint": "Pokazuje tylko numery zawierające tę sekwencję cyfr."
         },
         "notConfigured": {
           "title": "Telefonia nie jest skonfigurowana",

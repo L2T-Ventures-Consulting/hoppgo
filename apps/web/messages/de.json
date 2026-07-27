@@ -4449,9 +4449,13 @@
           "unlinkConfirmBody": "Die Nummer {number} wird von Ihrem Sprachagenten getrennt. Die Nummer bleibt bei Ihrem Anbieter.",
           "searching": "Verfügbare Nummern werden gesucht…",
           "searchHint": "Wählen Sie ein Land und suchen Sie eine verfügbare Nummer zur Bereitstellung.",
-          "areaCodePlaceholder": "z. B. 30",
+          "areaCodePlaceholder": "z. B. 415",
           "manualSetup": "Eine vorhandene Nummer verknüpfen",
-          "copy": "Kopieren"
+          "copy": "Kopieren",
+          "areaCodeHint": "Filtert Nummern nach regionaler Vorwahl (z. B. 415 für San Francisco).",
+          "contains": "Gewünschte Ziffern (optional)",
+          "containsPlaceholder": "z. B. 06",
+          "containsHint": "Zeigt nur Nummern, die diese Ziffernfolge enthalten."
         },
         "notConfigured": {
           "title": "Telefonie nicht konfiguriert",
