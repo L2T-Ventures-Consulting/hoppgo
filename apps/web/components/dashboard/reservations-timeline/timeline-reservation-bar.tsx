@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, Truck, TriangleAlert } from "lucide-react";
+import { ChevronLeft, ExternalLink, Truck, TriangleAlert } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Badge, Tooltip, TooltipContent, TooltipTrigger } from "@louez/ui";
@@ -77,6 +77,10 @@ interface TimelineReservationBarProps {
   currency: string;
   /** Flags an overbooked placement (no free unit lane was available) */
   isConflict?: boolean;
+  /** Keeps the label visible while its reservation intersects the horizontal viewport */
+  isLabelSticky?: boolean;
+  /** Signals that the reservation started before the visible timeline */
+  continuesBeforeViewport?: boolean;
   style?: React.CSSProperties;
 }
 
@@ -161,6 +165,8 @@ export function TimelineReservationBar({
   reservation,
   currency,
   isConflict = false,
+  isLabelSticky = false,
+  continuesBeforeViewport = false,
   style,
 }: TimelineReservationBarProps) {
   const t = useTranslations("dashboard.calendar");
@@ -182,7 +188,8 @@ export function TimelineReservationBar({
             target="_blank"
             rel="noopener noreferrer"
             className={cn(
-              "absolute z-5 flex items-center gap-1 overflow-hidden rounded-md px-2 text-xs font-medium transition-[filter]",
+              "absolute z-5 overflow-hidden rounded-md text-xs font-medium transition-[filter]",
+              isLabelSticky && "overflow-clip",
               "focus-visible:ring-ring focus-visible:z-10 focus-visible:ring-2 focus-visible:outline-none ",
               // "shadow-[0_0_1px_0px_var(--color-border)]",
               "shadow-[0_0_0.5px_0.5px_currentColor] dark:shadow-[0_0_1px_0px_currentColor]",
@@ -193,12 +200,22 @@ export function TimelineReservationBar({
           />
         }
       >
-        {isConflict && <TriangleAlert className="text-destructive h-3 w-3 shrink-0" />}
-        {hasDelivery && <Truck className="h-3 w-3 shrink-0" />}
-        <span className="truncate">{reservation.customerName}</span>
-        {reservation.quantity > 1 && (
-          <span className="shrink-0 opacity-70">×{reservation.quantity}</span>
-        )}
+        <span
+          className={cn(
+            "flex h-full w-fit max-w-full items-center gap-1 px-2",
+            isLabelSticky && "sticky left-0",
+          )}
+        >
+          {continuesBeforeViewport && (
+            <ChevronLeft aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
+          )}
+          {isConflict && <TriangleAlert className="text-destructive h-3 w-3 shrink-0" />}
+          {hasDelivery && <Truck className="h-3 w-3 shrink-0" />}
+          <span className="truncate">{reservation.customerName}</span>
+          {reservation.quantity > 1 && (
+            <span className="shrink-0 opacity-70">×{reservation.quantity}</span>
+          )}
+        </span>
       </TooltipTrigger>
       <TooltipContent side="top" className="max-w-xs">
         <div className="min-w-52 space-y-2 p-1.5">

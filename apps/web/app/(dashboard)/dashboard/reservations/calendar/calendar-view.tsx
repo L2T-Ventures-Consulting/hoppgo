@@ -295,15 +295,23 @@ export function ReservationsCalendarView({
   const [visibleMonthLabel, setVisibleMonthLabel] = useState(() =>
     formatMonthLabel(anchorDateRef.current),
   );
+  const [leftmostVisibleDayIndex, setLeftmostVisibleDayIndex] = useState(0);
 
   // ---------------------------------------------------------------------------
   // Scrolling: initial position, label sync, infinite extension
   // ---------------------------------------------------------------------------
 
-  const updateVisibleLabel = (element: HTMLDivElement) => {
+  const updateVisibleViewport = (element: HTMLDivElement) => {
+    const leftmostIndex = Math.max(
+      0,
+      Math.min(daysCount - 1, Math.floor(element.scrollLeft / dayWidth)),
+    );
     const centerOffset = element.scrollLeft + element.clientWidth / 2;
     const index = Math.max(0, Math.min(daysCount - 1, Math.floor(centerOffset / dayWidth)));
     const label = formatMonthLabel(addDays(windowStart, index));
+    setLeftmostVisibleDayIndex((previous) =>
+      previous === leftmostIndex ? previous : leftmostIndex,
+    );
     setVisibleMonthLabel((previous) => (previous === label ? previous : label));
   };
 
@@ -316,7 +324,7 @@ export function ReservationsCalendarView({
     const anchorIndex = diffInDays(windowStart, anchorDateRef.current);
     const target = anchorIndex * dayWidth - Math.max(0, element.clientWidth / 3);
     element.scrollLeft = Math.max(0, target);
-    updateVisibleLabel(element);
+    updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowStart]);
 
@@ -326,6 +334,7 @@ export function ReservationsCalendarView({
     if (!element || pendingPrependRef.current === 0) return;
     element.scrollLeft += pendingPrependRef.current * dayWidth;
     pendingPrependRef.current = 0;
+    updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowStart]);
 
@@ -335,7 +344,7 @@ export function ReservationsCalendarView({
     if (!element || zoomAnchorRef.current === null) return;
     element.scrollLeft = zoomAnchorRef.current * dayWidth;
     zoomAnchorRef.current = null;
-    updateVisibleLabel(element);
+    updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoom]);
 
@@ -358,7 +367,7 @@ export function ReservationsCalendarView({
 
     scrollRafRef.current = requestAnimationFrame(() => {
       scrollRafRef.current = null;
-      updateVisibleLabel(element);
+      updateVisibleViewport(element);
 
       if (daysCount >= MAX_DAYS_COUNT) return;
 
@@ -633,6 +642,8 @@ export function ReservationsCalendarView({
                     key={item.reservation.id}
                     reservation={item.reservation}
                     currency={currency}
+                    isLabelSticky
+                    continuesBeforeViewport={item.startIndex < leftmostVisibleDayIndex}
                     style={{
                       left: from * dayWidth + 4,
                       width: (to - from + 1) * dayWidth - 8,
