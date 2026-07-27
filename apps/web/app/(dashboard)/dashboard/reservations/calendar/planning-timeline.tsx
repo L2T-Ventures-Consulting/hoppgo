@@ -385,15 +385,23 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
   const [visibleMonthLabel, setVisibleMonthLabel] = useState(() =>
     formatMonthLabel(anchorDateRef.current),
   );
+  const [leftmostVisibleDayIndex, setLeftmostVisibleDayIndex] = useState(0);
 
   // ---------------------------------------------------------------------------
   // Scrolling: initial position, label sync, infinite extension
   // ---------------------------------------------------------------------------
 
-  const updateVisibleLabel = (element: HTMLDivElement) => {
+  const updateVisibleViewport = (element: HTMLDivElement) => {
+    const leftmostIndex = Math.max(
+      0,
+      Math.min(daysCount - 1, Math.floor(element.scrollLeft / dayWidth)),
+    );
     const centerOffset = element.scrollLeft + (element.clientWidth - PRODUCT_COLUMN_WIDTH) / 2;
     const index = Math.max(0, Math.min(daysCount - 1, Math.floor(centerOffset / dayWidth)));
     const label = formatMonthLabel(addDays(windowStart, index));
+    setLeftmostVisibleDayIndex((previous) =>
+      previous === leftmostIndex ? previous : leftmostIndex,
+    );
     setVisibleMonthLabel((previous) => (previous === label ? previous : label));
   };
 
@@ -407,7 +415,7 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
     const target =
       anchorIndex * dayWidth - Math.max(0, (element.clientWidth - PRODUCT_COLUMN_WIDTH) / 3);
     element.scrollLeft = Math.max(0, target);
-    updateVisibleLabel(element);
+    updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowStart]);
 
@@ -417,6 +425,7 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
     if (!element || pendingPrependRef.current === 0) return;
     element.scrollLeft += pendingPrependRef.current * dayWidth;
     pendingPrependRef.current = 0;
+    updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowStart]);
 
@@ -426,7 +435,7 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
     if (!element || zoomAnchorRef.current === null) return;
     element.scrollLeft = zoomAnchorRef.current * dayWidth;
     zoomAnchorRef.current = null;
-    updateVisibleLabel(element);
+    updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoom]);
 
@@ -449,7 +458,7 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
 
     scrollRafRef.current = requestAnimationFrame(() => {
       scrollRafRef.current = null;
-      updateVisibleLabel(element);
+      updateVisibleViewport(element);
 
       if (daysCount >= MAX_DAYS_COUNT) return;
 
@@ -868,6 +877,9 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
                             key={`${placed.reservation.id}-${placed.laneIndex}`}
                             reservation={placed.reservation}
                             currency={currency}
+                            isLabelSticky
+                            stickyLabelOffset={PRODUCT_COLUMN_WIDTH}
+                            continuesBeforeViewport={placed.startIndex < leftmostVisibleDayIndex}
                             style={{
                               left: from * dayWidth + 2,
                               width: (to - from + 1) * dayWidth - 4,

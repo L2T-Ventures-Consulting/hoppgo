@@ -79,6 +79,8 @@ interface TimelineReservationBarProps {
   isConflict?: boolean;
   /** Keeps the label visible while its reservation intersects the horizontal viewport */
   isLabelSticky?: boolean;
+  /** Left edge reserved by a sticky timeline column */
+  stickyLabelOffset?: number;
   /** Signals that the reservation started before the visible timeline */
   continuesBeforeViewport?: boolean;
   style?: React.CSSProperties;
@@ -166,6 +168,7 @@ export function TimelineReservationBar({
   currency,
   isConflict = false,
   isLabelSticky = false,
+  stickyLabelOffset = 0,
   continuesBeforeViewport = false,
   style,
 }: TimelineReservationBarProps) {
@@ -203,8 +206,9 @@ export function TimelineReservationBar({
         <span
           className={cn(
             "flex h-full w-fit max-w-full items-center gap-1 px-2",
-            isLabelSticky && "sticky left-0",
+            isLabelSticky && "sticky",
           )}
+          style={isLabelSticky ? { left: stickyLabelOffset } : undefined}
         >
           {continuesBeforeViewport && (
             <ChevronLeft aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
