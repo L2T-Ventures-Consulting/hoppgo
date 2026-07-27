@@ -6,7 +6,7 @@ import { ChevronRight } from "lucide-react";
 
 import { cn } from "@louez/utils";
 
-interface HomeListRowProps {
+interface DashboardListRowProps {
   href: string;
   /** Icon tile or avatar. */
   leading: ReactNode;
@@ -18,21 +18,20 @@ interface HomeListRowProps {
 }
 
 /**
- * The single row shape of the home page — used by the activity lists, the
- * pending requests and the quick actions.
+ * The single row shape of the dashboard lists.
  *
- * The affordance is a chevron that is always rendered (the previous rows
- * revealed their action on `:hover` only, which never fired on touch devices)
- * and nudges to the right on hover.
+ * The affordance is a chevron that is always rendered (rows used to reveal
+ * their action on `:hover` only, which never fired on touch devices) and
+ * nudges to the right on hover.
  */
-export const HomeListRow = ({
+export const DashboardListRow = ({
   href,
   leading,
   title,
   subtitle,
   meta,
   className,
-}: HomeListRowProps) => (
+}: DashboardListRowProps) => (
   <Link
     href={href}
     className={cn(

@@ -2,29 +2,29 @@ import type { ComponentType } from "react";
 
 import { cn } from "@louez/utils";
 
-import { HOME_ACCENT_SURFACE, type HomeAccent } from "./home-accent";
+import { DASHBOARD_ACCENT_SURFACE, type DashboardAccent } from "./dashboard-accent";
 
-interface HomeIconTileProps {
+interface DashboardIconTileProps {
   icon: ComponentType<{ className?: string }>;
-  accent?: HomeAccent;
+  accent?: DashboardAccent;
   /** `sm` for stat cards and dense rows, `md` for section headers. */
   size?: "sm" | "md";
   className?: string;
 }
 
-/** The single icon-container shape used across the home page. */
-export const HomeIconTile = ({
+/** The single icon-container shape used across the dashboard. */
+export const DashboardIconTile = ({
   icon: Icon,
   accent = "neutral",
   size = "md",
   className,
-}: HomeIconTileProps) => (
+}: DashboardIconTileProps) => (
   <span
     aria-hidden="true"
     className={cn(
       "flex shrink-0 items-center justify-center rounded-lg",
       size === "sm" ? "size-8" : "size-9",
-      HOME_ACCENT_SURFACE[accent],
+      DASHBOARD_ACCENT_SURFACE[accent],
       className,
     )}
   >

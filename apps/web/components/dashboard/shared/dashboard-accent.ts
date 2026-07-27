@@ -1,13 +1,13 @@
 /**
- * Accent palette shared by every widget of the dashboard home.
+ * Accent palette shared by every dashboard widget (home, analytics, …).
  *
- * Each widget used to bring its own colours (emerald / blue / orange / purple
+ * Widgets used to bring their own colours (emerald / blue / orange / purple
  * Tailwind palettes, plus hand-written gradients in `dashboard-theme.css`), so
  * an icon tile and the badge sitting next to it never matched. Everything now
  * resolves to the badge tokens from `@louez/ui`: an accent gives the tile the
  * exact background/foreground pair its `<Badge variant>` counterpart uses.
  */
-export type HomeAccent =
+export type DashboardAccent =
   | "success"
   | "progress"
   | "pending"
@@ -17,7 +17,7 @@ export type HomeAccent =
   | "primary";
 
 /** Background + foreground pair for an accented surface (icon tile, dot, …). */
-export const HOME_ACCENT_SURFACE: Record<HomeAccent, string> = {
+export const DASHBOARD_ACCENT_SURFACE: Record<DashboardAccent, string> = {
   success: "bg-badge-success-background text-badge-success-foreground",
   progress: "bg-badge-progress-background text-badge-progress-foreground",
   pending: "bg-badge-pending-background text-badge-pending-foreground",
@@ -25,4 +25,15 @@ export const HOME_ACCENT_SURFACE: Record<HomeAccent, string> = {
   review: "bg-badge-review-background text-badge-review-foreground",
   neutral: "bg-badge-expired-background text-badge-expired-foreground",
   primary: "bg-primary/10 text-primary",
+};
+
+/** Solid fill for charts and progress bars — the accent's foreground colour. */
+export const DASHBOARD_ACCENT_FILL: Record<DashboardAccent, string> = {
+  success: "bg-badge-success-foreground",
+  progress: "bg-badge-progress-foreground",
+  pending: "bg-badge-pending-foreground",
+  submitted: "bg-badge-submitted-foreground",
+  review: "bg-badge-review-foreground",
+  neutral: "bg-badge-expired-foreground",
+  primary: "bg-primary",
 };

@@ -11,16 +11,16 @@ import { Button } from "@louez/ui";
 import { CheckCircleIcon } from "@louez/ui/icons";
 
 import { ActivityListItem } from "./activity-list-item";
-import type { HomeAccent } from "./home-accent";
-import { HomeEmptyState } from "./home-empty-state";
-import { HomeSectionCard } from "./home-section-card";
+import type { DashboardAccent } from "@/components/dashboard/shared/dashboard-accent";
+import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
+import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import type { HomeReservation } from "./home-types";
 
 interface ActivityCardProps {
   title: string;
   description: string;
   icon: ComponentType<{ className?: string }>;
-  accent: HomeAccent;
+  accent: DashboardAccent;
   reservations: HomeReservation[];
   emptyMessage: string;
   viewAllHref: string;
@@ -45,7 +45,7 @@ export const ActivityCard = ({
   const t = useTranslations("dashboard.home");
 
   return (
-    <HomeSectionCard
+    <DashboardSectionCard
       title={title}
       description={description}
       icon={icon}
@@ -59,7 +59,7 @@ export const ActivityCard = ({
       }
     >
       {reservations.length === 0 ? (
-        <HomeEmptyState icon={CheckCircleIcon} description={emptyMessage} />
+        <DashboardEmptyState icon={CheckCircleIcon} description={emptyMessage} />
       ) : (
         <div className="-mx-2 space-y-0.5 sm:-mx-3">
           {reservations.map((reservation) => (
@@ -73,6 +73,6 @@ export const ActivityCard = ({
           ))}
         </div>
       )}
-    </HomeSectionCard>
+    </DashboardSectionCard>
   );
 };

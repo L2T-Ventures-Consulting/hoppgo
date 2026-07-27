@@ -6,17 +6,17 @@ import { useTranslations } from "next-intl";
 
 import { CalendarSolidIcon, ProductSolidIcon, ZapSolidIcon } from "@louez/ui/icons";
 
-import type { HomeAccent } from "./home-accent";
-import { HomeIconTile } from "./home-icon-tile";
-import { HomeListRow } from "./home-list-row";
-import { HomeSectionCard } from "./home-section-card";
+import type { DashboardAccent } from "@/components/dashboard/shared/dashboard-accent";
+import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
+import { DashboardListRow } from "@/components/dashboard/shared/dashboard-list-row";
+import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import type { StoreState } from "./home-types";
 
 interface QuickAction {
   key: string;
   icon: ComponentType<{ className?: string }>;
   href: string;
-  accent: HomeAccent;
+  accent: DashboardAccent;
 }
 
 const ADD_PRODUCT: QuickAction = {
@@ -55,7 +55,7 @@ export const QuickActions = ({ storeState, className }: QuickActionsProps) => {
   const t = useTranslations("dashboard.home");
 
   return (
-    <HomeSectionCard
+    <DashboardSectionCard
       title={t("quickActions.title")}
       description={t("quickActions.description")}
       icon={ZapSolidIcon}
@@ -64,10 +64,10 @@ export const QuickActions = ({ storeState, className }: QuickActionsProps) => {
     >
       <div className="-mx-2 space-y-0.5 sm:-mx-3">
         {getQuickActions(storeState).map((action) => (
-          <HomeListRow
+          <DashboardListRow
             key={action.key}
             href={action.href}
-            leading={<HomeIconTile icon={action.icon} accent={action.accent} />}
+            leading={<DashboardIconTile icon={action.icon} accent={action.accent} />}
             title={
               <span className="truncate font-medium">{t(`quickActions.${action.key}.title`)}</span>
             }
@@ -77,6 +77,6 @@ export const QuickActions = ({ storeState, className }: QuickActionsProps) => {
           />
         ))}
       </div>
-    </HomeSectionCard>
+    </DashboardSectionCard>
   );
 };

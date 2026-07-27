@@ -11,8 +11,8 @@ import { Share2 } from "lucide-react";
 
 import { env } from "@/env";
 
-import { HomeIconTile } from "./home-icon-tile";
-import { HomeSectionCard } from "./home-section-card";
+import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
+import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import { ShareModal } from "./share-modal";
 
 const COPIED_FEEDBACK_MS = 2000;
@@ -42,7 +42,7 @@ export const StorefrontWidget = ({ storeSlug, className }: StorefrontWidgetProps
 
   return (
     <>
-      <HomeSectionCard
+      <DashboardSectionCard
         title={t("storefront.title")}
         description={t("storefront.description")}
         icon={StoreIcon}
@@ -60,7 +60,7 @@ export const StorefrontWidget = ({ storeSlug, className }: StorefrontWidgetProps
         }
       >
         <div className="bg-muted/40 flex min-w-0 items-center gap-3 rounded-xl p-3">
-          <HomeIconTile icon={GlobeSolidIcon} accent="progress" />
+          <DashboardIconTile icon={GlobeSolidIcon} accent="progress" />
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium">
               {storeSlug}.{domain}
@@ -77,7 +77,7 @@ export const StorefrontWidget = ({ storeSlug, className }: StorefrontWidgetProps
           </Button>
         </div>
 
-        <div className="flex flex-col gap-2 sm:flex-row">
+        <div className="flex gap-2">
           <Button variant="outline" className="flex-1" onClick={handleCopy}>
             {copied ? <CheckIcon /> : <CopyIcon />}
             {copied ? t("storefront.copied") : t("storefront.copy")}
@@ -87,7 +87,7 @@ export const StorefrontWidget = ({ storeSlug, className }: StorefrontWidgetProps
             {t("storefront.share")}
           </Button>
         </div>
-      </HomeSectionCard>
+      </DashboardSectionCard>
 
       <ShareModal open={shareModalOpen} onOpenChange={setShareModalOpen} storeUrl={storeUrl} />
     </>

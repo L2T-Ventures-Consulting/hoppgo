@@ -6,14 +6,14 @@ import { Badge, Card, CardPanel } from "@louez/ui";
 import { TrendingDownSolidIcon, TrendingUpSolidIcon } from "@louez/ui/icons";
 import { cn } from "@louez/utils";
 
-import type { HomeAccent } from "./home-accent";
-import { HomeIconTile } from "./home-icon-tile";
+import type { DashboardAccent } from "./dashboard-accent";
+import { DashboardIconTile } from "./dashboard-icon-tile";
 
-interface HomeStatCardProps {
+interface DashboardStatCardProps {
   title: string;
   value: ReactNode;
   icon: ComponentType<{ className?: string }>;
-  accent?: HomeAccent;
+  accent?: DashboardAccent;
   subtitle?: string;
   /** Short qualifier rendered as a badge next to the value. */
   badge?: string;
@@ -22,8 +22,11 @@ interface HomeStatCardProps {
   href?: string;
 }
 
-/** Uniform KPI tile of the home page. */
-export const HomeStatCard = ({
+/** Whole percentages stay whole; anything else keeps a single decimal. */
+const formatTrend = (trend: number) => (Number.isInteger(trend) ? `${trend}` : trend.toFixed(1));
+
+/** Uniform KPI tile of the dashboard. */
+export const DashboardStatCard = ({
   title,
   value,
   icon,
@@ -32,7 +35,7 @@ export const HomeStatCard = ({
   badge,
   trend,
   href,
-}: HomeStatCardProps) => {
+}: DashboardStatCardProps) => {
   const card = (
     <Card
       className={cn(
@@ -43,9 +46,9 @@ export const HomeStatCard = ({
       <CardPanel className="flex h-full flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-2">
           <p className="text-muted-foreground min-w-0 text-xs font-medium sm:text-sm">{title}</p>
-          <HomeIconTile icon={icon} accent={accent} size="sm" />
+          <DashboardIconTile icon={icon} accent={accent} size="sm" />
         </div>
-        <div className="mt-auto space-y-1">
+        <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="text-xl leading-tight font-bold tracking-tight tabular-nums sm:text-2xl">
               {value}
@@ -58,7 +61,7 @@ export const HomeStatCard = ({
               >
                 {trend > 0 ? <TrendingUpSolidIcon /> : trend < 0 ? <TrendingDownSolidIcon /> : null}
                 {trend > 0 ? "+" : ""}
-                {trend}%
+                {formatTrend(trend)}%
               </Badge>
             )}
           </div>

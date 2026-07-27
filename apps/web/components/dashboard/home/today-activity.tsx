@@ -8,7 +8,7 @@ import { CheckCircleIcon } from "@louez/ui/icons";
 import { cn } from "@louez/utils";
 
 import { ActivityCard } from "./activity-card";
-import { HomeEmptyState } from "./home-empty-state";
+import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 import type { HomeReservation } from "./home-types";
 
 interface TodayActivityProps {
@@ -24,7 +24,7 @@ export const TodayActivity = ({ departures, returns, className }: TodayActivityP
     return (
       <Card className={className}>
         <CardPanel className="p-4 sm:p-5">
-          <HomeEmptyState
+          <DashboardEmptyState
             icon={CheckCircleIcon}
             title={t("activity.noActivityTitle")}
             description={t("activity.noActivityDescription")}

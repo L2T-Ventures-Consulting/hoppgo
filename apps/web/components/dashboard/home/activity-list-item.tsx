@@ -6,15 +6,18 @@ import { Badge } from "@louez/ui";
 import { ClockSolidIcon, ProductSolidIcon } from "@louez/ui/icons";
 import { cn, formatCurrency } from "@louez/utils";
 
-import { HOME_ACCENT_SURFACE, type HomeAccent } from "./home-accent";
-import { HomeListRow } from "./home-list-row";
+import {
+  DASHBOARD_ACCENT_SURFACE,
+  type DashboardAccent,
+} from "@/components/dashboard/shared/dashboard-accent";
+import { DashboardListRow } from "@/components/dashboard/shared/dashboard-list-row";
 import type { HomeReservation } from "./home-types";
 import { getCustomerInitials, summarizeProducts } from "./home-utils";
 
 interface ActivityListItemProps {
   reservation: HomeReservation;
   /** Colours the avatar so a row always matches the section it belongs to. */
-  accent: HomeAccent;
+  accent: DashboardAccent;
   /** Show the rental period instead of the product names. */
   showPeriod?: boolean;
   showAmount?: boolean;
@@ -29,14 +32,14 @@ export const ActivityListItem = ({
   const { names, remainingCount } = summarizeProducts(reservation);
 
   return (
-    <HomeListRow
+    <DashboardListRow
       href={`/dashboard/reservations/${reservation.id}`}
       leading={
         <span
           aria-hidden="true"
           className={cn(
             "flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold",
-            HOME_ACCENT_SURFACE[accent],
+            DASHBOARD_ACCENT_SURFACE[accent],
           )}
         >
           {getCustomerInitials(reservation)}

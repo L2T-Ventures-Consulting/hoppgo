@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl";
 import { PendingSolidIcon } from "@louez/ui/icons";
 import { cn } from "@louez/utils";
 
-import { HomeIconTile } from "./home-icon-tile";
+import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
 
 interface DashboardAlertProps {
   pendingCount: number;
@@ -31,7 +31,7 @@ export const DashboardAlert = ({ pendingCount, className }: DashboardAlertProps)
       )}
     >
       <div className="flex min-w-0 items-center gap-3">
-        <HomeIconTile icon={PendingSolidIcon} accent="pending" className="bg-background/70" />
+        <DashboardIconTile icon={PendingSolidIcon} accent="pending" className="bg-background/70" />
         <div className="min-w-0">
           <p className="font-medium">
             {pendingCount === 1

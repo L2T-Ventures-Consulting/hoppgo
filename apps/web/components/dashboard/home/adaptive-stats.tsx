@@ -12,7 +12,7 @@ import {
 } from "@louez/ui/icons";
 import { formatCurrency } from "@louez/utils";
 
-import { HomeStatCard } from "./home-stat-card";
+import { DashboardStatCard } from "@/components/dashboard/shared/dashboard-stat-card";
 import type { StoreMetrics, StoreState } from "./home-types";
 import { calculateGrowth } from "./home-utils";
 
@@ -31,7 +31,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
   if (storeState === "virgin" || storeState === "building") {
     return (
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <HomeStatCard
+        <DashboardStatCard
           title={t("stats.products")}
           value={metrics.activeProductCount}
           icon={ProductSolidIcon}
@@ -43,7 +43,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
               : undefined
           }
         />
-        <HomeStatCard
+        <DashboardStatCard
           title={t("stats.customers")}
           value={metrics.customerCount}
           icon={ParticipantsSolidIcon}
@@ -57,7 +57,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
   if (storeState === "starting") {
     return (
       <div className={GRID_CLASS_NAME}>
-        <HomeStatCard
+        <DashboardStatCard
           title={t("stats.todaysDepartures")}
           value={metrics.todaysDepartures}
           icon={ArrowUpRight}
@@ -65,7 +65,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
           href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
           subtitle={t("stats.toDeliver")}
         />
-        <HomeStatCard
+        <DashboardStatCard
           title={t("stats.todaysReturns")}
           value={metrics.todaysReturns}
           icon={ArrowDownRight}
@@ -73,7 +73,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
           href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
           subtitle={t("stats.toRecover")}
         />
-        <HomeStatCard
+        <DashboardStatCard
           title={t("stats.pendingRequests")}
           value={metrics.pendingReservations}
           icon={ClockSolidIcon}
@@ -81,7 +81,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
           href="/dashboard/reservations?status=pending"
           badge={metrics.pendingReservations > 0 ? t("stats.toProcess") : undefined}
         />
-        <HomeStatCard
+        <DashboardStatCard
           title={t("stats.totalReservations")}
           value={metrics.totalReservations}
           icon={CalendarSolidIcon}
@@ -97,7 +97,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
 
   return (
     <div className={GRID_CLASS_NAME}>
-      <HomeStatCard
+      <DashboardStatCard
         title={t("stats.todaysDepartures")}
         value={metrics.todaysDepartures}
         icon={ArrowUpRight}
@@ -105,7 +105,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
         href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
         subtitle={t("stats.toDeliver")}
       />
-      <HomeStatCard
+      <DashboardStatCard
         title={t("stats.todaysReturns")}
         value={metrics.todaysReturns}
         icon={ArrowDownRight}
@@ -113,7 +113,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
         href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
         subtitle={t("stats.toRecover")}
       />
-      <HomeStatCard
+      <DashboardStatCard
         title={t("stats.pendingRequests")}
         value={metrics.pendingReservations}
         icon={ClockSolidIcon}
@@ -121,7 +121,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
         href="/dashboard/reservations?status=pending"
         badge={metrics.pendingReservations > 0 ? t("stats.toProcess") : undefined}
       />
-      <HomeStatCard
+      <DashboardStatCard
         title={t("stats.monthlyRevenue")}
         value={formatCurrency(metrics.monthlyRevenue)}
         icon={CreditCardSolidIcon}
