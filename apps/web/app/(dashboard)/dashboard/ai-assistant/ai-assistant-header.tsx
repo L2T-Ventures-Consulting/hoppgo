@@ -56,7 +56,7 @@ export const AiAssistantHeader = ({
   }, [canTopup, searchParams]);
 
   return (
-    <div className="sticky top-0 z-20 -mx-4 border-b bg-background/80 px-4 py-3 backdrop-blur supports-backdrop-filter:bg-background/60 sm:-mx-6 sm:px-6">
+    <div className="bg-background sticky top-0 z-20 -mx-4 -mt-4 border-b px-4 py-3 sm:-mx-6 sm:px-6 md:-mt-6">
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           <DashboardIconTile icon={Bot} accent="primary" />

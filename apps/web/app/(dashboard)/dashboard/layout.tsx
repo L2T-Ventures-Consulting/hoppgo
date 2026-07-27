@@ -63,8 +63,8 @@ export default async function DashboardMainLayout({ children }: { children: Reac
       timezone={settings.timezone}
     >
       <ReservationPollingProvider interval={30000}>
-        <div className="dashboard relative min-h-screen">
-          <SidebarProvider>
+        <div className="dashboard relative h-svh overflow-hidden">
+          <SidebarProvider className="h-full min-h-0 overflow-hidden">
             <DashboardBreadcrumbsProvider>
               <DashboardSidebar
                 planSlug={planSlug}
@@ -76,8 +76,8 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                 userImage={session.user.image}
                 isPlatformAdmin={isPlatformAdmin}
               />
-              <SidebarInset className="min-w-0 overflow-x-clip">
-                <header className="bg-background/90 supports-backdrop-filter:bg-background/70 sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur">
+              <SidebarInset className="min-h-0 min-w-0 overflow-clip">
+                <header className="bg-background/90 supports-backdrop-filter:bg-background/70 z-30 flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur">
                   <div className="flex min-w-0 flex-1 items-center gap-2">
                     <SidebarTrigger className="-ml-1 shrink-0" />
                     <Separator orientation="vertical" className="h-4 shrink-0" />
@@ -90,8 +90,11 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                     isPlatformAdmin={isPlatformAdmin}
                   />
                 </header>
-                <div data-dashboard-content className="px-4 py-4 sm:px-6 md:py-6 lg:px-8">
-                  {children}
+                <div
+                  data-dashboard-content
+                  className="min-h-0 flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-4 sm:px-6 lg:px-8"
+                >
+                  <div className="min-h-full py-4 md:py-6">{children}</div>
                 </div>
               </SidebarInset>
             </DashboardBreadcrumbsProvider>
