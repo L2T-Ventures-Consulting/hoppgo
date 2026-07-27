@@ -4,9 +4,10 @@ import { Fragment, useMemo, useState } from "react";
 import type { ComponentType } from "react";
 
 import { useHotkey } from "@tanstack/react-hotkeys";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, CornerDownLeft, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMessages, useTranslations } from "next-intl";
+import { useFormatter, useMessages, useTranslations } from "next-intl";
 
 import {
   Button,
@@ -39,11 +40,13 @@ import {
   UsersIcon,
 } from "@louez/ui/icons";
 
-import { cn } from "@louez/utils";
+import { cn, formatCurrency } from "@louez/utils";
 
 import { useStore } from "@/contexts/store-context";
+import { useDebounce } from "@/hooks/use-debounce";
 import { useStorefrontUrl } from "@/hooks/use-storefront-url";
 import { keyboardShortcuts } from "@/lib/keyboard-shortcuts";
+import { searchQueries } from "@/lib/queries/search.queries";
 
 import {
   SETTINGS_NAVIGATION_GROUPS,
@@ -59,6 +62,7 @@ import {
 import { ChatModal } from "./chat-modal";
 
 type CommandActionBase = {
+  description?: string;
   icon: ComponentType<{ className?: string }>;
   keywords: string;
   label: string;
@@ -101,7 +105,8 @@ export const DashboardCommandPalette = ({
   const t = useTranslations("dashboard");
   const tSettingsNavigation = useTranslations("dashboard.settings.settingsNavigation");
   const messages = useMessages();
-  const { storeSlug } = useStore();
+  const formatter = useFormatter();
+  const { storeSlug, currency } = useStore();
   const { getAbsoluteUrl } = useStorefrontUrl(storeSlug);
 
   useHotkey(
@@ -191,6 +196,75 @@ export const DashboardCommandPalette = ({
         ),
     })).filter((group) => group.items.length > 0);
   }, [settingsSearchDocuments, t, tSettingsNavigation, trimmedQuery]);
+
+  const debouncedQuery = useDebounce(trimmedQuery, 200);
+  const entitySearchEnabled = open && debouncedQuery.length >= 2;
+
+  const { data: entityResults } = useQuery({
+    ...searchQueries.global(debouncedQuery),
+    enabled: entitySearchEnabled,
+    placeholderData: keepPreviousData,
+    staleTime: 30_000,
+  });
+
+  const entityGroups: CommandGroupDefinition[] = [];
+
+  if (trimmedQuery.length >= 2 && entityResults) {
+    if (entityResults.products.length > 0) {
+      entityGroups.push({
+        value: t("navigation.products"),
+        items: entityResults.products.map(
+          (product): CommandAction => ({
+            value: `product-${product.id}`,
+            label: product.name,
+            description: formatCurrency(Number(product.price), currency),
+            keywords: "",
+            icon: PackageIcon,
+            kind: "navigate",
+            href: `/dashboard/products/${product.id}`,
+          }),
+        ),
+      });
+    }
+
+    if (entityResults.reservations.length > 0) {
+      entityGroups.push({
+        value: t("navigation.reservations"),
+        items: entityResults.reservations.map(
+          (reservation): CommandAction => ({
+            value: `reservation-${reservation.id}`,
+            label: `#${reservation.number} · ${reservation.customerName}`,
+            description: formatter.dateTimeRange(
+              new Date(reservation.startDate),
+              new Date(reservation.endDate),
+              { day: "numeric", month: "short", year: "numeric" },
+            ),
+            keywords: "",
+            icon: CalendarIcon,
+            kind: "navigate",
+            href: `/dashboard/reservations/${reservation.id}`,
+          }),
+        ),
+      });
+    }
+
+    if (entityResults.customers.length > 0) {
+      entityGroups.push({
+        value: t("navigation.customers"),
+        items: entityResults.customers.map(
+          (customer): CommandAction => ({
+            value: `customer-${customer.id}`,
+            label: customer.name,
+            description: customer.email,
+            keywords: "",
+            icon: UsersIcon,
+            kind: "navigate",
+            href: `/dashboard/customers/${customer.id}`,
+          }),
+        ),
+      });
+    }
+  }
 
   const commandGroups = [
     {
@@ -305,6 +379,7 @@ export const DashboardCommandPalette = ({
         items: queryTokens.length > 0 ? group.items.filter(matchesQuery) : group.items,
       }))
       .filter((group) => group.items.length > 0),
+    ...entityGroups,
     ...settingsGroups,
   ];
 
@@ -408,18 +483,15 @@ export const DashboardCommandPalette = ({
                             key={action.value}
                             value={action}
                             onClick={() => runAction(action)}
-                            className={cn(
-                              "gap-2.5 py-2",
-                              action.kind === "settingsSearch" && "items-start",
-                            )}
+                            className={cn("gap-2.5 py-2", action.description && "items-start")}
                           >
                             <action.icon
                               className={cn(
                                 "text-muted-foreground size-4 shrink-0",
-                                action.kind === "settingsSearch" && "mt-0.5",
+                                action.description && "mt-0.5",
                               )}
                             />
-                            {action.kind === "settingsSearch" ? (
+                            {action.description ? (
                               <span className="min-w-0 flex-1">
                                 <span className="block truncate font-medium">{action.label}</span>
                                 <span className="text-muted-foreground line-clamp-2 block text-xs">

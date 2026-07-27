@@ -11,6 +11,7 @@ import { dashboardOnboardingRouter } from "./onboarding";
 import { dashboardProductsRouter } from "./products";
 import { dashboardReferralRouter } from "./referral";
 import { dashboardReservationsRouter } from "./reservations";
+import { dashboardSearchRouter } from "./search";
 import { dashboardSettingsRouter } from "./settings";
 import { dashboardVariantsRouter } from "./variants";
 
@@ -43,6 +44,7 @@ export const dashboardRouter = {
   integrations: dashboardIntegrationsRouter,
   settings: dashboardSettingsRouter,
   reservations: dashboardReservationsRouter,
+  search: dashboardSearchRouter,
   onboarding: dashboardOnboardingRouter,
   products: dashboardProductsRouter,
   notifications: dashboardNotificationsRouter,
