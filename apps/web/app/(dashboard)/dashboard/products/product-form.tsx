@@ -743,7 +743,7 @@ export function ProductForm({
   return (
     <>
       <form.AppForm>
-        <form.Form className="space-y-6 pb-6">
+        <form.Form className="space-y-6">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
             <div className="min-w-0 flex-1 space-y-6">
               <div id="section-product" className="scroll-mt-8">
@@ -793,7 +793,7 @@ export function ProductForm({
               </div>
             </div>
 
-            <aside className="w-full shrink-0 lg:sticky lg:top-6 lg:w-80 xl:w-88">
+            <aside className="w-full shrink-0 lg:sticky lg:top-16 lg:w-80 xl:w-88">
               <ProductFormSummaryPanel
                 form={form as unknown as ProductFormComponentApi}
                 watchedValues={watchedValues}
