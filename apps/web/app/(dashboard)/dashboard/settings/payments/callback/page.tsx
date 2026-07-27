@@ -11,6 +11,8 @@ import { Button } from '@louez/ui'
 import { CheckCircleIcon, WarningIcon } from '@louez/ui/icons'
 import Link from 'next/link'
 
+import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context'
+
 import { sanitizeStripeNextPath } from '../stripe-return'
 
 export default async function StripeCallbackPage({
@@ -65,29 +67,40 @@ export default async function StripeCallbackPage({
   const isActive = status.chargesEnabled && status.detailsSubmitted
 
   return (
-    <div className="flex min-h-[50vh] items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="flex items-center justify-center gap-2">
-            {isActive ? (
-              <CheckCircleIcon className="h-5 w-5 shrink-0 text-green-500" />
-            ) : (
-              <WarningIcon className="h-5 w-5 shrink-0 text-yellow-500" />
-            )}
-            {isActive ? t('callback.successTitle') : t('callback.incompleteTitle')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-center">
-          <p className="text-muted-foreground">
-            {isActive
-              ? t('callback.successDescription')
-              : t('callback.incompleteDescription')}
-          </p>
-          <Button render={<Link href="/dashboard/settings/payments" />} className="w-full">
-              {t('callback.backToSettings')}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <DashboardBreadcrumbLabel
+        label={
+          isActive
+            ? t('callback.successTitle')
+            : t('callback.incompleteTitle')
+        }
+      />
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              {isActive ? (
+                <CheckCircleIcon className="h-5 w-5 shrink-0 text-green-500" />
+              ) : (
+                <WarningIcon className="h-5 w-5 shrink-0 text-yellow-500" />
+              )}
+              {isActive
+                ? t('callback.successTitle')
+                : t('callback.incompleteTitle')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">
+              {isActive
+                ? t('callback.successDescription')
+                : t('callback.incompleteDescription')}
+            </p>
+            <Button render={<Link href="/dashboard/settings/payments" />} className="w-full">
+                {t('callback.backToSettings')}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

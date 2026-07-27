@@ -24,6 +24,7 @@ import {
 } from "@louez/ui";
 import { ArrowLeftIcon, CameraIcon, CogIcon, ExternalLinkIcon, InfoCircleIcon, ListCheckIcon, PuzzleIcon, WarningIcon } from "@louez/ui/icons";
 
+import { DashboardBreadcrumbLabel } from "@/components/dashboard/dashboard-breadcrumbs-context";
 import { getIntegration } from "@/lib/integrations/registry";
 import type { IntegrationDetail } from "@/lib/integrations/registry/types";
 import { orpc } from "@/lib/orpc/react";
@@ -126,41 +127,52 @@ export function IntegrationDetailView({ integrationId }: IntegrationDetailViewPr
   const activeTab = selectedTab ?? initialTab;
   const registration = useMemo(() => getIntegration(integrationId), [integrationId]);
   const ConfigurationPanel = registration?.adapter.getConfigurationPanel?.();
+  const breadcrumbLabel = registration
+    ? resolveMessage(registration.manifest.nameKey, integrationId)
+    : integrationId;
 
   if (detailQuery.isLoading) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-6">
-        <Skeleton className="h-5 w-40" />
-        <Skeleton className="h-33 rounded-2xl" />
-        <Skeleton className="h-64 rounded-2xl" />
-      </div>
+      <>
+        <DashboardBreadcrumbLabel label={breadcrumbLabel} />
+        <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-6">
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-33 rounded-2xl" />
+          <Skeleton className="h-64 rounded-2xl" />
+        </div>
+      </>
     );
   }
 
   if (detailQuery.isError || !integration) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <WarningIcon className="h-5 w-5 shrink-0" />
-            {resolveMessage(
-              "dashboard.settings.integrationsHub.detailNotFoundTitle",
-              "Integration not found",
-            )}
-          </CardTitle>
-          <CardDescription>
-            {resolveMessage(
-              "dashboard.settings.integrationsHub.detailNotFoundDescription",
-              "The integration could not be loaded.",
-            )}
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      <>
+        <DashboardBreadcrumbLabel label={breadcrumbLabel} />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <WarningIcon className="h-5 w-5 shrink-0" />
+              {resolveMessage(
+                "dashboard.settings.integrationsHub.detailNotFoundTitle",
+                "Integration not found",
+              )}
+            </CardTitle>
+            <CardDescription>
+              {resolveMessage(
+                "dashboard.settings.integrationsHub.detailNotFoundDescription",
+                "The integration could not be loaded.",
+              )}
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </>
     );
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-6">
+    <>
+      <DashboardBreadcrumbLabel label={breadcrumbLabel} />
+      <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 sm:space-y-6">
       <Link
         href="/dashboard/settings/integrations"
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition"
@@ -531,6 +543,7 @@ export function IntegrationDetailView({ integrationId }: IntegrationDetailViewPr
           </CardContent>
         </Card>
       </div>
-    </div>
+      </div>
+    </>
   );
 }

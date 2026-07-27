@@ -8,6 +8,7 @@ import { ArrowLeft } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
 
 import { Button } from '@louez/ui'
+import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context'
 import { CustomerForm } from '../../customer-form'
 
 interface EditCustomerPageProps {
@@ -35,8 +36,18 @@ export default async function EditCustomerPage({ params }: EditCustomerPageProps
     notFound()
   }
 
+  const customerBreadcrumbLabel =
+    customer.customerType === 'business' && customer.companyName
+      ? customer.companyName
+      : `${customer.firstName} ${customer.lastName}`.trim()
+
   return (
     <div className="space-y-6">
+      <DashboardBreadcrumbLabel
+        pathname={`/dashboard/customers/${customer.id}`}
+        label={customerBreadcrumbLabel}
+      />
+      <DashboardBreadcrumbLabel label={t('editCustomer')} />
       <div className="flex items-center gap-4">
         <Button render={<Link href={`/dashboard/customers/${customer.id}`} />} variant="ghost" size="icon">
           <ArrowLeft className="h-4 w-4" />

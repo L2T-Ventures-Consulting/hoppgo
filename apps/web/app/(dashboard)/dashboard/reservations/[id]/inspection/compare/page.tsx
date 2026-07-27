@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
+import { getTranslations } from 'next-intl/server'
 import { db } from '@louez/db'
 import {
   reservations,
@@ -11,6 +12,7 @@ import {
 import { getCurrentStore } from '@/lib/store-context'
 import { ComparisonView } from './comparison-view'
 import type { ConditionRating } from '@louez/types'
+import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -43,6 +45,8 @@ export default async function InspectionComparePage({ params }: PageProps) {
   if (!reservation) {
     notFound()
   }
+
+  const tInspection = await getTranslations('dashboard.settings.inspection')
 
   // Get customer name
   const [customer] = await db
@@ -167,12 +171,19 @@ export default async function InspectionComparePage({ params }: PageProps) {
   } : null
 
   return (
-    <ComparisonView
-      reservationId={reservationId}
-      reservationNumber={reservation.number}
-      customerName={customerName}
-      departure={formattedDeparture}
-      return_={formattedReturn}
-    />
+    <>
+      <DashboardBreadcrumbLabel
+        pathname={`/dashboard/reservations/${reservationId}`}
+        label={`#${reservation.number}`}
+      />
+      <DashboardBreadcrumbLabel label={tInspection('comparison.title')} />
+      <ComparisonView
+        reservationId={reservationId}
+        reservationNumber={reservation.number}
+        customerName={customerName}
+        departure={formattedDeparture}
+        return_={formattedReturn}
+      />
+    </>
   )
 }

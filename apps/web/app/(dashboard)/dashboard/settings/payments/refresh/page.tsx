@@ -8,6 +8,8 @@ import { Button } from '@louez/ui'
 import { WarningIcon } from '@louez/ui/icons'
 import Link from 'next/link'
 
+import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context'
+
 import { sanitizeStripeNextPath, stripeReturnUrls } from '../stripe-return'
 
 export default async function StripeRefreshPage({
@@ -47,21 +49,24 @@ export default async function StripeRefreshPage({
 
   // Otherwise show error page
   return (
-    <div className="flex min-h-[50vh] items-center justify-center">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="flex items-center justify-center gap-2">
-            <WarningIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
-            {t('refresh.title')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4 text-center">
-          <p className="text-muted-foreground">{t('refresh.description')}</p>
-          <Button render={<Link href="/dashboard/settings/payments" />} className="w-full">
-              {t('refresh.backToSettings')}
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
+    <>
+      <DashboardBreadcrumbLabel label={t('refresh.title')} />
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="flex items-center justify-center gap-2">
+              <WarningIcon className="h-5 w-5 shrink-0 text-muted-foreground" />
+              {t('refresh.title')}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-muted-foreground">{t('refresh.description')}</p>
+            <Button render={<Link href="/dashboard/settings/payments" />} className="w-full">
+                {t('refresh.backToSettings')}
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   )
 }

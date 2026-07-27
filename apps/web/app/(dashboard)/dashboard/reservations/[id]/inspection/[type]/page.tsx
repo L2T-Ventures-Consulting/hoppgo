@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 
 import { and, eq, inArray } from 'drizzle-orm';
+import { getTranslations } from 'next-intl/server';
 
 import { db } from '@louez/db';
 import {
@@ -18,6 +19,8 @@ import {
 } from '@louez/db';
 import { DEFAULT_INSPECTION_SETTINGS } from '@louez/types';
 import type { ConditionRating, InspectionType } from '@louez/types';
+
+import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context';
 
 import { getCurrentStore } from '@/lib/store-context';
 
@@ -97,6 +100,21 @@ export default async function InspectionPage({ params }: PageProps) {
   if (!reservation) {
     notFound();
   }
+
+  const tInspection = await getTranslations('dashboard.settings.inspection');
+  const inspectionBreadcrumbLabel =
+    inspectionType === 'departure'
+      ? tInspection('wizard.departureInspection')
+      : tInspection('wizard.returnInspection');
+  const breadcrumbLabels = (
+    <>
+      <DashboardBreadcrumbLabel
+        pathname={`/dashboard/reservations/${reservationId}`}
+        label={`#${reservation.number}`}
+      />
+      <DashboardBreadcrumbLabel label={inspectionBreadcrumbLabel} />
+    </>
+  );
 
   // Get customer
   const [customer] = await db
@@ -195,23 +213,29 @@ export default async function InspectionPage({ params }: PageProps) {
     );
 
     return (
-      <InspectionView
-        inspection={{
-          id: existingInspection.id,
-          type: existingInspection.type as InspectionType,
-          status: existingInspection.status as 'draft' | 'completed' | 'signed',
-          hasDamage: existingInspection.hasDamage,
-          notes: existingInspection.notes,
-          performedByName,
-          createdAt: existingInspection.createdAt,
-          signedAt: existingInspection.signedAt,
-          customerSignature: existingInspection.customerSignature,
-          items: itemsWithPhotos,
-        }}
-        reservationId={reservationId}
-        reservationNumber={reservation.number}
-        customerName={customerName}
-      />
+      <>
+        {breadcrumbLabels}
+        <InspectionView
+          inspection={{
+            id: existingInspection.id,
+            type: existingInspection.type as InspectionType,
+            status: existingInspection.status as
+              | 'draft'
+              | 'completed'
+              | 'signed',
+            hasDamage: existingInspection.hasDamage,
+            notes: existingInspection.notes,
+            performedByName,
+            createdAt: existingInspection.createdAt,
+            signedAt: existingInspection.signedAt,
+            customerSignature: existingInspection.customerSignature,
+            items: itemsWithPhotos,
+          }}
+          reservationId={reservationId}
+          reservationNumber={reservation.number}
+          customerName={customerName}
+        />
+      </>
     );
   }
 
@@ -321,14 +345,17 @@ export default async function InspectionPage({ params }: PageProps) {
     });
 
   return (
-    <InspectionWizard
-      reservationId={reservationId}
-      reservationNumber={reservation.number}
-      customerName={customerName}
-      type={inspectionType}
-      items={formattedItems}
-      requireSignature={inspectionSettings.requireCustomerSignature}
-      maxPhotosPerItem={inspectionSettings.maxPhotosPerItem}
-    />
+    <>
+      {breadcrumbLabels}
+      <InspectionWizard
+        reservationId={reservationId}
+        reservationNumber={reservation.number}
+        customerName={customerName}
+        type={inspectionType}
+        items={formattedItems}
+        requireSignature={inspectionSettings.requireCustomerSignature}
+        maxPhotosPerItem={inspectionSettings.maxPhotosPerItem}
+      />
+    </>
   );
 }
