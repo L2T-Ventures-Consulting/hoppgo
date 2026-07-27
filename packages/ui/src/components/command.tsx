@@ -99,7 +99,10 @@ function CommandInput({
   return (
     <AutocompleteInput
       autoFocus
-      className={cn("border-transparent! bg-transparent! before:hidden", className)}
+      className={cn(
+        "border-transparent! bg-transparent! has-focus-visible:ring-0 before:hidden",
+        className,
+      )}
       placeholder={placeholder}
       size="lg"
       startAddon={<SearchIcon />}

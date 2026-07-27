@@ -1,12 +1,12 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import type { ComponentType } from "react";
 
 import { useHotkey } from "@tanstack/react-hotkeys";
 import { ArrowDown, ArrowUp, CornerDownLeft, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useMessages, useTranslations } from "next-intl";
 
 import {
   Button,
@@ -39,10 +39,23 @@ import {
   UsersIcon,
 } from "@louez/ui/icons";
 
+import { cn } from "@louez/utils";
+
 import { useStore } from "@/contexts/store-context";
 import { env } from "@/env";
 import { keyboardShortcuts } from "@/lib/keyboard-shortcuts";
 
+import {
+  SETTINGS_NAVIGATION_GROUPS,
+  SETTINGS_NAVIGATION_ITEMS,
+} from "../settings-navigation.constants";
+import { buildSettingsSearchHref } from "../util.settings-search-focus";
+import {
+  getMessageText,
+  getSearchableMessageText,
+  getSettingsSearchScore,
+  normalizeSettingsSearchText,
+} from "../util.settings-search";
 import { ChatModal } from "./chat-modal";
 
 type CommandActionBase = {
@@ -57,7 +70,13 @@ type CommandAction =
   | (CommandActionBase & { href: string; kind: "navigate" })
   | (CommandActionBase & { href: string; kind: "external" })
   | (CommandActionBase & { kind: "createReservation" })
-  | (CommandActionBase & { kind: "ai" });
+  | (CommandActionBase & { kind: "ai" })
+  | (CommandActionBase & {
+      description: string;
+      href: string;
+      itemId: string;
+      kind: "settingsSearch";
+    });
 
 type CommandGroupDefinition = {
   items: CommandAction[];
@@ -65,23 +84,29 @@ type CommandGroupDefinition = {
 };
 
 type DashboardCommandPaletteProps = {
+  isPlatformAdmin?: boolean;
   onCreateReservation: () => void;
   showAIChat: boolean;
 };
 
 export const DashboardCommandPalette = ({
+  isPlatformAdmin = false,
   onCreateReservation,
   showAIChat,
 }: DashboardCommandPaletteProps) => {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [aiChatOpen, setAIChatOpen] = useState(false);
   const router = useRouter();
   const t = useTranslations("dashboard");
+  const tSettingsNavigation = useTranslations("dashboard.settings.settingsNavigation");
+  const messages = useMessages();
   const { storeSlug } = useStore();
 
   useHotkey(
     keyboardShortcuts.commandPalette.open.hotkey,
     () => {
+      setQuery("");
       setOpen((currentOpen) => !currentOpen);
     },
     { ignoreInputs: false, requireReset: true },
@@ -117,6 +142,54 @@ export const DashboardCommandPalette = ({
       shortcut: keyboardShortcuts.commandPalette.ai.label,
     });
   }
+
+  const settingsSearchDocuments = useMemo(
+    () =>
+      SETTINGS_NAVIGATION_ITEMS.filter(
+        (item) => !item.platformAdminOnly || isPlatformAdmin,
+      ).map((item) => ({
+        ...item,
+        content: getSearchableMessageText(messages, item.searchPaths),
+        description: getMessageText(messages, item.descriptionPath),
+        label: getMessageText(messages, item.labelPath),
+      })),
+    [isPlatformAdmin, messages],
+  );
+
+  const trimmedQuery = query.trim();
+
+  const settingsGroups: CommandGroupDefinition[] = useMemo(() => {
+    if (!trimmedQuery) {
+      return [];
+    }
+
+    const matches = settingsSearchDocuments
+      .map((item) => {
+        const score = getSettingsSearchScore({ ...item, query: trimmedQuery });
+
+        return score === null ? null : { ...item, score };
+      })
+      .filter((item): item is NonNullable<typeof item> => item !== null)
+      .sort((left, right) => left.score - right.score);
+
+    return SETTINGS_NAVIGATION_GROUPS.map((group) => ({
+      value: `${t("navigation.settings")} · ${tSettingsNavigation(`groups.${group}`)}`,
+      items: matches
+        .filter((item) => item.group === group)
+        .map(
+          (item): CommandAction => ({
+            value: `settings-${item.id}`,
+            label: item.label,
+            description: item.description,
+            keywords: "",
+            icon: item.icon,
+            kind: "settingsSearch",
+            href: item.href,
+            itemId: item.id,
+          }),
+        ),
+    })).filter((group) => group.items.length > 0);
+  }, [settingsSearchDocuments, t, tSettingsNavigation, trimmedQuery]);
 
   const commandGroups = [
     {
@@ -216,8 +289,33 @@ export const DashboardCommandPalette = ({
     },
   ] satisfies CommandGroupDefinition[];
 
+  const queryTokens = normalizeSettingsSearchText(trimmedQuery).split(/\s+/).filter(Boolean);
+
+  const matchesQuery = (action: CommandAction) => {
+    const searchableText = normalizeSettingsSearchText(`${action.label} ${action.keywords}`);
+
+    return queryTokens.every((token) => searchableText.includes(token));
+  };
+
+  const visibleGroups: CommandGroupDefinition[] = [
+    ...commandGroups
+      .map((group) => ({
+        ...group,
+        items: queryTokens.length > 0 ? group.items.filter(matchesQuery) : group.items,
+      }))
+      .filter((group) => group.items.length > 0),
+    ...settingsGroups,
+  ];
+
   const runAction = (action: CommandAction) => {
     setOpen(false);
+
+    if (action.kind === "settingsSearch") {
+      router.push(
+        buildSettingsSearchHref({ href: action.href, itemId: action.itemId, query: trimmedQuery }),
+      );
+      return;
+    }
 
     if (action.kind === "navigate") {
       router.push(action.href);
@@ -239,7 +337,16 @@ export const DashboardCommandPalette = ({
 
   return (
     <>
-      <CommandDialog open={open} onOpenChange={setOpen}>
+      <CommandDialog
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen);
+
+          if (nextOpen) {
+            setQuery("");
+          }
+        }}
+      >
         <CommandDialogTrigger
           render={
             <Button
@@ -266,20 +373,21 @@ export const DashboardCommandPalette = ({
         <CommandDialogPopup>
           <DialogTitle className="sr-only">{t("commandPalette.title")}</DialogTitle>
           <Command
-            items={commandGroups}
+            filter={null}
+            items={visibleGroups}
+            value={query}
+            onValueChange={setQuery}
             itemToStringValue={(itemValue) => {
               if (
                 typeof itemValue !== "object" ||
                 itemValue === null ||
                 !("label" in itemValue) ||
-                typeof itemValue.label !== "string" ||
-                !("keywords" in itemValue) ||
-                typeof itemValue.keywords !== "string"
+                typeof itemValue.label !== "string"
               ) {
                 return "";
               }
 
-              return `${itemValue.label} ${itemValue.keywords}`;
+              return itemValue.label;
             }}
           >
             <CommandInput
@@ -299,10 +407,27 @@ export const DashboardCommandPalette = ({
                             key={action.value}
                             value={action}
                             onClick={() => runAction(action)}
-                            className="gap-2.5 py-2"
+                            className={cn(
+                              "gap-2.5 py-2",
+                              action.kind === "settingsSearch" && "items-start",
+                            )}
                           >
-                            <action.icon className="text-muted-foreground size-4 shrink-0" />
-                            <span className="min-w-0 flex-1 truncate">{action.label}</span>
+                            <action.icon
+                              className={cn(
+                                "text-muted-foreground size-4 shrink-0",
+                                action.kind === "settingsSearch" && "mt-0.5",
+                              )}
+                            />
+                            {action.kind === "settingsSearch" ? (
+                              <span className="min-w-0 flex-1">
+                                <span className="block truncate font-medium">{action.label}</span>
+                                <span className="text-muted-foreground line-clamp-2 block text-xs">
+                                  {action.description}
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="min-w-0 flex-1 truncate">{action.label}</span>
+                            )}
                             {action.shortcut && (
                               <CommandShortcut>{action.shortcut}</CommandShortcut>
                             )}
@@ -310,7 +435,7 @@ export const DashboardCommandPalette = ({
                         )}
                       </CommandCollection>
                     </CommandGroup>
-                    {groupIndex < commandGroups.length - 1 && <CommandSeparator />}
+                    {groupIndex < visibleGroups.length - 1 && <CommandSeparator />}
                   </Fragment>
                 )}
               </CommandList>

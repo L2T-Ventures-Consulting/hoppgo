@@ -131,6 +131,8 @@ export const SettingsNav = ({ isPlatformAdmin = false }: SettingsNavProps) => {
           open
           filter={null}
           items={searchGroups}
+          value={searchQuery}
+          onValueChange={setSearchQuery}
           itemToStringValue={(itemValue) => {
             if (
               typeof itemValue !== "object" ||
@@ -145,20 +147,20 @@ export const SettingsNav = ({ isPlatformAdmin = false }: SettingsNavProps) => {
           }}
         >
           <CommandInput
-            className={cn("border shadow-[0_0_1px_0.5px_var(--color-border)]")}
+            className={cn(
+              "border shadow-[0_0_1px_0.5px_var(--color-border)] has-focus-visible:shadow-[0_0_1px_0.5px_var(--color-border)]!  has-focus-visible:ring-1",
+            )}
             aria-label={t("search.label")}
             autoFocus={false}
             placeholder={t("search.placeholder")}
             showClear
             size="default"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.currentTarget.value)}
           />
 
           {hasSearch && (
             <CommandPanel className="mx-0 mt-1 rounded-xl border-b [clip-path:none] not-has-[+[data-slot=command-footer]]:mb-0 not-has-[+[data-slot=command-footer]]:rounded-b-xl not-has-[+[data-slot=command-footer]]:[clip-path:none]">
               <CommandEmpty>{t("search.noResults")}</CommandEmpty>
-              <CommandList>
+              <CommandList className="max-h-[calc(100dvh-17rem)]">
                 {(group: SettingsSearchGroup, groupIndex: number) => (
                   <Fragment key={group.value}>
                     <CommandGroup items={group.items}>

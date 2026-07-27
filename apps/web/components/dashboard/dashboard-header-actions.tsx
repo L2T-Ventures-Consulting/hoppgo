@@ -22,10 +22,12 @@ export const DashboardHeaderActions = ({
   showAIChat,
   reservationLimits,
   planSlug,
+  isPlatformAdmin = false,
 }: {
   showAIChat: boolean;
   reservationLimits: LimitStatus;
   planSlug: string;
+  isPlatformAdmin?: boolean;
 }) => {
   const t = useTranslations("dashboard.sidebar");
   const router = useRouter();
@@ -38,6 +40,7 @@ export const DashboardHeaderActions = ({
     <>
       <div className="ml-auto flex shrink-0 items-center gap-2">
         <DashboardCommandPalette
+          isPlatformAdmin={isPlatformAdmin}
           showAIChat={showAIChat}
           onCreateReservation={() => {
             if (isAtReservationLimit) {

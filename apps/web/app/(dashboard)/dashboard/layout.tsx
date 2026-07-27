@@ -87,6 +87,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                     showAIChat={showAIChat}
                     reservationLimits={limits.reservationsThisMonth}
                     planSlug={planSlug}
+                    isPlatformAdmin={isPlatformAdmin}
                   />
                 </header>
                 <div data-dashboard-content className="px-4 py-4 sm:px-6 md:py-6 lg:px-8">
