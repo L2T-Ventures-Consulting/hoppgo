@@ -118,12 +118,16 @@
       "select": "Select",
       "naturalPlaceholder": "e.g. tomorrow at 2pm or May 12 at 1pm",
       "time": "Time",
+      "startTime": "Start",
+      "endTime": "End",
       "confirm": "Confirm"
     },
     "customerSearch": {
       "placeholder": "Search customer...",
       "noResults": "No customer found",
-      "selectCustomer": "Select a customer"
+      "selectCustomer": "Select a customer",
+      "createCustomer": "Create a customer",
+      "createNamed": "Create “{query}”"
     }
   },
   "auth": {
@@ -1700,11 +1704,7 @@
       "manualForm": {
         "title": "New manual reservation",
         "selectCustomer": "Select a customer",
-        "newCustomer": "New customer",
-        "newCustomerDescription": "Create a new customer for this reservation",
         "newCustomerBadge": "New customer",
-        "existingCustomer": "Existing customer",
-        "existingCustomerDescription": "Select a customer from your database",
         "selectProducts": "Select products",
         "selectPeriod": "Select period",
         "addProduct": "Add a product",
@@ -1712,15 +1712,6 @@
         "sendConfirmationEmail": "Send confirmation to customer",
         "customer": "Customer",
         "customerStepDescription": "Select an existing customer or create a new one",
-        "chooseCustomer": "Choose a customer",
-        "email": "Email",
-        "emailPlaceholder": "customer@email.com",
-        "firstName": "First name",
-        "firstNamePlaceholder": "John",
-        "lastName": "Last name",
-        "lastNamePlaceholder": "Doe",
-        "phone": "Phone (optional)",
-        "phonePlaceholder": "+1 234 567 8900",
         "period": "Period",
         "periodStepDescription": "Set the start and end dates for the rental",
         "startDate": "Start date",
@@ -1781,7 +1772,6 @@
         "selectDatesError": "Please select dates",
         "addProductError": "Please add at least one product",
         "selectCustomerError": "Please select a customer",
-        "fillCustomerInfoError": "Please fill in customer information",
         "confirmTitle": "Summary",
         "confirmDescription": "Review the information before creating the reservation",
         "steps": {
@@ -1875,7 +1865,11 @@
           "apply": "Apply",
           "modified": "Price modified",
           "priceUpdated": "Price updated",
-          "priceReset": "Price reset"
+          "priceReset": "Price reset",
+          "modeUnit": "Unit price",
+          "modeTotal": "Total price",
+          "modePercent": "Discount %",
+          "resultingUnitPrice": "Resulting unit price"
         },
         "warnings": {
           "advanceNotice": "Start date is before the advance notice period",
@@ -1905,6 +1899,11 @@
           "combination": "Combination: {combination}",
           "shortfall": "Requested: {requested} · Available: {available}",
           "createAnyway": "Create anyway"
+        },
+        "addUnavailable": {
+          "title": "Product unavailable",
+          "description": "“{name}” has no availability left for the selected period. Adding it may cause overbooking.",
+          "confirm": "Add anyway"
         }
       },
       "rejectDialog": {
@@ -2393,6 +2392,10 @@
         "CA": "Canada",
         "US": "United States",
         "GB": "United Kingdom"
+      },
+      "quickCreate": {
+        "title": "New customer",
+        "description": "The customer will be created and selected automatically."
       }
     },
     "calendar": {

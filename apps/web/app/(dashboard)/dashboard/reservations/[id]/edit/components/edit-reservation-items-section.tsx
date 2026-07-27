@@ -1,29 +1,12 @@
 "use client";
 
-import { useState } from "react";
-
-import { ChevronsUpDown, PenLine } from "lucide-react";
+import { PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { PricingMode } from "@louez/types";
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@louez/ui";
-import { cn } from "@louez/utils";
+import { Button, Card, CardContent } from "@louez/ui";
 
-import { ProductImage } from "@/components/product/product-image";
+import { ProductAddCombobox } from "@/components/dashboard/product-add-combobox";
 
 import type { AvailabilityWarning, Product, ReservationCalculations } from "../types";
 
@@ -49,119 +32,6 @@ interface EditReservationItemsSectionProps {
     pricingMode?: PricingMode,
   ) => void;
   onRemoveItem: (itemId: string) => void;
-}
-
-function ProductAddCombobox({
-  products,
-  availableQuantityByProduct,
-  onAddProduct,
-  placeholder,
-  searchPlaceholder,
-  emptyLabel,
-  unavailableLabel,
-  availableLabel,
-}: {
-  products: Product[];
-  availableQuantityByProduct: Map<string, number>;
-  onAddProduct: (productId: string) => void;
-  placeholder: string;
-  searchPlaceholder: string;
-  emptyLabel: string;
-  unavailableLabel: string;
-  availableLabel: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="h-9 w-fit justify-between  group"
-          />
-        }
-      >
-        {/* <Plus data-slot="icon" className="size-4 shrink-0" /> */}
-        <span className="flex-1 min-w-0 justify-start gap-2 w-full">
-          <span className="truncate">{placeholder}</span>
-        </span>
-        <ChevronsUpDown
-          data-slot="icon"
-          className="transition-opacity size-4 opacity-70 group-hover:opacity-100"
-        />
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-(--radix-popover-trigger-width) sm:w-[360px] p-0 pt-1 *:p-0"
-        align="end"
-      >
-        <Command open items={filteredProducts} filter={null}>
-          <CommandInput
-            placeholder={searchPlaceholder}
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-          />
-          <CommandEmpty>{emptyLabel}</CommandEmpty>
-          <CommandList className="max-h-[320px] not-empty:pt-0">
-            <CommandGroup>
-              {filteredProducts.map((product) => {
-                const remaining = availableQuantityByProduct.get(product.id);
-                const isUnavailable = remaining !== undefined && remaining <= 0;
-
-                return (
-                  <CommandItem
-                    key={product.id}
-                    value={product.id}
-                    onClick={() => {
-                      onAddProduct(product.id);
-                      setOpen(false);
-                      setSearchQuery("");
-                    }}
-                    className="flex items-center gap-2"
-                  >
-                    <ProductImage
-                      src={product.images?.[0]}
-                      alt=""
-                      sizes="32px"
-                      className={cn(isUnavailable && "opacity-40")}
-                      containerClassName="w-8 shrink-0 rounded-md"
-                    />
-
-                    <span
-                      className={cn(
-                        "min-w-0 flex-1 truncate",
-                        isUnavailable && "text-muted-foreground",
-                      )}
-                    >
-                      {product.name}
-                    </span>
-                    {isUnavailable ? (
-                      <Badge variant="pending" size="default">
-                        {unavailableLabel}
-                      </Badge>
-                    ) : (
-                      remaining !== undefined && (
-                        <Badge variant="expired" className={cn("tabular-nums")}>
-                          {remaining} {availableLabel}
-                        </Badge>
-                      )
-                    )}
-                  </CommandItem>
-                );
-              })}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  );
 }
 
 export function EditReservationItemsSection({

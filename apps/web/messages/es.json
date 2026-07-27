@@ -118,12 +118,16 @@
       "select": "Seleccionar",
       "naturalPlaceholder": "p. ej. mañana a las 14 o 12 de mayo a las 13",
       "time": "Hora",
+      "startTime": "Inicio",
+      "endTime": "Fin",
       "confirm": "Confirmar"
     },
     "customerSearch": {
       "placeholder": "Buscar cliente...",
       "noResults": "No se encontro ningun cliente",
-      "selectCustomer": "Seleccionar un cliente"
+      "selectCustomer": "Seleccionar un cliente",
+      "createCustomer": "Crear un cliente",
+      "createNamed": "Crear «{query}»"
     }
   },
   "auth": {
@@ -1598,11 +1602,7 @@
       "manualForm": {
         "title": "Nueva reserva manual",
         "selectCustomer": "Seleccionar un cliente",
-        "newCustomer": "Nuevo cliente",
-        "newCustomerDescription": "Crear un nuevo cliente para esta reserva",
         "newCustomerBadge": "Nuevo cliente",
-        "existingCustomer": "Cliente existente",
-        "existingCustomerDescription": "Seleccionar un cliente de su base de datos",
         "selectProducts": "Seleccionar productos",
         "selectPeriod": "Seleccionar periodo",
         "addProduct": "Agregar un producto",
@@ -1610,15 +1610,6 @@
         "sendConfirmationEmail": "Enviar confirmacion al cliente",
         "customer": "Cliente",
         "customerStepDescription": "Seleccione un cliente existente o cree uno nuevo",
-        "chooseCustomer": "Elegir un cliente",
-        "email": "Correo",
-        "emailPlaceholder": "cliente@correo.com",
-        "firstName": "Nombre",
-        "firstNamePlaceholder": "Juan",
-        "lastName": "Apellido",
-        "lastNamePlaceholder": "Garcia",
-        "phone": "Telefono (opcional)",
-        "phonePlaceholder": "+34 612 345 678",
         "period": "Periodo",
         "periodStepDescription": "Establezca las fechas de inicio y fin del alquiler",
         "startDate": "Fecha de inicio",
@@ -1660,10 +1651,14 @@
           "shortfall": "Solicitado: {requested} · Disponible: {available}",
           "createAnyway": "Crear de todos modos"
         },
+        "addUnavailable": {
+          "title": "Producto no disponible",
+          "description": "«{name}» ya no tiene disponibilidad en el período seleccionado. Añadirlo puede provocar una sobrerreserva.",
+          "confirm": "Añadir de todos modos"
+        },
         "selectDatesError": "Por favor seleccione fechas",
         "addProductError": "Por favor agregue al menos un producto",
         "selectCustomerError": "Por favor seleccione un cliente",
-        "fillCustomerInfoError": "Por favor complete la informacion del cliente",
         "confirmTitle": "Resumen",
         "confirmDescription": "Revise la informacion antes de crear la reserva",
         "steps": {
@@ -1753,7 +1748,11 @@
           "apply": "Aplicar",
           "modified": "Precio modificado",
           "priceUpdated": "Precio actualizado",
-          "priceReset": "Precio restablecido"
+          "priceReset": "Precio restablecido",
+          "modeUnit": "Precio unitario",
+          "modeTotal": "Precio total",
+          "modePercent": "Descuento %",
+          "resultingUnitPrice": "Precio unitario resultante"
         },
         "warnings": {
           "advanceNotice": "La fecha de inicio es anterior al periodo de preaviso",
@@ -2286,6 +2285,10 @@
         "CA": "Canada",
         "US": "Estados Unidos",
         "GB": "Reino Unido"
+      },
+      "quickCreate": {
+        "title": "Nuevo cliente",
+        "description": "El cliente se creará y se seleccionará automáticamente."
       }
     },
     "calendar": {

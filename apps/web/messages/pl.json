@@ -118,12 +118,16 @@
       "select": "Wybierz",
       "naturalPlaceholder": "np. jutro o 14:00 lub 12 maja o 13:00",
       "time": "Godzina",
+      "startTime": "Początek",
+      "endTime": "Koniec",
       "confirm": "Potwierdź"
     },
     "customerSearch": {
       "placeholder": "Szukaj klienta...",
       "noResults": "Nie znaleziono klienta",
-      "selectCustomer": "Wybierz klienta"
+      "selectCustomer": "Wybierz klienta",
+      "createCustomer": "Utwórz klienta",
+      "createNamed": "Utwórz „{query}”"
     }
   },
   "auth": {
@@ -1559,11 +1563,7 @@
       "manualForm": {
         "title": "Nowa rezerwacja ręczna",
         "selectCustomer": "Wybierz klienta",
-        "newCustomer": "Nowy klient",
-        "newCustomerDescription": "Utwórz nowego klienta dla tej rezerwacji",
         "newCustomerBadge": "Nowy klient",
-        "existingCustomer": "Istniejący klient",
-        "existingCustomerDescription": "Wybierz klienta z bazy danych",
         "selectProducts": "Wybierz produkty",
         "selectPeriod": "Wybierz okres",
         "addProduct": "Dodaj produkt",
@@ -1571,15 +1571,6 @@
         "sendConfirmationEmail": "Wyślij potwierdzenie do klienta",
         "customer": "Klient",
         "customerStepDescription": "Wybierz istniejącego klienta lub utwórz nowego",
-        "chooseCustomer": "Wybierz klienta",
-        "email": "Email",
-        "emailPlaceholder": "klient@email.pl",
-        "firstName": "Imię",
-        "firstNamePlaceholder": "Jan",
-        "lastName": "Nazwisko",
-        "lastNamePlaceholder": "Kowalski",
-        "phone": "Telefon (opcjonalnie)",
-        "phonePlaceholder": "+48 123 456 789",
         "period": "Okres",
         "periodStepDescription": "Ustaw daty rozpoczęcia i zakończenia wynajmu",
         "startDate": "Data rozpoczęcia",
@@ -1620,10 +1611,14 @@
           "shortfall": "Żądane: {requested} · Dostępne: {available}",
           "createAnyway": "Utwórz mimo to"
         },
+        "addUnavailable": {
+          "title": "Produkt niedostępny",
+          "description": "„{name}” nie jest już dostępny w wybranym okresie. Dodanie może spowodować overbooking.",
+          "confirm": "Dodaj mimo to"
+        },
         "selectDatesError": "Proszę wybrać daty",
         "addProductError": "Proszę dodać co najmniej jeden produkt",
         "selectCustomerError": "Proszę wybrać klienta",
-        "fillCustomerInfoError": "Proszę wypełnić dane klienta",
         "confirmTitle": "Podsumowanie",
         "confirmDescription": "Sprawdź informacje przed utworzeniem rezerwacji",
         "steps": {
@@ -1713,7 +1708,11 @@
           "apply": "Zastosuj",
           "modified": "Cena zmieniona",
           "priceUpdated": "Cena zaktualizowana",
-          "priceReset": "Cena zresetowana"
+          "priceReset": "Cena zresetowana",
+          "modeUnit": "Cena jednostkowa",
+          "modeTotal": "Cena łączna",
+          "modePercent": "Rabat %",
+          "resultingUnitPrice": "Wynikowa cena jednostkowa"
         },
         "warnings": {
           "advanceNotice": "Data rozpoczęcia jest przed okresem wyprzedzenia",
@@ -2241,6 +2240,10 @@
         "CA": "Kanada",
         "US": "Stany Zjednoczone",
         "GB": "Wielka Brytania"
+      },
+      "quickCreate": {
+        "title": "Nowy klient",
+        "description": "Klient zostanie utworzony i automatycznie wybrany."
       }
     },
     "calendar": {

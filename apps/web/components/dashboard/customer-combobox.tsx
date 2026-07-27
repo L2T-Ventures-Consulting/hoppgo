@@ -1,35 +1,32 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 
-import { Check, ChevronsUpDown, Search } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Check, ChevronsUpDown, Search, UserPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { Button } from '@louez/ui';
+import { Button } from "@louez/ui";
 import {
   Command,
   CommandEmpty,
+  CommandFooter,
   CommandGroup,
   CommandInput,
   CommandItem,
   CommandList,
-} from '@louez/ui';
-import { Popover, PopoverContent, PopoverTrigger } from '@louez/ui';
-import { Avatar, AvatarFallback } from '@louez/ui';
-import { cn } from '@louez/utils';
+} from "@louez/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@louez/ui";
+import { Avatar, AvatarFallback } from "@louez/ui";
+import { cn } from "@louez/utils";
 
-interface Customer {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone: string | null;
-}
+import type { DashboardCustomer } from "./customer.types";
 
 interface CustomerComboboxProps {
-  customers: Customer[];
+  customers: DashboardCustomer[];
   value: string;
   onValueChange: (value: string) => void;
+  /** When provided, a create action is pinned under the list and receives the current search. */
+  onCreateRequest?: (query: string) => void;
   disabled?: boolean;
   className?: string;
 }
@@ -38,13 +35,16 @@ export function CustomerCombobox({
   customers,
   value,
   onValueChange,
+  onCreateRequest,
   disabled = false,
   className,
 }: CustomerComboboxProps) {
-  const t = useTranslations('common.customerSearch');
+  const t = useTranslations("common.customerSearch");
   const [open, setOpen] = React.useState(false);
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = React.useState("");
   const scrollPositionRef = React.useRef<{ x: number; y: number } | null>(null);
+  // Set while closing to hand over to a dialog, so the popover doesn't steal focus back.
+  const skipFinalFocusRef = React.useRef(false);
 
   const selectedCustomer = customers.find((customer) => customer.id === value);
 
@@ -53,16 +53,11 @@ export function CustomerCombobox({
 
     const query = searchQuery.toLowerCase();
     return customers.filter((customer) => {
-      const fullName =
-        `${customer.firstName} ${customer.lastName}`.toLowerCase();
+      const fullName = `${customer.firstName} ${customer.lastName}`.toLowerCase();
       const email = customer.email.toLowerCase();
-      const phone = customer.phone?.toLowerCase() || '';
+      const phone = customer.phone?.toLowerCase() || "";
 
-      return (
-        fullName.includes(query) ||
-        email.includes(query) ||
-        phone.includes(query)
-      );
+      return fullName.includes(query) || email.includes(query) || phone.includes(query);
     });
   }, [customers, searchQuery]);
 
@@ -87,6 +82,15 @@ export function CustomerCombobox({
     setOpen(nextOpen);
   }, []);
 
+  const handleCreateRequest = () => {
+    if (!onCreateRequest) return;
+
+    skipFinalFocusRef.current = true;
+    setOpen(false);
+    onCreateRequest(searchQuery);
+    setSearchQuery("");
+  };
+
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger
@@ -96,8 +100,8 @@ export function CustomerCombobox({
             role="combobox"
             aria-expanded={open}
             className={cn(
-              'h-auto min-h-[44px] w-full min-w-0 justify-between py-2',
-              !value && 'text-muted-foreground',
+              "h-auto min-h-[44px] w-full min-w-0 justify-between py-2 *:w-full",
+              !value && "text-muted-foreground",
               className,
             )}
             disabled={disabled}
@@ -105,28 +109,23 @@ export function CustomerCombobox({
         }
       >
         {selectedCustomer ? (
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-3 w-full">
             <Avatar className="h-8 w-8 shrink-0">
               <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                {getInitials(
-                  selectedCustomer.firstName,
-                  selectedCustomer.lastName,
-                )}
+                {getInitials(selectedCustomer.firstName, selectedCustomer.lastName)}
               </AvatarFallback>
             </Avatar>
             <div className="min-w-0 text-left">
               <p className="text-foreground truncate font-medium">
                 {selectedCustomer.firstName} {selectedCustomer.lastName}
               </p>
-              <p className="text-muted-foreground truncate text-xs">
-                {selectedCustomer.email}
-              </p>
+              <p className="text-muted-foreground truncate text-xs">{selectedCustomer.email}</p>
             </div>
           </div>
         ) : (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full">
             <Search className="h-4 w-4" />
-            <span>{t('selectCustomer')}</span>
+            <span>{t("selectCustomer")}</span>
           </div>
         )}
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
@@ -134,15 +133,21 @@ export function CustomerCombobox({
       <PopoverContent
         className="max-h-[calc(100vh-2rem)] w-[calc(100vw-2rem)] max-w-(--available-width) p-0 pt-2 *:p-0 sm:w-[400px]"
         align="start"
+        finalFocus={() => {
+          if (!skipFinalFocusRef.current) return true;
+
+          skipFinalFocusRef.current = false;
+          return false;
+        }}
       >
         <Command open items={filteredCustomers}>
           <CommandInput
             autoFocus={false}
-            placeholder={t('placeholder')}
+            placeholder={t("placeholder")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <CommandEmpty>{t('noResults')}</CommandEmpty>
+          <CommandEmpty>{t("noResults")}</CommandEmpty>
           <CommandList className="max-h-[min(calc(100vh-12rem),22rem)]">
             <CommandGroup>
               {filteredCustomers.map((customer) => (
@@ -150,9 +155,9 @@ export function CustomerCombobox({
                   key={customer.id}
                   value={customer.id}
                   onClick={() => {
-                    onValueChange(customer.id === value ? '' : customer.id);
+                    onValueChange(customer.id === value ? "" : customer.id);
                     setOpen(false);
-                    setSearchQuery('');
+                    setSearchQuery("");
                   }}
                   className="flex items-center gap-3 py-3"
                 >
@@ -165,9 +170,7 @@ export function CustomerCombobox({
                     <p className="truncate font-medium">
                       {customer.firstName} {customer.lastName}
                     </p>
-                    <p className="text-muted-foreground truncate text-xs">
-                      {customer.email}
-                    </p>
+                    <p className="text-muted-foreground truncate text-xs">{customer.email}</p>
                   </div>
                   {customer.phone && (
                     <span className="text-muted-foreground max-w-24 truncate text-xs">
@@ -176,14 +179,31 @@ export function CustomerCombobox({
                   )}
                   <Check
                     className={cn(
-                      'h-4 w-4 shrink-0',
-                      value === customer.id ? 'opacity-100' : 'opacity-0',
+                      "h-4 w-4 shrink-0",
+                      value === customer.id ? "opacity-100" : "opacity-0",
                     )}
                   />
                 </CommandItem>
               ))}
             </CommandGroup>
           </CommandList>
+          {onCreateRequest && (
+            <CommandFooter className="p-2">
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full justify-start gap-2 text-sm"
+                onClick={handleCreateRequest}
+              >
+                <UserPlus className="h-4 w-4 shrink-0" />
+                <span className="truncate">
+                  {searchQuery.trim()
+                    ? t("createNamed", { query: searchQuery.trim() })
+                    : t("createCustomer")}
+                </span>
+              </Button>
+            </CommandFooter>
+          )}
         </Command>
       </PopoverContent>
     </Popover>

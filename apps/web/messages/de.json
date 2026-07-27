@@ -118,12 +118,16 @@
       "select": "Auswählen",
       "naturalPlaceholder": "z. B. morgen um 14 Uhr oder 12. Mai um 13 Uhr",
       "time": "Uhrzeit",
+      "startTime": "Beginn",
+      "endTime": "Ende",
       "confirm": "Bestätigen"
     },
     "customerSearch": {
       "placeholder": "Kunde suchen...",
       "noResults": "Kein Kunde gefunden",
-      "selectCustomer": "Kunde auswählen"
+      "selectCustomer": "Kunde auswählen",
+      "createCustomer": "Kunde anlegen",
+      "createNamed": "„{query}“ anlegen"
     }
   },
   "auth": {
@@ -1598,11 +1602,7 @@
       "manualForm": {
         "title": "Neue manuelle Reservierung",
         "selectCustomer": "Kunde auswählen",
-        "newCustomer": "Neuer Kunde",
-        "newCustomerDescription": "Neuen Kunden für diese Reservierung erstellen",
         "newCustomerBadge": "Neuer Kunde",
-        "existingCustomer": "Bestehender Kunde",
-        "existingCustomerDescription": "Kunde aus Ihrer Datenbank auswählen",
         "selectProducts": "Produkte auswählen",
         "selectPeriod": "Zeitraum auswählen",
         "addProduct": "Produkt hinzufügen",
@@ -1610,15 +1610,6 @@
         "sendConfirmationEmail": "Bestätigung an Kunden senden",
         "customer": "Kunde",
         "customerStepDescription": "Wählen Sie einen bestehenden Kunden oder erstellen Sie einen neuen",
-        "chooseCustomer": "Kunde auswählen",
-        "email": "E-Mail",
-        "emailPlaceholder": "kunde@email.de",
-        "firstName": "Vorname",
-        "firstNamePlaceholder": "Max",
-        "lastName": "Nachname",
-        "lastNamePlaceholder": "Mustermann",
-        "phone": "Telefon (optional)",
-        "phonePlaceholder": "+49 123 456 7890",
         "period": "Zeitraum",
         "periodStepDescription": "Legen Sie Start- und Enddatum für die Miete fest",
         "startDate": "Startdatum",
@@ -1658,11 +1649,15 @@
           "shortfall": "Angefragt: {requested} · Verfügbar: {available}",
           "createAnyway": "Trotzdem erstellen"
         },
+        "addUnavailable": {
+          "title": "Produkt nicht verfügbar",
+          "description": "„{name}“ ist im gewählten Zeitraum nicht mehr verfügbar. Das Hinzufügen kann zu Überbuchung führen.",
+          "confirm": "Trotzdem hinzufügen"
+        },
         "reservationCreated": "Reservierung erstellt",
         "selectDatesError": "Bitte wählen Sie Daten aus",
         "addProductError": "Bitte fügen Sie mindestens ein Produkt hinzu",
         "selectCustomerError": "Bitte wählen Sie einen Kunden aus",
-        "fillCustomerInfoError": "Bitte füllen Sie die Kundeninformationen aus",
         "confirmTitle": "Zusammenfassung",
         "confirmDescription": "Überprüfen Sie die Informationen vor dem Erstellen der Reservierung",
         "steps": {
@@ -1752,7 +1747,11 @@
           "apply": "Anwenden",
           "modified": "Preis geändert",
           "priceUpdated": "Preis aktualisiert",
-          "priceReset": "Preis zurückgesetzt"
+          "priceReset": "Preis zurückgesetzt",
+          "modeUnit": "Einzelpreis",
+          "modeTotal": "Gesamtpreis",
+          "modePercent": "Rabatt %",
+          "resultingUnitPrice": "Resultierender Einzelpreis"
         },
         "warnings": {
           "advanceNotice": "Startdatum liegt vor der Vorlaufzeit",
@@ -2280,6 +2279,10 @@
         "CA": "Kanada",
         "US": "Vereinigte Staaten",
         "GB": "Vereinigtes Königreich"
+      },
+      "quickCreate": {
+        "title": "Neuer Kunde",
+        "description": "Der Kunde wird erstellt und automatisch ausgewählt."
       }
     },
     "calendar": {

@@ -118,12 +118,16 @@
       "select": "Selecteren",
       "naturalPlaceholder": "bijv. morgen om 14:00 of 12 mei om 13:00",
       "time": "Tijd",
+      "startTime": "Start",
+      "endTime": "Einde",
       "confirm": "Bevestigen"
     },
     "customerSearch": {
       "placeholder": "Zoek een klant...",
       "noResults": "Geen klant gevonden",
-      "selectCustomer": "Selecteer een klant"
+      "selectCustomer": "Selecteer een klant",
+      "createCustomer": "Klant aanmaken",
+      "createNamed": "“{query}” aanmaken"
     }
   },
   "auth": {
@@ -1559,11 +1563,7 @@
       "manualForm": {
         "title": "Nieuwe handmatige reservering",
         "selectCustomer": "Selecteer een klant",
-        "newCustomer": "Nieuwe klant",
-        "newCustomerDescription": "Maak een nieuwe klant aan voor deze reservering",
         "newCustomerBadge": "Nieuwe klant",
-        "existingCustomer": "Bestaande klant",
-        "existingCustomerDescription": "Selecteer een klant uit uw database",
         "selectProducts": "Selecteer producten",
         "selectPeriod": "Selecteer periode",
         "addProduct": "Product toevoegen",
@@ -1571,15 +1571,6 @@
         "sendConfirmationEmail": "Bevestiging naar klant verzenden",
         "customer": "Klant",
         "customerStepDescription": "Selecteer een bestaande klant of maak een nieuwe aan",
-        "chooseCustomer": "Kies een klant",
-        "email": "E-mail",
-        "emailPlaceholder": "klant@email.nl",
-        "firstName": "Voornaam",
-        "firstNamePlaceholder": "Jan",
-        "lastName": "Achternaam",
-        "lastNamePlaceholder": "Jansen",
-        "phone": "Telefoon (optioneel)",
-        "phonePlaceholder": "06 12 34 56 78",
         "period": "Periode",
         "periodStepDescription": "Stel de begin- en einddatum van de verhuur in",
         "startDate": "Startdatum",
@@ -1619,11 +1610,15 @@
           "shortfall": "Gevraagd: {requested} · Beschikbaar: {available}",
           "createAnyway": "Toch aanmaken"
         },
+        "addUnavailable": {
+          "title": "Product niet beschikbaar",
+          "description": "“{name}” is niet meer beschikbaar in de geselecteerde periode. Toevoegen kan overboeking veroorzaken.",
+          "confirm": "Toch toevoegen"
+        },
         "reservationCreated": "Reservering aangemaakt",
         "selectDatesError": "Selecteer data",
         "addProductError": "Voeg minimaal één product toe",
         "selectCustomerError": "Selecteer een klant",
-        "fillCustomerInfoError": "Vul de klantgegevens in",
         "confirmTitle": "Samenvatting",
         "confirmDescription": "Controleer de informatie voordat u de reservering aanmaakt",
         "steps": {
@@ -1713,7 +1708,11 @@
           "apply": "Toepassen",
           "modified": "Prijs gewijzigd",
           "priceUpdated": "Prijs bijgewerkt",
-          "priceReset": "Prijs hersteld"
+          "priceReset": "Prijs hersteld",
+          "modeUnit": "Stukprijs",
+          "modeTotal": "Totaalprijs",
+          "modePercent": "Korting %",
+          "resultingUnitPrice": "Resulterende stukprijs"
         },
         "warnings": {
           "advanceNotice": "Startdatum is vóór de vooraanmeldingsperiode",
@@ -2241,6 +2240,10 @@
         "CA": "Canada",
         "US": "Verenigde Staten",
         "GB": "Verenigd Koninkrijk"
+      },
+      "quickCreate": {
+        "title": "Nieuwe klant",
+        "description": "De klant wordt aangemaakt en automatisch geselecteerd."
       }
     },
     "calendar": {

@@ -7,7 +7,12 @@ Tous les événements portent les propriétés de base `analytics_area: core_pro
 `analytics_version: 1` (voir `apps/web/lib/product-analytics/analytics-events.ts`), plus
 `feature` / `surface` propres à chaque flow.
 
-## Flow dashboard — création manuelle (wizard)
+## Flow dashboard — création manuelle (page unique)
+
+Depuis juillet 2026, la création manuelle est une **page unique sans stepper** (sections
+client / période / produits / livraison / notes + panneau récapitulatif sticky), alignée sur
+le flow de création de produit. La validation se joue au submit : les événements de
+validation portent une propriété `step` qui désigne la **section** en échec.
 
 Émis côté client dans `apps/web/app/(dashboard)/dashboard/reservations/new/new-reservation-form.tsx`
 (`feature: reservation_creation`, `surface: dashboard`). Le distinct_id est l'utilisateur
@@ -16,13 +21,16 @@ identifié (`user.id`), le même que l'événement serveur `dashboard_reservatio
 
 | Événement | Quand | Propriétés clés |
 | --- | --- | --- |
-| `dashboard_reservation_creation_started` | Montage du wizard | `source` (header, quick_action, calendrier…) |
-| `dashboard_reservation_step_viewed` | Changement d'étape visible | `step` (customer/period/products/delivery/confirm), `step_index`, `steps_total`, `direction`, `includes_delivery_step`, `source` |
-| `dashboard_reservation_step_validation_failed` | Blocage « Continuer » par la validation | `step`, `failed_fields[]`, `source` |
+| `dashboard_reservation_creation_started` | Montage de la page | `source` (header, quick_action, calendrier…) |
+| `dashboard_reservation_step_validation_failed` | Section invalide au submit | `step` (customer/period/products/delivery), `failed_fields[]`, `source` |
 | `dashboard_reservation_capacity_blocked` | Le serveur refuse pour capacité insuffisante (dialog overbooking) | `shortfall_count`, `shortfall_product_ids[]`, `source` |
 | `dashboard_reservation_overbooking_confirmed` | L'admin force la création malgré l'alerte | `shortfall_count`, `source` |
 | `dashboard_reservation_creation_failed` | Erreur serveur à la soumission | `error_code`, `source` |
 | `dashboard_reservation_created` (serveur, préexistant) | Réservation créée | voir `reservations/actions.ts` |
+
+> `dashboard_reservation_step_viewed` a existé brièvement (wizard à étapes, jamais déployé)
+> et a été retiré avec le passage en page unique. L'insight PostHog « Funnel creation
+> reservation (dashboard) » doit être redéfini en `creation_started` → `created`.
 
 ## Flow storefront — checkout client
 

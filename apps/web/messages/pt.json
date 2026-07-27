@@ -118,12 +118,16 @@
       "select": "Selecionar",
       "naturalPlaceholder": "ex.: amanhã às 14h ou 12 de maio às 13h",
       "time": "Hora",
+      "startTime": "Início",
+      "endTime": "Fim",
       "confirm": "Confirmar"
     },
     "customerSearch": {
       "placeholder": "Pesquisar cliente...",
       "noResults": "Nenhum cliente encontrado",
-      "selectCustomer": "Selecionar um cliente"
+      "selectCustomer": "Selecionar um cliente",
+      "createCustomer": "Criar um cliente",
+      "createNamed": "Criar «{query}»"
     }
   },
   "auth": {
@@ -1559,11 +1563,7 @@
       "manualForm": {
         "title": "Nova reserva manual",
         "selectCustomer": "Selecionar um cliente",
-        "newCustomer": "Novo cliente",
-        "newCustomerDescription": "Criar um novo cliente para esta reserva",
         "newCustomerBadge": "Novo cliente",
-        "existingCustomer": "Cliente existente",
-        "existingCustomerDescription": "Selecionar um cliente do seu banco de dados",
         "selectProducts": "Selecionar produtos",
         "selectPeriod": "Selecionar periodo",
         "addProduct": "Adicionar um produto",
@@ -1578,17 +1578,13 @@
           "shortfall": "Solicitado: {requested} · Disponível: {available}",
           "createAnyway": "Criar mesmo assim"
         },
+        "addUnavailable": {
+          "title": "Produto indisponível",
+          "description": "«{name}» já não tem disponibilidade no período selecionado. Adicioná-lo pode causar overbooking.",
+          "confirm": "Adicionar mesmo assim"
+        },
         "customer": "Cliente",
         "customerStepDescription": "Selecione um cliente existente ou crie um novo",
-        "chooseCustomer": "Escolher um cliente",
-        "email": "Email",
-        "emailPlaceholder": "cliente@email.com",
-        "firstName": "Nome",
-        "firstNamePlaceholder": "Joao",
-        "lastName": "Sobrenome",
-        "lastNamePlaceholder": "Silva",
-        "phone": "Telefone (opcional)",
-        "phonePlaceholder": "+351 912 345 678",
         "period": "Periodo",
         "periodStepDescription": "Defina as datas de inicio e fim do aluguel",
         "startDate": "Data de inicio",
@@ -1623,7 +1619,6 @@
         "selectDatesError": "Por favor, selecione as datas",
         "addProductError": "Por favor, adicione pelo menos um produto",
         "selectCustomerError": "Por favor, selecione um cliente",
-        "fillCustomerInfoError": "Por favor, preencha as informacoes do cliente",
         "confirmTitle": "Resumo",
         "confirmDescription": "Revise as informacoes antes de criar a reserva",
         "steps": {
@@ -1713,7 +1708,11 @@
           "apply": "Aplicar",
           "modified": "Preco modificado",
           "priceUpdated": "Preco atualizado",
-          "priceReset": "Preco redefinido"
+          "priceReset": "Preco redefinido",
+          "modeUnit": "Preço unitário",
+          "modeTotal": "Preço total",
+          "modePercent": "Desconto %",
+          "resultingUnitPrice": "Preço unitário resultante"
         },
         "warnings": {
           "advanceNotice": "A data de início é anterior ao período de aviso prévio",
@@ -2241,6 +2240,10 @@
         "CA": "Canada",
         "US": "Estados Unidos",
         "GB": "Reino Unido"
+      },
+      "quickCreate": {
+        "title": "Novo cliente",
+        "description": "O cliente será criado e selecionado automaticamente."
       }
     },
     "calendar": {

@@ -118,12 +118,16 @@
       "select": "Sélectionner",
       "naturalPlaceholder": "ex : demain à 14h ou 12 mai à 13h",
       "time": "Heure",
+      "startTime": "Début",
+      "endTime": "Fin",
       "confirm": "Confirmer"
     },
     "customerSearch": {
       "placeholder": "Rechercher un client...",
       "noResults": "Aucun client trouvé",
-      "selectCustomer": "Sélectionner un client"
+      "selectCustomer": "Sélectionner un client",
+      "createCustomer": "Créer un client",
+      "createNamed": "Créer « {query} »"
     }
   },
   "auth": {
@@ -1709,11 +1713,7 @@
       "manualForm": {
         "title": "Nouvelle réservation manuelle",
         "selectCustomer": "Sélectionner un client",
-        "newCustomer": "Nouveau client",
-        "newCustomerDescription": "Créer un nouveau client pour cette réservation",
         "newCustomerBadge": "Nouveau client",
-        "existingCustomer": "Client existant",
-        "existingCustomerDescription": "Sélectionner un client de votre base",
         "selectProducts": "Sélectionner les produits",
         "selectPeriod": "Sélectionner la période",
         "addProduct": "Ajouter un produit",
@@ -1721,15 +1721,6 @@
         "sendConfirmationEmail": "Envoyer la confirmation au client",
         "customer": "Client",
         "customerStepDescription": "Sélectionnez un client existant ou créez-en un nouveau",
-        "chooseCustomer": "Choisir un client",
-        "email": "Email",
-        "emailPlaceholder": "client@email.com",
-        "firstName": "Prénom",
-        "firstNamePlaceholder": "Jean",
-        "lastName": "Nom",
-        "lastNamePlaceholder": "Dupont",
-        "phone": "Téléphone (optionnel)",
-        "phonePlaceholder": "06 12 34 56 78",
         "period": "Période",
         "periodStepDescription": "Définissez les dates de début et de fin de location",
         "startDate": "Date de début",
@@ -1790,7 +1781,6 @@
         "selectDatesError": "Veuillez sélectionner les dates",
         "addProductError": "Veuillez ajouter au moins un produit",
         "selectCustomerError": "Veuillez sélectionner un client",
-        "fillCustomerInfoError": "Veuillez remplir les informations du client",
         "confirmTitle": "Récapitulatif",
         "confirmDescription": "Vérifiez les informations avant de créer la réservation",
         "steps": {
@@ -1884,7 +1874,11 @@
           "apply": "Appliquer",
           "modified": "Prix modifié",
           "priceUpdated": "Prix mis à jour",
-          "priceReset": "Prix réinitialisé"
+          "priceReset": "Prix réinitialisé",
+          "modeUnit": "Prix unitaire",
+          "modeTotal": "Prix total",
+          "modePercent": "Remise %",
+          "resultingUnitPrice": "Prix unitaire résultant"
         },
         "warnings": {
           "advanceNotice": "Date de début avant le délai de préavis",
@@ -1914,6 +1908,11 @@
           "combination": "Combinaison : {combination}",
           "shortfall": "Demandé : {requested} · Disponible : {available}",
           "createAnyway": "Créer quand même"
+        },
+        "addUnavailable": {
+          "title": "Produit indisponible",
+          "description": "« {name} » n'a plus de disponibilité sur la période sélectionnée. L'ajouter peut créer un surbooking.",
+          "confirm": "Ajouter quand même"
         }
       },
       "rejectDialog": {
@@ -2393,6 +2392,10 @@
         "CA": "Canada",
         "US": "États-Unis",
         "GB": "Royaume-Uni"
+      },
+      "quickCreate": {
+        "title": "Nouveau client",
+        "description": "Le client sera créé et sélectionné automatiquement."
       }
     },
     "calendar": {
