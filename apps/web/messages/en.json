@@ -1769,7 +1769,7 @@
         "noProductsFound": "No products found",
         "noProductsFoundHint": "No products match \"{search}\".",
         "noProducts": "No products selected",
-        "noProductsHint": "Use the menu above to add products",
+        "noProductsHint": "Add a product to this reservation to get started",
         "perHour": "h",
         "perDay": "d",
         "perWeek": "week",

@@ -1628,7 +1628,7 @@
         "noProductsFound": "Nessun prodotto trovato",
         "noProductsFoundHint": "Nessun prodotto corrisponde a \"{search}\".",
         "noProducts": "Nessun prodotto selezionato",
-        "noProductsHint": "Usa il menu sopra per aggiungere prodotti",
+        "noProductsHint": "Aggiungi un prodotto a questa prenotazione per iniziare",
         "perHour": "h",
         "perDay": "g",
         "available": "disponibile",

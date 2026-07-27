@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 
 import {
   AlertTriangle,
+  CalendarDays,
   Loader2,
   Minus,
   Package,
@@ -284,7 +285,7 @@ export function NewReservationStepProducts({
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:justify-between">
-            {!hasSelectedPeriod ? (
+            {!hasSelectedPeriod && hasItems ? (
               <p className="text-muted-foreground text-xs">{t("customItem.selectPeriodFirst")}</p>
             ) : (
               <span />
@@ -766,9 +767,39 @@ export function NewReservationStepProducts({
 
           {selectedProducts.length === 0 && customItems.length === 0 && (
             <div className="py-8 text-center">
-              <ShoppingCart className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
-              <p className="text-muted-foreground">{t("noProducts")}</p>
-              <p className="text-muted-foreground mt-1 text-sm">{t("noProductsHint")}</p>
+              {!hasSelectedPeriod ? (
+                <>
+                  <CalendarDays className="text-primary mx-auto mb-4 h-12 w-12" />
+                  <p className="font-medium">{t("selectPeriod")}</p>
+                  <p className="text-muted-foreground mt-1 text-sm">{t("periodStepDescription")}</p>
+                  <Button type="button" className="mt-4" onClick={focusMissingDateField}>
+                    <CalendarDays data-slot="icon" className="size-4" />
+                    {t("selectPeriod")}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
+                  <p className="text-muted-foreground">{t("noProducts")}</p>
+                  <p className="text-muted-foreground mt-1 text-sm">{t("noProductsHint")}</p>
+                  {products.length > 0 && (
+                    <div className="mt-4 flex justify-center">
+                      <ProductAddCombobox
+                        products={products}
+                        availableQuantityByProduct={availableQuantityByProduct}
+                        onAddProduct={handleAddFromCombobox}
+                        placeholder={t("addProduct")}
+                        searchPlaceholder={tEdit("searchProductsPlaceholder", {
+                          count: products.length,
+                        })}
+                        emptyLabel={tEdit("noProductsFound")}
+                        unavailableLabel={tEdit("unavailableForPeriod")}
+                        availableLabel={t("available")}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
 

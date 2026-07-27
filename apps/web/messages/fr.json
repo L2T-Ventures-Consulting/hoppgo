@@ -1778,7 +1778,7 @@
         "noProductsFound": "Aucun produit trouvé",
         "noProductsFoundHint": "Aucun produit ne correspond à \"{search}\".",
         "noProducts": "Aucun produit sélectionné",
-        "noProductsHint": "Utilisez le menu ci-dessus pour ajouter des produits",
+        "noProductsHint": "Ajoutez un produit à cette réservation pour commencer",
         "perHour": "h",
         "perDay": "j",
         "perWeek": "sem",

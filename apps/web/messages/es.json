@@ -1667,7 +1667,7 @@
         "noProductsFound": "No se encontraron productos",
         "noProductsFoundHint": "Ningun producto coincide con \"{search}\".",
         "noProducts": "No hay productos seleccionados",
-        "noProductsHint": "Use el menu de arriba para agregar productos",
+        "noProductsHint": "Agrega un producto a esta reserva para comenzar",
         "perHour": "h",
         "perDay": "d",
         "pricingMode": "Unidad de precio",
