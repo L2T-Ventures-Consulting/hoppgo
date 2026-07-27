@@ -165,6 +165,10 @@
   --color-badge-failed-foreground: var(--badge-failed-foreground);
   --color-badge-expired-background: var(--badge-expired-background);
   --color-badge-expired-foreground: var(--badge-expired-foreground);
+  --color-badge-warning-background: var(--badge-warning-background);
+  --color-badge-warning-foreground: var(--badge-warning-foreground);
+  --color-badge-gray-background: var(--badge-gray-background);
+  --color-badge-gray-foreground: var(--badge-gray-foreground);
 
   --thumb-size: var(--spacing) * 5;
 
@@ -291,6 +295,10 @@
   --badge-failed-foreground: rgb(231 102 80);
   --badge-expired-background: rgb(241 241 241);
   --badge-expired-foreground: rgb(120 120 120);
+  --badge-warning-background: rgb(255 245 231);
+  --badge-warning-foreground: rgb(235 148 44);
+  --badge-gray-background: rgb(241 241 241);
+  --badge-gray-foreground: rgb(120 120 120);
 }
 
 .dark {
@@ -395,6 +403,10 @@
   --badge-failed-foreground: rgb(252 165 165);
   --badge-expired-background: rgb(120 120 120 / 22%);
   --badge-expired-foreground: rgb(212 212 216);
+  --badge-warning-background: rgb(235 148 44 / 18%);
+  --badge-warning-foreground: rgb(252 202 128);
+  --badge-gray-background: rgb(120 120 120 / 22%);
+  --badge-gray-foreground: rgb(212 212 216);
 }
 
 @layer base {

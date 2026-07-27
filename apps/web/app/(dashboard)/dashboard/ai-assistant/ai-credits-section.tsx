@@ -1,71 +1,55 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
+import { useState } from "react";
 
-import {
-  AlertTriangle,
-  CheckCircle2,
-  CreditCard,
-  Loader2,
-  Sparkles,
-  Wallet,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { AlertTriangle, CheckCircle2, CreditCard, Loader2, Sparkles, Wallet } from "lucide-react";
+import { useFormatter, useTranslations } from "next-intl";
 
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Input,
-  Switch,
-} from '@louez/ui'
-import { cn } from '@louez/utils'
+import { Badge, Button, Input, Switch } from "@louez/ui";
+import { cn } from "@louez/utils";
 
-import type { AiCreditPackage } from '@/lib/plans'
+import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
+import type { AiCreditPackage } from "@/lib/plans";
 
-import { updateAiCreditsAutoTopup } from './credit-actions'
-import { AiCreditsTopupModal } from './ai-credits-topup-modal'
+import { updateAiCreditsAutoTopup } from "./credit-actions";
+import { AiCreditsTopupModal } from "./ai-credits-topup-modal";
 
 export type AiCreditsHistoryRow = {
-  id: string
-  type: 'grant' | 'topup' | 'auto_topup' | 'adjustment'
-  credits: number
-  amountCents: number
-  currency: string
-  status: 'pending' | 'completed' | 'failed'
-  createdAt: string | Date
-}
+  id: string;
+  type: "grant" | "topup" | "auto_topup" | "adjustment";
+  credits: number;
+  amountCents: number;
+  currency: string;
+  status: "pending" | "completed" | "failed";
+  createdAt: string | Date;
+};
 
 export type AiCreditsSectionProps = {
-  monthlyIncludedCredits: number | null
-  monthlyRemainingCredits: number | null
-  prepaidCredits: number
-  autoTopup: { enabled: boolean; thresholdCredits: number; packIndex: number }
-  packages: AiCreditPackage[]
-  history: AiCreditsHistoryRow[]
-  topupStatus: 'success' | 'cancelled' | null
+  monthlyIncludedCredits: number | null;
+  monthlyRemainingCredits: number | null;
+  prepaidCredits: number;
+  autoTopup: { enabled: boolean; thresholdCredits: number; packIndex: number };
+  packages: AiCreditPackage[];
+  history: AiCreditsHistoryRow[];
+  topupStatus: "success" | "cancelled" | null;
   /** Balance + recharge only, hiding auto-recharge and history (billing page). */
-  compact?: boolean
+  compact?: boolean;
   /** Where Stripe returns after checkout (defaults to the AI advisor page). */
-  returnPath?: string
+  returnPath?: string;
   /** Flat voice tariff (credits/min) for the recharge value breakdown. */
-  voiceCreditsPerMinute?: number | null
+  voiceCreditsPerMinute?: number | null;
   /** Monthly number rental in credits for the recharge value breakdown. */
-  numberRentalCredits?: number | null
-}
+  numberRentalCredits?: number | null;
+};
 
-const LOW_BALANCE_CREDITS = 5
+const LOW_BALANCE_CREDITS = 5;
 
 function fmtCredits(n: number): string {
-  const r = Math.round(n * 10) / 10
-  return Number.isInteger(r) ? String(r) : r.toFixed(1)
+  const r = Math.round(n * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
 }
 function fmtPrice(cents: number): string {
-  return (cents / 100).toFixed(2).replace('.', ',') + '€'
+  return (cents / 100).toFixed(2).replace(".", ",") + "€";
 }
 
 export function AiCreditsSection({
@@ -81,124 +65,115 @@ export function AiCreditsSection({
   voiceCreditsPerMinute = null,
   numberRentalCredits = null,
 }: AiCreditsSectionProps) {
-  const t = useTranslations('dashboard.aiCredits')
-  const [modalOpen, setModalOpen] = useState(false)
+  const t = useTranslations("dashboard.aiCredits");
+  const format = useFormatter();
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const [autoEnabled, setAutoEnabled] = useState(autoTopup.enabled)
-  const [autoThreshold, setAutoThreshold] = useState(
-    String(autoTopup.thresholdCredits || ''),
-  )
+  const [autoEnabled, setAutoEnabled] = useState(autoTopup.enabled);
+  const [autoThreshold, setAutoThreshold] = useState(String(autoTopup.thresholdCredits || ""));
   const [autoPackIndex, setAutoPackIndex] = useState(
     autoTopup.packIndex >= 0 ? autoTopup.packIndex : packages.length ? 0 : -1,
-  )
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
+  );
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const isUnlimited = monthlyIncludedCredits === null
-  const hasMonthlyAllowance =
-    monthlyIncludedCredits !== null && monthlyIncludedCredits > 0
-  const totalAvailable = isUnlimited
-    ? null
-    : (monthlyRemainingCredits ?? 0) + prepaidCredits
-  const isLow =
-    totalAvailable !== null && totalAvailable < LOW_BALANCE_CREDITS
-  const canTopup = packages.length > 0
+  const isUnlimited = monthlyIncludedCredits === null;
+  const hasMonthlyAllowance = monthlyIncludedCredits !== null && monthlyIncludedCredits > 0;
+  const totalAvailable = isUnlimited ? null : (monthlyRemainingCredits ?? 0) + prepaidCredits;
+  const isLow = totalAvailable !== null && totalAvailable < LOW_BALANCE_CREDITS;
+  const canTopup = packages.length > 0;
 
   const handleSaveAutoTopup = async () => {
-    setSaving(true)
-    setSaved(false)
+    setSaving(true);
+    setSaved(false);
     try {
       const res = await updateAiCreditsAutoTopup({
         enabled: autoEnabled,
         thresholdCredits: Number(autoThreshold) || 0,
         packIndex: autoPackIndex,
-      })
+      });
       if (res.success) {
-        setSaved(true)
-        setTimeout(() => setSaved(false), 2500)
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2500);
       }
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   return (
-    <Card>
-      <CardHeader className="flex-row items-center gap-3 space-y-0">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-          <Wallet className="h-5 w-5 text-primary" />
-        </div>
-        <div className="flex-1">
-          <CardTitle className="text-base">{t('title')}</CardTitle>
-          <CardDescription>{t('description')}</CardDescription>
-        </div>
-        {isLow && (
+    <DashboardSectionCard
+      title={t("title")}
+      description={t("description")}
+      icon={Wallet}
+      accent="submitted"
+      action={
+        isLow && (
           <Badge variant="warning" className="shrink-0">
-            {t('lowBalance')}
+            {t("lowBalance")}
           </Badge>
-        )}
-      </CardHeader>
-
-      <CardContent className="space-y-5">
-        {topupStatus === 'success' && (
-          <div className="flex items-center gap-2 rounded-lg border border-success/32 bg-success/4 px-3 py-2.5 text-sm text-success">
+        )
+      }
+      contentClassName="space-y-5"
+    >
+      <>
+        {topupStatus === "success" && (
+          <div className="bg-badge-success-background/60 text-badge-success-foreground ring-badge-success-foreground/15 flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm ring-1 ring-inset">
             <CheckCircle2 className="h-4 w-4 shrink-0" />
-            {t('topupSuccess')}
+            {t("topupSuccess")}
           </div>
         )}
-        {topupStatus === 'cancelled' && (
-          <div className="rounded-lg border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground">
-            {t('topupCancelled')}
+        {topupStatus === "cancelled" && (
+          <div className="bg-muted/40 text-muted-foreground rounded-xl px-3 py-2.5 text-sm">
+            {t("topupCancelled")}
           </div>
         )}
 
         {/* Balance */}
-        <div className="flex flex-wrap items-end justify-between gap-4 rounded-xl border bg-muted/30 p-4">
+        <div className="bg-muted/40 flex flex-wrap items-end justify-between gap-4 rounded-xl p-4">
           <div className="min-w-0">
             <p className="text-3xl font-bold text-foreground">
-              {isUnlimited ? t('unlimited') : fmtCredits(totalAvailable ?? 0)}
+              {isUnlimited ? t("unlimited") : fmtCredits(totalAvailable ?? 0)}
               {!isUnlimited && (
                 <span className="ml-1.5 text-sm font-normal text-muted-foreground">
-                  {t('creditsUnit')}
+                  {t("creditsUnit")}
                 </span>
               )}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               {isUnlimited
-                ? t('breakdownUnlimited', {
+                ? t("breakdownUnlimited", {
                     prepaid: fmtCredits(prepaidCredits),
                   })
                 : hasMonthlyAllowance
-                  ? t('breakdown', {
+                  ? t("breakdown", {
                       monthly: fmtCredits(monthlyRemainingCredits ?? 0),
                       prepaid: fmtCredits(prepaidCredits),
                     })
-                  : t('breakdownPrepaidOnly', {
+                  : t("breakdownPrepaidOnly", {
                       prepaid: fmtCredits(prepaidCredits),
                     })}
             </p>
             {!isUnlimited && (
               <p className="mt-0.5 text-xs text-muted-foreground/70">
-                {t('conversationsHint', {
+                {t("conversationsHint", {
                   count: Math.floor(totalAvailable ?? 0),
                 })}
               </p>
             )}
           </div>
           {canTopup && (
-            <Button type="button" onClick={() => setModalOpen(true)}>
+            <Button type="button" className="max-sm:w-full" onClick={() => setModalOpen(true)}>
               <CreditCard className="mr-2 h-4 w-4" />
-              {t('recharge')}
+              {t("recharge")}
             </Button>
           )}
         </div>
 
         {isLow && (
-          <div className="flex items-start gap-2.5 rounded-lg border border-warning/32 bg-warning/4 px-3 py-2.5">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-            <p className="text-xs leading-relaxed text-muted-foreground">
-              {t('lowBalanceHint')}
-            </p>
+          <div className="bg-badge-warning-background/60 ring-badge-warning-foreground/15 flex items-start gap-2.5 rounded-xl px-3 py-2.5 ring-1 ring-inset">
+            <AlertTriangle className="text-badge-warning-foreground mt-0.5 h-4 w-4 shrink-0" />
+            <p className="text-muted-foreground text-xs leading-relaxed">{t("lowBalanceHint")}</p>
           </div>
         )}
 
@@ -209,11 +184,9 @@ export function AiCreditsSection({
               <div className="min-w-0">
                 <p className="flex items-center gap-2 text-sm font-medium">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  {t('autoTopup.title')}
+                  {t("autoTopup.title")}
                 </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t('autoTopup.description')}
-                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{t("autoTopup.description")}</p>
               </div>
               <Switch
                 checked={autoEnabled}
@@ -225,19 +198,19 @@ export function AiCreditsSection({
               <div className="space-y-3 border-t pt-3">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-medium text-muted-foreground">
-                    {t('autoTopup.thresholdLabel')}
+                    {t("autoTopup.thresholdLabel")}
                   </label>
                   <Input
                     type="number"
                     min={0}
                     value={autoThreshold}
                     onChange={(e) => setAutoThreshold(e.target.value)}
-                    className="max-w-[10rem]"
+                    className="max-w-40"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-medium text-muted-foreground">
-                    {t('autoTopup.packLabel')}
+                    {t("autoTopup.packLabel")}
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {packages.map((pkg, index) => (
@@ -246,13 +219,13 @@ export function AiCreditsSection({
                         type="button"
                         onClick={() => setAutoPackIndex(index)}
                         className={cn(
-                          'rounded-lg border px-3 py-1.5 text-xs transition-colors',
+                          "rounded-lg border px-3 py-1.5 text-xs transition-colors",
                           index === autoPackIndex
-                            ? 'border-primary bg-primary/5 text-primary'
-                            : 'border-border text-muted-foreground hover:border-primary/30',
+                            ? "border-primary bg-primary/5 text-primary"
+                            : "border-border text-muted-foreground hover:border-primary/30",
                         )}
                       >
-                        {t('autoTopup.pack', {
+                        {t("autoTopup.pack", {
                           credits: pkg.credits,
                           amount: fmtPrice(pkg.priceCents),
                         })}
@@ -260,9 +233,7 @@ export function AiCreditsSection({
                     ))}
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground/70">
-                  {t('autoTopup.cardNote')}
-                </p>
+                <p className="text-xs text-muted-foreground/70">{t("autoTopup.cardNote")}</p>
               </div>
             )}
 
@@ -275,11 +246,9 @@ export function AiCreditsSection({
                 disabled={saving}
               >
                 {saving && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
-                {t('autoTopup.save')}
+                {t("autoTopup.save")}
               </Button>
-              {saved && (
-                <span className="text-xs text-success">{t('autoTopup.saved')}</span>
-              )}
+              {saved && <span className="text-xs text-success">{t("autoTopup.saved")}</span>}
             </div>
           </div>
         )}
@@ -287,9 +256,7 @@ export function AiCreditsSection({
         {/* History */}
         {!compact && history.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              {t('history.title')}
-            </p>
+            <p className="text-xs font-medium text-muted-foreground">{t("history.title")}</p>
             <div className="divide-y rounded-xl border">
               {history.map((row) => (
                 <div
@@ -301,17 +268,19 @@ export function AiCreditsSection({
                       {t(`history.type.${row.type}`)}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(row.createdAt).toLocaleDateString()}
+                      {format.dateTime(new Date(row.createdAt), {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-medium text-foreground">
-                      +{fmtCredits(row.credits)} {t('creditsUnit')}
+                      +{fmtCredits(row.credits)} {t("creditsUnit")}
                     </p>
                     {row.amountCents > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {fmtPrice(row.amountCents)}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{fmtPrice(row.amountCents)}</p>
                     )}
                   </div>
                 </div>
@@ -319,18 +288,17 @@ export function AiCreditsSection({
             </div>
           </div>
         )}
-      </CardContent>
-
-      {canTopup && (
-        <AiCreditsTopupModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          packages={packages}
-          returnPath={returnPath}
-          voiceCreditsPerMinute={voiceCreditsPerMinute}
-          numberRentalCredits={numberRentalCredits}
-        />
-      )}
-    </Card>
-  )
+        {canTopup && (
+          <AiCreditsTopupModal
+            open={modalOpen}
+            onOpenChange={setModalOpen}
+            packages={packages}
+            returnPath={returnPath}
+            voiceCreditsPerMinute={voiceCreditsPerMinute}
+            numberRentalCredits={numberRentalCredits}
+          />
+        )}
+      </>
+    </DashboardSectionCard>
+  );
 }
