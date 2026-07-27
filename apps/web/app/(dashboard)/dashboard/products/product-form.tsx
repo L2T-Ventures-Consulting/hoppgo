@@ -802,7 +802,7 @@ export function ProductForm({
           </div>
 
           {/* Actions */}
-          <StepActions position="fixed" className="lg:left-64">
+          <StepActions>
             <div>
               <Button
                 type="button"
