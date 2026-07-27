@@ -1,22 +1,22 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
+import { revalidatePath } from "next/cache";
 
-import { and, desc, eq } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-import { z } from 'zod';
+import { and, desc, eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { z } from "zod";
 
-import { db } from '@louez/db';
-import { storeInvitations, storeMembers, users } from '@louez/db';
+import { db } from "@louez/db";
+import { storeInvitations, storeMembers, users } from "@louez/db";
 
-import { auth } from '@/lib/auth';
-import { notifyTeamMemberInvited } from '@/lib/discord/platform-notifications';
-import { getLocaleFromCountry } from '@/lib/email/i18n';
-import { sendTeamInvitationEmail } from '@/lib/email/send';
-import { canAddTeamMember } from '@/lib/plan-limits';
-import { currentUserHasPermission, getCurrentStore } from '@/lib/store-context';
+import { auth } from "@/lib/auth";
+import { notifyTeamMemberInvited } from "@/lib/discord/platform-notifications";
+import { getLocaleFromCountry } from "@/lib/email/i18n";
+import { sendTeamInvitationEmail } from "@/lib/email/send";
+import { canAddTeamMember } from "@/lib/plan-limits";
+import { currentUserHasPermission, getCurrentStore } from "@/lib/store-context";
 
-import { env } from '@/env';
+import { env } from "@/env";
 
 const addMemberSchema = z.object({
   email: z.email(),
@@ -25,32 +25,32 @@ const addMemberSchema = z.object({
 export async function addTeamMember(formData: FormData) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   const store = await getCurrentStore();
   if (!store) {
-    return { error: 'errors.storeNotFound' };
+    return { error: "errors.storeNotFound" };
   }
 
   // Check permission
-  const canManage = await currentUserHasPermission('manage_members');
+  const canManage = await currentUserHasPermission("manage_members");
   if (!canManage) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   // Check plan limits
   const teamLimits = await canAddTeamMember(store.id);
   if (!teamLimits.allowed) {
-    return { error: 'dashboard.team.limitReached' };
+    return { error: "dashboard.team.limitReached" };
   }
 
   const validated = addMemberSchema.safeParse({
-    email: formData.get('email'),
+    email: formData.get("email"),
   });
 
   if (!validated.success) {
-    return { error: 'errors.invalidEmail' };
+    return { error: "errors.invalidEmail" };
   }
 
   const email = validated.data.email.toLowerCase();
@@ -63,31 +63,27 @@ export async function addTeamMember(formData: FormData) {
   if (existingUser) {
     // Check if already a member
     const existingMember = await db.query.storeMembers.findFirst({
-      where: and(
-        eq(storeMembers.storeId, store.id),
-        eq(storeMembers.userId, existingUser.id),
-      ),
+      where: and(eq(storeMembers.storeId, store.id), eq(storeMembers.userId, existingUser.id)),
     });
 
     if (existingMember) {
-      return { error: 'dashboard.team.alreadyMember' };
+      return { error: "dashboard.team.alreadyMember" };
     }
 
     // Add as member directly
     await db.insert(storeMembers).values({
       storeId: store.id,
       userId: existingUser.id,
-      role: 'member',
+      role: "member",
       addedBy: session.user.id,
     });
 
-    notifyTeamMemberInvited(
-      { id: store.id, name: store.name, slug: store.slug },
-      email,
-    ).catch(() => {});
+    notifyTeamMemberInvited({ id: store.id, name: store.name, slug: store.slug }, email).catch(
+      () => {},
+    );
 
-    revalidatePath('/dashboard/team');
-    return { success: true, type: 'added' };
+    revalidatePath("/dashboard/team");
+    return { success: true, type: "added" };
   }
 
   // User doesn't exist, check for existing pending invitation
@@ -95,12 +91,12 @@ export async function addTeamMember(formData: FormData) {
     where: and(
       eq(storeInvitations.storeId, store.id),
       eq(storeInvitations.email, email),
-      eq(storeInvitations.status, 'pending'),
+      eq(storeInvitations.status, "pending"),
     ),
   });
 
   if (existingInvitation) {
-    return { error: 'dashboard.team.invitationAlreadySent' };
+    return { error: "dashboard.team.invitationAlreadySent" };
   }
 
   // Create invitation
@@ -111,7 +107,7 @@ export async function addTeamMember(formData: FormData) {
   await db.insert(storeInvitations).values({
     storeId: store.id,
     email,
-    role: 'member',
+    role: "member",
     token,
     invitedBy: session.user.id,
     expiresAt,
@@ -127,123 +123,111 @@ export async function addTeamMember(formData: FormData) {
       to: email,
       storeName: store.name,
       storeLogoUrl: store.logoUrl,
-      inviterName: inviter?.name || inviter?.email || 'Un membre',
+      inviterName: inviter?.name || inviter?.email || "Un membre",
       invitationUrl: `${env.NEXT_PUBLIC_APP_URL}/invitation/${token}`,
       locale: getLocaleFromCountry(store.settings?.country),
     });
   } catch (error) {
-    console.error('Failed to send invitation email:', error);
+    console.error("Failed to send invitation email:", error);
     // Don't fail the action if email fails
   }
 
-  notifyTeamMemberInvited(
-    { id: store.id, name: store.name, slug: store.slug },
-    email,
-  ).catch(() => {});
+  notifyTeamMemberInvited({ id: store.id, name: store.name, slug: store.slug }, email).catch(
+    () => {},
+  );
 
-  revalidatePath('/dashboard/team');
-  return { success: true, type: 'invited' };
+  revalidatePath("/dashboard/team");
+  return { success: true, type: "invited" };
 }
 
 export async function removeMember(memberId: string) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   const store = await getCurrentStore();
   if (!store) {
-    return { error: 'errors.storeNotFound' };
+    return { error: "errors.storeNotFound" };
   }
 
-  const canManage = await currentUserHasPermission('manage_members');
+  const canManage = await currentUserHasPermission("manage_members");
   if (!canManage) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   // Get the member to remove
   const member = await db.query.storeMembers.findFirst({
-    where: and(
-      eq(storeMembers.id, memberId),
-      eq(storeMembers.storeId, store.id),
-    ),
+    where: and(eq(storeMembers.id, memberId), eq(storeMembers.storeId, store.id)),
   });
 
   if (!member) {
-    return { error: 'errors.memberNotFound' };
+    return { error: "errors.memberNotFound" };
   }
 
   // Cannot remove self
   if (member.userId === session.user.id) {
-    return { error: 'dashboard.team.cannotRemoveSelf' };
+    return { error: "dashboard.team.cannotRemoveSelf" };
   }
 
   // Cannot remove owner
-  if (member.role === 'owner') {
-    return { error: 'dashboard.team.cannotRemoveOwner' };
+  if (member.role === "owner") {
+    return { error: "dashboard.team.cannotRemoveOwner" };
   }
 
   await db.delete(storeMembers).where(eq(storeMembers.id, memberId));
 
-  revalidatePath('/dashboard/team');
+  revalidatePath("/dashboard/team");
   return { success: true };
 }
 
 export async function cancelInvitation(invitationId: string) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   const store = await getCurrentStore();
   if (!store) {
-    return { error: 'errors.storeNotFound' };
+    return { error: "errors.storeNotFound" };
   }
 
-  const canManage = await currentUserHasPermission('manage_members');
+  const canManage = await currentUserHasPermission("manage_members");
   if (!canManage) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   await db
     .update(storeInvitations)
-    .set({ status: 'cancelled' })
-    .where(
-      and(
-        eq(storeInvitations.id, invitationId),
-        eq(storeInvitations.storeId, store.id),
-      ),
-    );
+    .set({ status: "cancelled" })
+    .where(and(eq(storeInvitations.id, invitationId), eq(storeInvitations.storeId, store.id)));
 
-  revalidatePath('/dashboard/team');
+  revalidatePath("/dashboard/team");
   return { success: true };
 }
 
 export async function resendInvitation(invitationId: string) {
   const session = await auth();
   if (!session?.user?.id) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   const store = await getCurrentStore();
   if (!store) {
-    return { error: 'errors.storeNotFound' };
+    return { error: "errors.storeNotFound" };
   }
 
-  const canManage = await currentUserHasPermission('manage_members');
+  const canManage = await currentUserHasPermission("manage_members");
   if (!canManage) {
-    return { error: 'errors.unauthorized' };
+    return { error: "errors.unauthorized" };
   }
 
   const invitation = await db.query.storeInvitations.findFirst({
-    where: and(
-      eq(storeInvitations.id, invitationId),
-      eq(storeInvitations.storeId, store.id),
-    ),
+    where: and(eq(storeInvitations.id, invitationId), eq(storeInvitations.storeId, store.id)),
   });
 
-  if (!invitation || invitation.status !== 'pending') {
-    return { error: 'errors.invitationNotFound' };
+  if (!invitation || invitation.status !== "pending") {
+    return { error: "errors.invitationNotFound" };
   }
 
   // Update expiry and generate new token
@@ -266,15 +250,15 @@ export async function resendInvitation(invitationId: string) {
       to: invitation.email,
       storeName: store.name,
       storeLogoUrl: store.logoUrl,
-      inviterName: inviter?.name || inviter?.email || 'Un membre',
+      inviterName: inviter?.name || inviter?.email || "Un membre",
       invitationUrl: `${env.NEXT_PUBLIC_APP_URL}/invitation/${newToken}`,
       locale: getLocaleFromCountry(store.settings?.country),
     });
   } catch (error) {
-    console.error('Failed to resend invitation email:', error);
+    console.error("Failed to resend invitation email:", error);
   }
 
-  revalidatePath('/dashboard/team');
+  revalidatePath("/dashboard/team");
   return { success: true };
 }
 
@@ -294,10 +278,7 @@ export async function getTeamData() {
       orderBy: [desc(storeMembers.createdAt)],
     }),
     db.query.storeInvitations.findMany({
-      where: and(
-        eq(storeInvitations.storeId, store.id),
-        eq(storeInvitations.status, 'pending'),
-      ),
+      where: and(eq(storeInvitations.storeId, store.id), eq(storeInvitations.status, "pending")),
       orderBy: [desc(storeInvitations.createdAt)],
     }),
     canAddTeamMember(store.id),
