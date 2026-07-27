@@ -14,6 +14,7 @@ import {
   TodayActivity,
   PendingRequests,
   QuickActions,
+  ReservationsCalendarPrefetch,
   StorefrontWidget,
 } from "@/components/dashboard/home";
 
@@ -115,6 +116,8 @@ async function DashboardContent({
 
   return (
     <div className="space-y-4 sm:space-y-6">
+      {storeState !== "virgin" && storeState !== "building" && <ReservationsCalendarPrefetch />}
+
       {/* Adaptive Header */}
       <AdaptiveHeader
         firstName={firstName}

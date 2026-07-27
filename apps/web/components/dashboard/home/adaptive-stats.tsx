@@ -15,6 +15,7 @@ import { formatCurrency } from "@louez/utils";
 import { DashboardStatCard } from "@/components/dashboard/shared/dashboard-stat-card";
 import type { StoreMetrics, StoreState } from "./home-types";
 import { calculateGrowth } from "./home-utils";
+import { ReservationCalendarPrefetchBoundary } from "./reservation-calendar-prefetch-boundary";
 
 interface AdaptiveStatsProps {
   metrics: StoreMetrics;
@@ -57,22 +58,26 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
   if (storeState === "starting") {
     return (
       <div className={GRID_CLASS_NAME}>
-        <DashboardStatCard
-          title={t("stats.todaysDepartures")}
-          value={metrics.todaysDepartures}
-          icon={ArrowUpRight}
-          accent="success"
-          href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
-          subtitle={t("stats.toDeliver")}
-        />
-        <DashboardStatCard
-          title={t("stats.todaysReturns")}
-          value={metrics.todaysReturns}
-          icon={ArrowDownRight}
-          accent="progress"
-          href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
-          subtitle={t("stats.toRecover")}
-        />
+        <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed">
+          <DashboardStatCard
+            title={t("stats.todaysDepartures")}
+            value={metrics.todaysDepartures}
+            icon={ArrowUpRight}
+            accent="success"
+            href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
+            subtitle={t("stats.toDeliver")}
+          />
+        </ReservationCalendarPrefetchBoundary>
+        <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing">
+          <DashboardStatCard
+            title={t("stats.todaysReturns")}
+            value={metrics.todaysReturns}
+            icon={ArrowDownRight}
+            accent="progress"
+            href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
+            subtitle={t("stats.toRecover")}
+          />
+        </ReservationCalendarPrefetchBoundary>
         <DashboardStatCard
           title={t("stats.pendingRequests")}
           value={metrics.pendingReservations}
@@ -97,22 +102,26 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
 
   return (
     <div className={GRID_CLASS_NAME}>
-      <DashboardStatCard
-        title={t("stats.todaysDepartures")}
-        value={metrics.todaysDepartures}
-        icon={ArrowUpRight}
-        accent="success"
-        href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
-        subtitle={t("stats.toDeliver")}
-      />
-      <DashboardStatCard
-        title={t("stats.todaysReturns")}
-        value={metrics.todaysReturns}
-        icon={ArrowDownRight}
-        accent="progress"
-        href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
-        subtitle={t("stats.toRecover")}
-      />
+      <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed">
+        <DashboardStatCard
+          title={t("stats.todaysDepartures")}
+          value={metrics.todaysDepartures}
+          icon={ArrowUpRight}
+          accent="success"
+          href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
+          subtitle={t("stats.toDeliver")}
+        />
+      </ReservationCalendarPrefetchBoundary>
+      <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing">
+        <DashboardStatCard
+          title={t("stats.todaysReturns")}
+          value={metrics.todaysReturns}
+          icon={ArrowDownRight}
+          accent="progress"
+          href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
+          subtitle={t("stats.toRecover")}
+        />
+      </ReservationCalendarPrefetchBoundary>
       <DashboardStatCard
         title={t("stats.pendingRequests")}
         value={metrics.pendingReservations}

@@ -22,12 +22,11 @@ import {
   computeMonthSegments,
   diffInDays,
   formatDeliveryAddress,
-  getMondayOf,
   isWeekend,
   stackReservations,
 } from "@/components/dashboard/reservations-timeline/timeline-utils";
+import { reservationCalendarQueries } from "@/lib/queries/reservation-calendar.queries";
 
-import { fetchReservationsForPeriod } from "./actions";
 import {
   type CalendarRange,
   matchesTodayOperation,
@@ -67,20 +66,12 @@ const DRAG_CREATE_END_HOUR = 18;
 /** Prevent a click or tiny pointer jitter from starting a reservation */
 const DRAG_START_THRESHOLD_PX = 4;
 
-/** Days loaded initially before the anchor date (Monday aligned) */
-const INITIAL_PAST_DAYS = 28;
-const INITIAL_DAYS_COUNT = 84;
 /** Days added per infinite-scroll extension (multiple of 7 keeps Monday alignment) */
 const EXTEND_CHUNK_DAYS = 28;
 /** Distance from an edge (px) that triggers an extension */
 const EXTEND_THRESHOLD_PX = 320;
 /** Hard cap on the loaded window to keep the DOM bounded */
 const MAX_DAYS_COUNT = 560;
-
-// React Query chunking: time is split into fixed 28-day pages aligned on a
-// fixed epoch Monday, so every visit hits the same cache keys.
-const CHUNK_DAYS = 28;
-const CHUNK_EPOCH = new Date(2024, 0, 1); // Monday, Jan 1 2024
 
 // =============================================================================
 // Types
@@ -135,11 +126,10 @@ export function ReservationsCalendarView({
   const anchorDateRef = useRef(
     parseCalendarDateParam(searchParams.get("date") ?? undefined) ?? new Date(),
   );
+  const initialWindowRef = useRef(reservationCalendarQueries.initialWindow(anchorDateRef.current));
 
-  const [windowStart, setWindowStart] = useState(() =>
-    getMondayOf(addDays(anchorDateRef.current, -INITIAL_PAST_DAYS)),
-  );
-  const [daysCount, setDaysCount] = useState(INITIAL_DAYS_COUNT);
+  const [windowStart, setWindowStart] = useState(initialWindowRef.current.start);
+  const [daysCount, setDaysCount] = useState(initialWindowRef.current.daysCount);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const scrollRafRef = useRef<number | null>(null);
@@ -162,30 +152,13 @@ export function ReservationsCalendarView({
   // through time never shows a loading state.
   // ---------------------------------------------------------------------------
 
-  const chunkIndices = useMemo(() => {
-    const first = Math.floor(diffInDays(CHUNK_EPOCH, windowStart) / CHUNK_DAYS);
-    const last = Math.floor(
-      diffInDays(CHUNK_EPOCH, addDays(windowStart, daysCount - 1)) / CHUNK_DAYS,
-    );
-    return Array.from({ length: last - first + 1 }, (_, i) => first + i);
-  }, [windowStart, daysCount]);
+  const chunkQueries = useMemo(
+    () => reservationCalendarQueries.forWindow(windowStart, daysCount),
+    [windowStart, daysCount],
+  );
 
   const { reservations, isFetching, hasLoadedOnce } = useQueries({
-    queries: chunkIndices.map((index) => {
-      const start = addDays(CHUNK_EPOCH, index * CHUNK_DAYS);
-      const end = addDays(start, CHUNK_DAYS - 1);
-      end.setHours(23, 59, 59, 999);
-
-      return {
-        queryKey: ["dashboard-calendar-reservations", index],
-        queryFn: async () => {
-          const result = await fetchReservationsForPeriod(start.toISOString(), end.toISOString());
-          if ("error" in result) throw new Error(result.error);
-          return result.data;
-        },
-        staleTime: 30_000,
-      };
-    }),
+    queries: chunkQueries,
     combine: (results) => {
       const byId = new Map<string, Reservation>();
       for (const result of results) {
@@ -425,8 +398,9 @@ export function ReservationsCalendarView({
     // Today fell outside the loaded window (anchored far away) — reset around it
     anchorDateRef.current = new Date();
     didInitialScrollRef.current = false;
-    setWindowStart(getMondayOf(addDays(new Date(), -INITIAL_PAST_DAYS)));
-    setDaysCount(INITIAL_DAYS_COUNT);
+    const initialWindow = reservationCalendarQueries.initialWindow(anchorDateRef.current);
+    setWindowStart(initialWindow.start);
+    setDaysCount(initialWindow.daysCount);
   };
 
   // ---------------------------------------------------------------------------

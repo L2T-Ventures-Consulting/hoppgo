@@ -15,6 +15,7 @@ import type { DashboardAccent } from "@/components/dashboard/shared/dashboard-ac
 import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import type { HomeReservation } from "./home-types";
+import { ReservationCalendarPrefetchBoundary } from "./reservation-calendar-prefetch-boundary";
 
 interface ActivityCardProps {
   title: string;
@@ -24,6 +25,7 @@ interface ActivityCardProps {
   reservations: HomeReservation[];
   emptyMessage: string;
   viewAllHref: string;
+  prefetchCalendar?: boolean;
   showPeriod?: boolean;
   showAmount?: boolean;
   className?: string;
@@ -38,11 +40,18 @@ export const ActivityCard = ({
   reservations,
   emptyMessage,
   viewAllHref,
+  prefetchCalendar = false,
   showPeriod = false,
   showAmount = false,
   className,
 }: ActivityCardProps) => {
   const t = useTranslations("dashboard.home");
+  const viewAllAction = (
+    <Button variant="ghost" size="sm" render={<Link href={viewAllHref} />}>
+      <span className="max-sm:sr-only">{t("viewAll")}</span>
+      <ArrowRight />
+    </Button>
+  );
 
   return (
     <DashboardSectionCard
@@ -52,10 +61,13 @@ export const ActivityCard = ({
       accent={accent}
       className={className}
       action={
-        <Button variant="ghost" size="sm" render={<Link href={viewAllHref} />}>
-          <span className="max-sm:sr-only">{t("viewAll")}</span>
-          <ArrowRight />
-        </Button>
+        prefetchCalendar ? (
+          <ReservationCalendarPrefetchBoundary href={viewAllHref}>
+            {viewAllAction}
+          </ReservationCalendarPrefetchBoundary>
+        ) : (
+          viewAllAction
+        )
       }
     >
       {reservations.length === 0 ? (

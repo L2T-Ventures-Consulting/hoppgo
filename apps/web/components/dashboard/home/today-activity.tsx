@@ -44,6 +44,7 @@ export const TodayActivity = ({ departures, returns, className }: TodayActivityP
         reservations={departures}
         emptyMessage={t("activity.noDepartures")}
         viewAllHref="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
+        prefetchCalendar
       />
       <ActivityCard
         title={t("activity.returns")}
@@ -53,6 +54,7 @@ export const TodayActivity = ({ departures, returns, className }: TodayActivityP
         reservations={returns}
         emptyMessage={t("activity.noReturns")}
         viewAllHref="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
+        prefetchCalendar
       />
     </div>
   );
