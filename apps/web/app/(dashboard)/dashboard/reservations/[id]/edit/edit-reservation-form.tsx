@@ -1177,6 +1177,11 @@ export function EditReservationForm({
                         maxTime="23:59"
                         timeStep={30}
                         timezone={timezone}
+                        range={{
+                          role: 'start',
+                          otherValue: endDate,
+                          onOtherChange: handleEndDateChange,
+                        }}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1189,14 +1194,12 @@ export function EditReservationForm({
                         maxTime="23:59"
                         timeStep={30}
                         referenceDate={startDate}
-                        disabledDates={(date) => {
-                          if (!startDate) return false
-
-                          const startDay = new Date(startDate)
-                          startDay.setHours(0, 0, 0, 0)
-                          return date < startDay
-                        }}
                         timezone={timezone}
+                        range={{
+                          role: 'end',
+                          otherValue: startDate,
+                          onOtherChange: setStartDate,
+                        }}
                       />
                     </div>
                   </div>
