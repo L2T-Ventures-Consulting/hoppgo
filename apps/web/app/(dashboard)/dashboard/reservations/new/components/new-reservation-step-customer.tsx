@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 
-import { User } from "lucide-react";
+import { User, UserPlus } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
 
 import { CustomerCombobox } from "@/components/dashboard/customer-combobox";
 import { CustomerCreateDialog } from "@/components/dashboard/customer-create-dialog";
@@ -29,6 +29,7 @@ export function NewReservationStepCustomer({
   onCustomerCreated,
 }: NewReservationStepCustomerProps) {
   const t = useTranslations("dashboard.reservations.manualForm");
+  const tCustomerSearch = useTranslations("common.customerSearch");
   const [createDialog, setCreateDialog] = useState({ isOpen: false, query: "" });
 
   return (
@@ -45,15 +46,27 @@ export function NewReservationStepCustomer({
           <form.Field name="customerId">
             {(field) => (
               <div className="space-y-2">
-                <CustomerCombobox
-                  customers={customers}
-                  value={field.state.value}
-                  onValueChange={(value) => {
-                    field.handleChange(value);
-                    clearStepFieldError("customerId");
-                  }}
-                  onCreateRequest={(query) => setCreateDialog({ isOpen: true, query })}
-                />
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                  <CustomerCombobox
+                    className="sm:flex-1"
+                    customers={customers}
+                    value={field.state.value}
+                    onValueChange={(value) => {
+                      field.handleChange(value);
+                      clearStepFieldError("customerId");
+                    }}
+                    onCreateRequest={(query) => setCreateDialog({ isOpen: true, query })}
+                  />
+                  <Button
+                    className="h-11 shrink-0 max-sm:w-full"
+                    onClick={() => setCreateDialog({ isOpen: true, query: "" })}
+                    type="button"
+                    variant="outline"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    {tCustomerSearch("createCustomer")}
+                  </Button>
+                </div>
                 {field.state.meta.errors.length > 0 && (
                   <p className="text-sm font-medium text-destructive">
                     {getFieldErrorMessage(field.state.meta.errors[0])}
