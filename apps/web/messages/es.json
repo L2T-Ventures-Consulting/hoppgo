@@ -1797,6 +1797,11 @@
           "calculating": "Calculando la cobertura...",
           "estimatedAmount": "Cobertura estimada: {amount}",
           "previewUnavailable": "No se pudo recalcular el importe de Tulip."
+        },
+        "globalDiscount": {
+          "label": "Descuento",
+          "add": "Añadir un descuento",
+          "remove": "Quitar el descuento"
         }
       },
       "rejectDialog": {

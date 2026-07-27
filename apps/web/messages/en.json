@@ -1904,6 +1904,11 @@
           "title": "Product unavailable",
           "description": "“{name}” has no availability left for the selected period. Adding it may cause overbooking.",
           "confirm": "Add anyway"
+        },
+        "globalDiscount": {
+          "label": "Discount",
+          "add": "Add a discount",
+          "remove": "Remove discount"
         }
       },
       "rejectDialog": {

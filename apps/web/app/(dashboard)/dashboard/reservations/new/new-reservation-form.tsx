@@ -26,7 +26,7 @@ import { Input } from "@louez/ui";
 import { Textarea } from "@louez/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
-import { InputPrice, StepActions, ToggleGroup, ToggleGroupItem } from "@louez/ui";
+import { InputPrice, StepActions, Tabs, TabsList, TabsTrigger } from "@louez/ui";
 import {
   Dialog,
   DialogDescription,
@@ -191,6 +191,11 @@ export function NewReservationForm({
   });
   const [priceInputMode, setPriceInputMode] = useState<"unit" | "total">("total");
   const [sendConfirmationEmail, setSendConfirmationEmail] = useState(true);
+  const [globalDiscount, setGlobalDiscount] = useState<{
+    mode: "amount" | "percent";
+    value: number | null;
+  }>({ mode: "amount", value: null });
+  const [depositOverride, setDepositOverride] = useState<number | null>(null);
   const sendAsQuoteRef = useRef(false);
   const [tulipInsuranceOptIn, setTulipInsuranceOptIn] = useState(
     tulipInsuranceMode === "required" || tulipInsuranceMode === "optional",
@@ -417,6 +422,9 @@ export function NewReservationForm({
                   },
           },
           internalNotes: value.internalNotes || undefined,
+          discountAmount:
+            globalDiscountAmount > 0 ? Math.round(globalDiscountAmount * 100) / 100 : undefined,
+          depositOverride: depositOverride ?? undefined,
           tulipInsuranceOptIn: effectiveTulipInsuranceOptIn,
           sendConfirmationEmail: sendAsQuoteRef.current ? true : sendConfirmationEmail,
           sendAsQuote: sendAsQuoteRef.current,
@@ -704,6 +712,17 @@ export function NewReservationForm({
     storeLongitude,
     subtotal: subtotal + tulipInsuranceAmount,
   });
+
+  // Commercial discount resolved in currency units; the % mode applies to the
+  // pre-delivery subtotal (products + custom items + insurance), like the
+  // server-side clamp.
+  const discountBase = subtotal + tulipInsuranceAmount;
+  const globalDiscountAmount =
+    globalDiscount.value == null || globalDiscount.value <= 0
+      ? 0
+      : globalDiscount.mode === "amount"
+        ? Math.min(globalDiscount.value, discountBase)
+        : Math.min((discountBase * globalDiscount.value) / 100, discountBase);
 
   const addProduct = (productId: string, options: { allowUnavailable?: boolean } = {}) => {
     const product = products.find((item) => item.id === productId);
@@ -1500,6 +1519,11 @@ export function NewReservationForm({
                 isTulipInsuranceQuoteLoading={isTulipInsuranceQuoteLoading}
                 deliveryFee={delivery.totalFee}
                 deposit={deposit}
+                discount={globalDiscount}
+                discountAmount={globalDiscountAmount}
+                onDiscountChange={setGlobalDiscount}
+                depositOverride={depositOverride}
+                onDepositOverrideChange={setDepositOverride}
                 sendConfirmationEmail={sendConfirmationEmail}
                 onSendConfirmationEmailChange={setSendConfirmationEmail}
                 onNavigateToSection={scrollToSection}
@@ -1788,18 +1812,16 @@ export function NewReservationForm({
               </div>
 
               {/* Edit mode: unit price, total for the period, or discount % */}
-              <ToggleGroup
-                value={[priceOverrideDialog.mode]}
-                onValueChange={(groupValue) => {
-                  const nextMode = groupValue[0] as PriceOverrideMode | undefined;
-                  if (nextMode) setPriceOverrideMode(nextMode);
-                }}
-                className="w-full *:flex-1"
+              <Tabs
+                value={priceOverrideDialog.mode}
+                onValueChange={(value) => setPriceOverrideMode(value as PriceOverrideMode)}
               >
-                <ToggleGroupItem value="unit">{t("priceOverride.modeUnit")}</ToggleGroupItem>
-                <ToggleGroupItem value="total">{t("priceOverride.modeTotal")}</ToggleGroupItem>
-                <ToggleGroupItem value="percent">{t("priceOverride.modePercent")}</ToggleGroupItem>
-              </ToggleGroup>
+                <TabsList className="w-full *:flex-1">
+                  <TabsTrigger value="unit">{t("priceOverride.modeUnit")}</TabsTrigger>
+                  <TabsTrigger value="total">{t("priceOverride.modeTotal")}</TabsTrigger>
+                  <TabsTrigger value="percent">{t("priceOverride.modePercent")}</TabsTrigger>
+                </TabsList>
+              </Tabs>
 
               {/* Value input */}
               <div className="space-y-2">

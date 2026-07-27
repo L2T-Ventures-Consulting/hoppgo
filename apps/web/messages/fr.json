@@ -1913,6 +1913,11 @@
           "title": "Produit indisponible",
           "description": "« {name} » n'a plus de disponibilité sur la période sélectionnée. L'ajouter peut créer un surbooking.",
           "confirm": "Ajouter quand même"
+        },
+        "globalDiscount": {
+          "label": "Remise",
+          "add": "Ajouter une remise",
+          "remove": "Retirer la remise"
         }
       },
       "rejectDialog": {

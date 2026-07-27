@@ -2,7 +2,6 @@ export const productAnalyticsEvents = {
   productCreated: 'product_created',
   dashboardReservationCreated: 'dashboard_reservation_created',
   dashboardReservationCreationStarted: 'dashboard_reservation_creation_started',
-  dashboardReservationStepViewed: 'dashboard_reservation_step_viewed',
   dashboardReservationStepValidationFailed:
     'dashboard_reservation_step_validation_failed',
   dashboardReservationCapacityBlocked: 'dashboard_reservation_capacity_blocked',

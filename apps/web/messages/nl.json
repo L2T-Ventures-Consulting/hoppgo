@@ -1752,6 +1752,11 @@
           "optionalLabel": "Dekking inschakelen voor deze reservering",
           "insurableProduct": "Verzekerbaar",
           "assuredProduct": "Verzekerd"
+        },
+        "globalDiscount": {
+          "label": "Korting",
+          "add": "Korting toevoegen",
+          "remove": "Korting verwijderen"
         }
       },
       "quoteCard": {

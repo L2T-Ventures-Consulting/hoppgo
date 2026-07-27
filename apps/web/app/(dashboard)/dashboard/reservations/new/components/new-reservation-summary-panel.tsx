@@ -1,20 +1,26 @@
 "use client";
 
-import { CheckCircle2, Circle, Loader2 } from "lucide-react";
+import { useState } from "react";
+
+import { CheckCircle2, Circle, Loader2, PenLine, RotateCcw, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
   Badge,
+  Button,
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
   Checkbox,
+  InputPrice,
   Label,
   Separator,
+  ToggleGroup,
+  ToggleGroupItem,
 } from "@louez/ui";
-import { formatCurrency } from "@louez/utils";
+import { cn, formatCurrency } from "@louez/utils";
 
 import { formatStoreDate } from "@/lib/utils/store-date";
 
@@ -29,6 +35,11 @@ interface DetailedDuration {
 }
 
 export type ReservationSectionId = Exclude<ReservationStepId, "confirm">;
+
+export interface ReservationDiscount {
+  mode: "amount" | "percent";
+  value: number | null;
+}
 
 interface SectionChecklistItem {
   id: ReservationSectionId;
@@ -53,6 +64,12 @@ interface NewReservationSummaryPanelProps {
   isTulipInsuranceQuoteLoading: boolean;
   deliveryFee: number;
   deposit: number;
+  discount: ReservationDiscount;
+  /** Discount resolved in currency units, already clamped to the subtotal. */
+  discountAmount: number;
+  onDiscountChange: (discount: ReservationDiscount) => void;
+  depositOverride: number | null;
+  onDepositOverrideChange: (value: number | null) => void;
   sendConfirmationEmail: boolean;
   onSendConfirmationEmailChange: (checked: boolean) => void;
   onNavigateToSection: (sectionId: ReservationSectionId) => void;
@@ -74,11 +91,20 @@ export function NewReservationSummaryPanel({
   isTulipInsuranceQuoteLoading,
   deliveryFee,
   deposit,
+  discount,
+  discountAmount,
+  onDiscountChange,
+  depositOverride,
+  onDepositOverrideChange,
   sendConfirmationEmail,
   onSendConfirmationEmailChange,
   onNavigateToSection,
 }: NewReservationSummaryPanelProps) {
   const t = useTranslations("dashboard.reservations.manualForm");
+  const [isEditingDiscount, setIsEditingDiscount] = useState(false);
+  const [isEditingDeposit, setIsEditingDeposit] = useState(false);
+
+  const effectiveDeposit = depositOverride ?? deposit;
 
   const isCustomerDone = Boolean(selectedCustomer);
   const isPeriodDone = Boolean(startDate && endDate && endDate >= startDate);
@@ -117,7 +143,7 @@ export function NewReservationSummaryPanel({
         .join(", ") || t("durationDays", { count: duration })
     : t("durationDays", { count: duration });
 
-  const total = subtotal + tulipInsuranceAmount + deliveryFee;
+  const total = subtotal + tulipInsuranceAmount + deliveryFee - discountAmount;
 
   return (
     <Card>
@@ -219,10 +245,123 @@ export function NewReservationSummaryPanel({
               <span className="tabular-nums">{formatCurrency(deliveryFee)}</span>
             </div>
           )}
-          <div className="flex justify-between gap-2">
+
+          {/* Commercial discount */}
+          {isEditingDiscount || discount.value != null ? (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-muted-foreground">{t("globalDiscount.label")}</span>
+                <span className="flex items-center gap-1">
+                  {discountAmount > 0 && (
+                    <span className="tabular-nums text-green-600">
+                      -{formatCurrency(discountAmount)}
+                    </span>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-destructive h-6 w-6"
+                    aria-label={t("globalDiscount.remove")}
+                    onClick={() => {
+                      onDiscountChange({ mode: discount.mode, value: null });
+                      setIsEditingDiscount(false);
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ToggleGroup
+                  value={[discount.mode]}
+                  onValueChange={(groupValue) => {
+                    const mode = groupValue[0] as ReservationDiscount["mode"] | undefined;
+                    if (mode) onDiscountChange({ mode, value: discount.value });
+                  }}
+                >
+                  <ToggleGroupItem value="amount" aria-label="€">
+                    €
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="percent" aria-label="%">
+                    %
+                  </ToggleGroupItem>
+                </ToggleGroup>
+                <InputPrice
+                  value={discount.value ?? 0}
+                  displayEmpty={discount.value == null}
+                  onValueCommitted={(value) =>
+                    onDiscountChange({ mode: discount.mode, value: Math.max(0, value) })
+                  }
+                  onEmptyCommitted={() => onDiscountChange({ mode: discount.mode, value: null })}
+                  placeholder="0.00"
+                  suffix={discount.mode === "amount" ? "€" : "%"}
+                  ariaLabel={t("globalDiscount.label")}
+                  className="min-w-0 flex-1"
+                />
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsEditingDiscount(true)}
+              className="text-muted-foreground hover:text-foreground text-xs underline-offset-2 hover:underline"
+            >
+              + {t("globalDiscount.add")}
+            </button>
+          )}
+
+          {/* Deposit, editable */}
+          <div className="flex items-center justify-between gap-2">
             <span className="text-muted-foreground">{t("deposit")}</span>
-            <span className="tabular-nums">{formatCurrency(deposit)}</span>
+            {isEditingDeposit ? (
+              <InputPrice
+                value={effectiveDeposit}
+                onValueCommitted={(value) => {
+                  onDepositOverrideChange(Math.max(0, value));
+                  setIsEditingDeposit(false);
+                }}
+                placeholder="0.00"
+                suffix="€"
+                ariaLabel={t("deposit")}
+                className="w-32"
+              />
+            ) : (
+              <span className="flex items-center gap-1">
+                {depositOverride != null && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="text-muted-foreground hover:text-foreground h-6 w-6"
+                    aria-label={t("priceOverride.reset")}
+                    onClick={() => onDepositOverrideChange(null)}
+                  >
+                    <RotateCcw className="h-3 w-3" />
+                  </Button>
+                )}
+                <span
+                  className={cn(
+                    "tabular-nums",
+                    depositOverride != null && "font-medium text-orange-600",
+                  )}
+                >
+                  {formatCurrency(effectiveDeposit)}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground hover:text-foreground h-6 w-6"
+                  aria-label={t("priceOverride.dialogTitle")}
+                  onClick={() => setIsEditingDeposit(true)}
+                >
+                  <PenLine className="h-3 w-3" />
+                </Button>
+              </span>
+            )}
           </div>
+
           <Separator className="my-2" />
           <div className="flex justify-between gap-2 text-base font-semibold">
             <span>{t("total")}</span>

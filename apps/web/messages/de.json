@@ -1791,6 +1791,11 @@
           "optionalLabel": "Versicherungsschutz für diese Reservierung aktivieren",
           "insurableProduct": "Versicherbar",
           "assuredProduct": "Versichert"
+        },
+        "globalDiscount": {
+          "label": "Rabatt",
+          "add": "Rabatt hinzufügen",
+          "remove": "Rabatt entfernen"
         }
       },
       "rejectDialog": {

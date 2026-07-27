@@ -1752,6 +1752,11 @@
           "optionalLabel": "Ativar cobertura para esta reserva",
           "insurableProduct": "Segurável",
           "assuredProduct": "Segurado"
+        },
+        "globalDiscount": {
+          "label": "Desconto",
+          "add": "Adicionar um desconto",
+          "remove": "Remover o desconto"
         }
       },
       "rejectDialog": {

@@ -1752,6 +1752,11 @@
           "optionalLabel": "Attiva la copertura per questa prenotazione",
           "insurableProduct": "Assicurabile",
           "assuredProduct": "Assicurato"
+        },
+        "globalDiscount": {
+          "label": "Sconto",
+          "add": "Aggiungi uno sconto",
+          "remove": "Rimuovi lo sconto"
         }
       },
       "quoteCard": {

@@ -1752,6 +1752,11 @@
           "optionalLabel": "Włącz ochronę ubezpieczeniową dla tej rezerwacji",
           "insurableProduct": "Ubezpieczalny",
           "assuredProduct": "Ubezpieczony"
+        },
+        "globalDiscount": {
+          "label": "Rabat",
+          "add": "Dodaj rabat",
+          "remove": "Usuń rabat"
         }
       },
       "rejectDialog": {
