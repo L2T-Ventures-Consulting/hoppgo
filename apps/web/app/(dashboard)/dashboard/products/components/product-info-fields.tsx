@@ -7,6 +7,7 @@ import { ChevronRight, FolderOpen } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button, Label } from "@louez/ui";
+import { AI_ADVISOR_PRODUCT_CONTEXT_MAX_LENGTH } from "@louez/validations";
 
 import { CategoryManagerDrawer } from "@/components/categories/category-manager-drawer";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
@@ -16,6 +17,7 @@ import type { Category, ProductFormComponentApi } from "../types";
 
 export interface ProductInfoFieldsProps {
   form: ProductFormComponentApi;
+  showAiContext: boolean;
   categories: Category[];
   onCreateCategory: (name: string) => Promise<string | null>;
   isCreatingCategory: boolean;
@@ -27,6 +29,7 @@ export interface ProductInfoFieldsProps {
 
 export function ProductInfoFields({
   form,
+  showAiContext,
   categories,
   onCreateCategory,
   isCreatingCategory,
@@ -121,6 +124,20 @@ export function ProductInfoFields({
           </div>
         )}
       </form.Field>
+
+      {showAiContext && (
+        <form.AppField name="aiContext">
+          {(field) => (
+            <field.Textarea
+              label={t("aiContext")}
+              placeholder={t("aiContextPlaceholder")}
+              description={t("aiContextHint")}
+              rows={4}
+              maxLength={AI_ADVISOR_PRODUCT_CONTEXT_MAX_LENGTH}
+            />
+          )}
+        </form.AppField>
+      )}
     </div>
   );
 }

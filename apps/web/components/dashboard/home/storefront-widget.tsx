@@ -9,10 +9,9 @@ import { Badge, Button } from "@louez/ui";
 import { CheckIcon, CopyIcon, GlobeSolidIcon, OpenInNewIcon, StoreIcon } from "@louez/ui/icons";
 import { Share2 } from "lucide-react";
 
-import { env } from "@/env";
-
 import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
 import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
+import { useStorefrontUrl } from "@/hooks/use-storefront-url";
 import { ShareModal } from "./share-modal";
 
 const COPIED_FEEDBACK_MS = 2000;
@@ -27,8 +26,9 @@ export const StorefrontWidget = ({ storeSlug, className }: StorefrontWidgetProps
   const [copied, setCopied] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
 
-  const domain = env.NEXT_PUBLIC_APP_DOMAIN;
-  const storeUrl = `https://${storeSlug}.${domain}`;
+  const { getAbsoluteUrl } = useStorefrontUrl(storeSlug);
+  const storeUrl = getAbsoluteUrl();
+  const storefrontLabel = storeUrl.replace(/^https?:\/\//, "");
 
   const handleCopy = async () => {
     try {
@@ -63,7 +63,7 @@ export const StorefrontWidget = ({ storeSlug, className }: StorefrontWidgetProps
           <DashboardIconTile icon={GlobeSolidIcon} accent="progress" />
           <div className="min-w-0 flex-1">
             <p className="truncate font-medium">
-              {storeSlug}.{domain}
+              {storefrontLabel}
             </p>
             <p className="text-muted-foreground truncate text-xs">{t("storefront.publicUrl")}</p>
           </div>

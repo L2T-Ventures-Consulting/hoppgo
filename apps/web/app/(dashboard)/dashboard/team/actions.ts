@@ -8,6 +8,7 @@ import { z } from "zod";
 
 import { db } from "@louez/db";
 import { storeInvitations, storeMembers, users } from "@louez/db";
+import { isEmailConfigured } from "@louez/email";
 
 import { auth } from "@/lib/auth";
 import { notifyTeamMemberInvited } from "@/lib/discord/platform-notifications";
@@ -137,6 +138,15 @@ export async function addTeamMember(formData: FormData) {
   );
 
   revalidatePath("/dashboard/team");
+
+  if (!isEmailConfigured()) {
+    return {
+      success: true,
+      type: "invited",
+      invitationUrl: `${env.NEXT_PUBLIC_APP_URL}/invitation/${token}`,
+    };
+  }
+
   return { success: true, type: "invited" };
 }
 
@@ -259,6 +269,14 @@ export async function resendInvitation(invitationId: string) {
   }
 
   revalidatePath("/dashboard/team");
+
+  if (!isEmailConfigured()) {
+    return {
+      success: true,
+      invitationUrl: `${env.NEXT_PUBLIC_APP_URL}/invitation/${newToken}`,
+    };
+  }
+
   return { success: true };
 }
 

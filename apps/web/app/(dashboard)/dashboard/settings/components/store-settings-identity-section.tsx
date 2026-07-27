@@ -11,12 +11,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@loue
 import { AddressInput } from "@/components/ui/address-input";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { getFieldError } from "@/hooks/form/form-context";
+import { useStorefrontUrl } from "@/hooks/use-storefront-url";
 import { SUPPORTED_CURRENCIES, getDefaultCurrencyForCountry } from "@/lib/utils/currency";
 
 interface StoreSettingsIdentitySectionProps {
   form: any;
   storeSlug: string;
-  domain: string;
   latitude: number | null;
   longitude: number | null;
   onOpenSlugModal: () => void;
@@ -25,12 +25,14 @@ interface StoreSettingsIdentitySectionProps {
 export function StoreSettingsIdentitySection({
   form,
   storeSlug,
-  domain,
   latitude,
   longitude,
   onOpenSlugModal,
 }: StoreSettingsIdentitySectionProps) {
   const t = useTranslations("dashboard.settings");
+  const { getAbsoluteUrl } = useStorefrontUrl(storeSlug);
+  const storefrontUrl = getAbsoluteUrl();
+  const storefrontLabel = storefrontUrl.replace(/^https?:\/\//, "");
 
   const handleCountryChange = (newCountry: string) => {
     form.setFieldValue("currency", getDefaultCurrencyForCountry(newCountry));
@@ -135,11 +137,9 @@ export function StoreSettingsIdentitySection({
             <span className="text-muted-foreground shrink-0 text-sm">
               {t("storeSettings.storeUrl")}
             </span>
-            <code className="truncate font-mono text-sm">
-              {storeSlug}.{domain}
-            </code>
+            <code className="truncate font-mono text-sm">{storefrontLabel}</code>
             <a
-              href={`https://${storeSlug}.${domain}`}
+              href={storefrontUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground shrink-0 transition-colors"

@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
+import { isStripeConfigured } from "@/lib/plans";
 import { getCurrentStore } from "@/lib/store-context";
 import { PaymentsContent } from "./payments-content";
 
@@ -22,6 +23,7 @@ export default async function PaymentsSettingsPage() {
         stripeChargesEnabled={store.stripeChargesEnabled ?? false}
         stripeOnboardingComplete={store.stripeOnboardingComplete ?? false}
         reservationMode={reservationMode}
+        stripeConfigured={isStripeConfigured()}
       />
     </SettingsPageShell>
   );

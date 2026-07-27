@@ -42,7 +42,7 @@ import {
 import { cn } from "@louez/utils";
 
 import { useStore } from "@/contexts/store-context";
-import { env } from "@/env";
+import { useStorefrontUrl } from "@/hooks/use-storefront-url";
 import { keyboardShortcuts } from "@/lib/keyboard-shortcuts";
 
 import {
@@ -102,6 +102,7 @@ export const DashboardCommandPalette = ({
   const tSettingsNavigation = useTranslations("dashboard.settings.settingsNavigation");
   const messages = useMessages();
   const { storeSlug } = useStore();
+  const { getAbsoluteUrl } = useStorefrontUrl(storeSlug);
 
   useHotkey(
     keyboardShortcuts.commandPalette.open.hotkey,
@@ -128,7 +129,7 @@ export const DashboardCommandPalette = ({
       keywords: "boutique vitrine storefront store site public preview",
       icon: ExternalLinkIcon,
       kind: "external",
-      href: `https://${storeSlug}.${env.NEXT_PUBLIC_APP_DOMAIN}`,
+      href: getAbsoluteUrl(),
     },
   ];
 

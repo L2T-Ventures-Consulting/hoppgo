@@ -61,6 +61,20 @@ export const TeamInviteCard = ({ limits }: TeamInviteCardProps) => {
     onSubmit: async ({ value }) => {
       try {
         const result = await inviteMutation.mutateAsync(value.email);
+
+        if (result.invitationUrl) {
+          const copied = await navigator.clipboard
+            ?.writeText(result.invitationUrl)
+            .then(() => true)
+            .catch(() => false);
+          toastManager.add({
+            title: copied ? t("invitationLinkCopied") : result.invitationUrl,
+            type: "success",
+          });
+          form.reset();
+          return;
+        }
+
         toastManager.add({
           title: result.type === "invited" ? t("invitationSent") : t("memberAdded"),
           type: "success",

@@ -6,7 +6,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { revalidateLogic, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
-import { env } from "@/env";
 import { Button } from "@louez/ui";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
 import {
@@ -22,6 +21,7 @@ import { toastManager } from "@louez/ui";
 import { getCgvTemplate, getLegalNoticeTemplate } from "@/lib/legal-templates";
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
 import { useAppForm } from "@/hooks/form/form";
+import { useStorefrontUrl } from "@/hooks/use-storefront-url";
 import { orpc } from "@/lib/orpc/react";
 
 interface Store {
@@ -41,6 +41,7 @@ export const LegalPagesForm = ({ store }: LegalPagesFormProps) => {
   const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("dashboard.settings.legalSettings");
+  const { getAbsoluteUrl } = useStorefrontUrl(store.slug);
   const tErrors = useTranslations("errors");
   const [activeTab, setActiveTab] = useState("cgv");
 
@@ -155,7 +156,7 @@ export const LegalPagesForm = ({ store }: LegalPagesFormProps) => {
                       variant="ghost"
                       render={
                         <a
-                          href={`https://${store.slug}.${env.NEXT_PUBLIC_APP_DOMAIN}/terms`}
+                          href={getAbsoluteUrl("/terms")}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1"
@@ -187,7 +188,7 @@ export const LegalPagesForm = ({ store }: LegalPagesFormProps) => {
                       variant="ghost"
                       render={
                         <a
-                          href={`https://${store.slug}.${env.NEXT_PUBLIC_APP_DOMAIN}/legal`}
+                          href={getAbsoluteUrl("/legal")}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-1"

@@ -37,6 +37,7 @@ import { formatStoreDate } from "@/lib/utils/store-date";
 import { orpc } from "@/lib/orpc/react";
 
 import { ActivityTimelineV2 } from "./activity-timeline-v2";
+import { AdvisorConversationCard } from "./advisor-conversation-card";
 import { EmailContactPopover } from "@/components/dashboard/email-contact-popover";
 import { PhoneContactPopover } from "@/components/dashboard/phone-contact-popover";
 import { ReservationHeader } from "./reservation-header";
@@ -731,6 +732,8 @@ export function ReservationDetailClient({
             stripeConfigured={stripeConfigured}
             defaultPaymentMethod={defaultPaymentMethod}
           />
+
+          <AdvisorConversationCard reservationId={reservation.id} />
 
           <ReservationCustomerNotes notes={reservation.customerNotes || ""} />
 

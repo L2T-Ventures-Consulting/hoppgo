@@ -103,6 +103,7 @@ export {
 
 export {
   BarChart3 as AnalyticsIcon,
+  Bot as BotIcon,
   CalendarDays as CalendarDaysIcon,
   Calendar as CalendarIcon,
   CalendarSync as CalendarSyncIcon,

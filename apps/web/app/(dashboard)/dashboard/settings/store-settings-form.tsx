@@ -201,7 +201,6 @@ export function StoreSettingsForm({ store, stripeChargesEnabled }: StoreSettings
           <StoreSettingsIdentitySection
             form={form}
             storeSlug={store.slug}
-            domain={domain}
             latitude={latitude}
             longitude={longitude}
             onOpenSlugModal={() => setIsSlugModalOpen(true)}

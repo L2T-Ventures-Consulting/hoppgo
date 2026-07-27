@@ -1,5 +1,8 @@
 "use client";
 
+import { createElement, isValidElement } from "react";
+import type { ComponentType, ReactElement } from "react";
+
 import { getFieldError } from "@/hooks/form/form-context";
 import { Label, Radio, RadioGroup } from "@louez/ui";
 import { cn } from "@louez/utils";
@@ -8,7 +11,7 @@ type RadioCardOption<TValue extends string> = {
   value: TValue;
   label: string;
   description?: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: ComponentType<{ className?: string }> | ReactElement;
 };
 
 type FormRadioCardGroupProps<TValue extends string> = {
@@ -52,11 +55,17 @@ export function FormRadioCardGroup<TValue extends string>({
             className="flex items-start gap-2 rounded-lg border p-3 hover:bg-accent/50 has-data-checked:border-primary/48 has-data-checked:bg-accent/50"
           >
             <Radio value={option.value} />
-            {option.icon && (
-              <option.icon className="text-muted-foreground mt-0.5 size-4 shrink-0" />
-            )}
             <div className="flex flex-col gap-1">
-              <p className="text-sm font-semibold">{option.label}</p>
+              <div className="flex items-center gap-2">
+                {option.icon && (
+                  <span className="text-muted-foreground shrink-0 [&_svg]:size-4">
+                    {isValidElement(option.icon)
+                      ? option.icon
+                      : createElement(option.icon, { className: "size-4" })}
+                  </span>
+                )}
+                <p className="text-sm font-semibold">{option.label}</p>
+              </div>
               {option.description && (
                 <p className="text-muted-foreground text-xs">{option.description}</p>
               )}

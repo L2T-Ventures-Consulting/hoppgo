@@ -11,6 +11,7 @@ export type DashboardBreadcrumbItem =
     };
 
 const staticBreadcrumbRoutes = [
+  { href: "/dashboard/ai-assistant", translationKey: "aiAssistant" },
   { href: "/dashboard/products", translationKey: "products" },
   { href: "/dashboard/products/new", translationKey: "productsNew" },
   { href: "/dashboard/reservations", translationKey: "reservations" },

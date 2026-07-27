@@ -23,9 +23,25 @@ export const TeamInvitationRow = ({ invitation, canManageMembers }: TeamInvitati
   const format = useFormatter();
   const [isPending, startTransition] = useTransition();
 
-  const runAction = (action: () => Promise<{ error?: string }>, successMessage: string) => {
+  const runAction = (
+    action: () => Promise<{ error?: string; invitationUrl?: string }>,
+    successMessage: string,
+  ) => {
     startTransition(async () => {
       const result = await action();
+
+      if (result.invitationUrl) {
+        const copied = await navigator.clipboard
+          ?.writeText(result.invitationUrl)
+          .then(() => true)
+          .catch(() => false);
+        toastManager.add({
+          title: copied ? t("invitationLinkCopied") : result.invitationUrl,
+          type: "success",
+        });
+        return;
+      }
+
       toastManager.add({
         title: result.error ? tErrors("generic") : successMessage,
         type: result.error ? "error" : "success",

@@ -43,6 +43,7 @@ export function ProductFormSectionProduct(props: ProductFormSectionProductProps)
 
         <ProductInfoFields
           form={props.form}
+          showAiContext={props.showAiContext}
           categories={props.categories}
           onCreateCategory={props.onCreateCategory}
           isCreatingCategory={props.isCreatingCategory}

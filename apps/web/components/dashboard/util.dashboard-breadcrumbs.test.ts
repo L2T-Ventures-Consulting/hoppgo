@@ -5,6 +5,7 @@ import { getDashboardBreadcrumbItems } from "./util.dashboard-breadcrumbs";
 
 test("covers every static dashboard breadcrumb route", () => {
   const cases = [
+    ["/dashboard/ai-assistant", ["aiAssistant"]],
     ["/dashboard/products", ["products"]],
     ["/dashboard/products/new", ["products", "productsNew"]],
     ["/dashboard/reservations", ["reservations"]],
@@ -143,6 +144,12 @@ test("keeps settings and integrations as parents of integration detail pages", (
 });
 
 test("covers direct dashboard pages and ignores routes outside the dashboard", () => {
+  assert.deepEqual(getDashboardBreadcrumbItems("/dashboard/ai-assistant", {}), [
+    {
+      href: "/dashboard/ai-assistant",
+      translationKey: "aiAssistant",
+    },
+  ]);
   assert.deepEqual(getDashboardBreadcrumbItems("/dashboard/referrals", {}), [
     {
       href: "/dashboard/referrals",
