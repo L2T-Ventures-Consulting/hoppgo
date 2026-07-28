@@ -53,11 +53,27 @@ function createCandidateId(index: number) {
   return `product-image-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-const dataUrlToFile = async (dataUrl: string, filename: string) => {
-  const response = await fetch(dataUrl);
-  const blob = await response.blob();
-  const extension = blob.type === "image/jpeg" ? "jpg" : blob.type.replace("image/", "");
-  return new File([blob], `${filename}.${extension}`, { type: blob.type });
+// Decode locally: fetch(dataUrl) is blocked by connect-src in production and
+// can also be intercepted by third-party network instrumentation.
+const dataUrlToFile = (dataUrl: string, filename: string) => {
+  const [header = "", payload = ""] = dataUrl.split(",");
+  const mimeType = header.match(/^data:([^;,]+)/)?.[1] || "image/jpeg";
+
+  let bytes: Uint8Array<ArrayBuffer>;
+  if (header.includes(";base64")) {
+    const binary = atob(payload);
+    bytes = new Uint8Array(new ArrayBuffer(binary.length));
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+  } else {
+    const encoded = new TextEncoder().encode(decodeURIComponent(payload));
+    bytes = new Uint8Array(new ArrayBuffer(encoded.length));
+    bytes.set(encoded);
+  }
+
+  const extension = mimeType === "image/jpeg" ? "jpg" : mimeType.replace("image/", "");
+  return new File([bytes], `${filename}.${extension}`, { type: mimeType });
 };
 
 export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMediaParams) {
@@ -132,10 +148,7 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
         for (let index = 0; index < preparedImages.length; index += 1) {
           const prepared = preparedImages[index];
 
-          const file = await dataUrlToFile(
-            prepared.dataUrl,
-            `product-${Date.now()}-${prepared.order}`,
-          );
+          const file = dataUrlToFile(prepared.dataUrl, `product-${Date.now()}-${prepared.order}`);
           const uploaded = await uploadImage(file);
           pendingUploadsRef.current.add(uploaded.url);
           uploadedUrls.push({ order: prepared.order, url: uploaded.url });
