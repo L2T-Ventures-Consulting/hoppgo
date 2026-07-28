@@ -3,7 +3,6 @@
 import { Fragment, useMemo, useState } from "react";
 import type { ComponentType } from "react";
 
-import { useHotkey } from "@tanstack/react-hotkeys";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ArrowDown, ArrowUp, CornerDownLeft, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -44,8 +43,11 @@ import { cn, formatCurrency } from "@louez/utils";
 
 import { useStore } from "@/contexts/store-context";
 import { useDebounce } from "@/hooks/use-debounce";
+import {
+  useTrackedKeyboardHotkey,
+  useTrackedKeyboardShortcutSequence,
+} from "@/hooks/use-tracked-keyboard-shortcut";
 import { useStorefrontUrl } from "@/hooks/use-storefront-url";
-import { keyboardShortcuts } from "@/lib/keyboard-shortcuts";
 import { searchQueries } from "@/lib/queries/search.queries";
 
 import {
@@ -109,22 +111,61 @@ export const DashboardCommandPalette = ({
   const { storeSlug, currency } = useStore();
   const { getAbsoluteUrl } = useStorefrontUrl(storeSlug);
 
-  useHotkey(
-    keyboardShortcuts.commandPalette.open.hotkey,
+  const commandPaletteShortcut = useTrackedKeyboardHotkey(
+    "commandPalette",
     () => {
       setQuery("");
       setOpen((currentOpen) => !currentOpen);
     },
-    { ignoreInputs: false, requireReset: true },
+    { requireReset: true },
   );
 
-  useHotkey(
-    keyboardShortcuts.commandPalette.ai.hotkey,
+  const createReservationShortcut = useTrackedKeyboardShortcutSequence(
+    "createReservation",
+    () => {
+      setOpen(false);
+      onCreateReservation();
+    },
+    {
+      meta: {
+        name: t("shortcuts.actions.createReservation"),
+      },
+    },
+  );
+
+  const goToReservationsShortcut = useTrackedKeyboardShortcutSequence(
+    "goToReservations",
+    () => {
+      setOpen(false);
+      router.push("/dashboard/reservations");
+    },
+    {
+      meta: {
+        name: t("shortcuts.actions.goToReservations"),
+      },
+    },
+  );
+
+  const goToCalendarShortcut = useTrackedKeyboardShortcutSequence(
+    "goToCalendar",
+    () => {
+      setOpen(false);
+      router.push("/dashboard/reservations?view=calendar");
+    },
+    {
+      meta: {
+        name: t("shortcuts.actions.goToCalendar"),
+      },
+    },
+  );
+
+  const aiAssistantShortcut = useTrackedKeyboardHotkey(
+    "aiAssistant",
     () => {
       setOpen(false);
       setAIChatOpen(true);
     },
-    { enabled: showAIChat, ignoreInputs: false, requireReset: true },
+    { enabled: showAIChat, requireReset: true },
   );
 
   const toolActions: CommandAction[] = [
@@ -145,7 +186,7 @@ export const DashboardCommandPalette = ({
       keywords: "ia ai assistant demander question aide help",
       icon: SparklesIcon,
       kind: "ai",
-      shortcut: keyboardShortcuts.commandPalette.ai.label,
+      shortcut: aiAssistantShortcut.label,
     });
   }
 
@@ -276,6 +317,7 @@ export const DashboardCommandPalette = ({
           keywords: "reservation booking location commande creer ajouter new create",
           icon: CalendarIcon,
           kind: "createReservation",
+          shortcut: createReservationShortcut.label,
         },
         {
           value: "new-product",
@@ -314,6 +356,7 @@ export const DashboardCommandPalette = ({
           icon: CalendarDaysIcon,
           kind: "navigate",
           href: "/dashboard/reservations?view=calendar",
+          shortcut: goToCalendarShortcut.label,
         },
         {
           value: "reservations",
@@ -322,6 +365,7 @@ export const DashboardCommandPalette = ({
           icon: CalendarIcon,
           kind: "navigate",
           href: "/dashboard/reservations",
+          shortcut: goToReservationsShortcut.label,
         },
         {
           value: "products",
@@ -435,7 +479,7 @@ export const DashboardCommandPalette = ({
           <Search className="size-4" />
           <span className="min-w-0 flex-1 truncate text-left">{t("commandPalette.trigger")}</span>
           <kbd className="bg-muted text-muted-foreground/70 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium">
-            {keyboardShortcuts.commandPalette.open.label}
+            {commandPaletteShortcut.label}
           </kbd>
         </CommandDialogTrigger>
 

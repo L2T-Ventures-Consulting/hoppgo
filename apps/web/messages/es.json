@@ -326,6 +326,18 @@
       "help": "Ayuda",
       "feedback": "Ayuda y feedback"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Abrir la paleta de comandos",
+        "aiAssistant": "Abrir el asistente de IA",
+        "sidebar": "Mostrar u ocultar la barra lateral",
+        "search": "Enfocar la búsqueda",
+        "createReservation": "Crear una reserva",
+        "goToReservations": "Ir a reservas",
+        "goToCalendar": "Ir al calendario",
+        "save": "Guardar el formulario activo"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Seleccionar una tienda",
       "searchStores": "Buscar...",
@@ -4086,7 +4098,18 @@
         "deleteAccountWarning": "Esta accion es irreversible. Todos sus datos seran eliminados.",
         "signOut": "Cerrar sesion",
         "comingSoon": "Proximamente",
-        "administration": "Administración"
+        "administration": "Administración",
+        "keyboardShortcuts": {
+          "title": "Atajos de teclado",
+          "description": "Personaliza los atajos utilizados en tu espacio de trabajo.",
+          "recording": "Pulsa las teclas…",
+          "recordingSequence": "Introduce la secuencia y pulsa Intro…",
+          "sequenceTooShort": "Una secuencia debe contener al menos dos atajos.",
+          "hint": "Selecciona un atajo. Para una secuencia, pulsa las teclas en orden y luego Intro.",
+          "saved": "Atajos guardados",
+          "conflict": "Este atajo ya se usa para «{action}».",
+          "resetAction": "Restablecer «{action}»"
+        }
       },
       "admin": {
         "title": "Admin plataforma",

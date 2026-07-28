@@ -326,6 +326,18 @@
       "help": "Aiuto",
       "feedback": "Aiuto e feedback"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Apri la tavolozza dei comandi",
+        "aiAssistant": "Apri l’assistente IA",
+        "sidebar": "Mostra o nascondi la barra laterale",
+        "search": "Attiva la ricerca",
+        "createReservation": "Crea una prenotazione",
+        "goToReservations": "Vai alle prenotazioni",
+        "goToCalendar": "Vai al calendario",
+        "save": "Salva il modulo attivo"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Seleziona un negozio",
       "searchStores": "Cerca...",
@@ -4080,7 +4092,18 @@
         "deleteAccountWarning": "Questa azione e irreversibile. Tutti i tuoi dati saranno eliminati.",
         "signOut": "Esci",
         "comingSoon": "Prossimamente",
-        "administration": "Amministrazione"
+        "administration": "Amministrazione",
+        "keyboardShortcuts": {
+          "title": "Scorciatoie da tastiera",
+          "description": "Personalizza le scorciatoie utilizzate nel tuo spazio di lavoro.",
+          "recording": "Premi i tasti…",
+          "recordingSequence": "Inserisci la sequenza, quindi premi Invio…",
+          "sequenceTooShort": "Una sequenza deve contenere almeno due scorciatoie.",
+          "hint": "Seleziona una scorciatoia. Per una sequenza, premi i tasti in ordine e poi Invio.",
+          "saved": "Scorciatoie salvate",
+          "conflict": "Questa scorciatoia è già usata per «{action}».",
+          "resetAction": "Ripristina «{action}»"
+        }
       },
       "admin": {
         "title": "Admin piattaforma",

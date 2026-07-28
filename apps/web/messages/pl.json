@@ -326,6 +326,18 @@
       "help": "Pomoc",
       "feedback": "Pomoc i opinie"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Otwórz paletę poleceń",
+        "aiAssistant": "Otwórz asystenta AI",
+        "sidebar": "Pokaż lub ukryj pasek boczny",
+        "search": "Przejdź do wyszukiwania",
+        "createReservation": "Utwórz rezerwację",
+        "goToReservations": "Przejdź do rezerwacji",
+        "goToCalendar": "Przejdź do kalendarza",
+        "save": "Zapisz aktywny formularz"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Wybierz sklep",
       "searchStores": "Szukaj...",
@@ -4080,7 +4092,18 @@
         "deleteAccountWarning": "Ta akcja jest nieodwracalna. Wszystkie Twoje dane zostaną usunięte.",
         "signOut": "Wyloguj się",
         "comingSoon": "Wkrótce",
-        "administration": "Administracja"
+        "administration": "Administracja",
+        "keyboardShortcuts": {
+          "title": "Skróty klawiaturowe",
+          "description": "Dostosuj skróty używane w swoim obszarze roboczym.",
+          "recording": "Naciśnij klawisze…",
+          "recordingSequence": "Wprowadź sekwencję, a następnie naciśnij Enter…",
+          "sequenceTooShort": "Sekwencja musi zawierać co najmniej dwa skróty.",
+          "hint": "Wybierz skrót. Dla sekwencji naciśnij klawisze po kolei, a następnie Enter.",
+          "saved": "Skróty zapisane",
+          "conflict": "Ten skrót jest już używany dla „{action}”.",
+          "resetAction": "Zresetuj „{action}”"
+        }
       },
       "admin": {
         "title": "Admin platformy",

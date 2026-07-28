@@ -326,6 +326,18 @@
       "help": "Hilfe",
       "feedback": "Hilfe und Feedback"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Befehlspalette öffnen",
+        "aiAssistant": "KI-Assistenten öffnen",
+        "sidebar": "Seitenleiste ein- oder ausblenden",
+        "search": "Suche fokussieren",
+        "createReservation": "Reservierung erstellen",
+        "goToReservations": "Zu Reservierungen wechseln",
+        "goToCalendar": "Zum Kalender wechseln",
+        "save": "Aktives Formular speichern"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Shop auswählen",
       "searchStores": "Suchen...",
@@ -4080,7 +4092,18 @@
         "deleteAccountWarning": "Diese Aktion ist unwiderruflich. Alle Ihre Daten werden gelöscht.",
         "signOut": "Abmelden",
         "comingSoon": "Demnächst",
-        "administration": "Verwaltung"
+        "administration": "Verwaltung",
+        "keyboardShortcuts": {
+          "title": "Tastenkürzel",
+          "description": "Passe die Tastenkürzel für deinen Arbeitsbereich an.",
+          "recording": "Tasten drücken…",
+          "recordingSequence": "Sequenz eingeben und dann Enter drücken…",
+          "sequenceTooShort": "Eine Sequenz muss aus mindestens zwei Tastenkürzeln bestehen.",
+          "hint": "Wähle ein Tastenkürzel. Gib bei einer Sequenz die Tasten der Reihe nach ein und drücke dann Enter.",
+          "saved": "Tastenkürzel gespeichert",
+          "conflict": "Dieses Tastenkürzel wird bereits für „{action}“ verwendet.",
+          "resetAction": "„{action}“ zurücksetzen"
+        }
       },
       "admin": {
         "title": "Plattform-Admin",

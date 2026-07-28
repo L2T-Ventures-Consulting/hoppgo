@@ -326,6 +326,18 @@
       "help": "Hulp",
       "feedback": "Hulp en feedback"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Opdrachtpalet openen",
+        "aiAssistant": "AI-assistent openen",
+        "sidebar": "Zijbalk tonen of verbergen",
+        "search": "Zoeken activeren",
+        "createReservation": "Reservering maken",
+        "goToReservations": "Naar reserveringen gaan",
+        "goToCalendar": "Naar kalender gaan",
+        "save": "Actief formulier opslaan"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Selecteer een winkel",
       "searchStores": "Zoeken...",
@@ -4080,7 +4092,18 @@
         "deleteAccountWarning": "Deze actie is onomkeerbaar. Al uw gegevens worden verwijderd.",
         "signOut": "Uitloggen",
         "comingSoon": "Binnenkort",
-        "administration": "Beheer"
+        "administration": "Beheer",
+        "keyboardShortcuts": {
+          "title": "Sneltoetsen",
+          "description": "Pas de sneltoetsen van je werkruimte aan.",
+          "recording": "Druk op de toetsen…",
+          "recordingSequence": "Voer de reeks in en druk daarna op Enter…",
+          "sequenceTooShort": "Een reeks moet uit minstens twee sneltoetsen bestaan.",
+          "hint": "Selecteer een sneltoets. Druk voor een reeks de toetsen op volgorde in en daarna op Enter.",
+          "saved": "Sneltoetsen opgeslagen",
+          "conflict": "Deze sneltoets wordt al gebruikt voor ‘{action}’.",
+          "resetAction": "‘{action}’ herstellen"
+        }
       },
       "admin": {
         "title": "Platformbeheer",

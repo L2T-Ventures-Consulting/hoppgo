@@ -326,6 +326,18 @@
       "help": "Ajuda",
       "feedback": "Ajuda e feedback"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Abrir a paleta de comandos",
+        "aiAssistant": "Abrir o assistente de IA",
+        "sidebar": "Mostrar ou ocultar a barra lateral",
+        "search": "Focar a pesquisa",
+        "createReservation": "Criar uma reserva",
+        "goToReservations": "Ir para as reservas",
+        "goToCalendar": "Ir para o calendário",
+        "save": "Guardar o formulário ativo"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Selecionar uma loja",
       "searchStores": "Pesquisar...",
@@ -4080,7 +4092,18 @@
         "deleteAccountWarning": "Esta acao e irreversivel. Todos os seus dados serao excluidos.",
         "signOut": "Sair",
         "comingSoon": "Em breve",
-        "administration": "Administração"
+        "administration": "Administração",
+        "keyboardShortcuts": {
+          "title": "Atalhos de teclado",
+          "description": "Personalize os atalhos utilizados no seu espaço de trabalho.",
+          "recording": "Prima as teclas…",
+          "recordingSequence": "Introduza a sequência e prima Enter…",
+          "sequenceTooShort": "Uma sequência deve conter pelo menos dois atalhos.",
+          "hint": "Selecione um atalho. Para uma sequência, prima as teclas por ordem e depois Enter.",
+          "saved": "Atalhos guardados",
+          "conflict": "Este atalho já é utilizado para «{action}».",
+          "resetAction": "Repor «{action}»"
+        }
       },
       "admin": {
         "title": "Admin plataforma",

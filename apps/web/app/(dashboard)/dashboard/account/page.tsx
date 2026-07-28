@@ -19,7 +19,10 @@ import { Button } from '@louez/ui'
 import { Badge } from '@louez/ui'
 import { Separator } from '@louez/ui'
 
+import { parseKeyboardShortcutOverrides } from '@/lib/keyboard-shortcuts'
+
 import { AccountInfoForm } from './account-info-form'
+import { KeyboardShortcutsSettings } from './keyboard-shortcuts-settings'
 
 export default async function AccountSettingsPage() {
   const session = await auth()
@@ -90,6 +93,10 @@ export default async function AccountSettingsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <KeyboardShortcutsSettings
+        initialShortcuts={parseKeyboardShortcutOverrides(user.keyboardShortcuts)}
+      />
 
       {/* Security */}
       <Card>

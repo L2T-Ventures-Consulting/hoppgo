@@ -8,6 +8,8 @@ export const productAnalyticsEvents = {
   dashboardReservationOverbookingConfirmed:
     'dashboard_reservation_overbooking_confirmed',
   dashboardReservationCreationFailed: 'dashboard_reservation_creation_failed',
+  keyboardShortcutTriggered: 'keyboard_shortcut_triggered',
+  keyboardShortcutSettingsUpdated: 'keyboard_shortcut_settings_updated',
   checkoutReservationCreated: 'checkout_reservation_created',
   checkoutStepViewed: 'checkout_step_viewed',
   checkoutStepValidationFailed: 'checkout_step_validation_failed',
@@ -47,6 +49,12 @@ export const onboardingAnalyticsBaseProperties = {
 export const dashboardReservationAnalyticsBaseProperties = {
   ...productAnalyticsBaseProperties,
   feature: 'reservation_creation',
+  surface: 'dashboard',
+} as const;
+
+export const keyboardShortcutAnalyticsBaseProperties = {
+  ...productAnalyticsBaseProperties,
+  feature: 'keyboard_shortcuts',
   surface: 'dashboard',
 } as const;
 

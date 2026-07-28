@@ -326,6 +326,18 @@
       "help": "Aide",
       "feedback": "Aide et feedback"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Ouvrir la palette de commandes",
+        "aiAssistant": "Ouvrir l’assistant IA",
+        "sidebar": "Afficher ou masquer le menu latéral",
+        "search": "Placer le curseur dans la recherche",
+        "createReservation": "Créer une réservation",
+        "goToReservations": "Aller aux réservations",
+        "goToCalendar": "Aller au calendrier",
+        "save": "Enregistrer le formulaire actif"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Sélectionner une boutique",
       "searchStores": "Rechercher...",
@@ -4394,7 +4406,18 @@
         "deleteAccountWarning": "Cette action est irréversible. Toutes vos données seront supprimées.",
         "signOut": "Se déconnecter",
         "comingSoon": "Bientôt",
-        "administration": "Administration"
+        "administration": "Administration",
+        "keyboardShortcuts": {
+          "title": "Raccourcis clavier",
+          "description": "Personnalisez les raccourcis utilisés dans votre espace de travail.",
+          "recording": "Appuyez sur les touches…",
+          "recordingSequence": "Saisissez la séquence, puis appuyez sur Entrée…",
+          "sequenceTooShort": "Une séquence doit contenir au moins deux raccourcis.",
+          "hint": "Cliquez sur un raccourci. Pour une séquence, saisissez les touches dans l’ordre puis appuyez sur Entrée.",
+          "saved": "Raccourcis enregistrés",
+          "conflict": "Ce raccourci est déjà utilisé pour « {action} ».",
+          "resetAction": "Réinitialiser « {action} »"
+        }
       },
       "admin": {
         "title": "Administration",

@@ -70,6 +70,8 @@ export const users = mysqlTable('users', {
   // Analytics segmentation only (ICP discovery) — never gates features.
   productCategory: varchar('product_category', { length: 32 }),
   fleetSize: varchar('fleet_size', { length: 16 }),
+  keyboardShortcuts:
+    json('keyboard_shortcuts').$type<Record<string, string | string[]>>(),
   // Set once the user has been through the "introduce yourself" onboarding
   // step. Google users get a prefilled name but still confirm it once.
   profileCompletedAt: timestamp('profile_completed_at', { mode: 'date' }),

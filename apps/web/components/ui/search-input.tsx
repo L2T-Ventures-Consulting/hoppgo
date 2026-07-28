@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { type RegisterableHotkey, useHotkey } from "@tanstack/react-hotkeys";
 
 import { Search, X } from "lucide-react";
 
@@ -12,17 +11,15 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@louez/ui";
-
-import { keyboardShortcuts } from "@/lib/keyboard-shortcuts";
 import { cn } from "@louez/utils";
+
+import { useTrackedKeyboardHotkey } from "@/hooks/use-tracked-keyboard-shortcut";
 
 type SearchInputProps = Omit<React.ComponentProps<typeof InputGroupInput>, "type"> & {
   clearLabel: string;
   enableShortcut?: boolean;
   groupClassName?: string;
   onClear?: () => void;
-  shortcutHotkey?: RegisterableHotkey;
-  shortcutLabel?: string;
   showShortcutHint?: boolean;
 };
 
@@ -46,8 +43,6 @@ function SearchInput(
     onChange,
     onClear,
     onKeyDown,
-    shortcutHotkey = keyboardShortcuts.search.focus.hotkey,
-    shortcutLabel = keyboardShortcuts.search.focus.label,
     showShortcutHint = true,
     value,
     ...props
@@ -57,9 +52,8 @@ function SearchInput(
   const inputRef = React.useRef<HTMLInputElement>(null);
   const stringValue = typeof value === "string" ? value : (value?.toString() ?? "");
   const hasValue = stringValue.length > 0;
-
-  useHotkey(
-    shortcutHotkey,
+  const shortcut = useTrackedKeyboardHotkey(
+    "search",
     () => {
       inputRef.current?.focus();
     },
@@ -107,7 +101,7 @@ function SearchInput(
       )}
       {!hasValue && showShortcutHint && enableShortcut && (
         <InputGroupAddon align="inline-end">
-          <InputGroupText>{shortcutLabel}</InputGroupText>
+          <InputGroupText>{shortcut.label}</InputGroupText>
         </InputGroupAddon>
       )}
     </InputGroup>

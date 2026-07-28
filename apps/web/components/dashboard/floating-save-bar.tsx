@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@louez/ui';
 import { cn } from '@louez/utils';
 
+import { useKeyboardHotkey } from '@/components/shared/keyboard-shortcuts-provider';
 import { setSaveBarVisible } from '@/hooks/use-save-bar';
 
 interface FloatingSaveBarProps {
@@ -57,6 +58,7 @@ export function FloatingSaveBar({
   className,
 }: FloatingSaveBarProps) {
   const t = useTranslations('common');
+  const saveShortcut = useKeyboardHotkey('save');
 
   // Let other bottom-fixed UI (the PWA install banner) yield while the save bar
   // can be on screen, so it never covers the Save/Cancel actions.
@@ -105,10 +107,14 @@ export function FloatingSaveBar({
               type={onSubmit || formId ? 'button' : 'submit'}
               form={formId}
               disabled={isLoading}
+              data-keyboard-shortcut-save={isDirty ? '' : undefined}
               onClick={onSubmit}
             >
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('save')}
+              <kbd className="font-mono text-[10px] text-current/70">
+                {saveShortcut.label}
+              </kbd>
             </Button>
           </div>
         </div>

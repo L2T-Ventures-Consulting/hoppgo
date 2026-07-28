@@ -326,6 +326,18 @@
       "help": "Help",
       "feedback": "Help and feedback"
     },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Open the command palette",
+        "aiAssistant": "Open the AI assistant",
+        "sidebar": "Show or hide the sidebar",
+        "search": "Focus search",
+        "createReservation": "Create a reservation",
+        "goToReservations": "Go to reservations",
+        "goToCalendar": "Go to calendar",
+        "save": "Save the active form"
+      }
+    },
     "storeSwitcher": {
       "selectStore": "Select a store",
       "searchStores": "Search...",
@@ -4394,7 +4406,18 @@
         "deleteAccountWarning": "This action is irreversible. All your data will be deleted.",
         "signOut": "Sign out",
         "comingSoon": "Coming soon",
-        "administration": "Administration"
+        "administration": "Administration",
+        "keyboardShortcuts": {
+          "title": "Keyboard shortcuts",
+          "description": "Customize the shortcuts used in your workspace.",
+          "recording": "Press the keys…",
+          "recordingSequence": "Enter the sequence, then press Enter…",
+          "sequenceTooShort": "A sequence must contain at least two shortcuts.",
+          "hint": "Select a shortcut. For a sequence, press the keys in order and then press Enter.",
+          "saved": "Shortcuts saved",
+          "conflict": "This shortcut is already used for “{action}”.",
+          "resetAction": "Reset “{action}”"
+        }
       },
       "admin": {
         "title": "Platform Admin",
