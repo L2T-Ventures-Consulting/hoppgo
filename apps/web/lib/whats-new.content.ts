@@ -16,19 +16,41 @@ import { locales } from "@/i18n/config";
  * cannot read the filesystem. Locales without their own file fall back to
  * English rather than showing an empty page.
  */
-const CONTENT_ROOT = join(process.cwd(), "content", "whats-new");
+
+/**
+ * `process.cwd()` is not the same folder everywhere: `apps/web` under `next dev`
+ * and turbo, but the monorepo root in the standalone build, whose entrypoint is
+ * `node apps/web/server.js` from `/app`. Both roots are tried, and the one that
+ * answers is kept — a single hardcoded path would silently serve announcements
+ * with no body in production.
+ */
+const CONTENT_ROOTS = [
+  join(process.cwd(), "content", "whats-new"),
+  join(process.cwd(), "apps", "web", "content", "whats-new"),
+];
 
 const FALLBACK_LOCALE = "en";
 
 /** Trusted, repo-authored content: GFM on, no sanitiser needed. */
 marked.setOptions({ gfm: true });
 
+/** Set on the first successful read, so later requests skip the probing. */
+let resolvedRoot: string | null = null;
+
 const readBody = async (announcementId: string, locale: string) => {
-  try {
-    return await readFile(join(CONTENT_ROOT, announcementId, `${locale}.md`), "utf8");
-  } catch {
-    return null;
+  const roots = resolvedRoot ? [resolvedRoot] : CONTENT_ROOTS;
+
+  for (const root of roots) {
+    try {
+      const markdown = await readFile(join(root, announcementId, `${locale}.md`), "utf8");
+      resolvedRoot = root;
+      return markdown;
+    } catch {
+      // Missing translation or wrong root — try the next one, then give up.
+    }
   }
+
+  return null;
 };
 
 /**
