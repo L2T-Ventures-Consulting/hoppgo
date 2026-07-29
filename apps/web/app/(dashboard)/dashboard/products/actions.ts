@@ -47,6 +47,8 @@ import {
   updateUnits,
 } from "@/lib/utils/unit-mutations";
 
+import { hasTrackedUnitCapacityConflict } from "./util.product-unit-capacity";
+
 async function getStoreForUser() {
   return getCurrentStore();
 }
@@ -575,8 +577,9 @@ export async function updateProduct(productId: string, data: ProductInput) {
   }
 
   // Prevent edits that would make active unit capacity lower than
-  // active/future reserved quantities for any combination.
+  // the peak concurrent active/future reserved quantities.
   if (trackUnits) {
+    const capacityCheckStart = new Date();
     const proposedAvailableByCombination = new Map<string, number>();
 
     for (const unit of unitsToUpdate) {
@@ -603,6 +606,8 @@ export async function updateProduct(productId: string, data: ProductInput) {
 
     const reservedRows = await db
       .select({
+        startDate: reservations.startDate,
+        endDate: reservations.endDate,
         combinationKey: reservationItems.combinationKey,
         quantity: reservationItems.quantity,
       })
@@ -611,28 +616,19 @@ export async function updateProduct(productId: string, data: ProductInput) {
       .where(
         and(
           eq(reservationItems.productId, productId),
+          eq(reservations.storeId, store.id),
           inArray(reservations.status, blockingStatuses),
-          gte(reservations.endDate, new Date()),
+          gte(reservations.endDate, capacityCheckStart),
         ),
       );
 
-    const reservedByCombination = new Map<string, number>();
-    for (const row of reservedRows) {
-      const combinationKey = row.combinationKey || DEFAULT_COMBINATION_KEY;
-      reservedByCombination.set(
-        combinationKey,
-        (reservedByCombination.get(combinationKey) || 0) + row.quantity,
-      );
-    }
-
-    const hasCapacityConflict = [...reservedByCombination.entries()].some(
-      ([combinationKey, reservedQty]) => {
-        const availableQty = proposedAvailableByCombination.get(combinationKey) || 0;
-        return reservedQty > availableQty;
-      },
-    );
-
-    if (hasCapacityConflict) {
+    if (
+      hasTrackedUnitCapacityConflict({
+        availableByCombination: proposedAvailableByCombination,
+        reservations: reservedRows,
+        from: capacityCheckStart,
+      })
+    ) {
       return { error: "errors.unitStatusConflictsWithReservations" };
     }
   }

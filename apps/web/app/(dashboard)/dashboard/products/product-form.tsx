@@ -420,7 +420,7 @@ export function ProductForm({
           title: product ? t("productUpdated") : t("productCreated"),
           type: "success",
         });
-        router.push("/dashboard/products");
+        router.push(product ? `/dashboard/products/${product.id}` : "/dashboard/products");
       } catch (error) {
         if (copyDraft) {
           clearProductCopyDraft();
