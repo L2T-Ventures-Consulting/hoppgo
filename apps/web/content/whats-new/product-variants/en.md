@@ -22,7 +22,7 @@ This is where it pays off: instead of a "Ski suit S", a "Ski suit M" and a "Ski 
 
 ## Not for everyone, and that is fine
 
-Variants go hand in hand with advanced stock management: they make sense if you track your units one by one. If your gear is simply counted by quantity, do not bother — **create one product and duplicate it**, it is shorter and just as correct.
+Variants go hand in hand with advanced stock management: they make sense if you track your units one by one. If your gear is simply counted by quantity, do not bother — **[create one product](/dashboard/products/new) and duplicate it**, it is shorter and just as correct.
 
 ## Already have products duplicated by size?
 

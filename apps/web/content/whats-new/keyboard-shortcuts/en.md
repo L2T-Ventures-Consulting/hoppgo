@@ -19,7 +19,7 @@ The last three are **sequences**: two keys pressed one after the other, with no 
 
 ## Yours, if ours do not suit you
 
-None of these eight is fixed. In **My account**, click the one you want to change and **simply press the keys** you prefer — no dropdown, no syntax to learn. For a sequence, enter the keys in order then press Enter.
+None of these eight is fixed. In [**My account**](/dashboard/account), click the one you want to change and **simply press the keys** you prefer — no dropdown, no syntax to learn. For a sequence, enter the keys in order then press Enter.
 
 If the combination is already taken, Louez refuses it and tells you **which action owns it**, rather than quietly breaking another one. And each shortcut resets to its original value on its own, without wiping the rest.
 

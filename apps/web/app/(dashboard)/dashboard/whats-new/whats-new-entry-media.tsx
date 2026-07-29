@@ -14,15 +14,21 @@ interface WhatsNewEntryMediaProps {
 }
 
 /**
- * Illustration at the top of a changelog entry. Videos are self-hosted `<video>`
- * elements: the CSP allows `media-src 'self'` but not third-party frames.
+ * Illustration of an announcement. Videos are self-hosted `<video>` elements:
+ * the CSP allows `media-src 'self'` but not third-party frames.
+ *
+ * The box carries the demos' own 1734:1080 ratio rather than a 16:9 one. Forcing
+ * 16:9 would either crop the recordings — their zooms run edge to edge, so the
+ * top and bottom of the UI would go — or frame them in filler bars. The ratio is
+ * declared here rather than measured so the space is reserved before the video's
+ * metadata loads; recording at another ratio means updating this class.
  */
 export const WhatsNewEntryMedia = ({ className, label, media }: WhatsNewEntryMediaProps) => (
-  <div className={cn("bg-muted relative aspect-video w-full overflow-hidden", className)}>
+  <div className={cn("bg-muted relative aspect-1734/1080 w-full overflow-hidden", className)}>
     {media.type === "video" ? (
       <video
         aria-label={label}
-        className="absolute inset-0 size-full object-cover"
+        className="absolute inset-0 size-full object-contain"
         controls
         playsInline
         poster={media.posterSrc}

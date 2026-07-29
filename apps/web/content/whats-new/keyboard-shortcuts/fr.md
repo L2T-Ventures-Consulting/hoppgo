@@ -19,7 +19,7 @@ Les trois derniers sont des **séquences** : deux touches frappées l'une après
 
 ## Les vôtres, si les nôtres ne vous vont pas
 
-Aucun de ces huit raccourcis n'est figé. Dans **Mon compte**, cliquez sur celui que vous voulez changer et **appuyez simplement sur les touches** que vous préférez — pas de menu déroulant, pas de syntaxe à apprendre. Pour une séquence, saisissez les touches dans l'ordre puis Entrée.
+Aucun de ces huit raccourcis n'est figé. Dans [**Mon compte**](/dashboard/account), cliquez sur celui que vous voulez changer et **appuyez simplement sur les touches** que vous préférez — pas de menu déroulant, pas de syntaxe à apprendre. Pour une séquence, saisissez les touches dans l'ordre puis Entrée.
 
 Si la combinaison est déjà prise, Louez refuse et vous dit **à quelle action elle appartient**, plutôt que d'en casser une autre en silence. Et chaque raccourci se remet à sa valeur d'origine individuellement, sans tout réinitialiser.
 

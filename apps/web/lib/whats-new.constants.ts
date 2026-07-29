@@ -112,6 +112,11 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     date: "2026-07-28",
     titleKey: "announcements.sidebar-simplified.title",
     descriptionKey: "announcements.sidebar-simplified.description",
+    media: {
+      type: "video",
+      src: "/videos/whats-new/sidebar-simplified.mp4",
+      posterSrc: "/images/whats-new/sidebar-simplified.webp",
+    },
     icon: PanelLeft,
   },
   {
@@ -122,6 +127,11 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.navigation-refresh.description",
     featureId: "navigation-refresh",
     href: "/dashboard/settings",
+    media: {
+      type: "video",
+      src: "/videos/whats-new/navigation-refresh.mp4",
+      posterSrc: "/images/whats-new/navigation-refresh.webp",
+    },
     icon: Search,
   },
   {
@@ -132,6 +142,11 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.product-variants.description",
     featureId: "product-variants",
     href: "/dashboard/products",
+    media: {
+      type: "video",
+      src: "/videos/whats-new/product-variants.mp4",
+      posterSrc: "/images/whats-new/product-variants.webp",
+    },
     icon: Shapes,
   },
   {
@@ -142,6 +157,11 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.product-detail-hub.description",
     featureId: "product-detail-hub",
     href: "/dashboard/products",
+    media: {
+      type: "video",
+      src: "/videos/whats-new/product-detail-hub.mp4",
+      posterSrc: "/images/whats-new/product-detail-hub.webp",
+    },
     icon: LayoutDashboard,
   },
   {
@@ -152,6 +172,11 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.reservations-unified-views.description",
     featureId: "reservations-unified-views",
     href: "/dashboard/reservations",
+    media: {
+      type: "video",
+      src: "/videos/whats-new/reservations-unified-views.mp4",
+      posterSrc: "/images/whats-new/reservations-unified-views.webp",
+    },
     icon: CalendarRange,
   },
   {
@@ -172,6 +197,11 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.reservation-creation-simplified.description",
     featureId: "reservation-creation-simplified",
     href: "/dashboard/reservations/new",
+    media: {
+      type: "video",
+      src: "/videos/whats-new/reservation-creation-simplified.mp4",
+      posterSrc: "/images/whats-new/reservation-creation-simplified.webp",
+    },
     icon: CalendarPlus,
   },
   {

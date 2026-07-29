@@ -13,7 +13,7 @@ Accents and case are ignored: “parametres” finds “Paramètres”.
 
 ## A search box inside settings
 
-Settings run to more than twenty pages. The search box at the top of the navigation does more than open the right page: it scrolls to the exact setting and **highlights** it for a few seconds, long enough for your eye to catch it.
+[Settings](/dashboard/settings) run to more than twenty pages. The search box at the top of the navigation does more than open the right page: it scrolls to the exact setting and **highlights** it for a few seconds, long enough for your eye to catch it.
 
 ## Breadcrumbs that trace the whole path
 

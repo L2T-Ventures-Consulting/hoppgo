@@ -13,7 +13,7 @@ Les accents et la casse sont ignorés : « parametres » trouve « Paramètres �
 
 ## Une recherche dans les réglages
 
-Les paramètres comptent plus de vingt pages. La barre de recherche en haut de la navigation ne se contente pas d'ouvrir la bonne page : elle fait défiler jusqu'au réglage exact et le **surligne** quelques secondes, le temps que votre œil le trouve.
+Les [paramètres](/dashboard/settings) comptent plus de vingt pages. La barre de recherche en haut de la navigation ne se contente pas d'ouvrir la bonne page : elle fait défiler jusqu'au réglage exact et le **surligne** quelques secondes, le temps que votre œil le trouve.
 
 ## Un fil d'Ariane qui retrace tout le chemin
 

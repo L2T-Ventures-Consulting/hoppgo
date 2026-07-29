@@ -40,6 +40,25 @@ export const WhatsNewPageContent = () => {
     [announcements, filter],
   );
 
+  // Which entries put their demo on the left. Only entries that actually carry
+  // media are counted, and the tally runs across month sections: a text-only
+  // entry between two demos must not flip the rhythm, and neither must the
+  // boundary between two months.
+  const mediaLeadingIds = useMemo(() => {
+    const ids = new Set<string>();
+    let seen = 0;
+
+    for (const group of groups) {
+      for (const announcement of group.announcements) {
+        if (!announcement.media) continue;
+        if (seen % 2 === 1) ids.add(announcement.id);
+        seen += 1;
+      }
+    }
+
+    return ids;
+  }, [groups]);
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -74,6 +93,7 @@ export const WhatsNewPageContent = () => {
                   <Fragment key={announcement.id}>
                     <WhatsNewEntryCard
                       announcement={announcement}
+                      isMediaLeading={mediaLeadingIds.has(announcement.id)}
                       isUnread={unread.has(announcement.id)}
                     />
                     {index < group.announcements.length - 1 && <Separator className="my-2" />}

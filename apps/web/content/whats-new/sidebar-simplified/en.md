@@ -2,9 +2,9 @@ Twelve entries in the menu, two of which showed roughly the same thing — the c
 
 ## Where everything lives now
 
-- **The calendar** is now a view of the Reservations page. List, calendar, planning: three angles on the same reservations, one menu entry.
+- **The calendar** is now a view of the [Reservations](/dashboard/reservations) page. List, calendar, planning: three angles on the same reservations, one menu entry.
 - **Inventory** lives on the product's own page, in the Inventory section. With per-unit tracking you find every unit there; in simple quantity mode, the stock available.
-- **Subscription** and **referrals** moved into Settings, alongside the rest of your account management.
+- [**Subscription**](/dashboard/settings/subscription) and [**referrals**](/dashboard/settings/referrals) moved into [Settings](/dashboard/settings), alongside the rest of your account management.
 
 ## A product page you read before you edit
 

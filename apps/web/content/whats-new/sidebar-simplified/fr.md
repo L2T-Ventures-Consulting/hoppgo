@@ -2,9 +2,9 @@ Douze entrées dans le menu, dont deux qui montraient à peu près la même chos
 
 ## Où chaque chose se trouve maintenant
 
-- **Le calendrier** est devenu une vue de la page Réservations. Liste, calendrier, planning : trois angles sur les mêmes réservations, une seule entrée dans le menu.
+- **Le calendrier** est devenu une vue de la page [Réservations](/dashboard/reservations). Liste, calendrier, planning : trois angles sur les mêmes réservations, une seule entrée dans le menu.
 - **L'inventaire** vit sur la fiche du produit concerné, dans la section Inventaire. En suivi par unité, vous y retrouvez chaque exemplaire ; en quantité simple, le stock disponible.
-- **L'abonnement** et **le parrainage** ont rejoint les Paramètres, avec le reste de la gestion de votre compte.
+- [**L'abonnement**](/dashboard/settings/subscription) et [**le parrainage**](/dashboard/settings/referrals) ont rejoint les [Paramètres](/dashboard/settings), avec le reste de la gestion de votre compte.
 
 ## Une fiche produit qui se lit avant de se modifier
 

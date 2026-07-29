@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { ArrowRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { Badge, Button } from "@louez/ui";
@@ -24,6 +24,8 @@ interface WhatsNewEntryCardProps {
   announcement: WhatsNewAnnouncement;
   /** Never opened by this user — flagged so the feed can be scanned at a glance. */
   isUnread?: boolean;
+  /** Puts the demo on the left. Alternated down the feed to break the rhythm. */
+  isMediaLeading?: boolean;
 }
 
 /**
@@ -34,7 +36,11 @@ interface WhatsNewEntryCardProps {
  * points at. CSS `target:` cannot be used here: the App Router navigates with
  * `history.pushState`, which never sets the document's `:target` element.
  */
-export const WhatsNewEntryCard = ({ announcement, isUnread = false }: WhatsNewEntryCardProps) => {
+export const WhatsNewEntryCard = ({
+  announcement,
+  isMediaLeading = false,
+  isUnread = false,
+}: WhatsNewEntryCardProps) => {
   const t = useTranslations("dashboard.whatsNew");
   const format = useFormatter();
   const anchorId = useWhatsNewAnchorId();
@@ -75,38 +81,43 @@ export const WhatsNewEntryCard = ({ announcement, isUnread = false }: WhatsNewEn
         )}
       </div>
 
-      <h3 className="mt-3 text-lg font-semibold tracking-tight text-balance sm:text-xl">
-        {/* The `after` overlay stretches this link over the whole entry, so the
-            "Try it" action stays a real sibling link instead of an invalid
-            nested anchor. */}
-        <Link
-          className="focus-visible:ring-ring rounded-sm outline-none after:absolute after:inset-0 after:content-[''] group-hover:underline focus-visible:ring-2"
-          href={getWhatsNewDetailHref(announcement.id)}
-        >
-          {title}
-        </Link>
-      </h3>
+      {/* Copy and demo side by side, the side alternating down the feed. The
+          meta line above spans both, so "mark as read" never collides with the
+          video. Reversing with flex keeps the copy first in the DOM: the
+          reading order stays title-then-demo whatever the visual order. */}
+      <div
+        className={cn(
+          "mt-3 flex flex-col gap-4 sm:items-start sm:gap-6",
+          isMediaLeading ? "sm:flex-row-reverse" : "sm:flex-row",
+        )}
+      >
+        <div className="min-w-0 flex-1">
+          <h3 className="text-lg font-semibold tracking-tight text-balance sm:text-xl">
+            {/* The `after` overlay stretches this link over the whole entry:
+                anywhere on the card opens the announcement. The feed carries no
+                action of its own — "Try it" lives on the announcement's page,
+                once the reader knows what they would be trying. */}
+            <Link
+              className="focus-visible:ring-ring rounded-sm outline-none after:absolute after:inset-0 after:content-[''] group-hover:underline focus-visible:ring-2"
+              href={getWhatsNewDetailHref(announcement.id)}
+            >
+              {title}
+            </Link>
+          </h3>
 
-      <p className="text-muted-foreground mt-2 max-w-2xl text-sm text-pretty sm:text-base">
-        {t(announcement.descriptionKey)}
-      </p>
+          <p className="text-muted-foreground mt-2 text-sm text-pretty sm:text-base">
+            {t(announcement.descriptionKey)}
+          </p>
+        </div>
 
-      {announcement.media && (
-        <WhatsNewEntryThumbnail className="mt-4" label={title} media={announcement.media} />
-      )}
-
-      {announcement.href && (
-        /* `relative` paints the button above the title's overlay. */
-        <Button
-          className="relative mt-4"
-          render={<Link href={announcement.href} />}
-          size="sm"
-          variant="outline"
-        >
-          {t("tryIt")}
-          <ArrowRight className="size-4" />
-        </Button>
-      )}
+        {announcement.media && (
+          <WhatsNewEntryThumbnail
+            className="w-full sm:w-64 lg:w-80"
+            label={title}
+            media={announcement.media}
+          />
+        )}
+      </div>
     </article>
   );
 };

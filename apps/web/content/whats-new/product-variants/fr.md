@@ -22,7 +22,7 @@ C'est là que ça change tout : au lieu d'une fiche « Combinaison ski S », une
 
 ## Ce n'est pas pour tout le monde, et c'est normal
 
-Les variantes vont de pair avec la gestion de stock avancée : elles ont du sens si vous suivez vos exemplaires un par un. Si votre matériel se compte simplement en quantité, ne vous embêtez pas — **créez un produit et dupliquez-le**, c'est plus court et tout aussi correct.
+Les variantes vont de pair avec la gestion de stock avancée : elles ont du sens si vous suivez vos exemplaires un par un. Si votre matériel se compte simplement en quantité, ne vous embêtez pas — **[créez un produit](/dashboard/products/new) et dupliquez-le**, c'est plus court et tout aussi correct.
 
 ## Vous avez déjà des produits dupliqués par taille ?
 
