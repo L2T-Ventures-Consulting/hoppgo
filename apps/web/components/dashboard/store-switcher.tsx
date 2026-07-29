@@ -184,7 +184,11 @@ export function StoreSwitcher({ stores, currentStoreId }: StoreSwitcherProps) {
             role="combobox"
             aria-expanded={open}
             aria-label={t("selectStore")}
-            className="h-auto w-full [&>span]:w-full justify-between px-3 py-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+            className={cn(
+              "h-auto w-full [&>span]:w-full justify-between px-3 py-2",
+              "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0",
+              "hover:bg-background aria-expanded:shadow-[0_0_1px_0px_var(--color-border)] aria-expanded:bg-background",
+            )}
             disabled={isPending}
           />
         }

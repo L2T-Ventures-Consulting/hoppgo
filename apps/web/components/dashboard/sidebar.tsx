@@ -242,7 +242,7 @@ const UserMenu = ({
         render={
           <Button
             variant="ghost"
-            className="hover:bg-sidebar-accent min-w-0 *:w-full h-12 w-full justify-start gap-3 px-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:px-0"
+            className="hover:bg-background aria-expanded:bg-background aria-expanded:shadow-[0_0_1px_0px_var(--color-border)] min-w-0 *:w-full h-12 w-full justify-start gap-3 px-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:px-0"
           />
         }
       >
@@ -323,9 +323,9 @@ export const DashboardSidebar = ({
           planSlug={planSlug}
         />
 
-        <SidebarContent className="max-md:px-2">
+        <SidebarContent className="max-md:px-2 ">
           {navigationSections.map((section, index) => (
-            <div key={section.labelKey || "main"}>
+            <div key={section.labelKey || "main"} className="w-full">
               {index > 0 && <SidebarSeparator />}
               <DashboardNavSection
                 items={section.items}
