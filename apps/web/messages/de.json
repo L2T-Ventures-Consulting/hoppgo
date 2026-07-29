@@ -4597,6 +4597,7 @@
       "sms": "SMS",
       "subscription": "Abonnement",
       "account": "Konto",
+      "whatsNew": "Neuigkeiten",
       "settings": "Einstellungen",
       "settingsAdmin": "Administration",
       "settingsApi": "API",
@@ -4623,6 +4624,64 @@
       "emptyTitle": "Nichts zu prüfen",
       "emptyDescription": "Neue Anfragen erscheinen hier.",
       "viewAllPending": "Alle offenen Anfragen ansehen"
+    },
+    "whatsNew": {
+      "title": "Neuigkeiten",
+      "description": "Die neuesten Verbesserungen von Louez",
+      "pageDescription": "Alles, was wir in Louez veröffentlicht haben – das Neueste zuerst und warum wir es gebaut haben.",
+      "newLabel": "Neu",
+      "newFeatureLabel": "Neue Funktion",
+      "unread": "Ungelesen",
+      "markAsRead": "Als gelesen markieren",
+      "markAllAsRead": "Alle als gelesen markieren",
+      "tryIt": "Ausprobieren",
+      "viewAll": "Alle Neuigkeiten ansehen",
+      "backToList": "Alle Neuigkeiten",
+      "emptyTitle": "Noch nichts hier",
+      "empty": "Noch keine Neuigkeiten.",
+      "filterEmpty": "In dieser Kategorie gibt es noch nichts.",
+      "filters": {
+        "all": "Alle"
+      },
+      "categories": {
+        "feature": "Neu",
+        "improvement": "Verbessert",
+        "fix": "Behoben"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "Ein kürzeres Menü, klar einsortierte Seiten",
+          "description": "Der Kalender wandert zu den Reservierungen, das Inventar auf die Produktseite, Abonnement und Empfehlungen in die Einstellungen: vier Einträge weniger im Menü — und nichts geht verloren."
+        },
+        "product-variants": {
+          "title": "Varianten, ganz einfach",
+          "description": "Die früher von Hand eingetippten Merkmale sind jetzt echte Varianten, die im ganzen Shop gelten. Größe und Farbe stehen bereit, sobald Sie die Verfolgung je Exemplar einschalten, Schuhgröße und Material sind einen Klick entfernt — und Sie brauchen keine Produktseite je Größe mehr."
+        },
+        "product-detail-hub": {
+          "title": "Jedes Produkt hat jetzt seine eigene Seite",
+          "description": "Ein Produkt zu öffnen hieß bisher, sein Formular zu öffnen. Jetzt hat es eine echte Seite: was es einbringt, wie oft es rausgeht, wie der Bestand steht, wer es reserviert hat und was mit jedem Exemplar passiert ist."
+        },
+        "reservations-unified-views": {
+          "title": "Ihre Reservierungen öffnen im Kalender",
+          "description": "Die Seite Reservierungen öffnet jetzt im Kalender. Er scrollt durchgehend von Woche zu Woche, ohne Seitenwechsel, und ein Mouseover zeigt die komplette Reservierung. Liste und Belegungsplan bleiben einen Klick entfernt."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Zwei Abschnitte, und Ihr Produkt ist online",
+          "description": "Der vierstufige Assistent weicht einer einzigen Seite. Zubehör und Versicherung werden beim Anlegen nicht mehr abgefragt — die ergänzen Sie später, wenn Sie sie brauchen. Rechts: eine Vorschau der Seite und die Liste der offenen Angaben."
+        },
+        "keyboard-shortcuts": {
+          "title": "Für alle, die die Tastatur nicht loslassen",
+          "description": "Acht tägliche Aktionen lassen sich über die Tastatur öffnen, und jede davon können Sie in Ihrem Konto neu belegen — auch die Tastenfolgen. Wer den Tag in Louez verbringt, wird es lieben. Alle anderen arbeiten weiter mit der Maus."
+        },
+        "navigation-refresh": {
+          "title": "⌘K bringt Sie überallhin",
+          "description": "Die Befehlspalette öffnet jede Seite, jede Einstellung, jedes Produkt, jede Kundin und jede Reservierung. In den Einstellungen führt Sie eine Suche genau zur richtigen Option und hebt sie hervor. Und der Pfad zeigt Ihnen immer, wo Sie sind."
+        },
+        "reservation-creation-simplified": {
+          "title": "Eine Reservierung, eine Seite",
+          "description": "Keine Schritte mehr abzuarbeiten: Kunde, Zeitraum, Produkte und Lieferung passen auf eine Seite, die Zusammenfassung immer daneben. Und alles, wofür man die Reservierung sonst erneut öffnen musste — Rabatt, ausgehandelter Preis, Kaution, Laufkundschaft — erledigen Sie direkt hier."
+        }
+      }
     },
     "aiCredits": {
       "title": "KI-Guthaben",

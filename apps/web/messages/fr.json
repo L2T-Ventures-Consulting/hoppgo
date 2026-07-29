@@ -4783,6 +4783,7 @@
       "sms": "SMS",
       "subscription": "Abonnement",
       "account": "Compte",
+      "whatsNew": "Nouveautés",
       "settings": "Paramètres",
       "settingsAdmin": "Administration",
       "settingsApi": "API",
@@ -4809,6 +4810,64 @@
       "emptyTitle": "Rien à traiter",
       "emptyDescription": "Les nouvelles demandes apparaîtront ici.",
       "viewAllPending": "Voir toutes les demandes en attente"
+    },
+    "whatsNew": {
+      "title": "Nouveautés",
+      "description": "Les dernières améliorations de Louez",
+      "pageDescription": "Tout ce que nous avons livré sur Louez, du plus récent au plus ancien — et pourquoi.",
+      "newLabel": "Nouveau",
+      "newFeatureLabel": "Nouvelle fonctionnalité",
+      "unread": "Non lue",
+      "markAsRead": "Marquer comme lue",
+      "markAllAsRead": "Tout marquer comme lu",
+      "tryIt": "Essayer",
+      "viewAll": "Voir toutes les nouveautés",
+      "backToList": "Toutes les nouveautés",
+      "emptyTitle": "Rien pour le moment",
+      "empty": "Aucune nouveauté pour le moment.",
+      "filterEmpty": "Aucune nouveauté dans cette catégorie pour l'instant.",
+      "filters": {
+        "all": "Tout"
+      },
+      "categories": {
+        "feature": "Nouveauté",
+        "improvement": "Amélioration",
+        "fix": "Correctif"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "Un menu plus court, des pages mieux rangées",
+          "description": "Le calendrier rejoint les réservations, l'inventaire rejoint la fiche produit, l'abonnement et le parrainage rejoignent les paramètres : quatre entrées en moins dans le menu, et rien de perdu."
+        },
+        "product-variants": {
+          "title": "Des variantes simples",
+          "description": "Les attributs que vous saisissiez à la main deviennent de vraies variantes, partagées par toute votre boutique. Taille et Couleur sont prêtes dès que vous activez le suivi par unité, Pointure et Matière s'ajoutent en un clic — et vous n'avez plus besoin d'une fiche produit par taille."
+        },
+        "product-detail-hub": {
+          "title": "Chaque produit a désormais sa fiche",
+          "description": "Ouvrir un produit, c'était ouvrir son formulaire. Il a maintenant une vraie fiche : ce qu'il rapporte, combien il tourne, où en est son stock, qui l'a réservé et ce qui est arrivé à chacun de ses exemplaires."
+        },
+        "reservations-unified-views": {
+          "title": "Vos réservations s'ouvrent sur le calendrier",
+          "description": "La page Réservations s'ouvre désormais sur le calendrier. Il défile en continu, d'une semaine à l'autre sans changer de page, et un simple survol vous donne toute la réservation. La liste et le planning par produit restent à un clic."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Deux sections, et votre produit est en ligne",
+          "description": "L'assistant en quatre étapes laisse place à une seule page. Les accessoires et l'assurance ne sont plus demandés à la création — vous les ajouterez plus tard si vous en avez besoin. À droite, un aperçu de la fiche et la liste de ce qu'il reste à remplir."
+        },
+        "keyboard-shortcuts": {
+          "title": "Pour ceux qui ne lâchent pas le clavier",
+          "description": "Huit actions du quotidien s'ouvrent au clavier, et chacune se remappe dans votre compte — y compris les séquences à deux touches. Si vous passez vos journées dans Louez, c'est pour vous. Sinon, tout continue de se faire à la souris."
+        },
+        "navigation-refresh": {
+          "title": "⌘K vous emmène partout",
+          "description": "La palette de commandes ouvre n'importe quelle page, n'importe quel réglage, n'importe quel produit, client ou réservation. Dans les paramètres, une recherche vous conduit au réglage exact et le surligne. Et le fil d'Ariane vous dit toujours où vous êtes."
+        },
+        "reservation-creation-simplified": {
+          "title": "Une réservation, une seule page",
+          "description": "Plus d'étapes à enchaîner : client, période, produits et livraison tiennent sur une page, avec le récapitulatif toujours à côté. Et tout ce qui obligeait à rouvrir la réservation ensuite — une remise, un prix négocié, la caution, un client de passage — se règle maintenant sur place."
+        }
+      }
     },
     "aiCredits": {
       "title": "Crédits IA",

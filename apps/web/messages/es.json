@@ -4603,6 +4603,7 @@
       "sms": "SMS",
       "subscription": "Suscripción",
       "account": "Cuenta",
+      "whatsNew": "Novedades",
       "settings": "Ajustes",
       "settingsAdmin": "Administración",
       "settingsApi": "API",
@@ -4629,6 +4630,64 @@
       "emptyTitle": "Nada que revisar",
       "emptyDescription": "Las nuevas solicitudes aparecerán aquí.",
       "viewAllPending": "Ver todas las solicitudes pendientes"
+    },
+    "whatsNew": {
+      "title": "Novedades",
+      "description": "Las últimas mejoras de Louez",
+      "pageDescription": "Todo lo que hemos lanzado en Louez, lo más reciente primero, y por qué lo hicimos.",
+      "newLabel": "Nuevo",
+      "newFeatureLabel": "Nueva función",
+      "unread": "Sin leer",
+      "markAsRead": "Marcar como leída",
+      "markAllAsRead": "Marcar todo como leído",
+      "tryIt": "Probar",
+      "viewAll": "Ver todas las novedades",
+      "backToList": "Todas las novedades",
+      "emptyTitle": "Aquí no hay nada todavía",
+      "empty": "Aún no hay novedades.",
+      "filterEmpty": "Aún no hay novedades en esta categoría.",
+      "filters": {
+        "all": "Todo"
+      },
+      "categories": {
+        "feature": "Novedad",
+        "improvement": "Mejora",
+        "fix": "Corrección"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "Un menú más corto, páginas mejor ordenadas",
+          "description": "El calendario se une a las reservas, el inventario a la ficha de producto, y la suscripción y las recomendaciones a los ajustes: cuatro entradas menos en el menú, sin perder nada."
+        },
+        "product-variants": {
+          "title": "Variantes, así de simple",
+          "description": "Los atributos que escribía a mano se convierten en variantes de verdad, compartidas por toda su tienda. Talla y Color están listas en cuanto activa el seguimiento por unidad, y Número de calzado y Material se añaden con un clic: ya no necesita una ficha de producto por talla."
+        },
+        "product-detail-hub": {
+          "title": "Cada producto tiene ahora su ficha",
+          "description": "Abrir un producto era abrir su formulario. Ahora tiene una ficha de verdad: lo que factura, con qué frecuencia sale, cómo está su stock, quién lo ha reservado y qué le ha pasado a cada ejemplar."
+        },
+        "reservations-unified-views": {
+          "title": "Sus reservas se abren en el calendario",
+          "description": "La página Reservas se abre ahora en el calendario. Se desplaza de forma continua, de una semana a otra sin cambiar de página, y basta pasar el ratón para ver la reserva completa. La lista y el planning por producto siguen a un clic."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Dos secciones y su producto está en línea",
+          "description": "El asistente de cuatro pasos da paso a una sola página. Los accesorios y el seguro ya no se piden al crear: los añadirá más tarde si los necesita. A la derecha, una vista previa de la ficha y la lista de lo que falta por rellenar."
+        },
+        "keyboard-shortcuts": {
+          "title": "Para quienes no sueltan el teclado",
+          "description": "Ocho acciones del día a día se abren con el teclado, y cada una se puede reasignar en su cuenta, incluidas las secuencias de dos teclas. Si pasa el día en Louez, esto es para usted. Si no, todo sigue funcionando con el ratón."
+        },
+        "navigation-refresh": {
+          "title": "⌘K le lleva a cualquier parte",
+          "description": "La paleta de comandos abre cualquier página, cualquier ajuste, cualquier producto, cliente o reserva. En los ajustes, un buscador le lleva al ajuste exacto y lo resalta. Y la ruta de navegación siempre le dice dónde está."
+        },
+        "reservation-creation-simplified": {
+          "title": "Una reserva, una sola página",
+          "description": "Se acabaron los pasos encadenados: cliente, periodo, productos y entrega caben en una página, con el resumen siempre al lado. Y todo lo que obligaba a reabrir la reserva después — un descuento, un precio negociado, la fianza, un cliente de paso — se resuelve ahora sobre la marcha."
+        }
+      }
     },
     "aiCredits": {
       "title": "Créditos IA",

@@ -4597,6 +4597,7 @@
       "sms": "SMS",
       "subscription": "Abbonamento",
       "account": "Account",
+      "whatsNew": "Novità",
       "settings": "Impostazioni",
       "settingsAdmin": "Amministrazione",
       "settingsApi": "API",
@@ -4623,6 +4624,64 @@
       "emptyTitle": "Nulla da rivedere",
       "emptyDescription": "Le nuove richieste appariranno qui.",
       "viewAllPending": "Vedi tutte le richieste in attesa"
+    },
+    "whatsNew": {
+      "title": "Novità",
+      "description": "Gli ultimi miglioramenti di Louez",
+      "pageDescription": "Tutto ciò che abbiamo rilasciato su Louez, dal più recente — e perché l’abbiamo fatto.",
+      "newLabel": "Nuovo",
+      "newFeatureLabel": "Nuova funzione",
+      "unread": "Non letta",
+      "markAsRead": "Segna come letta",
+      "markAllAsRead": "Segna tutto come letto",
+      "tryIt": "Prova",
+      "viewAll": "Vedi tutte le novità",
+      "backToList": "Tutte le novità",
+      "emptyTitle": "Ancora nulla qui",
+      "empty": "Ancora nessuna novità.",
+      "filterEmpty": "Ancora nessuna novità in questa categoria.",
+      "filters": {
+        "all": "Tutte"
+      },
+      "categories": {
+        "feature": "Novità",
+        "improvement": "Miglioramento",
+        "fix": "Correzione"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "Un menu più corto, pagine al posto giusto",
+          "description": "Il calendario passa nelle prenotazioni, l'inventario nella scheda prodotto, abbonamento e referral nelle impostazioni: quattro voci in meno nel menu, senza perdere nulla."
+        },
+        "product-variants": {
+          "title": "Varianti, in modo semplice",
+          "description": "Gli attributi che scrivevate a mano diventano vere varianti, condivise da tutto il negozio. Taglia e Colore sono pronte non appena attivate il tracciamento per unità, Numero di scarpe e Materiale si aggiungono con un clic: non serve più una scheda prodotto per taglia."
+        },
+        "product-detail-hub": {
+          "title": "Ogni prodotto ha ora la sua scheda",
+          "description": "Aprire un prodotto voleva dire aprire il suo modulo. Ora ha una scheda vera: quanto rende, quanto gira, a che punto è lo stock, chi lo ha prenotato e cosa è successo a ciascun esemplare."
+        },
+        "reservations-unified-views": {
+          "title": "Le prenotazioni si aprono sul calendario",
+          "description": "La pagina Prenotazioni si apre ora sul calendario. Scorre in continuo, da una settimana all'altra senza cambiare pagina, e basta il passaggio del mouse per vedere l'intera prenotazione. Elenco e planning per prodotto restano a un clic."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Due sezioni, e il prodotto è online",
+          "description": "La procedura in quattro tappe lascia il posto a una sola pagina. Accessori e assicurazione non vengono più chiesti in fase di creazione: li aggiungerete dopo, se vi servono. A destra, un'anteprima della scheda e l'elenco di ciò che manca."
+        },
+        "keyboard-shortcuts": {
+          "title": "Per chi non stacca le mani dalla tastiera",
+          "description": "Otto azioni quotidiane si aprono da tastiera, e ognuna si può riassegnare nel vostro account, sequenze a due tasti comprese. Se passate le giornate in Louez, è per voi. Altrimenti, tutto continua a funzionare col mouse."
+        },
+        "navigation-refresh": {
+          "title": "⌘K vi porta ovunque",
+          "description": "La palette dei comandi apre qualsiasi pagina, qualsiasi impostazione, qualsiasi prodotto, cliente o prenotazione. Nelle impostazioni, una ricerca vi porta all'impostazione esatta e la evidenzia. E il percorso di navigazione dice sempre dove vi trovate."
+        },
+        "reservation-creation-simplified": {
+          "title": "Una prenotazione, una sola pagina",
+          "description": "Niente più tappe da incatenare: cliente, periodo, prodotti e consegna stanno su una pagina, con il riepilogo sempre accanto. E tutto ciò che costringeva a riaprire la prenotazione — uno sconto, un prezzo trattato, la cauzione, un cliente di passaggio — si sistema sul posto."
+        }
+      }
     },
     "aiCredits": {
       "title": "Crediti IA",

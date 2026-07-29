@@ -48,8 +48,10 @@ import {
   useTrackedKeyboardShortcutSequence,
 } from "@/hooks/use-tracked-keyboard-shortcut";
 import { useStorefrontUrl } from "@/hooks/use-storefront-url";
+import { useWhatsNew } from "@/hooks/use-whats-new";
 import { searchQueries } from "@/lib/queries/search.queries";
 
+import { NewFeatureBadge } from "../new-feature-badge";
 import {
   SETTINGS_NAVIGATION_GROUPS,
   SETTINGS_NAVIGATION_ITEMS,
@@ -89,6 +91,9 @@ type CommandGroupDefinition = {
   value: string;
 };
 
+/** Announcement backing the contextual "New" dot on the palette triggers. */
+const SEARCH_FEATURE_ID = "navigation-refresh";
+
 type DashboardCommandPaletteProps = {
   isPlatformAdmin?: boolean;
   onCreateReservation: () => void;
@@ -110,11 +115,13 @@ export const DashboardCommandPalette = ({
   const formatter = useFormatter();
   const { storeSlug, currency } = useStore();
   const { getAbsoluteUrl } = useStorefrontUrl(storeSlug);
+  const { dismissFeature } = useWhatsNew();
 
   const commandPaletteShortcut = useTrackedKeyboardHotkey(
     "commandPalette",
     () => {
       setQuery("");
+      dismissFeature(SEARCH_FEATURE_ID);
       setOpen((currentOpen) => !currentOpen);
     },
     { requireReset: true },
@@ -192,14 +199,14 @@ export const DashboardCommandPalette = ({
 
   const settingsSearchDocuments = useMemo(
     () =>
-      SETTINGS_NAVIGATION_ITEMS.filter(
-        (item) => !item.platformAdminOnly || isPlatformAdmin,
-      ).map((item) => ({
-        ...item,
-        content: getSearchableMessageText(messages, item.searchPaths),
-        description: getMessageText(messages, item.descriptionPath),
-        label: getMessageText(messages, item.labelPath),
-      })),
+      SETTINGS_NAVIGATION_ITEMS.filter((item) => !item.platformAdminOnly || isPlatformAdmin).map(
+        (item) => ({
+          ...item,
+          content: getSearchableMessageText(messages, item.searchPaths),
+          description: getMessageText(messages, item.descriptionPath),
+          label: getMessageText(messages, item.labelPath),
+        }),
+      ),
     [isPlatformAdmin, messages],
   );
 
@@ -464,6 +471,7 @@ export const DashboardCommandPalette = ({
 
           if (nextOpen) {
             setQuery("");
+            dismissFeature(SEARCH_FEATURE_ID);
           }
         }}
       >
@@ -481,6 +489,12 @@ export const DashboardCommandPalette = ({
           <kbd className="bg-muted text-muted-foreground/70 rounded-md border px-1.5 py-0.5 font-mono text-[10px] font-medium">
             {commandPaletteShortcut.label}
           </kbd>
+          {/* Corner dot: the trigger already carries a label and the shortcut hint. */}
+          <NewFeatureBadge
+            className="absolute -top-1 -right-1"
+            featureId={SEARCH_FEATURE_ID}
+            mode="dot"
+          />
         </CommandDialogTrigger>
 
         <CommandDialogTrigger
@@ -488,6 +502,11 @@ export const DashboardCommandPalette = ({
           render={<Button type="button" variant="outline" size="icon" className="lg:hidden" />}
         >
           <Search className="size-4" />
+          <NewFeatureBadge
+            className="absolute -top-1 -right-1"
+            featureId={SEARCH_FEATURE_ID}
+            mode="dot"
+          />
         </CommandDialogTrigger>
 
         <CommandDialogPopup>

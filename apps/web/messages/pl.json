@@ -4597,6 +4597,7 @@
       "sms": "SMS",
       "subscription": "Subskrypcja",
       "account": "Konto",
+      "whatsNew": "Nowości",
       "settings": "Ustawienia",
       "settingsAdmin": "Administracja",
       "settingsApi": "API",
@@ -4623,6 +4624,64 @@
       "emptyTitle": "Nic do sprawdzenia",
       "emptyDescription": "Nowe prośby pojawią się tutaj.",
       "viewAllPending": "Zobacz wszystkie oczekujące prośby"
+    },
+    "whatsNew": {
+      "title": "Nowości",
+      "description": "Najnowsze usprawnienia w Louez",
+      "pageDescription": "Wszystko, co wprowadziliśmy w Louez — od najnowszych — i dlaczego to zrobiliśmy.",
+      "newLabel": "Nowe",
+      "newFeatureLabel": "Nowa funkcja",
+      "unread": "Nieprzeczytana",
+      "markAsRead": "Oznacz jako przeczytaną",
+      "markAllAsRead": "Oznacz wszystkie jako przeczytane",
+      "tryIt": "Wypróbuj",
+      "viewAll": "Zobacz wszystkie nowości",
+      "backToList": "Wszystkie nowości",
+      "emptyTitle": "Jeszcze nic tu nie ma",
+      "empty": "Brak nowości.",
+      "filterEmpty": "Brak nowości w tej kategorii.",
+      "filters": {
+        "all": "Wszystko"
+      },
+      "categories": {
+        "feature": "Nowość",
+        "improvement": "Ulepszenie",
+        "fix": "Poprawka"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "Krótsze menu, strony na swoim miejscu",
+          "description": "Kalendarz trafia do rezerwacji, inwentarz na kartę produktu, abonament i polecenia do ustawień: cztery pozycje mniej w menu i nic nie ginie."
+        },
+        "product-variants": {
+          "title": "Warianty, po prostu",
+          "description": "Atrybuty wpisywane wcześniej ręcznie stają się prawdziwymi wariantami, wspólnymi dla całego sklepu. Rozmiar i Kolor są gotowe, gdy tylko włączysz śledzenie po egzemplarzu, Rozmiar buta i Materiał dodasz jednym kliknięciem — i nie potrzebujesz już osobnej karty produktu na każdy rozmiar."
+        },
+        "product-detail-hub": {
+          "title": "Każdy produkt ma teraz własną kartę",
+          "description": "Otwarcie produktu oznaczało otwarcie jego formularza. Teraz ma prawdziwą kartę: ile przynosi, jak często wychodzi, jak stoi stan magazynowy, kto go zarezerwował i co się stało z każdym egzemplarzem."
+        },
+        "reservations-unified-views": {
+          "title": "Rezerwacje otwierają się na kalendarzu",
+          "description": "Strona Rezerwacje otwiera się teraz na kalendarzu. Przewija się płynnie z tygodnia na tydzień bez zmiany strony, a najechanie kursorem pokazuje całą rezerwację. Lista i planowanie według produktu są o jedno kliknięcie stąd."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Dwie sekcje i produkt jest online",
+          "description": "Kreator w czterech krokach ustępuje miejsca jednej stronie. Akcesoria i ubezpieczenie nie są już wymagane przy tworzeniu — dodasz je później, jeśli będą potrzebne. Po prawej podgląd karty i lista tego, co zostało do wypełnienia."
+        },
+        "keyboard-shortcuts": {
+          "title": "Dla tych, którzy nie odrywają rąk od klawiatury",
+          "description": "Osiem codziennych czynności otwiera się z klawiatury, a każdą z nich zmienisz w swoim koncie — łącznie z sekwencjami dwóch klawiszy. Jeśli spędzasz dni w Louez, to jest dla Ciebie. Jeśli nie, wszystko nadal działa myszką."
+        },
+        "navigation-refresh": {
+          "title": "⌘K zabierze Cię wszędzie",
+          "description": "Paleta poleceń otwiera każdą stronę, każde ustawienie, każdy produkt, klienta i rezerwację. W ustawieniach wyszukiwarka prowadzi dokładnie do wybranej opcji i ją wyróżnia. A ścieżka nawigacji zawsze mówi, gdzie jesteś."
+        },
+        "reservation-creation-simplified": {
+          "title": "Jedna rezerwacja, jedna strona",
+          "description": "Koniec z przechodzeniem przez kroki: klient, okres, produkty i dostawa mieszczą się na jednej stronie, a podsumowanie jest zawsze obok. I wszystko, co wcześniej wymagało ponownego otwarcia rezerwacji — rabat, wynegocjowana cena, kaucja, klient z ulicy — załatwiasz od razu."
+        }
+      }
     },
     "aiCredits": {
       "title": "Kredyty AI",

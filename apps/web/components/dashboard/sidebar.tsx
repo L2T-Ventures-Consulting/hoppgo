@@ -26,7 +26,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
-  useSidebar,
   Tooltip,
   TooltipContent,
   TooltipProvider,
@@ -52,8 +51,10 @@ import {
 
 // import { ReferralSidebarWidget } from '@/components/dashboard/referral-sidebar-widget';
 import { UserAvatar } from "@/components/dashboard/shared/user-avatar";
+import { SidebarLink } from "@/components/dashboard/sidebar-link";
 import { StoreSwitcher } from "@/components/dashboard/store-switcher";
 import { ThemeMenuSub } from "@/components/dashboard/theme-toggle";
+import { WhatsNewSidebarItem } from "@/components/dashboard/whats-new-sidebar-item";
 import { LanguageMenuSub } from "@/components/ui/language-switcher";
 
 import { useStorefrontUrl } from "@/hooks/use-storefront-url";
@@ -113,23 +114,6 @@ interface NavigationItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
 }
-
-const SidebarLink = ({ onClick, ...props }: React.ComponentProps<typeof Link>) => {
-  const { isMobile, setOpenMobile } = useSidebar();
-
-  return (
-    <Link
-      {...props}
-      onClick={(event) => {
-        onClick?.(event);
-
-        if (isMobile && !event.defaultPrevented) {
-          setOpenMobile(false);
-        }
-      }}
-    />
-  );
-};
 
 const isNavigationItemActive = (pathname: string, href: string) => {
   if (href === "/dashboard") {
@@ -303,23 +287,17 @@ const UserMenu = ({
   );
 };
 
+/** Opens the Gleap widget — a button, not a route, but it reads as a nav row. */
 const HelpButton = () => {
   const t = useTranslations("dashboard.sidebar");
 
   return (
-    <Button
-      variant="ghost"
-      className="hover:bg-sidebar-accent h-auto w-full justify-start gap-3 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
-      onClick={() => Gleap.open()}
-    >
-      <SupportSolidIcon className="text-sidebar-foreground/70 h-4 w-4 shrink-0" />
-      <span className="min-w-0 group-data-[collapsible=icon]:hidden">
-        <span className="block text-sm leading-none font-medium">{t("help")}</span>
-        {/* <span className="text-muted-foreground mt-1 block truncate text-xs">
-          {t('feedback')}
-        </span> */}
-      </span>
-    </Button>
+    <SidebarMenuItem>
+      <SidebarMenuButton onClick={() => Gleap.open()} tooltip={t("help")}>
+        <SupportSolidIcon />
+        <span>{t("help")}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 };
 
@@ -358,9 +336,10 @@ export const DashboardSidebar = ({
           ))}
         </SidebarContent>
         <SidebarFooter className="border-sidebar-border border-t">
-          <div>
+          <SidebarMenu>
+            <WhatsNewSidebarItem />
             <HelpButton />
-          </div>
+          </SidebarMenu>
           {/* <ReferralSidebarWidget /> */}
           <UserMenu
             userId={userId}

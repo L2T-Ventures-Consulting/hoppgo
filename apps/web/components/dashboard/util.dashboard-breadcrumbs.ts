@@ -27,6 +27,7 @@ const staticBreadcrumbRoutes = [
   { href: "/dashboard/sms", translationKey: "sms" },
   { href: "/dashboard/subscription", translationKey: "subscription" },
   { href: "/dashboard/account", translationKey: "account" },
+  { href: "/dashboard/whats-new", translationKey: "whatsNew" },
   { href: "/dashboard/settings", translationKey: "settings" },
   {
     href: "/dashboard/settings/admin",

@@ -253,6 +253,12 @@ function buildSecurityHeaders() {
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker deployment
   output: "standalone",
+  // The changelog reads its write-ups from content/whats-new/**/*.md at runtime.
+  // Tracing only follows imports, so the files must be listed explicitly or the
+  // standalone build ships without them.
+  outputFileTracingIncludes: {
+    "/dashboard/whats-new/[slug]": ["./content/whats-new/**/*.md"],
+  },
   // TypeScript 7 ships the native compiler without the legacy JS API surface
   // Next currently expects during next build. Keep TS validation as a separate
   // workspace gate through `pnpm type-check`.

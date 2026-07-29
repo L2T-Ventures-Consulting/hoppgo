@@ -17,6 +17,7 @@ import { DashboardSidebar } from "@/components/dashboard/sidebar";
 import { WelcomeOverlay } from "@/components/dashboard/welcome-overlay";
 import { DashboardSaveShortcut } from "@/components/shared/dashboard-save-shortcut";
 import { KeyboardShortcutsProvider } from "@/components/shared/keyboard-shortcuts-provider";
+import { WhatsNewProvider } from "@/components/shared/whats-new-provider";
 
 import { isAIChatConfigured } from "@/lib/ai/provider";
 import { auth } from "@/lib/auth";
@@ -25,6 +26,7 @@ import { getStoreLimits } from "@/lib/plan-limits";
 import { isCurrentUserPlatformAdmin } from "@/lib/platform-admin";
 import { getCurrentStore, getUserStores } from "@/lib/store-context";
 import { getCurrentPlanSlug } from "@/lib/stripe/subscriptions";
+import { parseWhatsNewProgress } from "@/lib/whats-new.progress";
 
 import { StoreProvider } from "@/contexts/store-context";
 
@@ -62,6 +64,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
     db.query.users.findFirst({
       columns: {
         keyboardShortcuts: true,
+        whatsNewProgress: true,
       },
       where: eq(users.id, session.user.id),
     }),
@@ -71,57 +74,59 @@ export default async function DashboardMainLayout({ children }: { children: Reac
     <KeyboardShortcutsProvider
       initialShortcuts={parseKeyboardShortcutOverrides(userPreferences?.keyboardShortcuts)}
     >
-      <DashboardSaveShortcut />
-      <StoreProvider
-        currency={settings.currency || "EUR"}
-        storeSlug={store.slug}
-        storeName={store.name}
-        timezone={settings.timezone}
-      >
-        <ReservationPollingProvider interval={30000}>
-          <div className="dashboard relative h-svh overflow-hidden">
-            <SidebarProvider className="h-full min-h-0 overflow-hidden">
-              <DashboardBreadcrumbsProvider>
-                <DashboardSidebar
-                  planSlug={planSlug}
-                  stores={userStores}
-                  currentStoreId={store.id}
-                  storeSlug={store.slug}
-                  userId={session.user.id}
-                  userEmail={session.user.email || ""}
-                  userImage={session.user.image}
-                  isPlatformAdmin={isPlatformAdmin}
-                />
-                <SidebarInset className="min-h-0 min-w-0 overflow-clip">
-                  <header className="bg-background/90 supports-backdrop-filter:bg-background/70 z-30 flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur">
-                    <div className="flex min-w-0 flex-1 items-center gap-2">
-                      <DashboardSidebarTrigger />
-                      <Separator orientation="vertical" className="h-4 shrink-0" />
-                      <DashboardBreadcrumbs />
+      <WhatsNewProvider initialProgress={parseWhatsNewProgress(userPreferences?.whatsNewProgress)}>
+        <DashboardSaveShortcut />
+        <StoreProvider
+          currency={settings.currency || "EUR"}
+          storeSlug={store.slug}
+          storeName={store.name}
+          timezone={settings.timezone}
+        >
+          <ReservationPollingProvider interval={30000}>
+            <div className="dashboard relative h-svh overflow-hidden">
+              <SidebarProvider className="h-full min-h-0 overflow-hidden">
+                <DashboardBreadcrumbsProvider>
+                  <DashboardSidebar
+                    planSlug={planSlug}
+                    stores={userStores}
+                    currentStoreId={store.id}
+                    storeSlug={store.slug}
+                    userId={session.user.id}
+                    userEmail={session.user.email || ""}
+                    userImage={session.user.image}
+                    isPlatformAdmin={isPlatformAdmin}
+                  />
+                  <SidebarInset className="min-h-0 min-w-0 overflow-clip">
+                    <header className="bg-background/90 supports-backdrop-filter:bg-background/70 z-30 flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <DashboardSidebarTrigger />
+                        <Separator orientation="vertical" className="h-4 shrink-0" />
+                        <DashboardBreadcrumbs />
+                      </div>
+                      <DashboardHeaderActions
+                        showAIChat={showAIChat}
+                        reservationLimits={limits.reservationsThisMonth}
+                        planSlug={planSlug}
+                        isPlatformAdmin={isPlatformAdmin}
+                      />
+                    </header>
+                    <div
+                      data-dashboard-content
+                      className="min-h-0 flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-4 sm:px-6 lg:px-8"
+                    >
+                      <div className="min-h-full py-4 md:py-6">{children}</div>
                     </div>
-                    <DashboardHeaderActions
-                      showAIChat={showAIChat}
-                      reservationLimits={limits.reservationsThisMonth}
-                      planSlug={planSlug}
-                      isPlatformAdmin={isPlatformAdmin}
-                    />
-                  </header>
-                  <div
-                    data-dashboard-content
-                    className="min-h-0 flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-4 sm:px-6 lg:px-8"
-                  >
-                    <div className="min-h-full py-4 md:py-6">{children}</div>
-                  </div>
-                </SidebarInset>
-              </DashboardBreadcrumbsProvider>
-            </SidebarProvider>
-            <Suspense fallback={null}>
-              <WelcomeOverlay />
-              <SettingsSearchFocus />
-            </Suspense>
-          </div>
-        </ReservationPollingProvider>
-      </StoreProvider>
+                  </SidebarInset>
+                </DashboardBreadcrumbsProvider>
+              </SidebarProvider>
+              <Suspense fallback={null}>
+                <WelcomeOverlay />
+                <SettingsSearchFocus />
+              </Suspense>
+            </div>
+          </ReservationPollingProvider>
+        </StoreProvider>
+      </WhatsNewProvider>
     </KeyboardShortcutsProvider>
   );
 }

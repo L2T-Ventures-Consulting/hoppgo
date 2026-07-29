@@ -4597,6 +4597,7 @@
       "sms": "SMS",
       "subscription": "Subscrição",
       "account": "Conta",
+      "whatsNew": "Novidades",
       "settings": "Definições",
       "settingsAdmin": "Administração",
       "settingsApi": "API",
@@ -4623,6 +4624,64 @@
       "emptyTitle": "Nada para rever",
       "emptyDescription": "Novos pedidos aparecerão aqui.",
       "viewAllPending": "Ver todos os pedidos pendentes"
+    },
+    "whatsNew": {
+      "title": "Novidades",
+      "description": "As últimas melhorias do Louez",
+      "pageDescription": "Tudo o que lançámos no Louez, do mais recente ao mais antigo — e porquê.",
+      "newLabel": "Novo",
+      "newFeatureLabel": "Nova funcionalidade",
+      "unread": "Não lida",
+      "markAsRead": "Marcar como lida",
+      "markAllAsRead": "Marcar tudo como lido",
+      "tryIt": "Experimentar",
+      "viewAll": "Ver todas as novidades",
+      "backToList": "Todas as novidades",
+      "emptyTitle": "Ainda não há nada aqui",
+      "empty": "Ainda não há novidades.",
+      "filterEmpty": "Ainda não há novidades nesta categoria.",
+      "filters": {
+        "all": "Tudo"
+      },
+      "categories": {
+        "feature": "Novidade",
+        "improvement": "Melhoria",
+        "fix": "Correção"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "Um menu mais curto, páginas mais bem arrumadas",
+          "description": "O calendário junta-se às reservas, o inventário à ficha de produto, a subscrição e as recomendações às definições: menos quatro entradas no menu, sem perder nada."
+        },
+        "product-variants": {
+          "title": "Variantes, de forma simples",
+          "description": "Os atributos que escrevia à mão passam a ser variantes a sério, partilhadas por toda a sua loja. Tamanho e Cor estão prontos assim que ativa o acompanhamento por exemplar, Número de calçado e Material acrescentam-se com um clique — e deixa de precisar de uma ficha de produto por tamanho."
+        },
+        "product-detail-hub": {
+          "title": "Cada produto tem agora a sua ficha",
+          "description": "Abrir um produto era abrir o seu formulário. Agora tem uma ficha a sério: o que rende, com que frequência sai, como está o stock, quem o reservou e o que aconteceu a cada exemplar."
+        },
+        "reservations-unified-views": {
+          "title": "As suas reservas abrem no calendário",
+          "description": "A página Reservas abre agora no calendário. Desliza continuamente, de uma semana para a outra sem mudar de página, e basta passar o rato para ver a reserva inteira. A lista e o planeamento por produto ficam a um clique."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Duas secções e o seu produto está online",
+          "description": "O assistente de quatro etapas dá lugar a uma só página. Os acessórios e o seguro deixam de ser pedidos na criação — acrescenta-os depois, se precisar. À direita, uma pré-visualização da ficha e a lista do que falta preencher."
+        },
+        "keyboard-shortcuts": {
+          "title": "Para quem não larga o teclado",
+          "description": "Oito ações do dia a dia abrem-se pelo teclado, e cada uma pode ser redefinida na sua conta — sequências de duas teclas incluídas. Se passa os dias na Louez, isto é para si. Caso contrário, tudo continua a funcionar com o rato."
+        },
+        "navigation-refresh": {
+          "title": "⌘K leva-o a qualquer lado",
+          "description": "A paleta de comandos abre qualquer página, qualquer definição, qualquer produto, cliente ou reserva. Nas definições, uma pesquisa leva-o à definição exata e destaca-a. E o caminho de navegação diz-lhe sempre onde está."
+        },
+        "reservation-creation-simplified": {
+          "title": "Uma reserva, uma só página",
+          "description": "Acabaram-se as etapas encadeadas: cliente, período, produtos e entrega cabem numa página, com o resumo sempre ao lado. E tudo o que obrigava a reabrir a reserva depois — um desconto, um preço negociado, a caução, um cliente de passagem — resolve-se agora ali mesmo."
+        }
+      }
     },
     "aiCredits": {
       "title": "Créditos IA",

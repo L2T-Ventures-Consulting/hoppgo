@@ -442,6 +442,13 @@
       "when": 1785229921606,
       "tag": "0057_faithful_vin_gonzales",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "5",
+      "when": 1785331125940,
+      "tag": "0058_goofy_wonder_man",
+      "breakpoints": true
     }
   ]
 }

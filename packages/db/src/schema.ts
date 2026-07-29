@@ -72,6 +72,13 @@ export const users = mysqlTable('users', {
   fleetSize: varchar('fleet_size', { length: 16 }),
   keyboardShortcuts:
     json('keyboard_shortcuts').$type<Record<string, string | string[]>>(),
+  // What's New reading state, per user rather than per browser: which
+  // announcements have been read (`seenIds`) and which contextual "New" badges
+  // have been dismissed (`dismissedFeatureIds`). `null` until the first read.
+  whatsNewProgress: json('whats_new_progress').$type<{
+    dismissedFeatureIds: string[]
+    seenIds: string[]
+  }>(),
   // Set once the user has been through the "introduce yourself" onboarding
   // step. Google users get a prefilled name but still confirm it once.
   profileCompletedAt: timestamp('profile_completed_at', { mode: 'date' }),

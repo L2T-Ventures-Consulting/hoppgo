@@ -1,0 +1,191 @@
+import type { ComponentProps, ComponentType } from "react";
+
+import {
+  CalendarPlus,
+  CalendarRange,
+  Keyboard,
+  LayoutDashboard,
+  PackagePlus,
+  PanelLeft,
+  Search,
+  Shapes,
+} from "lucide-react";
+
+import type { Badge } from "@louez/ui";
+
+type BadgeVariant = NonNullable<ComponentProps<typeof Badge>["variant"]>;
+
+/**
+ * `feature` = a brand new capability, `improvement` = an existing flow made
+ * better, `fix` = a bug corrected.
+ */
+export type WhatsNewCategory = "feature" | "improvement" | "fix";
+
+export type WhatsNewCategoryMeta = {
+  /** `@louez/ui` Badge variant — carries its own light/dark tokens. */
+  badgeVariant: BadgeVariant;
+  /** Key under the `dashboard.whatsNew` namespace. */
+  labelKey: string;
+};
+
+export type WhatsNewMedia = {
+  /** Still frame shown before a video plays. Only meaningful for `video`. */
+  posterSrc?: string;
+  /** Public path, e.g. `/images/whats-new/<id>.webp` or `/videos/whats-new/<id>.mp4`. */
+  src: string;
+  type: "video" | "image";
+};
+
+export type WhatsNewAnnouncement = {
+  category: WhatsNewCategory;
+  /** ISO date the feature shipped — drives ordering and the 30-day badge expiry. */
+  date: string;
+  /** Key under the `dashboard.whatsNew` namespace. */
+  descriptionKey: string;
+  /** Ties the announcement to a contextual `NewFeatureBadge` in the UI. */
+  featureId?: string;
+  href?: string;
+  icon?: ComponentType<{ className?: string }>;
+  id: string;
+  /**
+   * Demo of the feature. Shown as a thumbnail on the changelog card and at full
+   * size on the announcement's page. The long-form write-up is not here: it
+   * lives in `content/whats-new/<id>/<locale>.md`.
+   */
+  media?: WhatsNewMedia;
+  titleKey: string;
+};
+
+/**
+ * Shared by the changelog page filters and every entry badge. `satisfies` keeps
+ * the `badgeVariant` literals narrow so the changelog accents can be derived
+ * from them and are guaranteed to match the chips.
+ */
+export const WHATS_NEW_CATEGORIES = {
+  feature: { badgeVariant: "submitted", labelKey: "categories.feature" },
+  improvement: { badgeVariant: "progress", labelKey: "categories.improvement" },
+  fix: { badgeVariant: "success", labelKey: "categories.fix" },
+} satisfies Record<WhatsNewCategory, WhatsNewCategoryMeta>;
+
+/**
+ * Declaration order drives the changelog page filter order. The assertion is
+ * the known `Object.keys` limitation — it is typed `string[]` whatever the
+ * object is. Deriving the list beats restating it: the `satisfies` above makes
+ * a new category a compile error until it is declared here too.
+ */
+export const WHATS_NEW_CATEGORY_ORDER = Object.keys(WHATS_NEW_CATEGORIES) as WhatsNewCategory[];
+
+/** How long a contextual "New" badge keeps showing after the feature shipped. */
+export const WHATS_NEW_FEATURE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export const WHATS_NEW_PAGE_PATH = "/dashboard/whats-new";
+
+/**
+ * The announcement's own page — the full write-up, media included. Every entry
+ * point points here; the older `${WHATS_NEW_PAGE_PATH}#<id>` hash links still
+ * land on the changelog and highlight their entry, they are just not produced
+ * anymore.
+ */
+export const getWhatsNewDetailHref = (announcementId: string) =>
+  `${WHATS_NEW_PAGE_PATH}/${announcementId}`;
+
+/** Local midnight, so a "YYYY-MM-DD" date never shifts a day in negative UTC offsets. */
+export const parseWhatsNewDate = (date: string) => {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(year, month - 1, day);
+};
+
+/**
+ * Newest first. Everything below shipped in the same release, so the dates are
+ * equal and the declaration order decides the changelog order.
+ *
+ * Every entry is commented out while its copy and its demo video are being
+ * written. Uncomment one the day it is ready — nothing else to touch: the
+ * sidebar counter, the changelog page and the contextual `NewFeatureBadge`
+ * indicators all read this array, and each entry's write-up already waits in
+ * `content/whats-new/<id>/<locale>.md`.
+ */
+export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
+  {
+    id: "sidebar-simplified",
+    category: "improvement",
+    date: "2026-07-28",
+    titleKey: "announcements.sidebar-simplified.title",
+    descriptionKey: "announcements.sidebar-simplified.description",
+    icon: PanelLeft,
+  },
+  {
+    id: "navigation-refresh",
+    category: "feature",
+    date: "2026-07-28",
+    titleKey: "announcements.navigation-refresh.title",
+    descriptionKey: "announcements.navigation-refresh.description",
+    featureId: "navigation-refresh",
+    href: "/dashboard/settings",
+    icon: Search,
+  },
+  {
+    id: "product-variants",
+    category: "improvement",
+    date: "2026-07-28",
+    titleKey: "announcements.product-variants.title",
+    descriptionKey: "announcements.product-variants.description",
+    featureId: "product-variants",
+    href: "/dashboard/products",
+    icon: Shapes,
+  },
+  {
+    id: "product-detail-hub",
+    category: "feature",
+    date: "2026-07-28",
+    titleKey: "announcements.product-detail-hub.title",
+    descriptionKey: "announcements.product-detail-hub.description",
+    featureId: "product-detail-hub",
+    href: "/dashboard/products",
+    icon: LayoutDashboard,
+  },
+  {
+    id: "reservations-unified-views",
+    category: "feature",
+    date: "2026-07-28",
+    titleKey: "announcements.reservations-unified-views.title",
+    descriptionKey: "announcements.reservations-unified-views.description",
+    featureId: "reservations-unified-views",
+    href: "/dashboard/reservations",
+    icon: CalendarRange,
+  },
+  {
+    id: "product-creation-flow-redesign",
+    category: "improvement",
+    date: "2026-07-28",
+    titleKey: "announcements.product-creation-flow-redesign.title",
+    descriptionKey: "announcements.product-creation-flow-redesign.description",
+    featureId: "product-creation-flow-redesign",
+    href: "/dashboard/products/new",
+    icon: PackagePlus,
+  },
+  {
+    id: "reservation-creation-simplified",
+    category: "improvement",
+    date: "2026-07-28",
+    titleKey: "announcements.reservation-creation-simplified.title",
+    descriptionKey: "announcements.reservation-creation-simplified.description",
+    featureId: "reservation-creation-simplified",
+    href: "/dashboard/reservations/new",
+    icon: CalendarPlus,
+  },
+  {
+    id: "keyboard-shortcuts",
+    category: "feature",
+    date: "2026-07-28",
+    titleKey: "announcements.keyboard-shortcuts.title",
+    descriptionKey: "announcements.keyboard-shortcuts.description",
+    featureId: "keyboard-shortcuts",
+    href: "/dashboard/account",
+    icon: Keyboard,
+  },
+];
+
+/** `undefined` for an unknown id — the detail route turns that into a 404. */
+export const findWhatsNewAnnouncement = (announcementId: string) =>
+  WHATS_NEW_ANNOUNCEMENTS.find((announcement) => announcement.id === announcementId);

@@ -4597,6 +4597,7 @@
       "sms": "SMS",
       "subscription": "Abonnement",
       "account": "Account",
+      "whatsNew": "Nieuw",
       "settings": "Instellingen",
       "settingsAdmin": "Administratie",
       "settingsApi": "API",
@@ -4623,6 +4624,64 @@
       "emptyTitle": "Niets te controleren",
       "emptyDescription": "Nieuwe aanvragen verschijnen hier.",
       "viewAllPending": "Alle openstaande aanvragen bekijken"
+    },
+    "whatsNew": {
+      "title": "Wat is er nieuw",
+      "description": "De nieuwste verbeteringen van Louez",
+      "pageDescription": "Alles wat we in Louez hebben uitgebracht, het nieuwste eerst — en waarom we het hebben gebouwd.",
+      "newLabel": "Nieuw",
+      "newFeatureLabel": "Nieuwe functie",
+      "unread": "Ongelezen",
+      "markAsRead": "Markeren als gelezen",
+      "markAllAsRead": "Alles markeren als gelezen",
+      "tryIt": "Uitproberen",
+      "viewAll": "Alle updates bekijken",
+      "backToList": "Alle updates",
+      "emptyTitle": "Hier is nog niets",
+      "empty": "Nog geen nieuws.",
+      "filterEmpty": "Nog niets in deze categorie.",
+      "filters": {
+        "all": "Alles"
+      },
+      "categories": {
+        "feature": "Nieuw",
+        "improvement": "Verbeterd",
+        "fix": "Opgelost"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "Een korter menu, pagina's waar u ze verwacht",
+          "description": "De agenda gaat naar de reserveringen, de voorraad naar de productpagina, abonnement en doorverwijzingen naar de instellingen: vier items minder in het menu, en niets kwijt."
+        },
+        "product-variants": {
+          "title": "Varianten, eenvoudig gehouden",
+          "description": "De kenmerken die u met de hand intypte zijn nu echte varianten, gedeeld door uw hele winkel. Maat en Kleur staan klaar zodra u het volgen per exemplaar aanzet, Schoenmaat en Materiaal voegt u met één klik toe — en u hebt geen productpagina per maat meer nodig."
+        },
+        "product-detail-hub": {
+          "title": "Elk product heeft nu een eigen pagina",
+          "description": "Een product openen betekende zijn formulier openen. Nu heeft het een echte pagina: wat het opbrengt, hoe vaak het uitgaat, hoe de voorraad ervoor staat, wie het reserveerde en wat er met elk exemplaar is gebeurd."
+        },
+        "reservations-unified-views": {
+          "title": "Uw reserveringen openen op de agenda",
+          "description": "De pagina Reserveringen opent nu op de agenda. Die scrolt doorlopend, van week tot week zonder van pagina te wisselen, en één beweging met de muis toont de volledige reservering. Lijst en planning per product blijven één klik verwijderd."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Twee secties, en uw product staat online",
+          "description": "De wizard in vier stappen maakt plaats voor één pagina. Accessoires en verzekering worden bij het aanmaken niet meer gevraagd — die voegt u later toe als u ze nodig hebt. Rechts: een voorbeeld van de pagina en de lijst van wat nog ontbreekt."
+        },
+        "keyboard-shortcuts": {
+          "title": "Voor wie het toetsenbord niet loslaat",
+          "description": "Acht dagelijkse handelingen gaan via het toetsenbord, en elk daarvan kunt u in uw account opnieuw instellen — ook de reeksen van twee toetsen. Werkt u de hele dag in Louez, dan is dit voor u. Zo niet, dan blijft alles gewoon met de muis werken."
+        },
+        "navigation-refresh": {
+          "title": "⌘K brengt u overal",
+          "description": "Het opdrachtenpalet opent elke pagina, elke instelling, elk product, elke klant en elke reservering. In de instellingen brengt een zoekveld u naar precies de juiste instelling en markeert die. En het kruimelpad vertelt altijd waar u bent."
+        },
+        "reservation-creation-simplified": {
+          "title": "Eén reservering, één pagina",
+          "description": "Geen stappen meer om door te lopen: klant, periode, producten en levering passen op één pagina, met het overzicht altijd ernaast. En alles waarvoor u de reservering daarna opnieuw moest openen — een korting, een afgesproken prijs, de waarborg, een passant — regelt u nu meteen."
+        }
+      }
     },
     "aiCredits": {
       "title": "AI-tegoed",

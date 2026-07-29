@@ -4783,6 +4783,7 @@
       "sms": "SMS",
       "subscription": "Subscription",
       "account": "Account",
+      "whatsNew": "What's new",
       "settings": "Settings",
       "settingsAdmin": "Administration",
       "settingsApi": "API",
@@ -4809,6 +4810,64 @@
       "emptyTitle": "Nothing to review",
       "emptyDescription": "New requests will appear here.",
       "viewAllPending": "View all pending requests"
+    },
+    "whatsNew": {
+      "title": "What's new",
+      "description": "The latest improvements to Louez",
+      "pageDescription": "Everything we shipped to Louez, newest first — and why we built it.",
+      "newLabel": "New",
+      "newFeatureLabel": "New feature",
+      "unread": "Unread",
+      "markAsRead": "Mark as read",
+      "markAllAsRead": "Mark all as read",
+      "tryIt": "Try it",
+      "viewAll": "See all updates",
+      "backToList": "All updates",
+      "emptyTitle": "Nothing here yet",
+      "empty": "No updates yet.",
+      "filterEmpty": "No update in this category yet.",
+      "filters": {
+        "all": "All"
+      },
+      "categories": {
+        "feature": "New",
+        "improvement": "Improved",
+        "fix": "Fixed"
+      },
+      "announcements": {
+        "sidebar-simplified": {
+          "title": "A shorter menu, pages where you expect them",
+          "description": "The calendar joins reservations, inventory joins the product page, subscription and referrals join settings: four fewer entries in the menu, and nothing lost along the way."
+        },
+        "product-variants": {
+          "title": "Variants, made simple",
+          "description": "The attributes you used to type by hand are now proper variants, shared across your whole store. Size and Colour are ready as soon as you turn on per-unit tracking, Shoe size and Material are one click away — and you no longer need one product page per size."
+        },
+        "product-detail-hub": {
+          "title": "Every product now has a page of its own",
+          "description": "Opening a product used to mean opening its form. It now has a real page: what it earns, how often it goes out, where its stock stands, who booked it and what happened to each of its units."
+        },
+        "reservations-unified-views": {
+          "title": "Your reservations now open on the calendar",
+          "description": "The Reservations page now opens on the calendar. It scrolls continuously, from one week to the next without changing page, and a hover gives you the whole reservation. The list and the per-product planning stay one click away."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Two sections, and your product is live",
+          "description": "The four-step wizard gives way to a single page. Accessories and insurance are no longer asked for at creation time — you add them later if you need them. On the right, a preview of the listing and a list of what is left to fill in."
+        },
+        "keyboard-shortcuts": {
+          "title": "For those who never leave the keyboard",
+          "description": "Eight everyday actions open from the keyboard, and every one of them can be remapped in your account — two-key sequences included. If you spend your days in Louez, this is for you. If not, everything still works with the mouse."
+        },
+        "navigation-refresh": {
+          "title": "⌘K takes you anywhere",
+          "description": "The command palette opens any page, any setting, any product, customer or reservation. In settings, a search box takes you to the exact setting and highlights it. And breadcrumbs always tell you where you are."
+        },
+        "reservation-creation-simplified": {
+          "title": "One reservation, one page",
+          "description": "No more steps to walk through: customer, period, products and delivery all fit on one page, with the summary always beside you. And everything that used to mean reopening the reservation afterwards — a discount, a negotiated price, the deposit, a walk-in customer — is now settled on the spot."
+        }
+      }
     },
     "aiCredits": {
       "title": "AI credits",

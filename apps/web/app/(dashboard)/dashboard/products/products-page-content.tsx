@@ -8,6 +8,8 @@ import { Plus, FolderOpen, Lock, ArrowUpDown } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import { CategoryManagerDrawer } from '@/components/categories/category-manager-drawer'
+import { NewFeatureBadge } from '@/components/dashboard/new-feature-badge'
+import { useWhatsNew } from '@/hooks/use-whats-new'
 import { invalidateProductsList } from '@/lib/orpc/invalidation'
 import { categoriesQueries } from '@/lib/queries/categories.queries'
 import { productsQueries } from '@/lib/queries/products.queries'
@@ -49,6 +51,7 @@ export function ProductsPageContent({
   const [showOrderDialog, setShowOrderDialog] = useState(false)
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
   const { status, categoryIds, setCategoryIds } = useProductsFilters()
+  const { dismissFeature } = useWhatsNew()
 
   // Filter changes are shallow, so the server props keep describing the
   // filters of the first render — only seed the cache while they still match.
@@ -96,7 +99,12 @@ export function ProductsPageContent({
     if (isAtLimit) {
       e.preventDefault()
       setShowUpgradeModal(true)
+      return
     }
+
+    // Opening the redesigned creation flow is the interaction the badge announces,
+    // so only a click that actually reaches it may burn the badge.
+    dismissFeature('product-creation-flow-redesign')
   }
 
   return (
@@ -148,10 +156,19 @@ export function ProductsPageContent({
               <Button
                 size="icon"
                 className="sm:hidden"
+                // The badge adds screen reader text, so the name has to be explicit.
+                aria-label={t('addProduct')}
                 title={t('addProduct')}
                 render={<Link href="/dashboard/products/new" onClick={handleAddProductClick} />}
               >
                 <Plus className="h-4 w-4" />
+                {/* Inset inside the primary fill: the default dot colour is the
+                    button's own background, so it needs the inverse token. */}
+                <NewFeatureBadge
+                  className="absolute top-1 right-1 bg-primary-foreground"
+                  featureId="product-creation-flow-redesign"
+                  mode="dot"
+                />
               </Button>
               <Button
                 className="hidden sm:inline-flex"
@@ -159,6 +176,10 @@ export function ProductsPageContent({
               >
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addProduct')}
+                <NewFeatureBadge
+                  className="bg-primary-foreground text-primary"
+                  featureId="product-creation-flow-redesign"
+                />
               </Button>
             </>
           )}

@@ -9,7 +9,9 @@ import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } fro
 
 import { CustomerCombobox } from "@/components/dashboard/customer-combobox";
 import { CustomerCreateDialog } from "@/components/dashboard/customer-create-dialog";
+import { NewFeatureBadge } from "@/components/dashboard/new-feature-badge";
 import { parseCustomerQuery } from "@/components/dashboard/util.customer-query";
+import { useWhatsNew } from "@/hooks/use-whats-new";
 
 import type { Customer, NewReservationFormComponentApi, StepFieldName } from "../types";
 
@@ -30,7 +32,13 @@ export function NewReservationStepCustomer({
 }: NewReservationStepCustomerProps) {
   const t = useTranslations("dashboard.reservations.manualForm");
   const tCustomerSearch = useTranslations("common.customerSearch");
+  const { dismissFeature } = useWhatsNew();
   const [createDialog, setCreateDialog] = useState({ isOpen: false, query: "" });
+
+  const openCreateDialog = () => {
+    dismissFeature("reservation-creation-simplified");
+    setCreateDialog({ isOpen: true, query: "" });
+  };
 
   return (
     <>
@@ -59,12 +67,18 @@ export function NewReservationStepCustomer({
                   />
                   <Button
                     className="h-11 shrink-0 max-sm:w-full"
-                    onClick={() => setCreateDialog({ isOpen: true, query: "" })}
+                    onClick={openCreateDialog}
                     type="button"
                     variant="outline"
                   >
                     <UserPlus className="h-4 w-4" />
                     {tCustomerSearch("createCustomer")}
+                    {/* Dot rather than a pill: the button shares its row with the combobox. */}
+                    <NewFeatureBadge
+                      className="absolute -top-1 -right-1"
+                      featureId="reservation-creation-simplified"
+                      mode="dot"
+                    />
                   </Button>
                 </div>
                 {field.state.meta.errors.length > 0 && (
