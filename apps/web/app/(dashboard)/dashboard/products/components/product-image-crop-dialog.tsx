@@ -9,6 +9,7 @@ import {
   ImageIcon,
   Loader2,
   RefreshCcwIcon,
+  WandSparklesIcon,
   ZoomInIcon,
   ZoomOutIcon,
 } from "lucide-react";
@@ -60,6 +61,8 @@ interface ProductImageCropDialogProps {
   onCropSizeChange: (itemId: string, cropSizePercent: number) => void;
   onApplyCrop: () => void | Promise<void>;
   onSkipCrop: () => void | Promise<void>;
+  /** Keeps the original and hands the uploaded object to the AI enhancement. */
+  onEnhanceWithAi: () => void | Promise<void>;
   onReplaceCurrentImage: (file: File) => void | Promise<void>;
 }
 
@@ -107,6 +110,7 @@ export function ProductImageCropDialog({
   onCropSizeChange,
   onApplyCrop,
   onSkipCrop,
+  onEnhanceWithAi,
   onReplaceCurrentImage,
 }: ProductImageCropDialogProps) {
   const t = useTranslations("dashboard.products.form");
@@ -430,6 +434,15 @@ export function ProductImageCropDialog({
 
         {/* Sticky footer — always visible */}
         <DialogFooter className="px-2">
+          <Button
+            variant="ghost"
+            onClick={onEnhanceWithAi}
+            disabled={isUploading || !currentItem}
+            className="text-muted-foreground hover:text-foreground sm:mr-auto"
+          >
+            <WandSparklesIcon className="size-4" />
+            {t("aiEnhanceCropAction")}
+          </Button>
           <Button variant="outline" onClick={onSkipCrop} disabled={isUploading}>
             {t("cropSkip")}
           </Button>

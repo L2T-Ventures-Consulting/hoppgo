@@ -3542,10 +3542,11 @@ export const aiCreditDebits = mysqlTable(
     storeId: varchar('store_id', { length: 21 }).notNull(),
     // Null for debits not tied to a conversation (e.g. phone-number rental).
     conversationId: varchar('conversation_id', { length: 21 }),
-    // What the debit pays for: AI usage (tokens/audio) or the monthly rental of
-    // the store's provisioned phone number. Keeps cost-vs-billed reporting
-    // trivially segmentable per revenue line.
-    kind: mysqlEnum('kind', ['usage', 'number_rental'])
+    // What the debit pays for: AI usage (tokens/audio), the monthly rental of
+    // the store's provisioned phone number, or one AI product-image enhancement
+    // (flat tariff). Keeps cost-vs-billed reporting trivially segmentable per
+    // revenue line.
+    kind: mysqlEnum('kind', ['usage', 'number_rental', 'image_enhancement'])
       .notNull()
       .default('usage'),
 

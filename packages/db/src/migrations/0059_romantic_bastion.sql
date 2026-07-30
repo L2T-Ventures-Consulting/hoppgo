@@ -1,0 +1,1 @@
+ALTER TABLE `ai_credit_debits` MODIFY COLUMN `kind` enum('usage','number_rental','image_enhancement') NOT NULL DEFAULT 'usage';

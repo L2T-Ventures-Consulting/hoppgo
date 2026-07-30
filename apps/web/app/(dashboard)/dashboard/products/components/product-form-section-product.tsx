@@ -38,6 +38,7 @@ export function ProductFormSectionProduct(props: ProductFormSectionProductProps)
           setMainImage={props.setMainImage}
           recropImage={props.recropImage}
           canRecrop={props.canRecrop}
+          imageEnhance={props.imageEnhance}
           showPhotosLabel
         />
 

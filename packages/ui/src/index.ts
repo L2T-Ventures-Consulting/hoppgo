@@ -37,6 +37,9 @@ export * from './components/dialog'
 // Drawer
 export * from './components/drawer'
 
+// Media Lightbox
+export * from './components/media-lightbox'
+
 // Menu (replaces DropdownMenu)
 export * from './components/menu'
 

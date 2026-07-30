@@ -132,6 +132,8 @@ export interface ProductFormProps {
   storeTaxSettings?: TaxSettings;
   availableAccessories?: AvailableAccessory[];
   showAiContext?: boolean;
+  imageEnhanceEnabled?: boolean;
+  imageBackgroundRemovalEnabled?: boolean;
 }
 
 export type ProductFormValues = Omit<ProductInput, "taxSettings"> & {

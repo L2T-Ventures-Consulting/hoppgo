@@ -146,3 +146,25 @@ export function getNumberRentalCredits(): number {
 export function numberRentalCostMicroUsd(): number {
   return Math.round(num(env.AI_PHONE_NUMBER_COST_USD_PER_MONTH) * USD_MICRO)
 }
+
+// ============================================================================
+// AI product image enhancement — flat per-image tariff. Same philosophy as the
+// voice tariff: the store is billed a flat number of credits while the real
+// provider cost keeps being frozen on the debit row for cost-vs-billed
+// reporting. Both values live in env, never in the repo.
+// ============================================================================
+
+/** Flat credits billed per enhanced product image. 0/unset ⇒ billing inert. */
+export function getImageEnhanceCredits(): number {
+  return num(env.AI_IMAGE_ENHANCE_CREDITS)
+}
+
+/** Micro-credits billed for ONE enhancement under the flat tariff. */
+export function imageEnhanceBillMicro(): number {
+  return Math.round(getImageEnhanceCredits() * CREDIT_MICRO)
+}
+
+/** Real provider cost of ONE enhancement, in micro-USD. */
+export function imageEnhanceCostMicroUsd(): number {
+  return Math.round(num(env.AI_IMAGE_USD_PER_IMAGE) * USD_MICRO)
+}

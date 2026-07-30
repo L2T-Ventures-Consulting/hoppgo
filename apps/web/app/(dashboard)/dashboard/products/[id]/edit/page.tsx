@@ -1,9 +1,9 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound, redirect } from "next/navigation";
 
-import { and, eq, inArray, ne } from 'drizzle-orm';
-import { getTranslations } from 'next-intl/server';
+import { and, eq, inArray, ne } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
 
-import { db, getEffectiveProductQuantities } from '@louez/db';
+import { db, getEffectiveProductQuantities } from "@louez/db";
 import {
   categories,
   getBlockingReservationStatuses,
@@ -11,29 +11,29 @@ import {
   reservationItemUnits,
   reservationItems,
   reservations,
-} from '@louez/db';
+} from "@louez/db";
 
-import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context';
+import { DashboardBreadcrumbLabel } from "@/components/dashboard/dashboard-breadcrumbs-context";
 
-import { getCurrentStore } from '@/lib/store-context';
+import { isImageBackgroundRemovalEnabled } from "@/lib/ai/image/background-removal";
+import { isAiImageEnhanceEnabled } from "@/lib/ai/image/credits";
+import { getCurrentStore } from "@/lib/store-context";
 
-import { ProductForm } from '../../product-form';
+import { ProductForm } from "../../product-form";
 
 interface EditProductPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditProductPage({
-  params,
-}: EditProductPageProps) {
+export default async function EditProductPage({ params }: EditProductPageProps) {
   const [t, tBreadcrumbs] = await Promise.all([
-    getTranslations('dashboard.products'),
-    getTranslations('dashboard.breadcrumbs'),
+    getTranslations("dashboard.products"),
+    getTranslations("dashboard.breadcrumbs"),
   ]);
   const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding');
+    redirect("/onboarding");
   }
 
   const { id } = await params;
@@ -76,11 +76,7 @@ export default async function EditProductPage({
 
   // Get all active products for the accessories selector (excluding current product)
   const availableAccessories = await db.query.products.findMany({
-    where: and(
-      eq(products.storeId, store.id),
-      eq(products.status, 'active'),
-      ne(products.id, id),
-    ),
+    where: and(eq(products.storeId, store.id), eq(products.status, "active"), ne(products.id, id)),
     columns: {
       id: true,
       name: true,
@@ -92,9 +88,7 @@ export default async function EditProductPage({
 
   // Extract accessory IDs for the form
   const accessoryIds = product.accessories.map((a) => a.accessoryId);
-  const editableUnits = product.units.filter(
-    (unit) => unit.lifecycleStatus === 'active',
-  );
+  const editableUnits = product.units.filter((unit) => unit.lifecycleStatus === "active");
   const unitIds = editableUnits.map((unit) => unit.id);
   const blockingStatuses = getBlockingReservationStatuses(
     store.settings?.pendingBlocksAvailability ?? true,
@@ -108,10 +102,7 @@ export default async function EditProductPage({
             reservationItems,
             eq(reservationItemUnits.reservationItemId, reservationItems.id),
           )
-          .innerJoin(
-            reservations,
-            eq(reservationItems.reservationId, reservations.id),
-          )
+          .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
           .where(
             and(
               inArray(reservationItemUnits.productUnitId, unitIds),
@@ -121,13 +112,9 @@ export default async function EditProductPage({
           )
       : [];
   const assignedUnitIds = new Set(
-    assignedUnitRows.flatMap((row) =>
-      row.productUnitId ? [row.productUnitId] : [],
-    ),
+    assignedUnitRows.flatMap((row) => (row.productUnitId ? [row.productUnitId] : [])),
   );
-  const effectiveQuantities = await getEffectiveProductQuantities(db, [
-    product.id,
-  ]);
+  const effectiveQuantities = await getEffectiveProductQuantities(db, [product.id]);
   const effectiveQuantity = product.trackUnits
     ? (effectiveQuantities.get(product.id) ?? 0)
     : product.quantity;
@@ -139,12 +126,10 @@ export default async function EditProductPage({
         pathname={`/dashboard/products/${product.id}`}
         label={product.name}
       />
-      <DashboardBreadcrumbLabel label={tBreadcrumbs('productsEdit')} />
+      <DashboardBreadcrumbLabel label={tBreadcrumbs("productsEdit")} />
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">
-          {t('editProduct')}
-        </h1>
-        <p className="text-muted-foreground">{t('editProductDescription')}</p>
+        <h1 className="text-2xl font-bold tracking-tight">{t("editProduct")}</h1>
+        <p className="text-muted-foreground">{t("editProductDescription")}</p>
       </div>
 
       <ProductForm
@@ -164,6 +149,8 @@ export default async function EditProductPage({
         storeTaxSettings={store.settings?.tax}
         availableAccessories={availableAccessories}
         showAiContext={showAiContext}
+        imageEnhanceEnabled={isAiImageEnhanceEnabled()}
+        imageBackgroundRemovalEnabled={isImageBackgroundRemovalEnabled()}
       />
     </div>
   );

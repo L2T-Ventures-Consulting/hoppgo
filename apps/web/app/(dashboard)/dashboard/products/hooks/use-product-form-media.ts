@@ -21,10 +21,13 @@ import {
   type ProductImageSize,
   readFileAsDataUrl,
 } from "../utils/product-image-crop";
+import { useProductImageEnhance } from "./use-product-image-enhance";
 
 interface UseProductFormMediaParams {
   form: ProductFormComponentApi;
   imagesPreviews: string[];
+  imageEnhanceEnabled?: boolean;
+  imageBackgroundRemovalEnabled?: boolean;
 }
 
 const MAX_PRODUCT_IMAGES = 5;
@@ -33,6 +36,12 @@ interface PreparedUploadImage {
   id: string;
   order: number;
   dataUrl: string;
+}
+
+/** Links a queue item back to the object it produced once uploaded. */
+interface UploadedImageResult {
+  id: string;
+  url: string;
 }
 
 type CropSessionMode = "append" | "replace";
@@ -76,7 +85,12 @@ const dataUrlToFile = async (dataUrl: string, filename: string) => {
   return new File([bytes], `${filename}.${extension}`, { type: mimeType });
 };
 
-export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMediaParams) {
+export function useProductFormMedia({
+  form,
+  imagesPreviews,
+  imageEnhanceEnabled = false,
+  imageBackgroundRemovalEnabled = false,
+}: UseProductFormMediaParams) {
   const t = useTranslations("dashboard.products.form");
   const { uploadImage, deleteImage } = useImageUpload("product");
   const pendingUploadsRef = useRef(new Set<string>());
@@ -115,6 +129,11 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
   const [cropSessionMode, setCropSessionMode] = useState<CropSessionMode>("append");
   const [replaceImageIndex, setReplaceImageIndex] = useState<number | null>(null);
 
+  // Crop queue item ids the user sent to the AI from the crop dialog. The
+  // enhancement can only run on an uploaded object, so the flags are resolved
+  // to their uploaded URLs once the session upload succeeds.
+  const enhanceAfterUploadIdsRef = useRef(new Set<string>());
+
   const isUploadingImages = isPreparingSession || isUploadingToServer;
 
   const currentCropItem = useMemo(
@@ -132,17 +151,18 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
     setPassthroughQueueItems([]);
     setCropSessionMode("append");
     setReplaceImageIndex(null);
+    enhanceAfterUploadIdsRef.current.clear();
   }, []);
 
   const uploadPreparedImages = useCallback(
     async (
       preparedImages: PreparedUploadImage[],
       options?: { mode?: CropSessionMode; replaceIndex?: number | null },
-    ): Promise<boolean> => {
-      if (preparedImages.length === 0) return false;
+    ): Promise<UploadedImageResult[]> => {
+      if (preparedImages.length === 0) return [];
 
       setIsUploadingToServer(true);
-      const uploadedUrls: { order: number; url: string }[] = [];
+      const uploadedUrls: { id: string; order: number; url: string }[] = [];
 
       try {
         for (let index = 0; index < preparedImages.length; index += 1) {
@@ -154,7 +174,7 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
           );
           const uploaded = await uploadImage(file);
           pendingUploadsRef.current.add(uploaded.url);
-          uploadedUrls.push({ order: prepared.order, url: uploaded.url });
+          uploadedUrls.push({ id: prepared.id, order: prepared.order, url: uploaded.url });
         }
 
         if (uploadedUrls.length > 0) {
@@ -180,7 +200,7 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
           }
         }
 
-        return uploadedUrls.length > 0;
+        return uploadedUrls.map(({ id, url }) => ({ id, url }));
       } catch (error) {
         for (const uploaded of uploadedUrls) {
           pendingUploadsRef.current.delete(uploaded.url);
@@ -188,7 +208,7 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
         void Promise.allSettled(uploadedUrls.map((uploaded) => deleteImage(uploaded.url)));
         console.error("Image upload error:", error);
         toastManager.add({ title: t("imageUploadError"), type: "error" });
-        return false;
+        return [];
       } finally {
         setIsUploadingToServer(false);
       }
@@ -338,6 +358,43 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
     },
     [form, imagesPreviews],
   );
+
+  // Swaps an AI-enhanced object in place of its original. The enhanced object
+  // joins `pendingUploadsRef` (deleted on unmount / when it leaves the form) and
+  // the replaced original leaves `imagesPreviews`, so the cleanup effect above
+  // deletes it when it was uploaded in this session — persisted originals are
+  // dropped on save by `useProductFormMutations`, exactly like a removed image.
+  const replaceImageWithEnhanced = useCallback(
+    (originalUrl: string, enhancedUrl: string) => {
+      const index = imagesPreviews.indexOf(originalUrl);
+      if (index === -1) return false;
+
+      pendingUploadsRef.current.add(enhancedUrl);
+      const updated = [...imagesPreviews];
+      updated[index] = enhancedUrl;
+      form.setFieldValue("images", updated);
+      return true;
+    },
+    [form, imagesPreviews],
+  );
+
+  const {
+    imageEnhance,
+    enhanceImages,
+    enhanceReviewItems,
+    isEnhanceReviewOpen,
+    acceptEnhancedImage,
+    rejectEnhancedImage,
+    closeEnhanceReview,
+    isEnhancePromoOpen,
+    openEnhancePromo,
+    closeEnhancePromo,
+  } = useProductImageEnhance({
+    enabled: imageEnhanceEnabled,
+    backgroundRemovalEnabled: imageBackgroundRemovalEnabled,
+    imagesPreviews,
+    replaceImage: replaceImageWithEnhanced,
+  });
 
   const setCropRect = useCallback((itemId: string, crop: ProductImagePercentCropRect) => {
     setCropQueueItems((prev) =>
@@ -489,12 +546,22 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
           (a, b) => a.order - b.order,
         );
 
-        const didUpload = await uploadPreparedImages(allPreparedImages, {
+        const uploadedImages = await uploadPreparedImages(allPreparedImages, {
           mode: cropSessionMode,
           replaceIndex: replaceImageIndex,
         });
-        if (didUpload) {
-          resetCropSession();
+        if (uploadedImages.length === 0) return;
+
+        // Resolved before the reset clears the flags: an image can only be
+        // enhanced once its object exists on the storage.
+        const urlsToEnhance = uploadedImages
+          .filter((uploaded) => enhanceAfterUploadIdsRef.current.has(uploaded.id))
+          .map((uploaded) => uploaded.url);
+
+        resetCropSession();
+
+        if (urlsToEnhance.length > 0) {
+          enhanceImages(urlsToEnhance);
         }
       } catch (error) {
         console.error("Image crop error:", error);
@@ -503,6 +570,7 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
     },
     [
       cropSessionMode,
+      enhanceImages,
       passthroughQueueItems,
       replaceImageIndex,
       resetCropSession,
@@ -512,9 +580,15 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
   );
 
   const applyCurrentCropChoice = useCallback(
-    async (nextResultMode: "cropped" | "original") => {
+    async (nextResultMode: "cropped" | "original", options?: { enhanceAfterUpload?: boolean }) => {
       const activeItem = cropQueueItems[selectedCropIndex];
       if (!activeItem) return;
+
+      if (options?.enhanceAfterUpload) {
+        enhanceAfterUploadIdsRef.current.add(activeItem.id);
+      } else {
+        enhanceAfterUploadIdsRef.current.delete(activeItem.id);
+      }
 
       const updatedQueue = cropQueueItems.map((item) =>
         item.id === activeItem.id
@@ -544,6 +618,16 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
   const keepCurrentCropOriginalAndProceed = useCallback(() => {
     void applyCurrentCropChoice("original");
   }, [applyCurrentCropChoice]);
+
+  // Same as "keep the original" — the AI reframes the photo itself — plus a
+  // flag so the uploaded object is sent to the enhance queue afterwards.
+  const enhanceCurrentCropImageAndProceed = useCallback(() => {
+    if (!imageEnhanceEnabled) {
+      openEnhancePromo();
+      return;
+    }
+    void applyCurrentCropChoice("original", { enhanceAfterUpload: true });
+  }, [applyCurrentCropChoice, imageEnhanceEnabled, openEnhancePromo]);
 
   const replaceCurrentCropImage = useCallback(
     async (file: File) => {
@@ -627,11 +711,20 @@ export function useProductFormMedia({ form, imagesPreviews }: UseProductFormMedi
     setCropAreaPixels,
     applyCurrentCropAndProceed,
     keepCurrentCropOriginalAndProceed,
+    enhanceCurrentCropImageAndProceed,
     replaceCurrentCropImage,
     goToPreviousCropItem,
     goToNextCropItem,
     closeCropDialog,
     uploadCropSession,
     markUploadsPersisted,
+    imageEnhance,
+    enhanceReviewItems,
+    isEnhanceReviewOpen,
+    acceptEnhancedImage,
+    rejectEnhancedImage,
+    closeEnhanceReview,
+    isEnhancePromoOpen,
+    closeEnhancePromo,
   };
 }

@@ -42,6 +42,8 @@ import { ProductFormStepPhotos } from "./components/product-form-step-photos";
 import { ProductFormStepPricing } from "./components/product-form-step-pricing";
 import { ProductFormSummaryPanel } from "./components/product-form-summary-panel";
 import { ProductImageCropDialog } from "./components/product-image-crop-dialog";
+import { ProductImageEnhanceDialog } from "./components/product-image-enhance-dialog";
+import { ProductImageEnhancePromoDialog } from "./components/product-image-enhance-promo-dialog";
 import { useProductFormMedia } from "./hooks/use-product-form-media";
 import { useProductFormMutations } from "./hooks/use-product-form-mutations";
 import { getProductSeasonalPricings } from "./seasonal-actions";
@@ -134,6 +136,8 @@ export function ProductForm({
   storeTaxSettings,
   availableAccessories = [],
   showAiContext = false,
+  imageEnhanceEnabled = false,
+  imageBackgroundRemovalEnabled = false,
 }: ProductFormProps) {
   const router = useRouter();
   const t = useTranslations("dashboard.products.form");
@@ -465,6 +469,8 @@ export function ProductForm({
   const media = useProductFormMedia({
     form: form as unknown as ProductFormComponentApi,
     imagesPreviews,
+    imageEnhanceEnabled,
+    imageBackgroundRemovalEnabled,
   });
 
   useEffect(() => {
@@ -645,6 +651,7 @@ export function ProductForm({
                     setMainImage={media.setMainImage}
                     recropImage={media.recropImage}
                     canRecrop={true}
+                    imageEnhance={media.imageEnhance}
                   />
                 </div>
 
@@ -733,7 +740,21 @@ export function ProductForm({
           onCropSizeChange={media.setCropSizePercent}
           onApplyCrop={media.applyCurrentCropAndProceed}
           onSkipCrop={media.keepCurrentCropOriginalAndProceed}
+          onEnhanceWithAi={media.enhanceCurrentCropImageAndProceed}
           onReplaceCurrentImage={media.replaceCurrentCropImage}
+        />
+
+        <ProductImageEnhanceDialog
+          open={media.isEnhanceReviewOpen}
+          items={media.enhanceReviewItems}
+          onAccept={media.acceptEnhancedImage}
+          onReject={media.rejectEnhancedImage}
+          onClose={media.closeEnhanceReview}
+        />
+
+        <ProductImageEnhancePromoDialog
+          open={media.isEnhancePromoOpen}
+          onClose={media.closeEnhancePromo}
         />
       </>
     );
@@ -772,6 +793,7 @@ export function ProductForm({
                   setMainImage={media.setMainImage}
                   recropImage={media.recropImage}
                   canRecrop={false}
+                  imageEnhance={media.imageEnhance}
                 />
               </div>
 
@@ -870,7 +892,21 @@ export function ProductForm({
         onCropSizeChange={media.setCropSizePercent}
         onApplyCrop={media.applyCurrentCropAndProceed}
         onSkipCrop={media.keepCurrentCropOriginalAndProceed}
+        onEnhanceWithAi={media.enhanceCurrentCropImageAndProceed}
         onReplaceCurrentImage={media.replaceCurrentCropImage}
+      />
+
+      <ProductImageEnhanceDialog
+        open={media.isEnhanceReviewOpen}
+        items={media.enhanceReviewItems}
+        onAccept={media.acceptEnhancedImage}
+        onReject={media.rejectEnhancedImage}
+        onClose={media.closeEnhanceReview}
+      />
+
+      <ProductImageEnhancePromoDialog
+        open={media.isEnhancePromoOpen}
+        onClose={media.closeEnhancePromo}
       />
     </>
   );

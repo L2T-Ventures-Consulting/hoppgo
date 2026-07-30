@@ -2,9 +2,21 @@
 
 import { StarSolidIcon, VideoSolidIcon } from "@louez/ui/icons";
 import type { ChangeEvent, DragEvent } from "react";
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
-import { Crop, ImageUp, Loader2, Pencil, Play, Star, Video, X } from "lucide-react";
+import {
+  Crop,
+  Eraser,
+  ImageUp,
+  Loader2,
+  Pencil,
+  Play,
+  Sparkles,
+  Star,
+  Video,
+  WandSparkles,
+  X,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -19,6 +31,7 @@ import {
   DialogTitle,
   Input,
   Label,
+  MediaLightbox,
 } from "@louez/ui";
 import { cn } from "@louez/utils";
 
@@ -26,7 +39,9 @@ import { getFieldError } from "@/hooks/form/form-context";
 import { IMAGE_UPLOAD_MIME_TYPES } from "@/lib/uploads/image-upload";
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from "@/lib/youtube";
 
+import type { ProductImageEnhanceControls } from "../hooks/use-product-image-enhance";
 import type { ProductFormComponentApi } from "../types";
+import { PRODUCT_IMAGE_ASPECT_RATIO } from "../utils/product-image-crop";
 
 export interface ProductMediaFieldsProps {
   form: ProductFormComponentApi;
@@ -42,6 +57,7 @@ export interface ProductMediaFieldsProps {
   setMainImage: (index: number) => void;
   recropImage: (index: number) => void;
   canRecrop: boolean;
+  imageEnhance: ProductImageEnhanceControls;
   showPhotosLabel?: boolean;
 }
 
@@ -59,9 +75,42 @@ export function ProductMediaFields({
   setMainImage,
   recropImage,
   canRecrop,
+  imageEnhance,
   showPhotosLabel = true,
 }: ProductMediaFieldsProps) {
   const t = useTranslations("dashboard.products.form");
+  const tCommon = useTranslations("common");
+
+  // `lightboxIndex` stays set until the closing animation finished, so the
+  // lightbox can fly back to its thumbnail.
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [aspectRatios, setAspectRatios] = useState<Record<string, number>>({});
+  const thumbnailsRef = useRef(new Map<number, HTMLImageElement>());
+
+  const openLightbox = (index: number) => {
+    setLightboxIndex(index);
+    setIsLightboxOpen(true);
+  };
+
+  const resolveLightboxSource = useCallback(
+    (index: number) => thumbnailsRef.current.get(index) ?? null,
+    [],
+  );
+
+  const getLightboxAspectRatio = useCallback(
+    (preview: string) => aspectRatios[preview] ?? PRODUCT_IMAGE_ASPECT_RATIO,
+    [aspectRatios],
+  );
+
+  const rememberAspectRatio = (preview: string, image: HTMLImageElement) => {
+    if (!image.naturalWidth || !image.naturalHeight) return;
+    setAspectRatios((current) =>
+      current[preview]
+        ? current
+        : { ...current, [preview]: image.naturalWidth / image.naturalHeight },
+    );
+  };
 
   return (
     <div className="space-y-4">
@@ -78,64 +127,124 @@ export function ProductMediaFields({
             )}
 
             <div className="flex flex-wrap gap-2">
-              {imagesPreviews.map((preview, index) => (
-                <div
-                  key={index}
-                  className="group max-w-[calc(50%-6px)] sm:max-w-48 w-full bg-muted/20 relative aspect-4/3 overflow-hidden rounded-lg border"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={preview}
-                    alt={`Product image ${index + 1}`}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-linear-to-b from-black/40 to-transparent opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100" />
-                  <div className="absolute top-1.5 right-1.5 flex gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
-                    {index !== 0 && (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="bg-background/80 hover:bg-background size-6 rounded-md shadow-xs backdrop-blur-sm"
-                        onClick={() => setMainImage(index)}
-                        title={t("setAsMain")}
-                      >
-                        <Star className="size-3" />
-                      </Button>
-                    )}
-                    {canRecrop && (
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="bg-background/80 hover:bg-background size-6 rounded-md shadow-xs backdrop-blur-sm"
-                        onClick={() => recropImage(index)}
-                        title={t("recropImage")}
-                      >
-                        <Crop className="size-3" />
-                      </Button>
-                    )}
-                    <Button
+              {imagesPreviews.map((preview, index) => {
+                const enhanceStatus = imageEnhance.statusByImage[preview] ?? "idle";
+                const isTileEnhancing = enhanceStatus === "enhancing";
+
+                return (
+                  <div
+                    key={index}
+                    className="group max-w-[calc(50%-6px)] sm:max-w-48 w-full bg-muted/20 relative aspect-4/3 overflow-hidden rounded-lg border"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      ref={(node) => {
+                        if (node) thumbnailsRef.current.set(index, node);
+                        else thumbnailsRef.current.delete(index);
+                      }}
+                      src={preview}
+                      alt={`Product image ${index + 1}`}
+                      className="h-full w-full object-cover"
+                      onLoad={(event) => rememberAspectRatio(preview, event.currentTarget)}
+                    />
+                    <button
                       type="button"
-                      variant="secondary"
-                      size="icon"
-                      className="bg-background/80 hover:bg-background hover:text-destructive size-6 rounded-md shadow-xs backdrop-blur-sm"
-                      onClick={() => removeImage(index)}
-                    >
-                      <X className="size-3" />
-                    </Button>
+                      className="focus-visible:ring-ring absolute inset-0 cursor-zoom-in rounded-lg focus-visible:ring-2 focus-visible:outline-none"
+                      onClick={() => openLightbox(index)}
+                      aria-label={t("openImageViewer")}
+                    />
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-linear-to-b from-black/40 to-transparent opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100" />
+                    <div className="absolute top-1.5 right-1.5 z-10 flex gap-1 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+                      {/* Always rendered: without AI it opens the promo dialog. */}
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="bg-background/80 hover:bg-background hover:text-primary size-6 rounded-md shadow-xs backdrop-blur-sm"
+                        onClick={() => imageEnhance.enhanceImage(preview)}
+                        disabled={imageEnhance.isRunning}
+                        title={t("aiEnhanceAction")}
+                        aria-label={t("aiEnhanceAction")}
+                      >
+                        <WandSparkles className="size-3" />
+                      </Button>
+                      {imageEnhance.backgroundRemovalEnabled && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+                          className="bg-background/80 hover:bg-background hover:text-primary size-6 rounded-md shadow-xs backdrop-blur-sm"
+                          onClick={() => imageEnhance.removeBackground(preview)}
+                          disabled={imageEnhance.isRunning}
+                          title={t("removeBackgroundAction")}
+                          aria-label={t("removeBackgroundAction")}
+                        >
+                          <Eraser className="size-3" />
+                        </Button>
+                      )}
+                      {index !== 0 && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+                          className="bg-background/80 hover:bg-background size-6 rounded-md shadow-xs backdrop-blur-sm"
+                          onClick={() => setMainImage(index)}
+                          title={t("setAsMain")}
+                        >
+                          <Star className="size-3" />
+                        </Button>
+                      )}
+                      {canRecrop && (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+                          className="bg-background/80 hover:bg-background size-6 rounded-md shadow-xs backdrop-blur-sm"
+                          onClick={() => recropImage(index)}
+                          title={t("recropImage")}
+                        >
+                          <Crop className="size-3" />
+                        </Button>
+                      )}
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="bg-background/80 hover:bg-background hover:text-destructive size-6 rounded-md shadow-xs backdrop-blur-sm"
+                        onClick={() => removeImage(index)}
+                      >
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                    {index === 0 && (
+                      <Badge
+                        variant="expired"
+                        className="pointer-events-none absolute bottom-1.5 left-1.5 h-5 gap-1 px-1.5 text-[10px] shadow-xs backdrop-blur-sm"
+                      >
+                        <StarSolidIcon className="size-2.5 fill-current" />
+                        {t("mainBadge")}
+                      </Badge>
+                    )}
+                    {enhanceStatus === "awaiting-review" && (
+                      <Badge
+                        variant="secondary"
+                        className="pointer-events-none absolute right-1.5 bottom-1.5 h-5 gap-1 px-1.5 text-[10px] shadow-xs backdrop-blur-sm"
+                      >
+                        <Sparkles className="size-2.5" />
+                        {t("aiEnhanceReadyBadge")}
+                      </Badge>
+                    )}
+                    {isTileEnhancing && (
+                      <div className="bg-background/70 absolute inset-0 flex flex-col items-center justify-center gap-1.5 backdrop-blur-[2px]">
+                        <Loader2 className="text-primary size-5 animate-spin" />
+                        <span className="text-muted-foreground text-[11px] font-medium">
+                          {t("aiEnhanceLoading")}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  {index === 0 && (
-                    <Badge
-                      variant="expired"
-                      className="absolute bottom-1.5 left-1.5 h-5 gap-1 px-1.5 text-[10px] shadow-xs backdrop-blur-sm"
-                    >
-                      <StarSolidIcon className="size-2.5 fill-current" />
-                      {t("mainBadge")}
-                    </Badge>
-                  )}
-                </div>
-              ))}
+                );
+              })}
 
               {imagesPreviews.length < 5 && (
                 <label
@@ -200,6 +309,33 @@ export function ProductMediaFields({
               </form.AppField>
             </div>
 
+            {imagesPreviews.length >= 2 && (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={imageEnhance.enhanceAllImages}
+                  disabled={imageEnhance.isRunning}
+                >
+                  {imageEnhance.isRunning ? (
+                    <Loader2 data-slot="icon" className="animate-spin" />
+                  ) : (
+                    <Sparkles data-slot="icon" />
+                  )}
+                  {t("aiEnhanceBatchAction")}
+                </Button>
+                <span className="text-muted-foreground text-xs">
+                  {imageEnhance.batchProgress
+                    ? t("aiEnhanceBatchProgress", {
+                        current: imageEnhance.batchProgress.current,
+                        total: imageEnhance.batchProgress.total,
+                      })
+                    : t("aiEnhanceBatchHint")}
+                </span>
+              </div>
+            )}
+
             {!showPhotosLabel && (
               <p className="text-muted-foreground text-xs">
                 {t("imagesHint", { count: 5 - imagesPreviews.length })}
@@ -213,6 +349,37 @@ export function ProductMediaFields({
           </div>
         )}
       </form.Field>
+
+      {lightboxIndex !== null && (
+        <MediaLightbox
+          items={imagesPreviews}
+          initialIndex={lightboxIndex}
+          open={isLightboxOpen}
+          getItemKey={(preview) => preview}
+          getAspectRatio={getLightboxAspectRatio}
+          resolveSource={resolveLightboxSource}
+          onOpenChange={(next) => {
+            if (!next) setIsLightboxOpen(false);
+          }}
+          onClosed={() => setLightboxIndex(null)}
+          labels={{
+            dialog: t("photos"),
+            close: tCommon("close"),
+            previous: tCommon("previous"),
+            next: tCommon("next"),
+          }}
+          renderItem={({ item, index }) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item}
+              alt={`Product image ${index + 1}`}
+              draggable={false}
+              onLoad={(event) => rememberAspectRatio(item, event.currentTarget)}
+              className="h-full w-full object-contain"
+            />
+          )}
+        />
+      )}
     </div>
   );
 }
