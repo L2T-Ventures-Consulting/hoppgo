@@ -232,10 +232,11 @@ export const env = createEnv({
 
     // ===== Product image processing (Optional — dashboard tools) =====
     // Private rembg service used for direct background removal and after GPT
-    // Image enhancement. Keep it on the application network: it has no public
-    // authentication layer of its own.
+    // Image enhancement. Keep it on the application network or configure the
+    // shared Bearer token below when exposing it publicly.
     AI_IMAGE_BACKGROUND_REMOVAL_URL: z.url().optional(),
     AI_IMAGE_BACKGROUND_REMOVAL_MODEL: z.string().optional(),
+    AI_IMAGE_BACKGROUND_REMOVAL_TOKEN: z.string().trim().min(32).optional(),
     // GPT Image enhancement is inert unless an image API key resolves AND the
     // background-removal service above is configured. The dedicated key takes
     // precedence over AI_API_KEY when AI_PROVIDER === 'openai'.
@@ -447,6 +448,7 @@ export const env = createEnv({
     AI_PHONE_RECOMMENDED_VOICES: process.env.AI_PHONE_RECOMMENDED_VOICES,
     AI_IMAGE_BACKGROUND_REMOVAL_URL: process.env.AI_IMAGE_BACKGROUND_REMOVAL_URL,
     AI_IMAGE_BACKGROUND_REMOVAL_MODEL: process.env.AI_IMAGE_BACKGROUND_REMOVAL_MODEL,
+    AI_IMAGE_BACKGROUND_REMOVAL_TOKEN: process.env.AI_IMAGE_BACKGROUND_REMOVAL_TOKEN,
     AI_IMAGE_OPENAI_API_KEY: process.env.AI_IMAGE_OPENAI_API_KEY,
     AI_IMAGE_MODEL: process.env.AI_IMAGE_MODEL,
     AI_IMAGE_QUALITY: process.env.AI_IMAGE_QUALITY,

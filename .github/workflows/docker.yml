@@ -93,6 +93,7 @@ jobs:
         run: |
           docker run -d --name louez-background-removal \
             --network louez-net -p 7000:7000 \
+            -e BACKGROUND_REMOVAL_API_TOKEN=smoke-test-background-removal-token \
             louez-background-removal:smoke
           echo "Waiting for the background-removal model to load..."
           for i in $(seq 1 90); do
@@ -106,7 +107,12 @@ jobs:
             fi
             sleep 2
           done
+          test "$(curl -sS -o /dev/null -w '%{http_code}' \
+            -F "file=@apps/web/public/favicon-32x32.png;type=image/png" \
+            -F "model=u2netp" \
+            http://localhost:7000/api/remove)" = "401"
           curl -fsS \
+            -H "Authorization: Bearer smoke-test-background-removal-token" \
             -F "file=@apps/web/public/favicon-32x32.png;type=image/png" \
             -F "model=u2netp" \
             http://localhost:7000/api/remove \
@@ -124,6 +130,7 @@ jobs:
             -e NEXT_PUBLIC_APP_URL=http://localhost:3000 \
             -e NEXT_PUBLIC_APP_DOMAIN=localhost:3000 \
             -e AI_IMAGE_BACKGROUND_REMOVAL_URL=http://louez-background-removal:7000 \
+            -e AI_IMAGE_BACKGROUND_REMOVAL_TOKEN=smoke-test-background-removal-token \
             louez-web:smoke
 
       - name: Wait for app to report healthy

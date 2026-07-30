@@ -14,7 +14,10 @@ Build and run it locally:
 
 ```bash
 docker build -f apps/background-removal/Dockerfile -t louez-background-removal .
-docker run --rm -p 127.0.0.1:7000:7000 louez-background-removal
+docker run --rm \
+  -e BACKGROUND_REMOVAL_API_TOKEN=replace-with-at-least-32-characters \
+  -p 127.0.0.1:7000:7000 \
+  louez-background-removal
 ```
 
 Release tags publish the same image as
@@ -34,10 +37,16 @@ Then configure the web app:
 
 ```dotenv
 AI_IMAGE_BACKGROUND_REMOVAL_URL=http://127.0.0.1:7000
+AI_IMAGE_BACKGROUND_REMOVAL_TOKEN=replace-with-the-same-32-character-token
 # Only when a non-default model was baked into the image:
 # AI_IMAGE_BACKGROUND_REMOVAL_MODEL=birefnet-general-lite
 ```
 
-In production, expose port 7000 only on the private application network. The
-service intentionally has no public authentication layer; the authenticated
-Louez route is its sole caller.
+When `BACKGROUND_REMOVAL_API_TOKEN` is configured, `/api/remove` requires the
+same value as a Bearer token. `/health` remains public for container
+orchestrators. Tokens shorter than 32 characters make the worker fail fast.
+
+Authentication is optional for backward-compatible private-network installs,
+but mandatory operationally whenever the worker is reachable publicly. Prefer
+a private application network in production even when Bearer authentication is
+enabled.

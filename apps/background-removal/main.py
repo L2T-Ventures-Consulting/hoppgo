@@ -1,9 +1,10 @@
+import hmac
 import os
 from contextlib import asynccontextmanager
 from typing import Annotated, AsyncIterator
 
 import onnxruntime as ort
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 from rembg import remove
@@ -11,9 +12,32 @@ from rembg.sessions import sessions_class
 from rembg.sessions.base import BaseSession
 
 MODEL = os.environ.get("BACKGROUND_REMOVAL_MODEL", "u2netp")
+API_TOKEN = os.environ.get("BACKGROUND_REMOVAL_API_TOKEN", "").strip() or None
 MAX_INPUT_SIZE = 16 * 1024 * 1024
 
+if API_TOKEN is not None and len(API_TOKEN) < 32:
+    raise ValueError("BACKGROUND_REMOVAL_API_TOKEN must contain at least 32 characters")
+
 session: BaseSession | None = None
+
+
+def require_api_token(
+    authorization: Annotated[str | None, Header()] = None,
+) -> None:
+    if API_TOKEN is None:
+        return
+
+    scheme, separator, credentials = (authorization or "").partition(" ")
+    if (
+        separator != " "
+        or scheme.lower() != "bearer"
+        or not hmac.compare_digest(credentials, API_TOKEN)
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="unauthorized",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 def create_session() -> BaseSession:
@@ -65,6 +89,7 @@ async def health() -> dict[str, str]:
 
 @app.post("/api/remove", response_class=Response)
 async def remove_background(
+    _: Annotated[None, Depends(require_api_token)],
     file: Annotated[UploadFile, File()],
     model: Annotated[str, Form()] = MODEL,
 ) -> Response:

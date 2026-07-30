@@ -48,10 +48,13 @@ export async function removeImageBackground(input: {
   );
   form.append("model", env.AI_IMAGE_BACKGROUND_REMOVAL_MODEL?.trim() || DEFAULT_MODEL);
 
+  const token = env.AI_IMAGE_BACKGROUND_REMOVAL_TOKEN?.trim();
+
   let response: Response;
   try {
     response = await fetch(`${baseUrl}/api/remove`, {
       method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       body: form,
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });

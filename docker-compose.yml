@@ -43,6 +43,7 @@ services:
       # Private OSS worker included below. Direct background removal is ready
       # without an API key; GPT enhancement remains optional.
       AI_IMAGE_BACKGROUND_REMOVAL_URL: http://background-removal:7000
+      AI_IMAGE_BACKGROUND_REMOVAL_TOKEN: ${BACKGROUND_REMOVAL_API_TOKEN:-}
       AI_IMAGE_OPENAI_API_KEY: ${AI_IMAGE_OPENAI_API_KEY:-}
       AI_IMAGE_MODEL: ${AI_IMAGE_MODEL:-}
       AI_IMAGE_QUALITY: ${AI_IMAGE_QUALITY:-}
@@ -81,6 +82,8 @@ services:
     build:
       context: .
       dockerfile: apps/background-removal/Dockerfile
+    environment:
+      BACKGROUND_REMOVAL_API_TOKEN: ${BACKGROUND_REMOVAL_API_TOKEN:-}
     expose:
       - "7000"
     restart: unless-stopped
