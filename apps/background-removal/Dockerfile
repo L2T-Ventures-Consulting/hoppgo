@@ -1,13 +1,13 @@
 FROM python:3.12-slim
 
 ARG REMBG_VERSION=2.0.75
-ARG REMBG_MODEL=u2netp
+ARG REMBG_MODEL=isnet-general-use
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     U2NET_HOME=/models \
-    BACKGROUND_REMOVAL_MODEL=${REMBG_MODEL}
+    REMBG_MODEL=${REMBG_MODEL}
 
 RUN groupadd --system --gid 1001 rembg \
     && useradd --system --uid 1001 --gid rembg --home-dir /app rembg \
@@ -24,7 +24,7 @@ WORKDIR /app
 
 # Bake the model into the image so production never downloads weights on the
 # first merchant request.
-RUN python -c 'import os; from rembg import new_session; new_session(os.environ["BACKGROUND_REMOVAL_MODEL"])'
+RUN python -c 'import os; from rembg import new_session; new_session(os.environ["REMBG_MODEL"])'
 
 COPY --chown=rembg:rembg apps/background-removal/main.py /app/main.py
 

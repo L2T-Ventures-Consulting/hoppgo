@@ -17,6 +17,10 @@ import {
   isAiImageEnhanceEnabled,
   recordImageEnhanceDebit,
 } from "@/lib/ai/image/credits";
+import {
+  type ImageProcessingDebugStageInput,
+  persistImageProcessingDebugRun,
+} from "@/lib/ai/image/debug-artifacts";
 import { standardizeProductImage } from "@/lib/ai/image/postprocess";
 import { ImageProviderError, enhanceProductImage } from "@/lib/ai/image/provider";
 import { auth } from "@/lib/auth";
@@ -34,7 +38,9 @@ export const maxDuration = 360;
 // minus GIF: an animated source has no meaningful "product on transparency".
 const KEY_PATTERN = /^[a-zA-Z0-9/_-]+\.(?:jpe?g|png|webp)$/;
 
-const MIME_BY_EXTENSION: Record<string, string> = {
+type SupportedImageMimeType = "image/jpeg" | "image/png" | "image/webp";
+
+const MIME_BY_EXTENSION: Record<string, SupportedImageMimeType> = {
   jpg: "image/jpeg",
   jpeg: "image/jpeg",
   png: "image/png",
@@ -102,12 +108,12 @@ const handlePost = async (request: Request) => {
   // Read the original through the storage adapter (works identically for a
   // public bucket and for the private, proxied MinIO of standalone installs).
   let source: Buffer;
-  let sourceMimeType: string;
+  let sourceMimeType: SupportedImageMimeType;
   try {
     const stored = await files.download(imageKey);
     source = Buffer.from(await stored.arrayBuffer());
     const extension = imageKey.split(".").pop()?.toLowerCase() ?? "";
-    sourceMimeType = MIME_BY_EXTENSION[extension] ?? stored.type ?? "application/octet-stream";
+    sourceMimeType = MIME_BY_EXTENSION[extension] ?? "image/png";
   } catch (error) {
     logger.error(error instanceof Error ? error : new Error("Product image read failed"));
     return NextResponse.json({ code: "invalid_image" }, { status: 400 });
@@ -117,20 +123,56 @@ const handlePost = async (request: Request) => {
     return NextResponse.json({ code: "invalid_image" }, { status: 400 });
   }
 
+  const runId = randomUUID();
+  const processingStartedAt = Date.now();
+  const debugStages: ImageProcessingDebugStageInput[] = [
+    {
+      id: "original",
+      label: "Original",
+      buffer: source,
+      contentType: sourceMimeType,
+    },
+  ];
   let standardized: { buffer: Buffer; contentType: "image/webp" };
   try {
-    const backgroundRemovalInput =
-      operation === "enhance"
-        ? {
-            buffer: await enhanceProductImage({
-              buffer: source,
-              mimeType: sourceMimeType,
-            }),
-            mimeType: "image/png",
-          }
-        : { buffer: source, mimeType: sourceMimeType };
+    let backgroundRemovalInput: { buffer: Buffer; mimeType: SupportedImageMimeType };
+    if (operation === "enhance") {
+      const aiStartedAt = Date.now();
+      const enhanced = await enhanceProductImage({
+        buffer: source,
+        mimeType: sourceMimeType,
+      });
+      debugStages.push({
+        id: "ai-enhanced",
+        label: "Après GPT Image",
+        buffer: enhanced,
+        contentType: "image/png",
+        durationMs: Date.now() - aiStartedAt,
+      });
+      backgroundRemovalInput = { buffer: enhanced, mimeType: "image/png" };
+    } else {
+      backgroundRemovalInput = { buffer: source, mimeType: sourceMimeType };
+    }
+
+    const backgroundRemovalStartedAt = Date.now();
     const isolated = await removeImageBackground(backgroundRemovalInput);
+    debugStages.push({
+      id: "background-removed",
+      label: "Après suppression du fond",
+      buffer: isolated,
+      contentType: "image/png",
+      durationMs: Date.now() - backgroundRemovalStartedAt,
+    });
+
+    const standardizationStartedAt = Date.now();
     standardized = await standardizeProductImage(isolated);
+    debugStages.push({
+      id: "standardized",
+      label: "Résultat standardisé",
+      buffer: standardized.buffer,
+      contentType: standardized.contentType,
+      durationMs: Date.now() - standardizationStartedAt,
+    });
   } catch (error) {
     // Provider messages can carry request details — logged, never returned.
     logger.error(error instanceof Error ? error : new Error("Product image processing failed"));
@@ -146,10 +188,11 @@ const handlePost = async (request: Request) => {
     // Anything else (e.g. an unreadable source the decoder chokes on) is ours.
     return NextResponse.json({ code: "server_error" }, { status: 500 });
   }
+  const processingDurationMs = Date.now() - processingStartedAt;
 
   // Always a NEW object (same id shape the upload router mints) — the original
   // stays untouched so the merchant can always fall back to it.
-  const objectId = randomUUID();
+  const objectId = runId;
   const suffix = operation === "enhance" ? "ai" : "bg";
   const key = `${prefix}${objectId}-${suffix}.webp`;
 
@@ -184,6 +227,24 @@ const handlePost = async (request: Request) => {
     // Off the critical path (result already stored): recharge the merchant's
     // balance off-session if it dropped below their threshold.
     await maybeTriggerAutoTopup(store.id);
+  }
+
+  try {
+    await persistImageProcessingDebugRun({
+      runId,
+      storeId: store.id,
+      operation,
+      createdAt: new Date(processingStartedAt),
+      sourceKey: imageKey,
+      outputKey: key,
+      totalDurationMs: processingDurationMs,
+      stages: debugStages,
+    });
+  } catch (error) {
+    // Diagnostics must never withhold a valid customer-facing result.
+    logger.error(
+      error instanceof Error ? error : new Error("Image processing debug persistence failed"),
+    );
   }
 
   return NextResponse.json({ key, url, creditsCharged });

@@ -235,7 +235,6 @@ export const env = createEnv({
     // Image enhancement. Keep it on the application network or configure the
     // shared Bearer token below when exposing it publicly.
     AI_IMAGE_BACKGROUND_REMOVAL_URL: z.url().optional(),
-    AI_IMAGE_BACKGROUND_REMOVAL_MODEL: z.string().optional(),
     AI_IMAGE_BACKGROUND_REMOVAL_TOKEN: z.string().trim().min(32).optional(),
     // GPT Image enhancement is inert unless an image API key resolves AND the
     // background-removal service above is configured. The dedicated key takes
@@ -253,6 +252,10 @@ export const env = createEnv({
     // Real provider cost of ONE enhancement in USD, frozen on the debit row for
     // cost-vs-billed reporting. 0/unset ⇒ 0. Never surfaced to anyone.
     AI_IMAGE_USD_PER_IMAGE: z.coerce.number().min(0).optional(),
+    // Persist private originals/intermediate outputs and expose the protected
+    // /dev/image-processing comparison page. Always enabled in local development;
+    // production/pre-production deployments must explicitly set this to "true".
+    AI_IMAGE_DEBUG_ENABLED: z.enum(["true", "false"]).optional(),
 
     // ===== fromHello (Optional — engagement & growth) =====
     FROMHELLO_API_URL: z.url().optional(),
@@ -447,13 +450,13 @@ export const env = createEnv({
     ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
     AI_PHONE_RECOMMENDED_VOICES: process.env.AI_PHONE_RECOMMENDED_VOICES,
     AI_IMAGE_BACKGROUND_REMOVAL_URL: process.env.AI_IMAGE_BACKGROUND_REMOVAL_URL,
-    AI_IMAGE_BACKGROUND_REMOVAL_MODEL: process.env.AI_IMAGE_BACKGROUND_REMOVAL_MODEL,
     AI_IMAGE_BACKGROUND_REMOVAL_TOKEN: process.env.AI_IMAGE_BACKGROUND_REMOVAL_TOKEN,
     AI_IMAGE_OPENAI_API_KEY: process.env.AI_IMAGE_OPENAI_API_KEY,
     AI_IMAGE_MODEL: process.env.AI_IMAGE_MODEL,
     AI_IMAGE_QUALITY: process.env.AI_IMAGE_QUALITY,
     AI_IMAGE_ENHANCE_CREDITS: process.env.AI_IMAGE_ENHANCE_CREDITS,
     AI_IMAGE_USD_PER_IMAGE: process.env.AI_IMAGE_USD_PER_IMAGE,
+    AI_IMAGE_DEBUG_ENABLED: process.env.AI_IMAGE_DEBUG_ENABLED,
     FROMHELLO_API_URL: process.env.FROMHELLO_API_URL,
     FROMHELLO_API_KEY: process.env.FROMHELLO_API_KEY,
     LOUEZ_MODE: process.env.LOUEZ_MODE,

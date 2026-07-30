@@ -4,14 +4,14 @@ from contextlib import asynccontextmanager
 from typing import Annotated, AsyncIterator
 
 import onnxruntime as ort
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import Response
 from rembg import remove
 from rembg.sessions import sessions_class
 from rembg.sessions.base import BaseSession
 
-MODEL = os.environ.get("BACKGROUND_REMOVAL_MODEL", "u2netp")
+MODEL = os.environ.get("REMBG_MODEL", "isnet-general-use")
 API_TOKEN = os.environ.get("BACKGROUND_REMOVAL_API_TOKEN", "").strip() or None
 MAX_INPUT_SIZE = 16 * 1024 * 1024
 
@@ -91,10 +91,7 @@ async def health() -> dict[str, str]:
 async def remove_background(
     _: Annotated[None, Depends(require_api_token)],
     file: Annotated[UploadFile, File()],
-    model: Annotated[str, Form()] = MODEL,
 ) -> Response:
-    if model != MODEL:
-        raise HTTPException(status_code=400, detail="unsupported_model")
     if session is None:
         raise HTTPException(status_code=503, detail="model_not_ready")
 

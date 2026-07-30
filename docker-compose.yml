@@ -49,6 +49,7 @@ services:
       AI_IMAGE_QUALITY: ${AI_IMAGE_QUALITY:-}
       AI_IMAGE_ENHANCE_CREDITS: ${AI_IMAGE_ENHANCE_CREDITS:-}
       AI_IMAGE_USD_PER_IMAGE: ${AI_IMAGE_USD_PER_IMAGE:-}
+      AI_IMAGE_DEBUG_ENABLED: ${AI_IMAGE_DEBUG_ENABLED:-}
       # Optional integrations — set them in .env when you need them.
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

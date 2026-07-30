@@ -1,6 +1,5 @@
 import { env } from "@/env";
 
-const DEFAULT_MODEL = "u2netp";
 const REQUEST_TIMEOUT_MS = 120_000;
 const MAX_OUTPUT_SIZE = 32 * 1024 * 1024;
 const ERROR_BODY_SNIPPET = 500;
@@ -46,8 +45,6 @@ export async function removeImageBackground(input: {
     new Blob([new Uint8Array(input.buffer)], { type: input.mimeType }),
     "product",
   );
-  form.append("model", env.AI_IMAGE_BACKGROUND_REMOVAL_MODEL?.trim() || DEFAULT_MODEL);
-
   const token = env.AI_IMAGE_BACKGROUND_REMOVAL_TOKEN?.trim();
 
   let response: Response;
