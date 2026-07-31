@@ -164,6 +164,10 @@ function getNewUnitImagesInput(unit: ProductUnitInput): string[] {
   return "images" in unit && Array.isArray(unit.images) ? unit.images : [];
 }
 
+function getProductImageHistoryUrls(data: ProductInput): string[] {
+  return data.imageHistory?.flatMap((history) => history.versions.map(({ url }) => url)) ?? [];
+}
+
 async function getAssignedBlockingUnitIds({
   unitIds,
   storeId,
@@ -292,7 +296,11 @@ export async function createProduct(data: ProductInput) {
     return { error: "errors.invalidData" };
   }
 
-  if (validated.data.images?.some((image) => !isOwnedImageUrl(image, `${store.id}/products`))) {
+  const submittedImageUrls = [
+    ...(validated.data.images ?? []),
+    ...getProductImageHistoryUrls(validated.data),
+  ];
+  if (submittedImageUrls.some((image) => !isOwnedImageUrl(image, `${store.id}/products`))) {
     return { error: "errors.invalidData" };
   }
 
@@ -353,6 +361,7 @@ export async function createProduct(data: ProductInput) {
         ...(!trackUnits ? { quantity: manualQuantity } : {}),
         status: validated.data.status,
         images: validated.data.images || [],
+        imageHistory: validated.data.imageHistory || [],
         videoUrl: validated.data.videoUrl || null,
         taxSettings: validated.data.taxSettings || null,
         enforceStrictTiers: validated.data.enforceStrictTiers || false,
@@ -484,9 +493,16 @@ export async function updateProduct(productId: string, data: ProductInput) {
     return { error: "errors.productNotFound" };
   }
 
-  const existingImages = new Set(product.images ?? []);
+  const existingImages = new Set([
+    ...(product.images ?? []),
+    ...(product.imageHistory?.flatMap((history) => history.versions.map(({ url }) => url)) ?? []),
+  ]);
+  const submittedImageUrls = [
+    ...(validated.data.images ?? []),
+    ...getProductImageHistoryUrls(validated.data),
+  ];
   if (
-    validated.data.images?.some(
+    submittedImageUrls.some(
       (image) => !existingImages.has(image) && !isOwnedImageUrl(image, `${store.id}/products`),
     )
   ) {
@@ -668,6 +684,7 @@ export async function updateProduct(productId: string, data: ProductInput) {
       ...(!trackUnits ? { quantity: manualQuantity } : {}),
       status: validated.data.status,
       images: validated.data.images || [],
+      imageHistory: validated.data.imageHistory || [],
       videoUrl: validated.data.videoUrl || null,
       taxSettings: validated.data.taxSettings || null,
       enforceStrictTiers: validated.data.enforceStrictTiers || false,

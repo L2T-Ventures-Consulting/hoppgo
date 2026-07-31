@@ -28,6 +28,7 @@ import type {
   GoogleReview,
   NotificationSettings,
   PricingBreakdown,
+  ProductImageHistory,
   ProductSnapshot,
   ProductTaxSettings,
   PromoCodeSnapshot,
@@ -878,6 +879,10 @@ export const products = mysqlTable(
 
     // Images (array of URLs)
     images: json('images').$type<string[]>().default([]),
+    // Non-destructive transformation history for each logical product image.
+    imageHistory: json('image_history')
+      .$type<ProductImageHistory[]>()
+      .default([]),
 
     // Pricing
     price: decimal('price', { precision: 10, scale: 2 }).notNull(),

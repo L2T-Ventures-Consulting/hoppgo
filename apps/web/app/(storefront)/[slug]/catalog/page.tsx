@@ -217,6 +217,7 @@ export default async function CatalogPage({ params, searchParams }: CatalogPageP
         // Advisor-only context — intentionally not selected nor sent to the storefront
         aiContext: null,
         images: row.images,
+        imageHistory: [],
         price: row.price,
         deposit: row.deposit,
         basePeriodMinutes: row.basePeriodMinutes,

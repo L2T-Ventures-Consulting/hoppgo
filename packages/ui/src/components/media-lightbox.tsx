@@ -79,6 +79,11 @@ type MediaLightboxRenderContext<Item> = {
   itemKey: Key;
 };
 
+type MediaLightboxToolbarContext<Item> = {
+  index: number;
+  item: Item;
+};
+
 type MediaLightboxProps<Item> = {
   items: readonly Item[];
   initialIndex: number;
@@ -86,6 +91,19 @@ type MediaLightboxProps<Item> = {
   /** Width / height of the item, used to size the hero and match the source. */
   getAspectRatio: (item: Item, index: number) => number;
   renderItem: (context: MediaLightboxRenderContext<Item>) => ReactNode;
+  /**
+   * Optional actions for the item on screen, laid out in a bar under the hero.
+   * A render prop rather than a node so it always sees the *current* item —
+   * the viewer owns its index and the caller cannot guess it after a swipe.
+   */
+  renderToolbar?: (context: MediaLightboxToolbarContext<Item>) => ReactNode;
+  /** Notified whenever the viewer moves to another item (swipe, arrows, jump). */
+  onIndexChange?: (index: number) => void;
+  /**
+   * Externally requested item. Changing it moves the viewer without animating;
+   * leave it out to keep the viewer fully uncontrolled.
+   */
+  activeIndex?: number;
   /** Element the hero flies from / back to — usually the thumbnail. */
   resolveSource: (index: number, item: Item) => HTMLElement | null;
   onOpenChange: (open: boolean) => void;
@@ -94,6 +112,8 @@ type MediaLightboxProps<Item> = {
   getItemKey?: (item: Item, index: number) => Key;
   labels?: MediaLightboxLabels;
   reduceMotion?: boolean;
+  /** Temporarily yields keyboard handling to a nested dialog or drawer. */
+  suspendInteractions?: boolean;
   className?: string;
   backdropClassName?: string;
   heroClassName?: string;
@@ -144,12 +164,16 @@ function MediaLightbox<Item>({
   open,
   getAspectRatio,
   renderItem,
+  renderToolbar,
+  onIndexChange,
+  activeIndex,
   resolveSource,
   onOpenChange,
   onClosed,
   getItemKey = (_item, index) => index,
   labels,
   reduceMotion,
+  suspendInteractions = false,
   className,
   backdropClassName,
   heroClassName,
@@ -281,6 +305,39 @@ function MediaLightbox<Item>({
     },
     [centerRail, dismissBlend, items.length, reduce, x, y],
   );
+
+  // Report the current item so a caller can keep its own pointer in step (and
+  // aim an `activeIndex` jump at it later).
+  useEffect(() => {
+    onIndexChange?.(index);
+  }, [index, onIndexChange]);
+
+  // The caller's list can shrink under us — a toolbar action deleting the item
+  // being viewed, typically. Clamp instead of letting `items[index]` go
+  // undefined, which would rip the whole viewer out mid-exit and strand
+  // `onClosed`, leaving the caller convinced it is still open.
+  useEffect(() => {
+    if (items.length === 0 || indexRef.current < items.length) return;
+    const clamped = items.length - 1;
+    indexRef.current = clamped;
+    setIndex(clamped);
+  }, [items.length]);
+
+  // An externally requested item — e.g. the caller reordered `items` and wants
+  // the same picture to stay on screen. No animation: nothing "moved" for the
+  // viewer, the list did.
+  useEffect(() => {
+    if (activeIndex === undefined || closeStartedRef.current) return;
+    if (activeIndex === indexRef.current) return;
+    if (activeIndex < 0 || activeIndex >= items.length) return;
+
+    stopRail();
+    indexRef.current = activeIndex;
+    setIndex(activeIndex);
+    x.jump(0);
+    y.jump(0);
+    dismissBlend.jump(0);
+  }, [activeIndex, dismissBlend, items.length, stopRail, x, y]);
 
   const requestClose = useCallback(
     (mode: CloseMode, releaseVelocity?: DragReleaseVelocity) => {
@@ -418,7 +475,7 @@ function MediaLightbox<Item>({
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!open) return;
+      if (!open || suspendInteractions) return;
       if (event.key === "Escape") {
         event.preventDefault();
         requestClose("shared");
@@ -453,7 +510,7 @@ function MediaLightbox<Item>({
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [navigate, open, requestClose]);
+  }, [navigate, open, requestClose, suspendInteractions]);
 
   if (!portalNode || item === undefined) return null;
 
@@ -633,7 +690,11 @@ function MediaLightbox<Item>({
                   >
                     <motion.div
                       data-slot="media-lightbox-slide"
-                      className="pointer-events-none absolute inset-0 flex items-center justify-center px-4 pt-16 pb-24 sm:px-20 sm:py-14"
+                      className={cn(
+                        "pointer-events-none absolute inset-0 flex items-center justify-center px-4 pt-16 sm:px-20 sm:pt-14",
+                        // Reserve the bar's height so the hero never sits under it.
+                        renderToolbar ? "pb-36 sm:pb-28" : "pb-24 sm:pb-14",
+                      )}
                       style={{ x: slot === 0 ? 0 : slideTravel(slot) }}
                     >
                       <motion.div
@@ -670,30 +731,50 @@ function MediaLightbox<Item>({
             </motion.div>
           </div>
 
-          {items.length > 1 ? (
+          {renderToolbar || items.length > 1 ? (
+            // Pointer-events-none on the stack itself: the gaps around the
+            // controls must stay click-to-dismiss.
             <div
-              data-slot="media-lightbox-mobile-navigation"
-              className="absolute inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex items-center justify-center gap-2 transition-opacity duration-150 sm:hidden"
+              data-slot="media-lightbox-bottom-bar"
+              className="pointer-events-none absolute inset-x-0 bottom-[max(1rem,env(safe-area-inset-bottom))] z-20 flex flex-col items-center gap-2 transition-opacity duration-150"
               style={{ opacity: returningToSource ? 0 : 1 }}
             >
-              <Button
-                type="button"
-                variant="tertiary"
-                size="icon-lg"
-                aria-label={resolvedLabels.previous}
-                onClick={() => navigate(-1)}
-              >
-                <ChevronLeft data-slot="icon" className="size-4 stroke-2" />
-              </Button>
-              <Button
-                type="button"
-                variant="tertiary"
-                size="icon-lg"
-                aria-label={resolvedLabels.next}
-                onClick={() => navigate(1)}
-              >
-                <ChevronRight data-slot="icon" className="size-4 stroke-2" />
-              </Button>
+              {items.length > 1 ? (
+                <div
+                  data-slot="media-lightbox-mobile-navigation"
+                  className="pointer-events-auto flex items-center justify-center gap-2 sm:hidden"
+                >
+                  <Button
+                    type="button"
+                    variant="tertiary"
+                    size="icon-lg"
+                    aria-label={resolvedLabels.previous}
+                    onClick={() => navigate(-1)}
+                  >
+                    <ChevronLeft data-slot="icon" className="size-4 stroke-2" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="tertiary"
+                    size="icon-lg"
+                    aria-label={resolvedLabels.next}
+                    onClick={() => navigate(1)}
+                  >
+                    <ChevronRight data-slot="icon" className="size-4 stroke-2" />
+                  </Button>
+                </div>
+              ) : null}
+
+              {renderToolbar ? (
+                <div
+                  data-slot="media-lightbox-toolbar"
+                  // Keeps a button press from arming the swipe/dismiss drag.
+                  data-media-lightbox-no-drag
+                  className="pointer-events-auto max-w-[calc(100vw-2rem)]"
+                >
+                  {renderToolbar({ index, item })}
+                </div>
+              ) : null}
             </div>
           ) : null}
         </motion.div>
@@ -733,4 +814,5 @@ export {
   type MediaLightboxLabels,
   type MediaLightboxProps,
   type MediaLightboxRenderContext,
+  type MediaLightboxToolbarContext,
 };

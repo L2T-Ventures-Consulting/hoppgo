@@ -37,8 +37,6 @@ import { ProductFormEditToc } from "./components/product-form-edit-toc";
 import { ProductFormSectionAccessories } from "./components/product-form-section-accessories";
 import { ProductFormSectionProduct } from "./components/product-form-section-product";
 import { ProductFormSectionStock } from "./components/product-form-section-stock";
-import { ProductFormStepInfo } from "./components/product-form-step-info";
-import { ProductFormStepPhotos } from "./components/product-form-step-photos";
 import { ProductFormStepPricing } from "./components/product-form-step-pricing";
 import { ProductFormSummaryPanel } from "./components/product-form-summary-panel";
 import { ProductImageCropDialog } from "./components/product-image-crop-dialog";
@@ -55,6 +53,7 @@ import type {
   ProductFormValues,
   SeasonalPricingData,
 } from "./types";
+import { createInitialProductImageHistory } from "./utils/util.product-image-history";
 
 type ProductFormSubmitIntent = "save" | "save-and-duplicate";
 const PRODUCT_COPY_DRAFT_STORAGE_KEY = "louez:product-copy-draft";
@@ -156,6 +155,7 @@ export function ProductForm({
   } = useProductFormMutations({
     productId: product?.id,
     initialImages: product?.images ?? [],
+    initialImageHistory: product?.imageHistory ?? [],
   });
 
   // Categories live in the React Query cache, seeded with the server-rendered
@@ -350,6 +350,10 @@ export function ProductForm({
       quantity: product?.quantity != null ? product.quantity.toString() : "1",
       status: (product?.status ?? "active") as "draft" | "active" | "archived",
       images: product?.images ?? [],
+      imageHistory: createInitialProductImageHistory(
+        product?.images ?? [],
+        product?.imageHistory ?? [],
+      ),
       pricingMode: (product?.pricingMode ?? "day") as PricingMode,
       pricingTiers: initialPricingTiers,
       rateTiers: initialRateTiers,
@@ -466,9 +470,12 @@ export function ProductForm({
   );
   const isDirty = useStore(form.store, (s) => s.isDirty);
   const imagesPreviews = useStore(form.store, (s) => s.values.images ?? []);
+  const imageHistory = useStore(form.store, (s) => s.values.imageHistory ?? []);
   const media = useProductFormMedia({
     form: form as unknown as ProductFormComponentApi,
+    productId: product?.id,
     imagesPreviews,
+    imageHistory,
     imageEnhanceEnabled,
     imageBackgroundRemovalEnabled,
   });
@@ -492,7 +499,7 @@ export function ProductForm({
       }
 
       form.reset(validationResult.data);
-      markImagesPersisted(validationResult.data.images);
+      markImagesPersisted(validationResult.data.images, validationResult.data.imageHistory);
       markMediaUploadsPersistedRef.current();
       clearProductCopyDraft();
     } catch {
@@ -636,27 +643,8 @@ export function ProductForm({
               <ProductFormEditToc />
 
               <div className="min-w-0 flex-1 space-y-6">
-                <div id="section-photos" className="scroll-mt-8">
-                  <ProductFormStepPhotos
-                    form={form as unknown as ProductFormComponentApi}
-                    imagesPreviews={imagesPreviews}
-                    isDragging={media.isDragging}
-                    isUploadingImages={media.isUploadingImages}
-                    handleImageUpload={media.handleImageUpload}
-                    handleDragOver={media.handleDragOver}
-                    handleDragEnter={media.handleDragEnter}
-                    handleDragLeave={media.handleDragLeave}
-                    handleDrop={media.handleDrop}
-                    removeImage={media.removeImage}
-                    setMainImage={media.setMainImage}
-                    recropImage={media.recropImage}
-                    canRecrop={true}
-                    imageEnhance={media.imageEnhance}
-                  />
-                </div>
-
-                <div id="section-information" className="scroll-mt-8">
-                  <ProductFormStepInfo
+                <div id="section-product" className="scroll-mt-8">
+                  <ProductFormSectionProduct
                     form={form as unknown as ProductFormComponentApi}
                     showAiContext={showAiContext}
                     categories={allCategories}
@@ -669,6 +657,22 @@ export function ProductForm({
                       }));
                       handleChange(event.target.value);
                     }}
+                    imagesPreviews={imagesPreviews}
+                    isDragging={media.isDragging}
+                    isUploadingImages={media.isUploadingImages}
+                    handleImageUpload={media.handleImageUpload}
+                    handleDragOver={media.handleDragOver}
+                    handleDragEnter={media.handleDragEnter}
+                    handleDragLeave={media.handleDragLeave}
+                    handleDrop={media.handleDrop}
+                    removeImage={media.removeImage}
+                    reorderImages={media.reorderImages}
+                    recropImage={media.recropImage}
+                    canRecrop={true}
+                    imageEnhance={media.imageEnhance}
+                    imageHistory={imageHistory}
+                    selectImageVersion={media.selectImageVersion}
+                    deleteImageVersion={media.deleteImageVersion}
                   />
                 </div>
 
@@ -731,6 +735,11 @@ export function ProductForm({
           canGoToPrevious={media.canGoToPreviousCropItem}
           canGoToNext={media.canGoToNextCropItem}
           isUploading={media.isUploadingImages}
+          isPreparing={media.isPreparingCrop}
+          isFreshSession={media.isFreshCropSession}
+          imageEnhance={media.imageEnhance}
+          aiSession={media.cropAiSession}
+          reviewItems={media.enhanceReviewItems}
           onClose={media.closeCropDialog}
           onSelectIndex={media.setSelectedCropIndex}
           onPrevious={media.goToPreviousCropItem}
@@ -740,7 +749,10 @@ export function ProductForm({
           onCropSizeChange={media.setCropSizePercent}
           onApplyCrop={media.applyCurrentCropAndProceed}
           onSkipCrop={media.keepCurrentCropOriginalAndProceed}
-          onEnhanceWithAi={media.enhanceCurrentCropImageAndProceed}
+          onStartAi={media.startAiOnCurrentCropImage}
+          onEnhanceAll={media.enhanceAllCropImages}
+          onRetryAi={media.retryCropAiSession}
+          onResolveReviewItem={media.resolveCropAiReviewItem}
           onReplaceCurrentImage={media.replaceCurrentCropImage}
         />
 
@@ -790,10 +802,13 @@ export function ProductForm({
                   handleDragLeave={media.handleDragLeave}
                   handleDrop={media.handleDrop}
                   removeImage={media.removeImage}
-                  setMainImage={media.setMainImage}
+                  reorderImages={media.reorderImages}
                   recropImage={media.recropImage}
                   canRecrop={false}
                   imageEnhance={media.imageEnhance}
+                  imageHistory={imageHistory}
+                  selectImageVersion={media.selectImageVersion}
+                  deleteImageVersion={media.deleteImageVersion}
                 />
               </div>
 
@@ -815,7 +830,7 @@ export function ProductForm({
               </div>
             </div>
 
-            <aside className="w-full shrink-0 lg:sticky lg:top-16 lg:w-80 xl:w-88">
+            <aside className="w-full shrink-0 lg:sticky lg:top-4 lg:w-80 xl:w-88">
               <ProductFormSummaryPanel
                 form={form as unknown as ProductFormComponentApi}
                 watchedValues={watchedValues}
@@ -883,6 +898,11 @@ export function ProductForm({
         canGoToPrevious={media.canGoToPreviousCropItem}
         canGoToNext={media.canGoToNextCropItem}
         isUploading={media.isUploadingImages}
+        isPreparing={media.isPreparingCrop}
+        isFreshSession={media.isFreshCropSession}
+        imageEnhance={media.imageEnhance}
+        aiSession={media.cropAiSession}
+        reviewItems={media.enhanceReviewItems}
         onClose={media.closeCropDialog}
         onSelectIndex={media.setSelectedCropIndex}
         onPrevious={media.goToPreviousCropItem}
@@ -892,7 +912,10 @@ export function ProductForm({
         onCropSizeChange={media.setCropSizePercent}
         onApplyCrop={media.applyCurrentCropAndProceed}
         onSkipCrop={media.keepCurrentCropOriginalAndProceed}
-        onEnhanceWithAi={media.enhanceCurrentCropImageAndProceed}
+        onStartAi={media.startAiOnCurrentCropImage}
+        onEnhanceAll={media.enhanceAllCropImages}
+        onRetryAi={media.retryCropAiSession}
+        onResolveReviewItem={media.resolveCropAiReviewItem}
         onReplaceCurrentImage={media.replaceCurrentCropImage}
       />
 

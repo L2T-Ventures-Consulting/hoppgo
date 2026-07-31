@@ -456,6 +456,13 @@
       "when": 1785395875984,
       "tag": "0059_romantic_bastion",
       "breakpoints": true
+    },
+    {
+      "idx": 60,
+      "version": "5",
+      "when": 1785508752344,
+      "tag": "0060_majestic_genesis",
+      "breakpoints": true
     }
   ]
 }

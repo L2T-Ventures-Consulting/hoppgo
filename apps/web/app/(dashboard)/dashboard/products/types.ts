@@ -1,7 +1,12 @@
 import type { ComponentType, ReactNode } from "react";
 
 import type { FormRadioGroupProps } from "@/components/form/form-radio-group";
-import type { PricingMode, ProductTaxSettings, TaxSettings } from "@louez/types";
+import type {
+  PricingMode,
+  ProductImageHistory,
+  ProductTaxSettings,
+  TaxSettings,
+} from "@louez/types";
 import type { DurationUnit } from "@louez/utils";
 import type { ProductInput } from "@louez/validations";
 
@@ -109,6 +114,7 @@ export interface Product {
   quantity: number;
   status: "draft" | "active" | "archived" | null;
   images: string[] | null;
+  imageHistory?: ProductImageHistory[] | null;
   videoUrl: string | null;
   taxSettings?: ProductTaxSettings | null;
   enforceStrictTiers?: boolean;

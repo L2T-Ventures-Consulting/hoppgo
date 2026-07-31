@@ -4,14 +4,17 @@ import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import type { ProductInput } from "@louez/validations";
+import type { ProductImageHistory } from "@louez/types";
 
 import { useImageUpload } from "@/hooks/use-image-upload";
 
 import { createProduct, updateProduct } from "../actions";
+import { collectProductImageUrls } from "../utils/util.product-image-history";
 
 interface UseProductFormMutationsParams {
   productId?: string;
   initialImages?: string[];
+  initialImageHistory?: ProductImageHistory[];
 }
 
 export interface ProductActionErrorDetails {
@@ -32,21 +35,22 @@ function isProductActionErrorPayload(value: unknown): value is ProductActionErro
 export function useProductFormMutations({
   productId,
   initialImages = [],
+  initialImageHistory = [],
 }: UseProductFormMutationsParams) {
   const tErrors = useTranslations("errors");
   const { deleteImage } = useImageUpload("product");
-  const persistedImagesRef = useRef(initialImages);
+  const persistedImagesRef = useRef(collectProductImageUrls(initialImages, initialImageHistory));
 
   const productMutation = useMutation({
     mutationFn: async (value: ProductInput) => {
-      const submittedImages = value.images ?? [];
+      const submittedImages = collectProductImageUrls(value.images ?? [], value.imageHistory ?? []);
       const persistedImages = persistedImagesRef.current;
-      const newImages = submittedImages.filter((image) => !persistedImages.includes(image));
 
       const result = productId ? await updateProduct(productId, value) : await createProduct(value);
 
       if (result.error) {
-        void Promise.allSettled(newImages.map((image) => deleteImage(image)));
+        // Keep freshly uploaded files available for a retry. The media hook
+        // still owns their cleanup if the user removes them or leaves the form.
         throw {
           error: result.error,
           details: "details" in result && result.details ? result.details : undefined,
@@ -100,9 +104,12 @@ export function useProductFormMutations({
     async (value: ProductInput) => productMutation.mutateAsync(value),
     [productMutation],
   );
-  const markImagesPersisted = useCallback((images: string[]) => {
-    persistedImagesRef.current = images;
-  }, []);
+  const markImagesPersisted = useCallback(
+    (images: string[], imageHistory: ProductImageHistory[] = []) => {
+      persistedImagesRef.current = collectProductImageUrls(images, imageHistory);
+    },
+    [],
+  );
 
   return {
     productMutation,

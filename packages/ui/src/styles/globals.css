@@ -179,7 +179,13 @@
   }
 }
 
-:root {
+/* `.light` mirrors `.dark`: it re-declares the light palette on a subtree, so a
+   surface can opt out of the ambient theme — a storefront preview showing both
+   themes side by side, for instance. Note that Tailwind's `dark:` variant keys
+   off `.dark *`, so inside a `.light` nested in a `.dark` page the tokens flip
+   but `dark:` utilities still match — style such subtrees with tokens only. */
+:root,
+.light {
   --radius: 0.625rem;
   --shadow-border: 0px 0px 0px 1px rgba(0, 0, 0, 0.15);
   --background: oklch(1 0 0);

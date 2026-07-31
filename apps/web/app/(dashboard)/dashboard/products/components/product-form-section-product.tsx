@@ -35,10 +35,13 @@ export function ProductFormSectionProduct(props: ProductFormSectionProductProps)
           handleDragLeave={props.handleDragLeave}
           handleDrop={props.handleDrop}
           removeImage={props.removeImage}
-          setMainImage={props.setMainImage}
+          reorderImages={props.reorderImages}
           recropImage={props.recropImage}
           canRecrop={props.canRecrop}
           imageEnhance={props.imageEnhance}
+          imageHistory={props.imageHistory}
+          selectImageVersion={props.selectImageVersion}
+          deleteImageVersion={props.deleteImageVersion}
           showPhotosLabel
         />
 
