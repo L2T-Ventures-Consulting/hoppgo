@@ -1,19 +1,27 @@
 import { NextResponse } from "next/server";
 
 import type { Readable } from "node:stream";
+import { z } from "zod";
 
 import {
   getImageProcessingDebugStage,
   isImageProcessingDebugEnabled,
 } from "@/lib/ai/image/debug-artifacts";
+import {
+  IMAGE_PROCESSING_BENCHMARK_FILTER,
+  IMAGE_PROCESSING_BENCHMARK_SCOPE_ID,
+} from "@/lib/ai/image/benchmark-fixtures";
 import { auth } from "@/lib/auth";
-import { getCurrentStore, hasPermission } from "@/lib/store-context";
+import { isPlatformAdmin } from "@/lib/platform-admin";
+import { getCurrentStore, hasPermission, verifyStoreAccess } from "@/lib/store-context";
 
 export const runtime = "nodejs";
 
 interface RouteContext {
   params: Promise<{ runId: string; stageId: string }>;
 }
+
+const storeIdSchema = z.string().length(21);
 
 function toResponseStream(source: Readable): ReadableStream<Uint8Array> {
   const iterator = source[Symbol.asyncIterator]();
@@ -48,7 +56,7 @@ function toResponseStream(source: Readable): ReadableStream<Uint8Array> {
   });
 }
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   if (!isImageProcessingDebugEnabled()) {
     return new NextResponse(null, { status: 404 });
   }
@@ -58,13 +66,41 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ code: "unauthorized" }, { status: 401 });
   }
 
-  const store = await getCurrentStore();
-  if (!store || !hasPermission(store.role, "read")) {
-    return NextResponse.json({ code: "forbidden" }, { status: 403 });
+  const url = new URL(request.url);
+  const requestedScope = url.searchParams.get("scope");
+  const requestedStoreId = url.searchParams.get("storeId");
+  let storeId: string;
+
+  if (requestedScope === IMAGE_PROCESSING_BENCHMARK_FILTER) {
+    if (!isPlatformAdmin(session.user.email)) {
+      return NextResponse.json({ code: "forbidden" }, { status: 403 });
+    }
+    storeId = IMAGE_PROCESSING_BENCHMARK_SCOPE_ID;
+  } else if (requestedScope) {
+    return NextResponse.json({ code: "invalid_scope" }, { status: 400 });
+  } else if (requestedStoreId) {
+    const parsedStoreId = storeIdSchema.safeParse(requestedStoreId);
+    if (!parsedStoreId.success) {
+      return NextResponse.json({ code: "invalid_store" }, { status: 400 });
+    }
+
+    const role = await verifyStoreAccess(parsedStoreId.data);
+    if (!role || !hasPermission(role, "read")) {
+      return NextResponse.json({ code: "forbidden" }, { status: 403 });
+    }
+    storeId = parsedStoreId.data;
+  } else {
+    // Backward compatibility for already-open image URLs from the former
+    // single-store page.
+    const store = await getCurrentStore();
+    if (!store || !hasPermission(store.role, "read")) {
+      return NextResponse.json({ code: "forbidden" }, { status: 403 });
+    }
+    storeId = store.id;
   }
 
   const { runId, stageId } = await context.params;
-  const stage = await getImageProcessingDebugStage(store.id, runId, stageId);
+  const stage = await getImageProcessingDebugStage(storeId, runId, stageId);
   if (!stage) {
     return new NextResponse(null, { status: 404 });
   }

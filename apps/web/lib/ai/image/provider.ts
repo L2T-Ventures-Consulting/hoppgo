@@ -1,4 +1,7 @@
 import { env } from "@/env";
+import type { ChromaKeyColor } from "@/lib/ai/image/chroma-background";
+import type { ImageTokenUsage } from "@/lib/ai/pricing";
+import { z } from "zod";
 
 /**
  * OpenAI image-edit call behind the "enhance product photo" dashboard action.
@@ -29,13 +32,17 @@ const ERROR_BODY_SNIPPET = 500;
  * real rental item, it does not reimagine it. Any invented detail would misprice
  * or misrepresent the goods a customer books.
  */
-const ENHANCE_PROMPT = [
-  "Create a clean, professional 4:3 product photo of the exact rental product shown in the input.",
-  "Keep the ENTIRE product visible and completely unchanged: same shape, proportions, colors, materials, textures, logos, labels, markings, scratches, wear and every small detail.",
-  "Do not crop, cut off or extend any part of the product. Do not add, remove or modify anything: no props, no accessories, no text, no watermark, no reflection, no drop shadow or contact shadow outside the product itself.",
-  "Improve only the photographic presentation with studio-quality neutral lighting, natural sharpness and accurate real colors.",
-  "Place the product centered on a perfectly uniform pure white background with comfortable margins.",
-].join(" ");
+const getEnhancePrompt = (chromaColor: ChromaKeyColor) =>
+  [
+    "Create a clean, professional 4:3 product photo of the exact rental product shown in the input.",
+    "First inspect the original composition and choose the correct framing rule. If the entire product is visible with space around it, keep the ENTIRE product visible and place it centered with comfortable, even margins. If any part of the product is intentionally cropped by an image edge, preserve the original framing exactly: keep the same camera angle, perspective, product scale, zoom, position and the same parts cropped at the same edges.",
+    "For a cropped product, never zoom out, shrink, reveal, reconstruct or invent any off-frame part. Keep the visible product at the exact same relative size, and do not introduce new background margins around it.",
+    "Keep every visible part completely unchanged: same shape, proportions, colors, materials, textures, logos, labels, markings, scratches, wear and every small detail.",
+    "Do not add, remove or modify anything: no props, no accessories, no text, no watermark, no reflection, no drop shadow or contact shadow outside the product itself.",
+    "Improve only the photographic presentation with studio-quality neutral lighting, natural sharpness and accurate real colors.",
+    `Replace the complete background with one perfectly flat, uniform chroma-key color: ${chromaColor.hex} (RGB ${chromaColor.rgb.join(", ")}). Use exactly this color from edge to edge, with no gradient, texture, shadow, reflection, glow or color spill on the product.`,
+    "When the source is intentionally cropped, adapt to 4:3 only by extending this empty chroma-key background where necessary and never by shrinking or moving the product.",
+  ].join(" ");
 
 export type ImageProviderErrorCode = "not_configured" | "request_failed" | "invalid_response";
 
@@ -70,8 +77,26 @@ const FILE_EXTENSIONS: Record<string, string> = {
   "image/webp": "webp",
 };
 
-type ImageEditResponse = {
-  data?: { b64_json?: string }[];
+const imageEditUsageSchema = z.object({
+  input_tokens: z.number().int().nonnegative(),
+  input_tokens_details: z.object({
+    image_tokens: z.number().int().nonnegative(),
+    text_tokens: z.number().int().nonnegative(),
+  }),
+  output_tokens: z.number().int().nonnegative(),
+  total_tokens: z.number().int().nonnegative(),
+});
+
+const imageEditResponseSchema = z.object({
+  data: z.array(z.object({ b64_json: z.string().min(1) })).min(1),
+  // Usage is diagnostic metadata: a provider-side shape change must not make
+  // an otherwise valid customer image fail. Validate it independently below.
+  usage: z.unknown().optional(),
+});
+
+export type ImageProviderResult = {
+  buffer: Buffer;
+  usage: ImageTokenUsage | null;
 };
 
 /**
@@ -82,7 +107,13 @@ type ImageEditResponse = {
 export async function enhanceProductImage(input: {
   buffer: Buffer;
   mimeType: string;
-}): Promise<Buffer> {
+  chromaColor: ChromaKeyColor;
+  /**
+   * Caller-owned cancellation (the route passes `request.signal`). Aborting it
+   * drops the provider call instead of letting a run nobody waits for finish.
+   */
+  signal?: AbortSignal;
+}): Promise<ImageProviderResult> {
   const apiKey = resolveImageApiKey();
   if (!apiKey) {
     throw new ImageProviderError("not_configured", "no image API key configured");
@@ -96,7 +127,7 @@ export async function enhanceProductImage(input: {
     new Blob([new Uint8Array(input.buffer)], { type: input.mimeType }),
     `product.${extension}`,
   );
-  form.append("prompt", ENHANCE_PROMPT);
+  form.append("prompt", getEnhancePrompt(input.chromaColor));
   form.append("background", "opaque");
   form.append("quality", env.AI_IMAGE_QUALITY ?? DEFAULT_QUALITY);
   form.append("size", OUTPUT_SIZE);
@@ -109,7 +140,10 @@ export async function enhanceProductImage(input: {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}` },
       body: form,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      // Whichever comes first: the caller giving up, or our own ceiling.
+      signal: input.signal
+        ? AbortSignal.any([input.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)])
+        : AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch (error) {
     throw new ImageProviderError(
@@ -142,9 +176,9 @@ export async function enhanceProductImage(input: {
     );
   }
 
-  let payload: ImageEditResponse;
+  let rawPayload: unknown;
   try {
-    payload = JSON.parse(bodyText) as ImageEditResponse;
+    rawPayload = JSON.parse(bodyText);
   } catch {
     throw new ImageProviderError(
       "invalid_response",
@@ -154,15 +188,29 @@ export async function enhanceProductImage(input: {
     );
   }
 
-  const b64 = payload.data?.[0]?.b64_json;
-  if (!b64) {
-    throw new ImageProviderError("invalid_response", "image edit response carried no image data");
+  const parsedPayload = imageEditResponseSchema.safeParse(rawPayload);
+  if (!parsedPayload.success) {
+    throw new ImageProviderError(
+      "invalid_response",
+      "image edit response did not match the expected shape",
+    );
   }
 
-  const buffer = Buffer.from(b64, "base64");
+  const buffer = Buffer.from(parsedPayload.data.data[0].b64_json, "base64");
   if (buffer.byteLength === 0) {
     throw new ImageProviderError("invalid_response", "image edit returned 0 bytes");
   }
 
-  return buffer;
+  const providerUsage = imageEditUsageSchema.safeParse(parsedPayload.data.usage);
+  const usage = providerUsage.success
+    ? {
+        inputTokens: providerUsage.data.input_tokens,
+        inputImageTokens: providerUsage.data.input_tokens_details.image_tokens,
+        inputTextTokens: providerUsage.data.input_tokens_details.text_tokens,
+        outputTokens: providerUsage.data.output_tokens,
+        totalTokens: providerUsage.data.total_tokens,
+      }
+    : null;
+
+  return { buffer, usage };
 }

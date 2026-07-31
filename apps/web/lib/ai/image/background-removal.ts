@@ -33,6 +33,11 @@ export function isImageBackgroundRemovalEnabled(): boolean {
 export async function removeImageBackground(input: {
   buffer: Buffer;
   mimeType: string;
+  /**
+   * Caller-owned cancellation (the route passes `request.signal`). Aborting it
+   * drops the sidecar call instead of letting a run nobody waits for finish.
+   */
+  signal?: AbortSignal;
 }): Promise<Buffer> {
   const baseUrl = resolveBackgroundRemovalUrl();
   if (!baseUrl) {
@@ -53,7 +58,10 @@ export async function removeImageBackground(input: {
       method: "POST",
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
       body: form,
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+      // Whichever comes first: the caller giving up, or our own ceiling.
+      signal: input.signal
+        ? AbortSignal.any([input.signal, AbortSignal.timeout(REQUEST_TIMEOUT_MS)])
+        : AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
   } catch (error) {
     throw new BackgroundRemovalError(

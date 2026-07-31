@@ -9,12 +9,7 @@ import {
 } from "@/lib/ai/advisor/credits";
 import { isImageBackgroundRemovalEnabled } from "@/lib/ai/image/background-removal";
 import { resolveImageApiKey } from "@/lib/ai/image/provider";
-import {
-  CREDIT_MICRO,
-  getImageEnhanceCredits,
-  imageEnhanceBillMicro,
-  imageEnhanceCostMicroUsd,
-} from "@/lib/ai/pricing";
+import { CREDIT_MICRO, getImageEnhanceCredits, imageEnhanceBillMicro } from "@/lib/ai/pricing";
 import { log } from "@/lib/evlog";
 import type { Plan } from "@/lib/plans";
 
@@ -28,16 +23,17 @@ export function isAiImageEnhanceEnabled(): boolean {
 }
 
 /**
- * Pre-call credit gate. Image enhancement shares the advisor's balance, but its
- * billing can be active through the flat per-image tariff ALONE (no USD cost
- * basis configured) — in that mode the advisor gate is inert, so gate on the
- * balance directly; otherwise defer to the shared gate. Fail-closed.
+ * Pre-call credit gate. Image operations share the advisor's balance, but
+ * their billing can be active through a flat per-image tariff ALONE (no USD
+ * cost basis configured) — in that mode the advisor gate is inert, so gate on
+ * the balance directly; otherwise defer to the shared gate. Fail-closed.
  */
-export async function checkImageEnhanceCredits(
+export async function checkImageCredits(
   storeId: string,
   plan: Plan,
+  flatCredits: number,
 ): Promise<AdvisorCreditCheck> {
-  if (getImageEnhanceCredits() > 0) {
+  if (flatCredits > 0) {
     try {
       const info = await getAiCreditsInfo(storeId, plan);
       const monthlyOk = info.monthlyRemainingMicro === null || info.monthlyRemainingMicro > 0;
@@ -52,6 +48,11 @@ export async function checkImageEnhanceCredits(
     }
   }
   return checkAdvisorCredits(storeId, plan);
+}
+
+/** Gate for the GPT Image enhancement operation (flat env tariff). */
+export function checkImageEnhanceCredits(storeId: string, plan: Plan): Promise<AdvisorCreditCheck> {
+  return checkImageCredits(storeId, plan, getImageEnhanceCredits());
 }
 
 type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -93,24 +94,25 @@ async function sumMonthlyUsedMicro(tx: Tx, storeId: string): Promise<number> {
 }
 
 /**
- * Flat, two-pocket debit for ONE successfully enhanced image. Called AFTER the
- * result is stored, so a store is never charged for an image it did not get.
- * There is no per-conversation cap here: the tariff is already a fixed amount
- * per image, and the debit is idempotent through the UNIQUE dedup key
- * (`imgenh:<objectId>`), so a retried request can never double-charge.
+ * Flat, two-pocket debit for ONE successfully processed image. Called AFTER
+ * the result is stored, so a store is never charged for an image it did not
+ * get. There is no per-conversation cap here: the tariff is already a fixed
+ * amount per image, and the debit is idempotent through the UNIQUE dedup key
+ * (`imgenh:<objectId>` / `imgbg:<objectId>`), so a retried request can never
+ * double-charge. `billMicro` defaults to the enhancement tariff; the
+ * standalone background-removal path passes its own.
  *
  * Returns the micro-credits actually debited (0 when billing is inert).
  */
 export async function recordImageEnhanceDebit(
   storeId: string,
-  params: { dedupKey: string; plan: Plan },
+  params: { dedupKey: string; plan: Plan; costMicroUsd: number; billMicro?: number },
 ): Promise<number> {
-  const { dedupKey, plan } = params;
+  const { costMicroUsd, dedupKey, plan } = params;
 
   // The real provider cost is frozen on the row regardless of what is billed,
   // so cost-vs-billed stays comparable per revenue line.
-  const costMicroUsd = imageEnhanceCostMicroUsd();
-  const billMicro = imageEnhanceBillMicro();
+  const billMicro = params.billMicro ?? imageEnhanceBillMicro();
   if (billMicro <= 0 && costMicroUsd <= 0) return 0;
 
   try {

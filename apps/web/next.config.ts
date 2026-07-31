@@ -114,6 +114,9 @@ function buildCspDirectives() {
       // YouTube thumbnails
       "https://img.youtube.com",
       "https://i.ytimg.com",
+      // Seeded storefront hero placeholders (development only). Picsum
+      // redirects image responses to its Fastly delivery hostname.
+      ...(isDev ? ["https://picsum.photos", "https://fastly.picsum.photos"] : []),
       // AWS S3
       "https://*.s3.amazonaws.com",
       "https://*.amazonaws.com",

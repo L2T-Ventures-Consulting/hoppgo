@@ -10,11 +10,19 @@ import { Readable } from "node:stream";
 import { z } from "zod";
 
 import { env } from "@/env";
+import { PRODUCT_IMAGE_FRAMING_MODES, type ProductImageFramingMode } from "@/lib/ai/image/framing";
+import {
+  getImageEnhanceCredits,
+  type ImageEnhanceCostSource,
+  type ImageTokenUsage,
+  USD_MICRO,
+} from "@/lib/ai/pricing";
+import { getAiCreditPackages } from "@/lib/plans";
 import { getStorageClient } from "@/lib/storage/files";
 
 const DEBUG_ROOT = "dev/image-processing";
 const MANIFEST_FILENAME = "manifest.json";
-const MANIFEST_VERSION = 1;
+const MANIFEST_VERSION = 5;
 const DEFAULT_LIST_LIMIT = 25;
 const MAX_LIST_LIMIT = 100;
 
@@ -24,8 +32,46 @@ export type ImageProcessingDebugStageId = z.infer<typeof stageIdSchema>;
 
 const operationSchema = z.enum(["enhance", "remove-background"]);
 
+const usageSchema = z.object({
+  inputTokens: z.number().int().nonnegative(),
+  inputImageTokens: z.number().int().nonnegative(),
+  inputTextTokens: z.number().int().nonnegative(),
+  outputTokens: z.number().int().nonnegative(),
+  totalTokens: z.number().int().nonnegative(),
+});
+
+const moneyRangeSchema = z.object({
+  min: z.number().nonnegative(),
+  max: z.number().nonnegative(),
+});
+
+const signedRangeSchema = z.object({
+  min: z.number(),
+  max: z.number(),
+});
+
+const economicsSchema = z.object({
+  tariffCredits: z.number().nonnegative(),
+  chargedCredits: z.number().nonnegative(),
+  providerCostSource: z.enum(["measured_usage", "configured_flat", "unavailable"]),
+  providerCostUsd: z.number().nonnegative().nullable(),
+  providerCostEur: z.number().nonnegative().nullable(),
+  usdToEurRate: z.number().positive().nullable(),
+  creditUnitPriceEur: moneyRangeSchema.nullable(),
+  modeledRevenueEur: moneyRangeSchema.nullable(),
+  grossMarginEur: signedRangeSchema.nullable(),
+  grossMarginPercent: signedRangeSchema.nullable(),
+  usage: usageSchema.nullable(),
+});
+
 const manifestSchema = z.object({
-  version: z.literal(MANIFEST_VERSION),
+  version: z.union([
+    z.literal(1),
+    z.literal(2),
+    z.literal(3),
+    z.literal(4),
+    z.literal(MANIFEST_VERSION),
+  ]),
   runId: z.uuid(),
   storeId: z.string().min(1),
   operation: operationSchema,
@@ -36,8 +82,20 @@ const manifestSchema = z.object({
   configuration: z.object({
     aiModel: z.string().nullable(),
     aiQuality: z.string().nullable(),
+    framingMode: z.enum(PRODUCT_IMAGE_FRAMING_MODES).nullable().optional(),
+    backgroundRemovalMethod: z.enum(["chroma-key", "semantic-fallback", "semantic"]).optional(),
     backgroundRemovalModel: z.string(),
   }),
+  benchmark: z
+    .object({
+      suiteId: z.uuid(),
+      suiteSize: z.number().int().positive().optional(),
+      fixtureId: z.string().min(1).max(80),
+      fixtureLabel: z.string().min(1).max(160),
+    })
+    .nullable()
+    .optional(),
+  economics: economicsSchema.nullable().optional(),
   stages: z.array(
     z.object({
       id: stageIdSchema,
@@ -64,11 +122,25 @@ interface PersistImageProcessingDebugRunInput {
   runId: string;
   storeId: string;
   operation: z.infer<typeof operationSchema>;
+  framingMode: ProductImageFramingMode | null;
+  backgroundRemovalMethod: "chroma-key" | "semantic-fallback" | "semantic";
   createdAt: Date;
   sourceKey: string;
   outputKey: string;
   totalDurationMs: number;
   stages: ImageProcessingDebugStageInput[];
+  benchmark?: {
+    suiteId: string;
+    suiteSize?: number;
+    fixtureId: string;
+    fixtureLabel: string;
+  };
+  economics?: {
+    chargedCredits: number;
+    providerCostMicroUsd: number;
+    providerCostSource: ImageEnhanceCostSource;
+    usage: ImageTokenUsage | null;
+  };
 }
 
 const extensionByContentType = {
@@ -91,6 +163,70 @@ function getManifestKey(storeId: string, runId: string): string {
 
 function isRunId(value: string): boolean {
   return z.uuid().safeParse(value).success;
+}
+
+function round(value: number, digits = 6): number {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+}
+
+function createEconomicsSnapshot(
+  input: NonNullable<PersistImageProcessingDebugRunInput["economics"]>,
+): z.infer<typeof economicsSchema> {
+  const tariffCredits = getImageEnhanceCredits();
+  const packages = getAiCreditPackages();
+  const unitPrices = packages.map(({ credits, priceCents }) => priceCents / 100 / credits);
+  const creditUnitPriceEur =
+    unitPrices.length > 0
+      ? {
+          min: round(Math.min(...unitPrices)),
+          max: round(Math.max(...unitPrices)),
+        }
+      : null;
+  const modeledRevenueEur = creditUnitPriceEur
+    ? {
+        min: round(creditUnitPriceEur.min * tariffCredits),
+        max: round(creditUnitPriceEur.max * tariffCredits),
+      }
+    : null;
+
+  const providerCostUsd =
+    input.providerCostSource === "unavailable"
+      ? null
+      : round(input.providerCostMicroUsd / USD_MICRO);
+  const usdToEurRate = env.AI_IMAGE_USD_TO_EUR_RATE ?? null;
+  const providerCostEur =
+    providerCostUsd !== null && usdToEurRate !== null
+      ? round(providerCostUsd * usdToEurRate)
+      : null;
+  const grossMarginEur =
+    modeledRevenueEur && providerCostEur !== null
+      ? {
+          min: round(modeledRevenueEur.min - providerCostEur),
+          max: round(modeledRevenueEur.max - providerCostEur),
+        }
+      : null;
+  const grossMarginPercent =
+    grossMarginEur && modeledRevenueEur && modeledRevenueEur.min > 0
+      ? {
+          min: round((grossMarginEur.min / modeledRevenueEur.min) * 100, 2),
+          max: round((grossMarginEur.max / modeledRevenueEur.max) * 100, 2),
+        }
+      : null;
+
+  return {
+    tariffCredits,
+    chargedCredits: Math.max(0, input.chargedCredits),
+    providerCostSource: input.providerCostSource,
+    providerCostUsd,
+    providerCostEur,
+    usdToEurRate,
+    creditUnitPriceEur,
+    modeledRevenueEur,
+    grossMarginEur,
+    grossMarginPercent,
+    usage: input.usage,
+  };
 }
 
 async function readManifest(
@@ -168,8 +304,15 @@ export async function persistImageProcessingDebugRun(
       configuration: {
         aiModel: input.operation === "enhance" ? env.AI_IMAGE_MODEL?.trim() || "gpt-image-2" : null,
         aiQuality: input.operation === "enhance" ? (env.AI_IMAGE_QUALITY ?? "medium") : null,
+        framingMode: input.operation === "enhance" ? input.framingMode : null,
+        backgroundRemovalMethod: input.backgroundRemovalMethod,
         backgroundRemovalModel: "worker-managed",
       },
+      benchmark: input.benchmark ?? null,
+      economics:
+        input.operation === "enhance" && input.economics
+          ? createEconomicsSnapshot(input.economics)
+          : null,
       stages: stages.map((stage) => ({
         id: stage.id,
         label: stage.label,
