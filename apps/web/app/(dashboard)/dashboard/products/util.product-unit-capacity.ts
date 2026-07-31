@@ -10,6 +10,43 @@ interface CapacityEvent {
   quantityDelta: number;
 }
 
+function haveSameTrackedUnitCapacity(
+  currentAvailableByCombination: ReadonlyMap<string, number>,
+  proposedAvailableByCombination: ReadonlyMap<string, number>,
+): boolean {
+  if (currentAvailableByCombination.size !== proposedAvailableByCombination.size) {
+    return false;
+  }
+
+  for (const [combinationKey, currentQuantity] of currentAvailableByCombination) {
+    if (proposedAvailableByCombination.get(combinationKey) !== currentQuantity) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * The reservation-capacity guard is only relevant when enabling tracked units
+ * or when the submitted unit distribution changes. Unrelated product edits
+ * must not be blocked by a pre-existing capacity conflict.
+ */
+export function shouldValidateTrackedUnitCapacity({
+  wasTrackingUnits,
+  currentAvailableByCombination,
+  proposedAvailableByCombination,
+}: {
+  wasTrackingUnits: boolean;
+  currentAvailableByCombination: ReadonlyMap<string, number>;
+  proposedAvailableByCombination: ReadonlyMap<string, number>;
+}): boolean {
+  return (
+    !wasTrackingUnits ||
+    !haveSameTrackedUnitCapacity(currentAvailableByCombination, proposedAvailableByCombination)
+  );
+}
+
 function addCapacityEvent(
   eventsByTimestamp: Map<number, CapacityEvent[]>,
   timestamp: number,

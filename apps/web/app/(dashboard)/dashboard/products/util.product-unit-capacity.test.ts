@@ -6,9 +6,55 @@ import { DEFAULT_COMBINATION_KEY } from "@louez/utils";
 import {
   type TrackedUnitCapacityReservation,
   hasTrackedUnitCapacityConflict,
+  shouldValidateTrackedUnitCapacity,
 } from "./util.product-unit-capacity";
 
 const now = new Date("2026-07-29T08:00:00.000Z");
+
+test("skips capacity validation when an unrelated product edit preserves unit capacity", () => {
+  assert.equal(
+    shouldValidateTrackedUnitCapacity({
+      wasTrackingUnits: true,
+      currentAvailableByCombination: new Map([
+        ["color:red", 1],
+        ["color:blue", 2],
+      ]),
+      proposedAvailableByCombination: new Map([
+        ["color:blue", 2],
+        ["color:red", 1],
+      ]),
+    }),
+    false,
+  );
+});
+
+test("validates capacity when tracked-unit distribution changes", () => {
+  assert.equal(
+    shouldValidateTrackedUnitCapacity({
+      wasTrackingUnits: true,
+      currentAvailableByCombination: new Map([
+        ["color:red", 1],
+        ["color:blue", 2],
+      ]),
+      proposedAvailableByCombination: new Map([
+        ["color:red", 2],
+        ["color:blue", 1],
+      ]),
+    }),
+    true,
+  );
+});
+
+test("validates capacity when unit tracking is enabled", () => {
+  assert.equal(
+    shouldValidateTrackedUnitCapacity({
+      wasTrackingUnits: false,
+      currentAvailableByCombination: new Map(),
+      proposedAvailableByCombination: new Map([[DEFAULT_COMBINATION_KEY, 1]]),
+    }),
+    true,
+  );
+});
 
 function reservation({
   start,

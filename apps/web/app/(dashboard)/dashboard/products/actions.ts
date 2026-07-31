@@ -47,7 +47,10 @@ import {
   updateUnits,
 } from "@/lib/utils/unit-mutations";
 
-import { hasTrackedUnitCapacityConflict } from "./util.product-unit-capacity";
+import {
+  hasTrackedUnitCapacityConflict,
+  shouldValidateTrackedUnitCapacity,
+} from "./util.product-unit-capacity";
 
 async function getStoreForUser() {
   return getCurrentStore();
@@ -580,7 +583,15 @@ export async function updateProduct(productId: string, data: ProductInput) {
   // the peak concurrent active/future reserved quantities.
   if (trackUnits) {
     const capacityCheckStart = new Date();
+    const currentAvailableByCombination = new Map<string, number>();
     const proposedAvailableByCombination = new Map<string, number>();
+
+    for (const unit of editableExistingUnits) {
+      currentAvailableByCombination.set(
+        unit.combinationKey,
+        (currentAvailableByCombination.get(unit.combinationKey) || 0) + 1,
+      );
+    }
 
     for (const unit of unitsToUpdate) {
       if (!unit.id) continue;
@@ -604,32 +615,40 @@ export async function updateProduct(productId: string, data: ProductInput) {
       );
     }
 
-    const reservedRows = await db
-      .select({
-        startDate: reservations.startDate,
-        endDate: reservations.endDate,
-        combinationKey: reservationItems.combinationKey,
-        quantity: reservationItems.quantity,
-      })
-      .from(reservationItems)
-      .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
-      .where(
-        and(
-          eq(reservationItems.productId, productId),
-          eq(reservations.storeId, store.id),
-          inArray(reservations.status, blockingStatuses),
-          gte(reservations.endDate, capacityCheckStart),
-        ),
-      );
-
     if (
-      hasTrackedUnitCapacityConflict({
-        availableByCombination: proposedAvailableByCombination,
-        reservations: reservedRows,
-        from: capacityCheckStart,
+      shouldValidateTrackedUnitCapacity({
+        wasTrackingUnits: product.trackUnits,
+        currentAvailableByCombination,
+        proposedAvailableByCombination,
       })
     ) {
-      return { error: "errors.unitStatusConflictsWithReservations" };
+      const reservedRows = await db
+        .select({
+          startDate: reservations.startDate,
+          endDate: reservations.endDate,
+          combinationKey: reservationItems.combinationKey,
+          quantity: reservationItems.quantity,
+        })
+        .from(reservationItems)
+        .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
+        .where(
+          and(
+            eq(reservationItems.productId, productId),
+            eq(reservations.storeId, store.id),
+            inArray(reservations.status, blockingStatuses),
+            gte(reservations.endDate, capacityCheckStart),
+          ),
+        );
+
+      if (
+        hasTrackedUnitCapacityConflict({
+          availableByCombination: proposedAvailableByCombination,
+          reservations: reservedRows,
+          from: capacityCheckStart,
+        })
+      ) {
+        return { error: "errors.unitStatusConflictsWithReservations" };
+      }
     }
   }
 
