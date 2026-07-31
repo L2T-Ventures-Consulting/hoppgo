@@ -3554,6 +3554,10 @@ export const aiCreditDebits = mysqlTable(
     kind: mysqlEnum('kind', ['usage', 'number_rental', 'image_enhancement'])
       .notNull()
       .default('usage'),
+    // Generated product-image artifact associated with an image debit. Stored
+    // as a key (not a deployment-specific public URL) so reads can resolve it
+    // through the current storage adapter.
+    imageKey: varchar('image_key', { length: 500 }),
 
     dedupKey: varchar('dedup_key', { length: 120 }).notNull().unique(),
 

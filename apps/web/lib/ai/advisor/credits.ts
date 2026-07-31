@@ -353,6 +353,7 @@ export type AiCreditDebitRow = {
   id: string
   kind: 'usage' | 'number_rental' | 'image_enhancement'
   conversationId: string | null
+  imageKey: string | null
   creditsMicro: number
   audioSeconds: number
   createdAt: Date
@@ -386,6 +387,7 @@ export async function getAiCreditDebitHistory(
         id: aiCreditDebits.id,
         kind: aiCreditDebits.kind,
         conversationId: aiCreditDebits.conversationId,
+        imageKey: aiCreditDebits.imageKey,
         creditsMicro: aiCreditDebits.debitedMicro,
         audioSeconds: aiCreditDebits.audioSeconds,
         createdAt: aiCreditDebits.createdAt,

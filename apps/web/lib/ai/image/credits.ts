@@ -106,9 +106,15 @@ async function sumMonthlyUsedMicro(tx: Tx, storeId: string): Promise<number> {
  */
 export async function recordImageEnhanceDebit(
   storeId: string,
-  params: { dedupKey: string; plan: Plan; costMicroUsd: number; billMicro?: number },
+  params: {
+    dedupKey: string;
+    imageKey: string;
+    plan: Plan;
+    costMicroUsd: number;
+    billMicro?: number;
+  },
 ): Promise<number> {
-  const { costMicroUsd, dedupKey, plan } = params;
+  const { costMicroUsd, dedupKey, imageKey, plan } = params;
 
   // The real provider cost is frozen on the row regardless of what is billed,
   // so cost-vs-billed stays comparable per revenue line.
@@ -123,6 +129,7 @@ export async function recordImageEnhanceDebit(
         await tx.insert(aiCreditDebits).values({
           storeId,
           kind: "image_enhancement",
+          imageKey,
           dedupKey,
           costMicroUsd,
           debitedMicro: 0,
@@ -159,6 +166,7 @@ export async function recordImageEnhanceDebit(
       await tx.insert(aiCreditDebits).values({
         storeId,
         kind: "image_enhancement",
+        imageKey,
         dedupKey,
         costMicroUsd,
         debitedMicro: billMicro,

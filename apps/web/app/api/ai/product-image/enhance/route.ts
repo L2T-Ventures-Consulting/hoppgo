@@ -284,6 +284,7 @@ const handlePost = async (request: Request) => {
     try {
       const debitedMicro = await recordImageEnhanceDebit(store.id, {
         dedupKey: `${operation === "enhance" ? "imgenh" : "imgbg"}:${objectId}`,
+        imageKey: key,
         plan,
         costMicroUsd: enhanceCost?.microUsd ?? 0,
         billMicro: operation === "enhance" ? undefined : bgBillMicro,

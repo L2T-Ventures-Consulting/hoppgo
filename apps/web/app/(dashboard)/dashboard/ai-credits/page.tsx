@@ -13,6 +13,7 @@ import {
 import { getNumberRentalCredits, getPhoneCreditsPerMinute } from "@/lib/ai/pricing";
 import { getStorePlan } from "@/lib/plan-limits";
 import { areAiCreditsEnabled, getAiCreditPackages } from "@/lib/plans";
+import { getImageFiles } from "@/lib/storage/files";
 import { getCurrentStore } from "@/lib/store-context";
 
 import { AiCreditsAutoTopup } from "./ai-credits-auto-topup";
@@ -82,6 +83,18 @@ export default async function AiCreditsPage({
   // pitch instead of an empty receipt.
   const hasPurchased = purchases.some((row) => row.type === "topup" || row.type === "auto_topup");
   const isNewcomer = !hasPurchased && debits.total === 0;
+  const imageFiles = getImageFiles();
+  const usageRows = await Promise.all(
+    debits.rows.map(async (row) => ({
+      id: row.id,
+      kind: row.kind,
+      conversationId: row.conversationId,
+      imageUrl: row.imageKey ? await imageFiles.url(row.imageKey) : null,
+      credits: microToCredits(row.creditsMicro),
+      audioSeconds: row.audioSeconds,
+      createdAt: row.createdAt.toISOString(),
+    })),
+  );
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-5xl">
@@ -145,14 +158,7 @@ export default async function AiCreditsPage({
           page={page}
           pageSize={USAGE_PAGE_SIZE}
           usageTotal={debits.total}
-          usage={debits.rows.map((row) => ({
-            id: row.id,
-            kind: row.kind,
-            conversationId: row.conversationId,
-            credits: microToCredits(row.creditsMicro),
-            audioSeconds: row.audioSeconds,
-            createdAt: row.createdAt.toISOString(),
-          }))}
+          usage={usageRows}
           purchases={purchases.map((row) => ({
             id: row.id,
             type: row.type,

@@ -463,6 +463,13 @@
       "when": 1785508752344,
       "tag": "0060_majestic_genesis",
       "breakpoints": true
+    },
+    {
+      "idx": 61,
+      "version": "5",
+      "when": 1785516770584,
+      "tag": "0061_new_shotgun",
+      "breakpoints": true
     }
   ]
 }

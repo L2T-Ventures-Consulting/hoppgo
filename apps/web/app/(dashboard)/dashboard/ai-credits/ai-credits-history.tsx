@@ -38,6 +38,7 @@ export type AiCreditsUsageRow = {
   id: string;
   kind: "usage" | "number_rental" | "image_enhancement";
   conversationId: string | null;
+  imageUrl: string | null;
   credits: number;
   audioSeconds: number;
   createdAt: string;
@@ -169,7 +170,29 @@ export const AiCreditsHistory = ({
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
-                              <Icon className="text-muted-foreground h-4 w-4 shrink-0" />
+                              {row.kind === "image_enhancement" && row.imageUrl ? (
+                                <a
+                                  href={row.imageUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  aria-label={label}
+                                  title={label}
+                                  className="bg-muted focus-visible:ring-ring relative flex size-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border focus-visible:ring-2 focus-visible:outline-none"
+                                >
+                                  <ImagePlus className="text-muted-foreground size-4" />
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={row.imageUrl}
+                                    alt={label}
+                                    loading="lazy"
+                                    decoding="async"
+                                    className="absolute inset-0 size-full object-contain"
+                                    onError={(event) => event.currentTarget.remove()}
+                                  />
+                                </a>
+                              ) : (
+                                <Icon className="text-muted-foreground h-4 w-4 shrink-0" />
+                              )}
                               <div className="min-w-0">
                                 {row.conversationId ? (
                                   <Link
