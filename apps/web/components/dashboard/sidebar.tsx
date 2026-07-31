@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import Gleap from "gleap";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
 
 import { authClient } from "@louez/auth/client";
 import {
@@ -23,6 +24,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
@@ -47,6 +49,7 @@ import {
   ReservationsSolidIcon,
   SupportSolidIcon,
   TeamSolidIcon,
+  WalletIcon,
 } from "@louez/ui/icons";
 
 // import { ReferralSidebarWidget } from '@/components/dashboard/referral-sidebar-widget';
@@ -58,6 +61,7 @@ import { WhatsNewSidebarItem } from "@/components/dashboard/whats-new-sidebar-it
 import { LanguageMenuSub } from "@/components/ui/language-switcher";
 
 import { useStorefrontUrl } from "@/hooks/use-storefront-url";
+import { aiCreditsQueries } from "@/lib/queries/ai-credits.queries";
 import { cn } from "@/lib/utils";
 
 interface StoreWithRole {
@@ -77,6 +81,11 @@ interface DashboardSidebarProps {
   userImage?: string | null;
   planSlug?: string;
   isPlatformAdmin?: boolean;
+  /**
+   * null = paid AI credits disabled for this deployment: no wallet entry.
+   * `credits` null = unlimited allowance (no count worth showing).
+   */
+  aiCredits?: { low: boolean; credits: number | null } | null;
 }
 
 const mainNavigation = [
@@ -85,6 +94,12 @@ const mainNavigation = [
   { key: "customers", href: "/dashboard/customers", icon: AudienceSolidIcon },
   { key: "aiAssistant", href: "/dashboard/ai-assistant", icon: BotIcon },
 ];
+
+const aiCreditsNavigationItem = {
+  key: "aiCredits",
+  href: "/dashboard/ai-credits",
+  icon: WalletIcon,
+};
 
 const catalogNavigation = [
   { key: "products", href: "/dashboard/products", icon: ProductSolidIcon },
@@ -99,21 +114,45 @@ const managementNavigation = [
   { key: "settings", href: "/dashboard/settings", icon: CogSolidIcon },
 ];
 
-const navigationSections = [
-  { items: mainNavigation },
-  { labelKey: "catalog", items: catalogNavigation },
-  { labelKey: "analytics", items: analyticsNavigation },
-  { labelKey: "manage", items: managementNavigation },
-] satisfies {
-  labelKey?: string;
-  items: typeof mainNavigation;
-}[];
-
 interface NavigationItem {
   key: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  /** Draws the discreet warning marker (currently: AI credits running out). */
+  alert?: boolean;
+  /** Numeric badge on the entry (currently: the AI credit balance). */
+  badgeCount?: number;
 }
+
+interface NavigationSection {
+  labelKey?: string;
+  items: NavigationItem[];
+}
+
+/**
+ * The AI wallet only exists when the operator sells credits, so the manage group
+ * is assembled per render rather than declared once.
+ */
+const buildNavigationSections = (
+  aiCredits: { low: boolean; credits: number | null } | null,
+): NavigationSection[] => [
+  { items: mainNavigation },
+  { labelKey: "catalog", items: catalogNavigation },
+  { labelKey: "analytics", items: analyticsNavigation },
+  {
+    labelKey: "manage",
+    items: aiCredits
+      ? [
+          ...managementNavigation,
+          {
+            ...aiCreditsNavigationItem,
+            alert: aiCredits.low,
+            badgeCount: aiCredits.credits ?? undefined,
+          },
+        ]
+      : managementNavigation,
+  },
+];
 
 const isNavigationItemActive = (pathname: string, href: string) => {
   if (href === "/dashboard") {
@@ -125,6 +164,8 @@ const isNavigationItemActive = (pathname: string, href: string) => {
 
 const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: string }) => {
   const t = useTranslations("dashboard.navigation");
+  const tSidebar = useTranslations("dashboard.sidebar");
+  const format = useFormatter();
   const active = isNavigationItemActive(pathname, item.href);
 
   return (
@@ -137,6 +178,40 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
         <item.icon />
         <span>{t(item.key)}</span>
       </SidebarMenuButton>
+      {item.badgeCount != null ? (
+        /* The vertical offset has to be restated under the same
+           `peer-data-[size]` variant as the default it replaces, otherwise the
+           more specific default wins and the badge rides high on these `h-10`
+           buttons. */
+        <SidebarMenuBadge
+          className={cn(
+            "rounded-full font-semibold peer-data-[size=default]/menu-button:top-2.5",
+            item.alert
+              ? "bg-badge-warning-background text-badge-warning-foreground peer-hover/menu-button:text-badge-warning-foreground peer-data-active/menu-button:text-badge-warning-foreground"
+              : "bg-sidebar-accent",
+          )}
+        >
+          {format.number(Math.floor(item.badgeCount), {
+            maximumFractionDigits: 0,
+            useGrouping: false,
+          })}
+          {item.alert && <span className="sr-only">{tSidebar("aiCreditsLow")}</span>}
+        </SidebarMenuBadge>
+      ) : (
+        item.alert && (
+          <SidebarMenuBadge className="bg-badge-warning-foreground peer-data-[size=default]/menu-button:top-4 size-2 min-w-0 rounded-full p-0">
+            <span className="sr-only">{tSidebar("aiCreditsLow")}</span>
+          </SidebarMenuBadge>
+        )
+      )}
+      {item.alert && (
+        /* Collapsed sidebar: the badge is hidden by its own styles, so the
+           icon carries a bare dot instead. */
+        <span
+          aria-hidden
+          className="bg-badge-warning-foreground ring-sidebar absolute top-1 right-1.5 hidden size-2.5 rounded-full ring-2 group-data-[collapsible=icon]:block"
+        />
+      )}
     </SidebarMenuItem>
   );
 };
@@ -310,8 +385,19 @@ export const DashboardSidebar = ({
   userImage,
   planSlug,
   isPlatformAdmin,
+  aiCredits = null,
 }: DashboardSidebarProps) => {
   const pathname = usePathname();
+  const balanceQuery = useQuery({
+    ...aiCreditsQueries.balance(),
+    enabled: aiCredits !== null,
+  });
+  const liveAiCredits = balanceQuery.data
+    ? balanceQuery.data.enabled
+      ? { low: balanceQuery.data.low, credits: balanceQuery.data.totalCredits }
+      : null
+    : aiCredits;
+  const navigationSections = buildNavigationSections(liveAiCredits);
 
   return (
     <TooltipProvider>

@@ -235,7 +235,14 @@
         "subtitle": "Je winkel adviseert, antwoordt en reserveert — automatisch",
         "credits": "{count} credits",
         "creditsUnlimited": "Onbeperkte credits",
-        "recharge": "Opwaarderen"
+        "recharge": "Opwaarderen",
+        "manageCredits": "Beheren"
+      },
+      "tabs": {
+        "label": "Onderdelen van de AI-assistent",
+        "advisor": "Online adviseur",
+        "voice": "Spraakagent",
+        "conversations": "Gesprekken"
       },
       "hero": {
         "eyebrow": "AI-assistent",
@@ -324,7 +331,8 @@
       "newReservation": "Nieuwe reservering",
       "reservationLimitReached": "Limiet bereikt",
       "help": "Hulp",
-      "feedback": "Hulp en feedback"
+      "feedback": "Hulp en feedback",
+      "aiCreditsLow": "Tegoed raakt op"
     },
     "shortcuts": {
       "actions": {
@@ -586,7 +594,8 @@
       "subscription": "Abonnement",
       "settings": "Instellingen",
       "store": "Mijn winkel",
-      "multiStore": "Multi-winkel"
+      "multiStore": "Multi-winkel",
+      "aiCredits": "AI-tegoed"
     },
     "home": {
       "viewAll": "Alles bekijken",
@@ -4777,6 +4786,61 @@
         "errors": {
           "generic": "Er ging iets mis. Probeer het opnieuw."
         }
+      },
+      "page": {
+        "title": "AI-tegoed",
+        "subtitle": "Het tegoed achter alle AI-functies van je winkel",
+        "totalTitle": "Totaalsaldo",
+        "totalUnlimitedHint": "Je abonnement kent geen gebruikslimiet",
+        "monthlyTitle": "Inbegrepen deze maand",
+        "monthlyUsedHint": "{used} van {included} gebruikt",
+        "monthlyUnlimitedHint": "Onbeperkt met je abonnement",
+        "monthlyNoneHint": "Je abonnement bevat geen tegoed",
+        "prepaidTitle": "Vooruitbetaald tegoed",
+        "prepaidHint": "Verloopt nooit",
+        "pitchTitle": "Wat je tegoed mogelijk maakt",
+        "pitchDescription": "Eén tegoed voor alle AI-functies van je winkel.",
+        "perkAdvisorTitle": "Een adviseur die nooit slaapt",
+        "perkAdvisorDescription": "Klanten stellen vragen over je aanbod en krijgen meteen antwoord, ook 's nachts.",
+        "perkVoiceTitle": "Een agent die opneemt",
+        "perkVoiceDescription": "Gemiste oproepen worden concrete aanvragen, met een eigen nummer als je dat wilt.",
+        "perkImagesTitle": "Strakke productfoto's",
+        "perkImagesDescription": "Verwijder de achtergrond en verbeter je foto's met één klik, direct vanaf het product.",
+        "pitchSecondaryCta": "Ontdek de AI-assistent",
+        "pitchFootnote": "Je betaalt alleen wat je verbruikt en tegoed verloopt niet.",
+        "recapTitle": "Je tegoed deze maand",
+        "recapDescription": "Wat je tegoed sinds het begin van de maand voor je winkel heeft gedaan.",
+        "recapConversations": "Gesprekken",
+        "recapCalls": "Beantwoorde oproepen",
+        "recapImages": "Verbeterde afbeeldingen",
+        "recapCredits": "Verbruikt tegoed",
+        "recapCallTime": "Samen {minutes} min beltijd.",
+        "historyTitle": "Geschiedenis",
+        "historyDescription": "Alles wat je hebt verbruikt en gekocht.",
+        "tabUsage": "Verbruik",
+        "tabPurchases": "Aankopen",
+        "usageEmpty": "Nog niets verbruikt",
+        "usageEmptyDescription": "Zodra de AI voor je aan de slag gaat, verschijnt hier elke afboeking.",
+        "purchasesEmpty": "Nog geen aankopen",
+        "purchasesEmptyDescription": "Je opwaarderingen en gratis tegoed komen hier te staan.",
+        "usageConversation": "Adviesgesprek",
+        "usageVoiceCall": "Telefoongesprek",
+        "usageCallDuration": "{minutes} min in rekening gebracht",
+        "usageNumberRental": "Huur van het nummer",
+        "usageImageEnhancement": "Afbeelding verbeteren",
+        "columnDate": "Datum",
+        "columnDetail": "Details",
+        "columnCredits": "Tegoed",
+        "columnAmount": "Bedrag",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Voltooid",
+          "pending": "In behandeling",
+          "failed": "Mislukt"
+        },
+        "pagination": "Pagina {page} van {totalPages}",
+        "previousPage": "Vorige pagina",
+        "nextPage": "Volgende pagina"
       }
     }
   },

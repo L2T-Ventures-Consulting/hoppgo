@@ -9,15 +9,14 @@ import { Button } from "@louez/ui";
 
 import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
 
+import { type AiAssistantTab } from "./ai-assistant-tab";
+import { useSelectAiAssistantTab } from "./ai-assistant-tabs";
+
 interface AiAssistantHeroProps {
   /** Whether the plan includes each side (drives Activate vs Upgrade CTAs). */
   hasAdvisorAccess: boolean;
   hasVoiceAccess: boolean;
 }
-
-const scrollTo = (id: string) => {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-};
 
 // Staggered entrance: each semantic chunk fades up with a light blur, 100ms
 // apart — one orchestrated page-load moment instead of scattered effects.
@@ -40,29 +39,33 @@ const itemVariants = {
  * enabled: sell what the assistant does before showing any setting. The
  * animated gradient mesh reuses the dashboard AI chat's visual identity, so
  * "AI" looks the same everywhere in the product.
+ *
+ * Sits above the tabs: its CTAs switch to the matching tab rather than scroll,
+ * since each configuration now lives in its own panel.
  */
 export const AiAssistantHero = ({ hasAdvisorAccess, hasVoiceAccess }: AiAssistantHeroProps) => {
   const t = useTranslations("dashboard.aiAssistant.hero");
   const router = useRouter();
+  const selectTab = useSelectAiAssistantTab();
   const reducedMotion = useReducedMotion();
   const hasAnyAccess = hasAdvisorAccess || hasVoiceAccess;
 
   const features: {
-    id: string;
+    id: AiAssistantTab;
     icon: typeof MessagesSquare;
     title: string;
     bullets: string[];
     hasAccess: boolean;
   }[] = [
     {
-      id: "advisor-section",
+      id: "advisor",
       icon: MessagesSquare,
       title: t("advisor.title"),
       bullets: [t("advisor.b1"), t("advisor.b2"), t("advisor.b3")],
       hasAccess: hasAdvisorAccess,
     },
     {
-      id: "voice-section",
+      id: "voice",
       icon: PhoneCall,
       title: t("voice.title"),
       bullets: [t("voice.b1"), t("voice.b2"), t("voice.b3")],
@@ -135,7 +138,7 @@ export const AiAssistantHero = ({ hasAdvisorAccess, hasVoiceAccess }: AiAssistan
                   <Button
                     variant="outline"
                     className="gap-1.5 transition-transform duration-150 ease-out active:scale-[0.96]"
-                    onClick={() => scrollTo(feature.id)}
+                    onClick={() => selectTab?.(feature.id)}
                   >
                     {t("activate")}
                     <ArrowRight className="h-4 w-4 transition-transform duration-200 ease-out group-hover:translate-x-0.5" />

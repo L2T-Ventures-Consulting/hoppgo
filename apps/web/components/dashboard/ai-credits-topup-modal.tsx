@@ -27,9 +27,8 @@ import {
 } from '@louez/ui'
 import { cn } from '@louez/utils'
 
+import { createAiCreditTopupCheckout } from '@/app/(dashboard)/dashboard/ai-assistant/credit-actions'
 import type { AiCreditPackage } from '@/lib/plans'
-
-import { createAiCreditTopupCheckout } from './credit-actions'
 
 type AiCreditsTopupModalProps = {
   open: boolean

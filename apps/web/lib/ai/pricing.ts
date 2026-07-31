@@ -1,4 +1,4 @@
-import { env } from '@/env'
+import { env } from "@/env";
 
 /**
  * AI advisor cost accounting. Every commercial value (token prices, credit
@@ -8,14 +8,14 @@ import { env } from '@/env'
  */
 
 /** 1 credit = 1_000_000 micro-credits. */
-export const CREDIT_MICRO = 1_000_000
+export const CREDIT_MICRO = 1_000_000;
 /** 1 USD = 1_000_000 micro-USD (used for frozen cost audit). */
-export const USD_MICRO = 1_000_000
+export const USD_MICRO = 1_000_000;
 
 /** Coerce a possibly-string env value to a non-negative number (0 when invalid). */
 function num(value: unknown): number {
-  const n = Number(value)
-  return Number.isFinite(n) && n >= 0 ? n : 0
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
 }
 
 /**
@@ -24,45 +24,43 @@ function num(value: unknown): number {
  * rate (conservative). Missing prices resolve to 0 → cost 0.
  */
 export function getAdvisorTokenPricing(): {
-  inputPerMTok: number
-  outputPerMTok: number
-  cachedInputPerMTok: number
+  inputPerMTok: number;
+  outputPerMTok: number;
+  cachedInputPerMTok: number;
 } {
-  const cachedRaw = env.AI_ADVISOR_CACHED_INPUT_USD_PER_MTOK
-  const hasCached = cachedRaw != null && String(cachedRaw).trim() !== ''
+  const cachedRaw = env.AI_ADVISOR_CACHED_INPUT_USD_PER_MTOK;
+  const hasCached = cachedRaw != null && String(cachedRaw).trim() !== "";
   return {
     inputPerMTok: num(env.AI_ADVISOR_INPUT_USD_PER_MTOK),
     outputPerMTok: num(env.AI_ADVISOR_OUTPUT_USD_PER_MTOK),
-    cachedInputPerMTok: hasCached
-      ? num(cachedRaw)
-      : num(env.AI_ADVISOR_INPUT_USD_PER_MTOK),
-  }
+    cachedInputPerMTok: hasCached ? num(cachedRaw) : num(env.AI_ADVISOR_INPUT_USD_PER_MTOK),
+  };
 }
 
 /** USD cost that equals 1 credit (≈ typical conversation cost). 0/unset ⇒ metering off. */
 export function getCreditCostBasisUsd(): number {
-  return num(env.AI_CREDIT_COST_BASIS_USD)
+  return num(env.AI_CREDIT_COST_BASIS_USD);
 }
 
 export type AdvisorUsage = {
-  inputTokens: number
-  outputTokens: number
-  cachedInputTokens: number
-}
+  inputTokens: number;
+  outputTokens: number;
+  cachedInputTokens: number;
+};
 
 /** Normalize a possibly-partial usage object from the AI SDK to safe integers. */
 export function normalizeUsage(usage: {
-  inputTokens?: number | null
-  outputTokens?: number | null
-  cachedInputTokens?: number | null
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  cachedInputTokens?: number | null;
 }): AdvisorUsage {
   const int = (v: number | null | undefined) =>
-    Number.isFinite(v) && (v as number) > 0 ? Math.trunc(v as number) : 0
+    Number.isFinite(v) && (v as number) > 0 ? Math.trunc(v as number) : 0;
   return {
     inputTokens: int(usage.inputTokens),
     outputTokens: int(usage.outputTokens),
     cachedInputTokens: int(usage.cachedInputTokens),
-  }
+  };
 }
 
 /**
@@ -72,13 +70,13 @@ export function normalizeUsage(usage: {
  * data is available.
  */
 export function runCostMicroUsd(usage: AdvisorUsage): number {
-  const p = getAdvisorTokenPricing()
-  const uncachedInput = Math.max(0, usage.inputTokens - usage.cachedInputTokens)
+  const p = getAdvisorTokenPricing();
+  const uncachedInput = Math.max(0, usage.inputTokens - usage.cachedInputTokens);
   const usd =
     (uncachedInput * p.inputPerMTok) / 1_000_000 +
     (usage.cachedInputTokens * p.cachedInputPerMTok) / 1_000_000 +
-    (usage.outputTokens * p.outputPerMTok) / 1_000_000
-  return Math.round(usd * USD_MICRO)
+    (usage.outputTokens * p.outputPerMTok) / 1_000_000;
+  return Math.round(usd * USD_MICRO);
 }
 
 /**
@@ -87,9 +85,9 @@ export function runCostMicroUsd(usage: AdvisorUsage): number {
  * Returns 0 when the cost basis is not configured.
  */
 export function costMicroUsdToCreditsMicro(costMicroUsd: number): number {
-  const basisUsd = getCreditCostBasisUsd()
-  if (basisUsd <= 0) return 0
-  return Math.round(costMicroUsd / basisUsd)
+  const basisUsd = getCreditCostBasisUsd();
+  if (basisUsd <= 0) return 0;
+  return Math.round(costMicroUsd / basisUsd);
 }
 
 // ============================================================================
@@ -102,15 +100,15 @@ export function costMicroUsdToCreditsMicro(costMicroUsd: number): number {
 
 /** Blended audio cost of the voice stack, USD per minute (0 when unset). */
 export function getVoiceAudioUsdPerMinute(): number {
-  return num(env.AI_VOICE_AUDIO_USD_PER_MIN)
+  return num(env.AI_VOICE_AUDIO_USD_PER_MIN);
 }
 
 /** Real audio cost of `audioSeconds` of call time, in micro-USD. */
 export function audioCostMicroUsd(audioSeconds: number): number {
-  const perMinute = getVoiceAudioUsdPerMinute()
-  if (perMinute <= 0 || audioSeconds <= 0) return 0
-  const usd = (audioSeconds / 60) * perMinute
-  return Math.round(usd * USD_MICRO)
+  const perMinute = getVoiceAudioUsdPerMinute();
+  if (perMinute <= 0 || audioSeconds <= 0) return 0;
+  const usd = (audioSeconds / 60) * perMinute;
+  return Math.round(usd * USD_MICRO);
 }
 
 // ============================================================================
@@ -124,7 +122,7 @@ export function audioCostMicroUsd(audioSeconds: number): number {
  * usage-metered (USD-based) billing.
  */
 export function getPhoneCreditsPerMinute(): number {
-  return num(env.AI_PHONE_CREDITS_PER_MINUTE)
+  return num(env.AI_PHONE_CREDITS_PER_MINUTE);
 }
 
 /**
@@ -132,19 +130,19 @@ export function getPhoneCreditsPerMinute(): number {
  * every started minute counts. 0 when flat billing is off or nothing to bill.
  */
 export function flatCallBillMicro(audioSeconds: number): number {
-  const perMinute = getPhoneCreditsPerMinute()
-  if (perMinute <= 0 || audioSeconds <= 0) return 0
-  return Math.round(Math.ceil(audioSeconds / 60) * perMinute * CREDIT_MICRO)
+  const perMinute = getPhoneCreditsPerMinute();
+  if (perMinute <= 0 || audioSeconds <= 0) return 0;
+  return Math.round(Math.ceil(audioSeconds / 60) * perMinute * CREDIT_MICRO);
 }
 
 /** Monthly rental of a provisioned number, in credits (0/unset ⇒ free). */
 export function getNumberRentalCredits(): number {
-  return num(env.AI_PHONE_NUMBER_RENTAL_CREDITS)
+  return num(env.AI_PHONE_NUMBER_RENTAL_CREDITS);
 }
 
 /** Real monthly provider cost of a provisioned number, in micro-USD. */
 export function numberRentalCostMicroUsd(): number {
-  return Math.round(num(env.AI_PHONE_NUMBER_COST_USD_PER_MONTH) * USD_MICRO)
+  return Math.round(num(env.AI_PHONE_NUMBER_COST_USD_PER_MONTH) * USD_MICRO);
 }
 
 // ============================================================================
@@ -154,17 +152,66 @@ export function numberRentalCostMicroUsd(): number {
 // reporting. Both values live in env, never in the repo.
 // ============================================================================
 
-/** Flat credits billed per enhanced product image. 0/unset ⇒ billing inert. */
+/** Flat credits billed per enhanced product image. Defaults to 2; 0 makes it free. */
 export function getImageEnhanceCredits(): number {
-  return num(env.AI_IMAGE_ENHANCE_CREDITS)
+  return num(env.AI_IMAGE_ENHANCE_CREDITS);
 }
 
 /** Micro-credits billed for ONE enhancement under the flat tariff. */
 export function imageEnhanceBillMicro(): number {
-  return Math.round(getImageEnhanceCredits() * CREDIT_MICRO)
+  return Math.round(getImageEnhanceCredits() * CREDIT_MICRO);
 }
 
-/** Real provider cost of ONE enhancement, in micro-USD. */
-export function imageEnhanceCostMicroUsd(): number {
-  return Math.round(num(env.AI_IMAGE_USD_PER_IMAGE) * USD_MICRO)
+/** Flat credits billed per standalone background removal. 0/unset ⇒ free. */
+export function getImageBgRemovalCredits(): number {
+  return num(env.AI_IMAGE_BG_REMOVAL_CREDITS);
+}
+
+/** Micro-credits billed for ONE standalone background removal. */
+export function imageBgRemovalBillMicro(): number {
+  return Math.round(getImageBgRemovalCredits() * CREDIT_MICRO);
+}
+
+export type ImageTokenUsage = {
+  inputTokens: number;
+  inputImageTokens: number;
+  inputTextTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+};
+
+export type ImageEnhanceCostSource = "measured_usage" | "configured_flat" | "unavailable";
+
+export type ImageEnhanceCost = {
+  microUsd: number;
+  source: ImageEnhanceCostSource;
+};
+
+/**
+ * Real provider cost of ONE enhancement.
+ *
+ * Prefer measured GPT Image usage returned by the provider. The flat per-image
+ * env value is only a fallback for providers or responses that omit usage.
+ */
+export function imageEnhanceCost(usage: ImageTokenUsage | null = null): ImageEnhanceCost {
+  if (usage) {
+    const usd =
+      (usage.inputTextTokens * num(env.AI_IMAGE_TEXT_INPUT_USD_PER_MTOK)) / 1_000_000 +
+      (usage.inputImageTokens * num(env.AI_IMAGE_INPUT_USD_PER_MTOK)) / 1_000_000 +
+      (usage.outputTokens * num(env.AI_IMAGE_OUTPUT_USD_PER_MTOK)) / 1_000_000;
+    return {
+      microUsd: Math.round(usd * USD_MICRO),
+      source: "measured_usage",
+    };
+  }
+
+  const configuredUsd = num(env.AI_IMAGE_USD_PER_IMAGE);
+  if (configuredUsd > 0) {
+    return {
+      microUsd: Math.round(configuredUsd * USD_MICRO),
+      source: "configured_flat",
+    };
+  }
+
+  return { microUsd: 0, source: "unavailable" };
 }

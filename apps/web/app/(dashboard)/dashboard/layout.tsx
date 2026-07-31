@@ -19,16 +19,37 @@ import { DashboardSaveShortcut } from "@/components/shared/dashboard-save-shortc
 import { KeyboardShortcutsProvider } from "@/components/shared/keyboard-shortcuts-provider";
 import { WhatsNewProvider } from "@/components/shared/whats-new-provider";
 
+import { getAiCreditsInfo, microToCredits } from "@/lib/ai/advisor/credits";
 import { isAIChatConfigured } from "@/lib/ai/provider";
 import { auth } from "@/lib/auth";
 import { parseKeyboardShortcutOverrides } from "@/lib/keyboard-shortcuts";
-import { getStoreLimits } from "@/lib/plan-limits";
+import { getStoreLimits, getStorePlan } from "@/lib/plan-limits";
+import { areAiCreditsEnabled } from "@/lib/plans";
 import { isCurrentUserPlatformAdmin } from "@/lib/platform-admin";
 import { getCurrentStore, getUserStores } from "@/lib/store-context";
 import { getCurrentPlanSlug } from "@/lib/stripe/subscriptions";
 import { parseWhatsNewProgress } from "@/lib/whats-new.progress";
 
 import { StoreProvider } from "@/contexts/store-context";
+
+/** Total balance under which the sidebar shows its low-credit marker. */
+const LOW_AI_CREDITS_THRESHOLD = 5;
+
+/**
+ * Wallet state for the sidebar entry. The paid credit layer is cloud-only, so
+ * self-hosted deployments never pay for the query — nor get the nav entry.
+ */
+const getSidebarAiCredits = async (
+  storeId: string,
+): Promise<{ low: boolean; credits: number | null } | null> => {
+  if (!areAiCreditsEnabled()) return null;
+  const info = await getAiCreditsInfo(storeId, await getStorePlan(storeId));
+  const total =
+    info.monthlyRemainingMicro === null
+      ? null
+      : microToCredits(info.monthlyRemainingMicro + info.prepaidBalanceMicro);
+  return { low: total !== null && total < LOW_AI_CREDITS_THRESHOLD, credits: total };
+};
 
 export default async function DashboardMainLayout({ children }: { children: React.ReactNode }) {
   const session = await auth();
@@ -57,7 +78,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
   const showAIChat = isAIChatConfigured();
 
   // Get current plan for the store
-  const [planSlug, limits, isPlatformAdmin, userPreferences] = await Promise.all([
+  const [planSlug, limits, isPlatformAdmin, userPreferences, aiCredits] = await Promise.all([
     getCurrentPlanSlug(store.id),
     getStoreLimits(store.id),
     isCurrentUserPlatformAdmin(),
@@ -68,6 +89,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
       },
       where: eq(users.id, session.user.id),
     }),
+    getSidebarAiCredits(store.id),
   ]);
 
   return (
@@ -95,6 +117,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                     userEmail={session.user.email || ""}
                     userImage={session.user.image}
                     isPlatformAdmin={isPlatformAdmin}
+                    aiCredits={aiCredits}
                   />
                   <SidebarInset className="min-h-0 min-w-0 overflow-clip">
                     <header className="bg-background/90 supports-backdrop-filter:bg-background/70 z-30 flex h-14 shrink-0 items-center gap-2 border-b px-2.5 backdrop-blur">

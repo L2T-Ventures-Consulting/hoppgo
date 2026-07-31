@@ -235,7 +235,14 @@
         "subtitle": "A sua loja aconselha, responde e reserva — automaticamente",
         "credits": "{count} créditos",
         "creditsUnlimited": "Créditos ilimitados",
-        "recharge": "Recarregar"
+        "recharge": "Recarregar",
+        "manageCredits": "Gerir"
+      },
+      "tabs": {
+        "label": "Secções do assistente de IA",
+        "advisor": "Consultor online",
+        "voice": "Agente de voz",
+        "conversations": "Conversas"
       },
       "hero": {
         "eyebrow": "Assistente IA",
@@ -324,7 +331,8 @@
       "newReservation": "Nova reserva",
       "reservationLimitReached": "Limite atingido",
       "help": "Ajuda",
-      "feedback": "Ajuda e feedback"
+      "feedback": "Ajuda e feedback",
+      "aiCreditsLow": "Saldo de créditos baixo"
     },
     "shortcuts": {
       "actions": {
@@ -586,7 +594,8 @@
       "settings": "Configuracoes",
       "store": "Minha loja",
       "analytics": "Análises",
-      "multiStore": "Multi-lojas"
+      "multiStore": "Multi-lojas",
+      "aiCredits": "Créditos IA"
     },
     "home": {
       "viewAll": "Ver tudo",
@@ -4777,6 +4786,61 @@
         "errors": {
           "generic": "Algo correu mal. Tente novamente."
         }
+      },
+      "page": {
+        "title": "Créditos IA",
+        "subtitle": "A carteira que alimenta todas as funcionalidades de IA da sua loja",
+        "totalTitle": "Saldo total",
+        "totalUnlimitedHint": "O seu plano não limita a utilização",
+        "monthlyTitle": "Incluídos este mês",
+        "monthlyUsedHint": "{used} de {included} utilizados",
+        "monthlyUnlimitedHint": "Sem limite no seu plano",
+        "monthlyNoneHint": "O seu plano não inclui créditos",
+        "prepaidTitle": "Créditos pré-pagos",
+        "prepaidHint": "Nunca expiram",
+        "pitchTitle": "O que os seus créditos desbloqueiam",
+        "pitchDescription": "Uma só carteira para todas as funcionalidades de IA da loja.",
+        "perkAdvisorTitle": "Um consultor 24 horas por dia",
+        "perkAdvisorDescription": "Os clientes perguntam sobre o catálogo e recebem resposta na hora, mesmo de noite.",
+        "perkVoiceTitle": "Um agente que atende",
+        "perkVoiceDescription": "As chamadas perdidas passam a pedidos qualificados, com número próprio se quiser.",
+        "perkImagesTitle": "Fotos de produto impecáveis",
+        "perkImagesDescription": "Remova o fundo e melhore as imagens num clique, a partir da própria ficha de produto.",
+        "pitchSecondaryCta": "Conhecer o assistente de IA",
+        "pitchFootnote": "Paga apenas o que consome e os créditos não expiram.",
+        "recapTitle": "Os seus créditos este mês",
+        "recapDescription": "O que os seus créditos fizeram pela loja desde o início do mês.",
+        "recapConversations": "Conversas",
+        "recapCalls": "Chamadas atendidas",
+        "recapImages": "Imagens melhoradas",
+        "recapCredits": "Créditos gastos",
+        "recapCallTime": "No total, {minutes} min de chamadas.",
+        "historyTitle": "Histórico",
+        "historyDescription": "O detalhe do que consumiu e do que comprou.",
+        "tabUsage": "Utilização",
+        "tabPurchases": "Compras",
+        "usageEmpty": "Sem consumo",
+        "usageEmptyDescription": "Assim que a IA trabalhar para si, cada gasto aparece aqui.",
+        "purchasesEmpty": "Sem compras",
+        "purchasesEmptyDescription": "Aqui verá os seus carregamentos e os créditos oferecidos.",
+        "usageConversation": "Conversa do consultor",
+        "usageVoiceCall": "Chamada de voz",
+        "usageCallDuration": "{minutes} min faturados",
+        "usageNumberRental": "Aluguer do número",
+        "usageImageEnhancement": "Melhoria de imagem",
+        "columnDate": "Data",
+        "columnDetail": "Detalhe",
+        "columnCredits": "Créditos",
+        "columnAmount": "Valor",
+        "columnStatus": "Estado",
+        "status": {
+          "completed": "Concluído",
+          "pending": "Pendente",
+          "failed": "Falhou"
+        },
+        "pagination": "Página {page} de {totalPages}",
+        "previousPage": "Página anterior",
+        "nextPage": "Página seguinte"
       }
     }
   },

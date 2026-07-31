@@ -235,7 +235,14 @@
         "subtitle": "Your store advises, answers and books — automatically",
         "credits": "{count} credits",
         "creditsUnlimited": "Unlimited credits",
-        "recharge": "Recharge"
+        "recharge": "Recharge",
+        "manageCredits": "Manage"
+      },
+      "tabs": {
+        "label": "AI assistant sections",
+        "advisor": "Online advisor",
+        "voice": "Voice agent",
+        "conversations": "Conversations"
       },
       "hero": {
         "eyebrow": "AI Assistant",
@@ -324,7 +331,8 @@
       "newReservation": "New reservation",
       "reservationLimitReached": "Limit reached",
       "help": "Help",
-      "feedback": "Help and feedback"
+      "feedback": "Help and feedback",
+      "aiCreditsLow": "Credit balance running low"
     },
     "shortcuts": {
       "actions": {
@@ -586,7 +594,8 @@
       "subscription": "Subscription",
       "settings": "Settings",
       "store": "My store",
-      "multiStore": "Multi-store"
+      "multiStore": "Multi-store",
+      "aiCredits": "AI credits"
     },
     "multiStore": {
       "title": "Multi-store",
@@ -4963,6 +4972,61 @@
         "errors": {
           "generic": "Something went wrong. Please try again."
         }
+      },
+      "page": {
+        "title": "AI credits",
+        "subtitle": "The wallet behind every AI feature in your shop",
+        "totalTitle": "Total balance",
+        "totalUnlimitedHint": "Your plan doesn't cap usage",
+        "monthlyTitle": "Included this month",
+        "monthlyUsedHint": "{used} of {included} used",
+        "monthlyUnlimitedHint": "Unlimited on your plan",
+        "monthlyNoneHint": "Your plan includes no credits",
+        "prepaidTitle": "Prepaid credits",
+        "prepaidHint": "They never expire",
+        "pitchTitle": "What your credits unlock",
+        "pitchDescription": "One wallet for every AI feature in your shop.",
+        "perkAdvisorTitle": "An advisor around the clock",
+        "perkAdvisorDescription": "Customers ask about your catalogue and get an answer straight away, even at night.",
+        "perkVoiceTitle": "An agent that picks up",
+        "perkVoiceDescription": "Missed calls turn into qualified enquiries, with a dedicated number if you want one.",
+        "perkImagesTitle": "Sharper product photos",
+        "perkImagesDescription": "Remove the background and polish your shots in one click, right from the product page.",
+        "pitchSecondaryCta": "Explore the AI assistant",
+        "pitchFootnote": "You only pay for what you use, and credits never expire.",
+        "recapTitle": "Your credits this month",
+        "recapDescription": "What your credits have done for the shop since the start of the month.",
+        "recapConversations": "Conversations",
+        "recapCalls": "Calls answered",
+        "recapImages": "Images enhanced",
+        "recapCredits": "Credits spent",
+        "recapCallTime": "That's {minutes} min of calls in total.",
+        "historyTitle": "History",
+        "historyDescription": "Everything you have used and everything you have bought.",
+        "tabUsage": "Usage",
+        "tabPurchases": "Purchases",
+        "usageEmpty": "Nothing used yet",
+        "usageEmptyDescription": "As soon as the AI works for you, every spend shows up here.",
+        "purchasesEmpty": "No purchases yet",
+        "purchasesEmptyDescription": "Your top-ups and free credits will be listed here.",
+        "usageConversation": "Advisor conversation",
+        "usageVoiceCall": "Voice call",
+        "usageCallDuration": "{minutes} min billed",
+        "usageNumberRental": "Number rental",
+        "usageImageEnhancement": "Image enhancement",
+        "columnDate": "Date",
+        "columnDetail": "Details",
+        "columnCredits": "Credits",
+        "columnAmount": "Amount",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Completed",
+          "pending": "Pending",
+          "failed": "Failed"
+        },
+        "pagination": "Page {page} of {totalPages}",
+        "previousPage": "Previous page",
+        "nextPage": "Next page"
       }
     }
   },

@@ -245,13 +245,25 @@ export const env = createEnv({
     AI_IMAGE_MODEL: z.string().optional(),
     // Render quality asked of GPT Image. Higher = slower and more expensive.
     AI_IMAGE_QUALITY: z.enum(["low", "medium", "high"]).optional(),
-    // Flat credits billed per successfully enhanced image. 0/unset ⇒ the feature
-    // runs without billing (self-host default), same philosophy as the other
-    // billing knobs.
-    AI_IMAGE_ENHANCE_CREDITS: z.coerce.number().min(0).optional(),
-    // Real provider cost of ONE enhancement in USD, frozen on the debit row for
-    // cost-vs-billed reporting. 0/unset ⇒ 0. Never surfaced to anyone.
+    // Flat credits billed per successfully enhanced image when the shared
+    // AI-credit layer is active. Explicitly set 0 to make enhancement free.
+    AI_IMAGE_ENHANCE_CREDITS: z.coerce.number().min(0).default(2),
+    // Flat credits billed per standalone background removal (no GPT Image
+    // step). Defaults to 0 = free, so metering it is an explicit operator
+    // decision rather than an accident of the shared credit layer.
+    AI_IMAGE_BG_REMOVAL_CREDITS: z.coerce.number().min(0).default(0),
+    // GPT Image token prices in USD per 1M tokens. Defaults match GPT Image 2
+    // standard pricing; override all three when using another model or tariff.
+    AI_IMAGE_TEXT_INPUT_USD_PER_MTOK: z.coerce.number().min(0).default(5),
+    AI_IMAGE_INPUT_USD_PER_MTOK: z.coerce.number().min(0).default(8),
+    AI_IMAGE_OUTPUT_USD_PER_MTOK: z.coerce.number().min(0).default(30),
+    // Fallback provider cost of ONE enhancement in USD when the provider does
+    // not return token usage. 0/unset ⇒ cost unavailable, not necessarily free.
     AI_IMAGE_USD_PER_IMAGE: z.coerce.number().min(0).optional(),
+    // Optional conversion used only by the private diagnostics page to compare
+    // USD provider cost with EUR credit-pack revenue. No margin is inferred
+    // when it is unset, avoiding a stale hardcoded exchange rate.
+    AI_IMAGE_USD_TO_EUR_RATE: z.coerce.number().positive().optional(),
     // Persist private originals/intermediate outputs and expose the protected
     // /dev/image-processing comparison page. Always enabled in local development;
     // production/pre-production deployments must explicitly set this to "true".
@@ -455,7 +467,12 @@ export const env = createEnv({
     AI_IMAGE_MODEL: process.env.AI_IMAGE_MODEL,
     AI_IMAGE_QUALITY: process.env.AI_IMAGE_QUALITY,
     AI_IMAGE_ENHANCE_CREDITS: process.env.AI_IMAGE_ENHANCE_CREDITS,
+    AI_IMAGE_BG_REMOVAL_CREDITS: process.env.AI_IMAGE_BG_REMOVAL_CREDITS,
+    AI_IMAGE_TEXT_INPUT_USD_PER_MTOK: process.env.AI_IMAGE_TEXT_INPUT_USD_PER_MTOK,
+    AI_IMAGE_INPUT_USD_PER_MTOK: process.env.AI_IMAGE_INPUT_USD_PER_MTOK,
+    AI_IMAGE_OUTPUT_USD_PER_MTOK: process.env.AI_IMAGE_OUTPUT_USD_PER_MTOK,
     AI_IMAGE_USD_PER_IMAGE: process.env.AI_IMAGE_USD_PER_IMAGE,
+    AI_IMAGE_USD_TO_EUR_RATE: process.env.AI_IMAGE_USD_TO_EUR_RATE,
     AI_IMAGE_DEBUG_ENABLED: process.env.AI_IMAGE_DEBUG_ENABLED,
     FROMHELLO_API_URL: process.env.FROMHELLO_API_URL,
     FROMHELLO_API_KEY: process.env.FROMHELLO_API_KEY,

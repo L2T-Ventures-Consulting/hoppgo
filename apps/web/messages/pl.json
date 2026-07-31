@@ -235,7 +235,14 @@
         "subtitle": "Twój sklep doradza, odpowiada i rezerwuje — automatycznie",
         "credits": "{count} kredytów",
         "creditsUnlimited": "Nielimitowane kredyty",
-        "recharge": "Doładuj"
+        "recharge": "Doładuj",
+        "manageCredits": "Zarządzaj"
+      },
+      "tabs": {
+        "label": "Sekcje asystenta AI",
+        "advisor": "Doradca online",
+        "voice": "Agent głosowy",
+        "conversations": "Rozmowy"
       },
       "hero": {
         "eyebrow": "Asystent AI",
@@ -324,7 +331,8 @@
       "newReservation": "Nowa rezerwacja",
       "reservationLimitReached": "Limit osiagniety",
       "help": "Pomoc",
-      "feedback": "Pomoc i opinie"
+      "feedback": "Pomoc i opinie",
+      "aiCreditsLow": "Niskie saldo kredytów"
     },
     "shortcuts": {
       "actions": {
@@ -586,7 +594,8 @@
       "settings": "Ustawienia",
       "store": "Mój sklep",
       "analytics": "Analizy",
-      "multiStore": "Multi-sklep"
+      "multiStore": "Multi-sklep",
+      "aiCredits": "Kredyty AI"
     },
     "home": {
       "viewAll": "Zobacz wszystko",
@@ -4777,6 +4786,61 @@
         "errors": {
           "generic": "Coś poszło nie tak. Spróbuj ponownie."
         }
+      },
+      "page": {
+        "title": "Kredyty AI",
+        "subtitle": "Portfel, który zasila wszystkie funkcje AI w Twoim sklepie",
+        "totalTitle": "Łączne saldo",
+        "totalUnlimitedHint": "Twój plan nie ogranicza zużycia",
+        "monthlyTitle": "W pakiecie w tym miesiącu",
+        "monthlyUsedHint": "Wykorzystano {used} z {included}",
+        "monthlyUnlimitedHint": "Bez limitu w Twoim planie",
+        "monthlyNoneHint": "Twój plan nie zawiera kredytów",
+        "prepaidTitle": "Kredyty przedpłacone",
+        "prepaidHint": "Nigdy nie wygasają",
+        "pitchTitle": "Co dają Ci kredyty",
+        "pitchDescription": "Jeden portfel dla wszystkich funkcji AI w sklepie.",
+        "perkAdvisorTitle": "Doradca przez całą dobę",
+        "perkAdvisorDescription": "Klienci pytają o ofertę i od razu dostają odpowiedź – nawet w nocy.",
+        "perkVoiceTitle": "Agent, który odbiera",
+        "perkVoiceDescription": "Nieodebrane połączenia zamieniają się w konkretne zapytania, a jeśli chcesz – na własnym numerze.",
+        "perkImagesTitle": "Dopracowane zdjęcia produktów",
+        "perkImagesDescription": "Usuń tło i popraw zdjęcia jednym kliknięciem, prosto z karty produktu.",
+        "pitchSecondaryCta": "Poznaj asystenta AI",
+        "pitchFootnote": "Płacisz tylko za to, co zużyjesz, a kredyty nie wygasają.",
+        "recapTitle": "Twoje kredyty w tym miesiącu",
+        "recapDescription": "Co Twoje kredyty zrobiły dla sklepu od początku miesiąca.",
+        "recapConversations": "Rozmowy",
+        "recapCalls": "Odebrane połączenia",
+        "recapImages": "Ulepszone zdjęcia",
+        "recapCredits": "Zużyte kredyty",
+        "recapCallTime": "Łącznie {minutes} min połączeń.",
+        "historyTitle": "Historia",
+        "historyDescription": "Szczegóły tego, co zużyto i kupiono.",
+        "tabUsage": "Zużycie",
+        "tabPurchases": "Zakupy",
+        "usageEmpty": "Brak zużycia",
+        "usageEmptyDescription": "Gdy tylko AI zacznie dla Ciebie pracować, każdy wydatek pojawi się tutaj.",
+        "purchasesEmpty": "Brak zakupów",
+        "purchasesEmptyDescription": "Tutaj zobaczysz doładowania i kredyty otrzymane w prezencie.",
+        "usageConversation": "Rozmowa z doradcą",
+        "usageVoiceCall": "Połączenie głosowe",
+        "usageCallDuration": "Naliczono {minutes} min",
+        "usageNumberRental": "Wynajem numeru",
+        "usageImageEnhancement": "Ulepszenie zdjęcia",
+        "columnDate": "Data",
+        "columnDetail": "Szczegóły",
+        "columnCredits": "Kredyty",
+        "columnAmount": "Kwota",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Zrealizowane",
+          "pending": "Oczekuje",
+          "failed": "Nieudane"
+        },
+        "pagination": "Strona {page} z {totalPages}",
+        "previousPage": "Poprzednia strona",
+        "nextPage": "Następna strona"
       }
     }
   },

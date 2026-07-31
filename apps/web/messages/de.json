@@ -235,7 +235,14 @@
         "subtitle": "Ihr Shop berät, antwortet und reserviert — automatisch",
         "credits": "{count} Credits",
         "creditsUnlimited": "Unbegrenzte Credits",
-        "recharge": "Aufladen"
+        "recharge": "Aufladen",
+        "manageCredits": "Verwalten"
+      },
+      "tabs": {
+        "label": "Bereiche des KI-Assistenten",
+        "advisor": "Online-Berater",
+        "voice": "Sprachagent",
+        "conversations": "Gespräche"
       },
       "hero": {
         "eyebrow": "KI-Assistent",
@@ -324,7 +331,8 @@
       "newReservation": "Neue Reservierung",
       "reservationLimitReached": "Limit erreicht",
       "help": "Hilfe",
-      "feedback": "Hilfe und Feedback"
+      "feedback": "Hilfe und Feedback",
+      "aiCreditsLow": "Guthaben wird knapp"
     },
     "shortcuts": {
       "actions": {
@@ -586,7 +594,8 @@
       "settings": "Einstellungen",
       "store": "Mein Shop",
       "analytics": "Analysen",
-      "multiStore": "Multi-Shop"
+      "multiStore": "Multi-Shop",
+      "aiCredits": "KI-Guthaben"
     },
     "multiStore": {
       "title": "Multi-Shop",
@@ -4777,6 +4786,61 @@
         "errors": {
           "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
         }
+      },
+      "page": {
+        "title": "KI-Guthaben",
+        "subtitle": "Das Guthaben hinter allen KI-Funktionen Ihres Shops",
+        "totalTitle": "Gesamtguthaben",
+        "totalUnlimitedHint": "Ihr Tarif begrenzt die Nutzung nicht",
+        "monthlyTitle": "Diesen Monat inklusive",
+        "monthlyUsedHint": "{used} von {included} verbraucht",
+        "monthlyUnlimitedHint": "Unbegrenzt in Ihrem Tarif",
+        "monthlyNoneHint": "Ihr Tarif enthält kein Guthaben",
+        "prepaidTitle": "Aufgeladenes Guthaben",
+        "prepaidHint": "Verfällt nie",
+        "pitchTitle": "Das leistet Ihr Guthaben",
+        "pitchDescription": "Ein Guthaben für sämtliche KI-Funktionen Ihres Shops.",
+        "perkAdvisorTitle": "Ein Berater rund um die Uhr",
+        "perkAdvisorDescription": "Kundinnen und Kunden fragen nach Ihrem Sortiment und bekommen sofort eine Antwort – auch nachts.",
+        "perkVoiceTitle": "Ein Agent, der abnimmt",
+        "perkVoiceDescription": "Aus verpassten Anrufen werden qualifizierte Anfragen – auf Wunsch mit eigener Rufnummer.",
+        "perkImagesTitle": "Bessere Produktfotos",
+        "perkImagesDescription": "Hintergrund entfernen und Aufnahmen aufwerten – mit einem Klick direkt im Produkt.",
+        "pitchSecondaryCta": "KI-Assistent entdecken",
+        "pitchFootnote": "Sie zahlen nur, was Sie verbrauchen. Guthaben verfällt nicht.",
+        "recapTitle": "Ihr Guthaben diesen Monat",
+        "recapDescription": "Was Ihr Guthaben seit Monatsbeginn für den Shop geleistet hat.",
+        "recapConversations": "Gespräche",
+        "recapCalls": "Angenommene Anrufe",
+        "recapImages": "Optimierte Bilder",
+        "recapCredits": "Verbrauchtes Guthaben",
+        "recapCallTime": "Das sind insgesamt {minutes} Min. Gesprächszeit.",
+        "historyTitle": "Verlauf",
+        "historyDescription": "Alles, was Sie verbraucht und gekauft haben.",
+        "tabUsage": "Verbrauch",
+        "tabPurchases": "Käufe",
+        "usageEmpty": "Noch nichts verbraucht",
+        "usageEmptyDescription": "Sobald die KI für Sie arbeitet, erscheint hier jede Buchung.",
+        "purchasesEmpty": "Noch keine Käufe",
+        "purchasesEmptyDescription": "Aufladungen und Gratisguthaben werden hier aufgelistet.",
+        "usageConversation": "Beratungsgespräch",
+        "usageVoiceCall": "Sprachanruf",
+        "usageCallDuration": "{minutes} Min. berechnet",
+        "usageNumberRental": "Rufnummernmiete",
+        "usageImageEnhancement": "Bildoptimierung",
+        "columnDate": "Datum",
+        "columnDetail": "Details",
+        "columnCredits": "Guthaben",
+        "columnAmount": "Betrag",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Abgeschlossen",
+          "pending": "Ausstehend",
+          "failed": "Fehlgeschlagen"
+        },
+        "pagination": "Seite {page} von {totalPages}",
+        "previousPage": "Vorherige Seite",
+        "nextPage": "Nächste Seite"
       }
     }
   },

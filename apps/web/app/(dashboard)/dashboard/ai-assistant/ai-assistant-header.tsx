@@ -1,16 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Bot, CreditCard, Wallet } from "lucide-react";
+import { ArrowUpRight, Bot, CreditCard, Wallet } from "lucide-react";
 
 import { Badge, Button } from "@louez/ui";
 import { cn } from "@louez/utils";
 
+import { AiCreditsTopupModal } from "@/components/dashboard/ai-credits-topup-modal";
 import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
 import type { AiCreditPackage } from "@/lib/plans";
-import { AiCreditsTopupModal } from "./ai-credits-topup-modal";
 
 /** Anywhere on the page can request the recharge modal (e.g. the voice setup's
  * insufficient-credits nudge) by dispatching this window event — the modal
@@ -81,6 +82,18 @@ export const AiAssistantHeader = ({
                     count: Math.floor(credits.totalCredits),
                   })}
             </Badge>
+            {/* History, auto-recharge and the usage ledger now live on the
+                wallet's own page — one discreet way through. */}
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-label={t("manageCredits")}
+              className="text-muted-foreground hover:text-foreground gap-1 px-2"
+              render={<Link href="/dashboard/ai-credits" />}
+            >
+              <span className="max-sm:sr-only">{t("manageCredits")}</span>
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Button>
             {canTopup && (
               <Button
                 size="sm"

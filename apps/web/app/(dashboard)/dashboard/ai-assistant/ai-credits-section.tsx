@@ -8,11 +8,11 @@ import { useFormatter, useTranslations } from "next-intl";
 import { Badge, Button, Input, Switch } from "@louez/ui";
 import { cn } from "@louez/utils";
 
+import { AiCreditsTopupModal } from "@/components/dashboard/ai-credits-topup-modal";
 import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import type { AiCreditPackage } from "@/lib/plans";
 
 import { updateAiCreditsAutoTopup } from "./credit-actions";
-import { AiCreditsTopupModal } from "./ai-credits-topup-modal";
 
 export type AiCreditsHistoryRow = {
   id: string;

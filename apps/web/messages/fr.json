@@ -235,7 +235,14 @@
         "subtitle": "Votre boutique conseille, répond et réserve — automatiquement",
         "credits": "{count} crédits",
         "creditsUnlimited": "Crédits illimités",
-        "recharge": "Recharger"
+        "recharge": "Recharger",
+        "manageCredits": "Gérer"
+      },
+      "tabs": {
+        "label": "Sections de l'assistant IA",
+        "advisor": "Conseiller en ligne",
+        "voice": "Agent vocal",
+        "conversations": "Conversations"
       },
       "hero": {
         "eyebrow": "Assistant IA",
@@ -324,7 +331,8 @@
       "newReservation": "Nouvelle réservation",
       "reservationLimitReached": "Limite atteinte",
       "help": "Aide",
-      "feedback": "Aide et feedback"
+      "feedback": "Aide et feedback",
+      "aiCreditsLow": "Solde de crédits bas"
     },
     "shortcuts": {
       "actions": {
@@ -586,7 +594,8 @@
       "subscription": "Abonnement",
       "settings": "Paramètres",
       "store": "Ma boutique",
-      "multiStore": "Multi-boutiques"
+      "multiStore": "Multi-boutiques",
+      "aiCredits": "Crédits IA"
     },
     "multiStore": {
       "title": "Multi-boutiques",
@@ -4963,6 +4972,61 @@
         "errors": {
           "generic": "Une erreur est survenue. Veuillez réessayer."
         }
+      },
+      "page": {
+        "title": "Crédits IA",
+        "subtitle": "Le porte-monnaie qui alimente vos fonctionnalités IA",
+        "totalTitle": "Solde total",
+        "totalUnlimitedHint": "Votre offre ne plafonne pas l'usage",
+        "monthlyTitle": "Inclus ce mois",
+        "monthlyUsedHint": "{used} utilisés sur {included}",
+        "monthlyUnlimitedHint": "Sans limite avec votre offre",
+        "monthlyNoneHint": "Votre offre n'inclut pas de crédits",
+        "prepaidTitle": "Crédits prépayés",
+        "prepaidHint": "Ils n'expirent jamais",
+        "pitchTitle": "Ce que vos crédits débloquent",
+        "pitchDescription": "Un seul porte-monnaie pour toutes les fonctions IA de votre boutique.",
+        "perkAdvisorTitle": "Un conseiller 24 h/24",
+        "perkAdvisorDescription": "Vos clients posent leurs questions sur la boutique et reçoivent une réponse immédiate, même la nuit.",
+        "perkVoiceTitle": "Un agent qui décroche",
+        "perkVoiceDescription": "Les appels manqués deviennent des demandes qualifiées, avec un numéro dédié si vous le souhaitez.",
+        "perkImagesTitle": "Des photos produit nettes",
+        "perkImagesDescription": "Détourez le fond et améliorez vos visuels en un clic, directement depuis la fiche produit.",
+        "pitchSecondaryCta": "Découvrir l'assistant IA",
+        "pitchFootnote": "Vous ne payez que ce que vous consommez. Les crédits n'expirent pas.",
+        "recapTitle": "Vos crédits ce mois-ci",
+        "recapDescription": "Ce que vos crédits ont fait pour la boutique depuis le début du mois.",
+        "recapConversations": "Conversations",
+        "recapCalls": "Appels pris",
+        "recapImages": "Images améliorées",
+        "recapCredits": "Crédits dépensés",
+        "recapCallTime": "Soit {minutes} min d'appels au total.",
+        "historyTitle": "Historique",
+        "historyDescription": "Le détail de ce que vous avez consommé et acheté.",
+        "tabUsage": "Utilisation",
+        "tabPurchases": "Achats",
+        "usageEmpty": "Aucune consommation",
+        "usageEmptyDescription": "Dès que l'IA travaille pour vous, chaque dépense apparaît ici.",
+        "purchasesEmpty": "Aucun achat",
+        "purchasesEmptyDescription": "Vos recharges et crédits offerts s'afficheront ici.",
+        "usageConversation": "Conversation du conseiller",
+        "usageVoiceCall": "Appel vocal",
+        "usageCallDuration": "{minutes} min facturées",
+        "usageNumberRental": "Location du numéro",
+        "usageImageEnhancement": "Amélioration d'image",
+        "columnDate": "Date",
+        "columnDetail": "Détail",
+        "columnCredits": "Crédits",
+        "columnAmount": "Montant",
+        "columnStatus": "Statut",
+        "status": {
+          "completed": "Validé",
+          "pending": "En attente",
+          "failed": "Échoué"
+        },
+        "pagination": "Page {page} sur {totalPages}",
+        "previousPage": "Page précédente",
+        "nextPage": "Page suivante"
       }
     }
   },
