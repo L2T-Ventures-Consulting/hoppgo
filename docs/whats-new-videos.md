@@ -27,7 +27,7 @@ Sans `media`, l'entrée s'affiche en texte seul — aucun placeholder, rien à c
 
 ## Avancement
 
-- [ ] `product-image-ai` — Vos photos produit passent au studio (~45 s : upload → dialog de choix → avant/après → historique)
+- [ ] `product-image-ai` — Vos photos produit passent au studio (~50 s, script section 1)
 - [x] `sidebar-simplified` — Un menu plus court · 45 s · en ligne
 - [x] `navigation-refresh` — ⌘K vous emmène partout · 23 s · en ligne
 - [x] `product-variants` — Des variantes simples · 46 s · en ligne
@@ -60,7 +60,25 @@ Monter `-crf` à 26 si le fichier dépasse 5 Mo.
 
 ---
 
-## 1. `sidebar-simplified` — ~38 s
+## 1. `product-image-ai` — ~50 s
+
+C'est l'avant qui vend : les photos de départ doivent être moches de façon crédible (fond de cuisine, garage, lumière quelconque). Solde de crédits confortable — l'alerte « Crédits IA insuffisants » ne doit jamais apparaître.
+
+- [ ] **0–6 s** — Formulaire produit, section Photos. Déposer une photo prise « à la maison ». Le dialog **« Que faire de cette photo ? »** s'ouvre : plan fixe 2 s sur les quatre cartes et leurs chips de coût.
+- [ ] **6–13 s** — Clic **Améliorer avec l'IA**. La vignette passe en file : état en cours, puis « À valider ». Ne pas accélérer — l'attente est courte et réelle.
+- [ ] **13–22 s** — Le dialog **Avant / Après**. Basculer le fond damier → blanc, laisser 3 s de comparaison pleine, puis **Utiliser cette version**. Le badge « Améliorée par IA » apparaît sur la vignette.
+- [ ] **22–30 s** — Deuxième photo, menu de la vignette → **Supprimer l'arrière-plan**. Dialog « Arrière-plan supprimé », accepter. Le cadrage d'origine n'a pas bougé — c'est le point.
+- [ ] **30–39 s** — Galerie de 3–4 photos hétérogènes : clic **Uniformiser les photos**. Les vignettes avancent une à une — en attente, en cours, à valider. Valider les résultats à la suite.
+- [ ] **39–48 s** — Ouvrir **Historique de la photo** sur la première : toutes les versions listées, badge « Utilisée ». Cliquer la version **originale** → la vignette revient en arrière. Re-basculer sur la version IA. Rien n'est perdu.
+- [ ] **48–50 s** — Plan final sur la galerie uniformisée : quatre photos, même fond, même cadrage.
+
+**À préparer** — [ ] un vrai produit avec 3–4 photos hétérogènes crédibles (le même objet photographié dans des contextes différents), [ ] un solde de crédits suffisant pour ~5 opérations, [ ] vérifier que la file ne montre aucune photo en échec.
+
+**Piège** — ne pas cliquer Annuler pendant la file : l'annulation est rassurante dans l'app, confuse dans une démo. Et ne pas supprimer de version dans l'historique — le message est « rien ne s'efface ».
+
+---
+
+## 2. `sidebar-simplified` — ~38 s
 
 À chaque entrée disparue du menu, on montre où elle a atterri.
 
@@ -75,7 +93,7 @@ Monter `-crf` à 26 si le fichier dépasse 5 Mo.
 
 ---
 
-## 2. `navigation-refresh` — ~50 s
+## 3. `navigation-refresh` — ~50 s
 
 - [x] **0–4 s** — Sur Réservations. `⌘K` : la palette s'ouvre. 2 s sur les groupes fermés.
 - [x] **4–14 s** — Taper un nom de client, lentement. Entrée → sa fiche s'ouvre.
@@ -88,7 +106,7 @@ Monter `-crf` à 26 si le fichier dépasse 5 Mo.
 
 ---
 
-## 3. `product-variants` — ~50 s
+## 4. `product-variants` — ~50 s
 
 Le plan final est la **liste des produits**, pas la boutique.
 
@@ -105,7 +123,7 @@ Le plan final est la **liste des produits**, pas la boutique.
 
 ---
 
-## 4. `product-detail-hub` — ~60 s
+## 5. `product-detail-hub` — ~60 s
 
 Les plans 3 et 5 doivent être **dans la même prise**.
 
@@ -120,7 +138,7 @@ Les plans 3 et 5 doivent être **dans la même prise**.
 
 ---
 
-## 5. `reservations-unified-views` — ~55 s
+## 6. `reservations-unified-views` — ~55 s
 
 On ne clique presque pas, on fait défiler.
 
@@ -135,7 +153,7 @@ On ne clique presque pas, on fait défiler.
 
 ---
 
-## 6. `product-creation-flow-redesign` — ~35 s
+## 7. `product-creation-flow-redesign` — ~35 s
 
 Le message est « c'est court » : la vidéo doit l'être.
 
@@ -148,7 +166,7 @@ Le message est « c'est court » : la vidéo doit l'être.
 
 ---
 
-## 7. `reservation-creation-simplified` — ~55 s
+## 8. `reservation-creation-simplified` — ~55 s
 
 **Un seul mouvement de scroll, pas de coupe.**
 
