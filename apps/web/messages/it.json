@@ -4797,6 +4797,10 @@
         "fix": "Correzione"
       },
       "announcements": {
+        "product-image-ai": {
+          "title": "Le vostre foto prodotto passano in studio",
+          "description": "Al caricamento, l'IA scontorna il prodotto, pulisce lo sfondo e lo centra — o rimuove solo lo sfondo se preferite tenere la vostra inquadratura. E ogni versione resta nella cronologia della foto: confrontate, cambiate idea, tornate all'originale."
+        },
         "sidebar-simplified": {
           "title": "Un menu più corto, pagine al posto giusto",
           "description": "Il calendario passa nelle prenotazioni, l'inventario nella scheda prodotto, abbonamento e referral nelle impostazioni: quattro voci in meno nel menu, senza perdere nulla."

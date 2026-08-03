@@ -4797,6 +4797,10 @@
         "fix": "Opgelost"
       },
       "announcements": {
+        "product-image-ai": {
+          "title": "Uw productfoto's krijgen een studiobehandeling",
+          "description": "Bij het uploaden snijdt de AI uw product uit, maakt de achtergrond schoon en centreert het — of verwijdert alleen de achtergrond als u uw kadrering wilt houden. En elke versie blijft bewaard in de geschiedenis van de foto: vergelijk, verander van gedachten, ga terug naar het origineel."
+        },
         "sidebar-simplified": {
           "title": "Een korter menu, pagina's waar u ze verwacht",
           "description": "De agenda gaat naar de reserveringen, de voorraad naar de productpagina, abonnement en doorverwijzingen naar de instellingen: vier items minder in het menu, en niets kwijt."

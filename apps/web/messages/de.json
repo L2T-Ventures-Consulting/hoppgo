@@ -4797,6 +4797,10 @@
         "fix": "Behoben"
       },
       "announcements": {
+        "product-image-ai": {
+          "title": "Ihre Produktfotos bekommen den Studio-Look",
+          "description": "Beim Hochladen stellt die KI Ihr Produkt frei, säubert den Hintergrund und zentriert es — oder entfernt nur den Hintergrund, wenn Sie Ihren Bildausschnitt behalten möchten. Und jede Version bleibt im Verlauf des Fotos erhalten: vergleichen, umentscheiden, zum Original zurückkehren."
+        },
         "sidebar-simplified": {
           "title": "Ein kürzeres Menü, klar einsortierte Seiten",
           "description": "Der Kalender wandert zu den Reservierungen, das Inventar auf die Produktseite, Abonnement und Empfehlungen in die Einstellungen: vier Einträge weniger im Menü — und nichts geht verloren."

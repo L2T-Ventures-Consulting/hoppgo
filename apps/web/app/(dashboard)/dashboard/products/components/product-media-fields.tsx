@@ -43,6 +43,7 @@ import {
 } from "@louez/ui";
 import { cn } from "@louez/utils";
 
+import { NewFeatureBadge } from "@/components/dashboard/new-feature-badge";
 import { getFieldError } from "@/hooks/form/form-context";
 import {
   IMAGE_UPLOAD_MIME_TYPES,
@@ -268,6 +269,7 @@ export function ProductMediaFields({
                     <span className="text-muted-foreground text-xs tabular-nums">
                       {imagesPreviews.length}/5
                     </span>
+                    <NewFeatureBadge featureId="product-image-ai" />
                   </div>
                   {batchImageActions}
                 </div>

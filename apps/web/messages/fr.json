@@ -4983,6 +4983,10 @@
         "fix": "Correctif"
       },
       "announcements": {
+        "product-image-ai": {
+          "title": "Vos photos produit passent au studio",
+          "description": "À l'upload, l'IA détoure votre produit, nettoie le fond et le centre — ou retire seulement l'arrière-plan si vous préférez garder votre cadrage. Et chaque version est conservée dans l'historique de la photo : comparez, changez d'avis, revenez à l'originale."
+        },
         "sidebar-simplified": {
           "title": "Un menu plus court, des pages mieux rangées",
           "description": "Le calendrier rejoint les réservations, l'inventaire rejoint la fiche produit, l'abonnement et le parrainage rejoignent les paramètres : quatre entrées en moins dans le menu, et rien de perdu."

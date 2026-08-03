@@ -4797,6 +4797,10 @@
         "fix": "Correção"
       },
       "announcements": {
+        "product-image-ai": {
+          "title": "As suas fotos de produto passam pelo estúdio",
+          "description": "Ao carregar, a IA recorta o seu produto, limpa o fundo e centra-o — ou remove apenas o fundo se preferir manter o seu enquadramento. E cada versão fica guardada no histórico da foto: compare, mude de ideias, volte à original."
+        },
         "sidebar-simplified": {
           "title": "Um menu mais curto, páginas mais bem arrumadas",
           "description": "O calendário junta-se às reservas, o inventário à ficha de produto, a subscrição e as recomendações às definições: menos quatro entradas no menu, sem perder nada."

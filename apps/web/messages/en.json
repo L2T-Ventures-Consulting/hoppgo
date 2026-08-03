@@ -4983,6 +4983,10 @@
         "fix": "Fixed"
       },
       "announcements": {
+        "product-image-ai": {
+          "title": "Your product photos get the studio treatment",
+          "description": "On upload, AI cuts out your product, cleans up the background and centres it — or only removes the backdrop if you'd rather keep your framing. And every version stays in the photo's history: compare, change your mind, go back to the original."
+        },
         "sidebar-simplified": {
           "title": "A shorter menu, pages where you expect them",
           "description": "The calendar joins reservations, inventory joins the product page, subscription and referrals join settings: four fewer entries in the menu, and nothing lost along the way."

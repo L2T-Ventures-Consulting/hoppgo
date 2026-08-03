@@ -9,6 +9,7 @@ import {
   PanelLeft,
   Search,
   Shapes,
+  WandSparkles,
 } from "lucide-react";
 
 import type { Badge } from "@louez/ui";
@@ -96,8 +97,8 @@ export const parseWhatsNewDate = (date: string) => {
 };
 
 /**
- * Newest first. Everything below shipped in the same release, so the dates are
- * equal and the declaration order decides the changelog order.
+ * Newest first. Nothing sorts this array — the declaration order is the
+ * changelog order, so dates must stay non-increasing from top to bottom.
  *
  * Every entry is commented out while its copy and its demo video are being
  * written. Uncomment one the day it is ready — nothing else to touch: the
@@ -107,9 +108,19 @@ export const parseWhatsNewDate = (date: string) => {
  */
 export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
   {
+    id: "product-image-ai",
+    category: "feature",
+    date: "2026-08-04",
+    titleKey: "announcements.product-image-ai.title",
+    descriptionKey: "announcements.product-image-ai.description",
+    featureId: "product-image-ai",
+    href: "/dashboard/products",
+    icon: WandSparkles,
+  },
+  {
     id: "sidebar-simplified",
     category: "improvement",
-    date: "2026-07-28",
+    date: "2026-08-04",
     titleKey: "announcements.sidebar-simplified.title",
     descriptionKey: "announcements.sidebar-simplified.description",
     media: {
@@ -122,7 +133,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
   {
     id: "navigation-refresh",
     category: "feature",
-    date: "2026-07-28",
+    date: "2026-08-03",
     titleKey: "announcements.navigation-refresh.title",
     descriptionKey: "announcements.navigation-refresh.description",
     featureId: "navigation-refresh",
@@ -137,7 +148,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
   {
     id: "product-variants",
     category: "improvement",
-    date: "2026-07-28",
+    date: "2026-07-31",
     titleKey: "announcements.product-variants.title",
     descriptionKey: "announcements.product-variants.description",
     featureId: "product-variants",
@@ -152,7 +163,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
   {
     id: "product-detail-hub",
     category: "feature",
-    date: "2026-07-28",
+    date: "2026-07-31",
     titleKey: "announcements.product-detail-hub.title",
     descriptionKey: "announcements.product-detail-hub.description",
     featureId: "product-detail-hub",
@@ -167,7 +178,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
   {
     id: "reservations-unified-views",
     category: "feature",
-    date: "2026-07-28",
+    date: "2026-07-30",
     titleKey: "announcements.reservations-unified-views.title",
     descriptionKey: "announcements.reservations-unified-views.description",
     featureId: "reservations-unified-views",
@@ -182,7 +193,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
   {
     id: "product-creation-flow-redesign",
     category: "improvement",
-    date: "2026-07-28",
+    date: "2026-07-29",
     titleKey: "announcements.product-creation-flow-redesign.title",
     descriptionKey: "announcements.product-creation-flow-redesign.description",
     featureId: "product-creation-flow-redesign",
@@ -207,7 +218,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
   {
     id: "keyboard-shortcuts",
     category: "feature",
-    date: "2026-07-28",
+    date: "2026-07-27",
     titleKey: "announcements.keyboard-shortcuts.title",
     descriptionKey: "announcements.keyboard-shortcuts.description",
     featureId: "keyboard-shortcuts",

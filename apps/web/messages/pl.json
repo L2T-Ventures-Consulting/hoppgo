@@ -4797,6 +4797,10 @@
         "fix": "Poprawka"
       },
       "announcements": {
+        "product-image-ai": {
+          "title": "Twoje zdjęcia produktów przechodzą przez studio",
+          "description": "Przy przesyłaniu AI wycina produkt, czyści tło i centruje go — albo tylko usuwa tło, jeśli wolisz zachować swój kadr. A każda wersja zostaje w historii zdjęcia: porównuj, zmieniaj zdanie, wracaj do oryginału."
+        },
         "sidebar-simplified": {
           "title": "Krótsze menu, strony na swoim miejscu",
           "description": "Kalendarz trafia do rezerwacji, inwentarz na kartę produktu, abonament i polecenia do ustawień: cztery pozycje mniej w menu i nic nie ginie."
