@@ -48,9 +48,14 @@ COPY packages/mcp/package.json ./packages/mcp/
 COPY apps/web/package.json ./apps/web/
 COPY apps/voice-relay/package.json ./apps/voice-relay/
 
-# Install dependencies using pnpm
+# Install dependencies using pnpm. The first pnpm invocation also makes
+# corepack download the pinned pnpm from the npm registry — the stage's first
+# network access — so both are retried: build hosts occasionally fail DNS
+# resolution transiently (EAI_AGAIN) and a blind retry is all it takes.
 RUN corepack enable pnpm && \
-    pnpm install --frozen-lockfile
+    (pnpm install --frozen-lockfile || \
+     (sleep 10 && pnpm install --frozen-lockfile) || \
+     (sleep 30 && pnpm install --frozen-lockfile))
 
 # -----------------------------------------------------------------------------
 # Stage 2: Builder
