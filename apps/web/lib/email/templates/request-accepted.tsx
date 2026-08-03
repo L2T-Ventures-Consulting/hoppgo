@@ -3,6 +3,7 @@ import {
   Column,
   Heading,
   Hr,
+  Link,
   Row,
   Section,
   Text,
@@ -44,6 +45,8 @@ interface RequestAcceptedEmailProps {
   total: number
   deposit?: number
   reservationUrl: string
+  contractUrl: string
+  termsUrl?: string | null
   paymentUrl?: string | null
   customContent?: EmailCustomContent
   locale?: EmailLocale
@@ -67,6 +70,8 @@ export function RequestAcceptedEmail({
   total,
   deposit = 0,
   reservationUrl,
+  contractUrl,
+  termsUrl,
   paymentUrl,
   customContent,
   locale = 'fr',
@@ -217,7 +222,20 @@ export function RequestAcceptedEmail({
       </Section>
 
       <Text style={footerNote}>
-        {messages.signContract}
+        {termsUrl ? messages.legalAcceptance : messages.contractAvailable}
+      </Text>
+      <Text style={legalLinks}>
+        <Link href={contractUrl} style={legalLink}>
+          {messages.viewContract}
+        </Link>
+        {termsUrl && (
+          <>
+            <span style={legalLinksSeparator}>·</span>
+            <Link href={termsUrl} style={legalLink}>
+              {messages.viewTerms}
+            </Link>
+          </>
+        )}
       </Text>
     </BaseLayout>
   )
@@ -301,6 +319,23 @@ const footerNote = {
   color: '#8898aa',
   fontStyle: 'italic' as const,
   textAlign: 'center' as const,
+  marginBottom: '8px',
+}
+
+const legalLinks = {
+  fontSize: '13px',
+  textAlign: 'center' as const,
+  margin: 0,
+}
+
+const legalLink = {
+  color: '#525f7f',
+  textDecoration: 'underline',
+}
+
+const legalLinksSeparator = {
+  color: '#8898aa',
+  margin: '0 8px',
 }
 
 export default RequestAcceptedEmail

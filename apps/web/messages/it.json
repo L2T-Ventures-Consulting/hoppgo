@@ -5618,7 +5618,10 @@
       "rentalPeriod": "Periodo di noleggio",
       "yourReservation": "La tua prenotazione",
       "proceedPayment": "Procedi al pagamento",
-      "signContract": "Non dimenticare di firmare il tuo contratto di noleggio prima di ritirare la tua attrezzatura."
+      "legalAcceptance": "La convalida della prenotazione comporta l'accettazione del contratto di noleggio e dei termini e condizioni.",
+      "contractAvailable": "Consulta il contratto di noleggio associato alla tua prenotazione.",
+      "viewContract": "Consulta il contratto",
+      "viewTerms": "Consulta i termini e le condizioni"
     },
     "requestRejected": {
       "subject": "Richiesta prenotazione #{number}",

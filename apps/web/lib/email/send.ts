@@ -467,6 +467,8 @@ export async function sendRequestAcceptedEmail({
   reservation,
   items,
   reservationUrl,
+  contractUrl,
+  termsUrl,
   paymentUrl,
   locale = 'fr',
 }: {
@@ -483,6 +485,8 @@ export async function sendRequestAcceptedEmail({
   }
   items: { name: string; quantity: number; totalPrice: number }[]
   reservationUrl: string
+  contractUrl: string
+  termsUrl?: string | null
   paymentUrl?: string | null
   locale?: EmailLocale
 }) {
@@ -513,6 +517,8 @@ export async function sendRequestAcceptedEmail({
       total: reservation.totalAmount,
       deposit: depositAmount,
       reservationUrl,
+      contractUrl,
+      termsUrl,
       paymentUrl,
       customContent,
       locale,

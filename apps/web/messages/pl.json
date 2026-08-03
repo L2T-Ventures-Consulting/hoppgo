@@ -5618,7 +5618,10 @@
       "rentalPeriod": "Okres wynajmu",
       "yourReservation": "Twoja rezerwacja",
       "proceedPayment": "Przejdź do płatności",
-      "signContract": "Nie zapomnij podpisać umowy najmu przed odbiorem sprzętu."
+      "legalAcceptance": "Potwierdzenie rezerwacji oznacza akceptację umowy najmu i regulaminu.",
+      "contractAvailable": "Zobacz umowę najmu powiązaną z Twoją rezerwacją.",
+      "viewContract": "Zobacz umowę",
+      "viewTerms": "Zobacz regulamin"
     },
     "requestRejected": {
       "subject": "Żądanie rezerwacji #{number}",

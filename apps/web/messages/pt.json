@@ -5618,7 +5618,10 @@
       "rentalPeriod": "Periodo de aluguel",
       "yourReservation": "Sua reserva",
       "proceedPayment": "Prosseguir para pagamento",
-      "signContract": "Nao se esqueca de assinar seu contrato de aluguel antes de retirar seu equipamento."
+      "legalAcceptance": "A validação da sua reserva implica a aceitação do contrato de aluguer e dos termos e condições.",
+      "contractAvailable": "Consulte o contrato de aluguer associado à sua reserva.",
+      "viewContract": "Consultar o contrato",
+      "viewTerms": "Consultar os termos e condições"
     },
     "requestRejected": {
       "subject": "Solicitacao de reserva #{number}",
