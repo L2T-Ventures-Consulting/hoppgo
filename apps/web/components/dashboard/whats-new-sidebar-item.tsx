@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from "@louez/ui";
-import { SparklesSolidIcon } from "@louez/ui/icons";
+import { WhatsNewGlassIcon } from "@louez/ui/icons/glass";
 
 import { SidebarLink } from "@/components/dashboard/sidebar-link";
 import { useWhatsNew } from "@/hooks/use-whats-new";
@@ -31,7 +31,7 @@ export const WhatsNewSidebarItem = () => {
         render={<SidebarLink href={WHATS_NEW_PAGE_PATH} />}
         tooltip={t("title")}
       >
-        <SparklesSolidIcon />
+        <WhatsNewGlassIcon />
         <span>{t("title")}</span>
       </SidebarMenuButton>
       {unseenCount > 0 && (

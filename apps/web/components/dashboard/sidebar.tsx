@@ -37,20 +37,22 @@ import {
 import {
   AccentSparklesIcon,
   AdminShieldIcon,
-  AudienceSolidIcon,
-  BotIcon,
-  ChartColumnSolidIcon,
-  CogSolidIcon,
   CrownIcon,
-  DashboardSolidIcon,
   LogoutIcon,
   OpenInNewIcon,
-  ProductSolidIcon,
-  ReservationsSolidIcon,
-  SupportSolidIcon,
-  TeamSolidIcon,
-  WalletIcon,
 } from "@louez/ui/icons";
+import {
+  AiAssistantGlassIcon,
+  AiCreditsGlassIcon,
+  AnalyticsGlassIcon,
+  CustomersGlassIcon,
+  HelpGlassIcon,
+  HomeGlassIcon,
+  ProductGlassIcon,
+  ReservationsGlassIcon,
+  SettingsGlassIcon,
+  TeamGlassIcon,
+} from "@louez/ui/icons/glass";
 
 // import { ReferralSidebarWidget } from '@/components/dashboard/referral-sidebar-widget';
 import { UserAvatar } from "@/components/dashboard/shared/user-avatar";
@@ -89,29 +91,29 @@ interface DashboardSidebarProps {
 }
 
 const mainNavigation = [
-  { key: "home", href: "/dashboard", icon: DashboardSolidIcon },
-  { key: "reservations", href: "/dashboard/reservations", icon: ReservationsSolidIcon },
-  { key: "customers", href: "/dashboard/customers", icon: AudienceSolidIcon },
-  { key: "aiAssistant", href: "/dashboard/ai-assistant", icon: BotIcon },
+  { key: "home", href: "/dashboard", icon: HomeGlassIcon },
+  { key: "reservations", href: "/dashboard/reservations", icon: ReservationsGlassIcon },
+  { key: "customers", href: "/dashboard/customers", icon: CustomersGlassIcon },
+  { key: "aiAssistant", href: "/dashboard/ai-assistant", icon: AiAssistantGlassIcon },
 ];
 
 const aiCreditsNavigationItem = {
   key: "aiCredits",
   href: "/dashboard/ai-credits",
-  icon: WalletIcon,
+  icon: AiCreditsGlassIcon,
 };
 
 const catalogNavigation = [
-  { key: "products", href: "/dashboard/products", icon: ProductSolidIcon },
+  { key: "products", href: "/dashboard/products", icon: ProductGlassIcon },
 ];
 
 const analyticsNavigation = [
-  { key: "analytics", href: "/dashboard/analytics", icon: ChartColumnSolidIcon },
+  { key: "analytics", href: "/dashboard/analytics", icon: AnalyticsGlassIcon },
 ];
 
 const managementNavigation = [
-  { key: "team", href: "/dashboard/team", icon: TeamSolidIcon },
-  { key: "settings", href: "/dashboard/settings", icon: CogSolidIcon },
+  { key: "team", href: "/dashboard/team", icon: TeamGlassIcon },
+  { key: "settings", href: "/dashboard/settings", icon: SettingsGlassIcon },
 ];
 
 interface NavigationItem {
@@ -369,7 +371,7 @@ const HelpButton = () => {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton onClick={() => Gleap.open()} tooltip={t("help")}>
-        <SupportSolidIcon />
+        <HelpGlassIcon />
         <span>{t("help")}</span>
       </SidebarMenuButton>
     </SidebarMenuItem>

@@ -413,6 +413,12 @@
   --badge-warning-foreground: rgb(252 202 128);
   --badge-gray-background: rgb(120 120 120 / 22%);
   --badge-gray-foreground: rgb(212 212 216);
+
+  /* Nucleo Glass icons: the solid "origin" layer flips to light so it stays
+     readable on the dark sidebar; the frosted pane keeps its translucent
+     defaults. */
+  --nc-gradient-1-color-1: #fafafa;
+  --nc-gradient-1-color-2: #a1a1aa;
 }
 
 @layer base {

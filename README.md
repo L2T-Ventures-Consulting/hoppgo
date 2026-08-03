@@ -328,6 +328,10 @@ See [SECURITY.md](SECURITY.md) for our full security policy.
 ✅ Contributions welcome
 ❌ Cannot sell as a commercial service without agreement
 
+### Third-party assets
+
+The dashboard uses icons from [Nucleo](https://nucleoapp.com) © Nucleo — see [NOTICE](NOTICE). They are **not** covered by this repository's license: they are used under the [Nucleo license](https://nucleoapp.com/license), which allows open source projects to use up to 100 icons with a copyright notice. The icon sources are not vendored here — they come from the official [`nucleo-glass`](https://www.npmjs.com/package/nucleo-glass) npm package at install time. Don't extract or reuse these icons outside the app, and when contributing keep the total Nucleo icon count under 100 (tracked in `packages/ui/src/icons/glass.tsx`).
+
 ---
 
 <div align="center">

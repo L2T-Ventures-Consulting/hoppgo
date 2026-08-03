@@ -1,0 +1,14 @@
+Louez
+Copyright Synapsr
+
+This product includes icons from Nucleo (https://nucleoapp.com),
+Copyright © Nucleo. All rights reserved.
+
+The Nucleo icons are NOT covered by this repository's Apache 2.0 +
+Commons Clause license. They are used under the Nucleo license
+(https://nucleoapp.com/license), which for open source projects permits
+a maximum of 100 icons and requires this copyright notice. The icon
+source files are not redistributed in this repository: they are consumed
+at install time from the official `nucleo-glass` npm package published
+by Nucleo. You may not extract, sublicense, resell, share, or
+redistribute these icons outside of this application.
