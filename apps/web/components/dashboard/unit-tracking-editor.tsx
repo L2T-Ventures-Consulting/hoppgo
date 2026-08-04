@@ -7,15 +7,12 @@ import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
-  CalendarCheck,
   ChevronDown,
   ChevronRight,
   ImagePlus,
   Loader2,
   Plus,
-  Receipt,
   Settings2,
-  Tag,
   Trash2,
   X,
 } from "lucide-react";
@@ -53,9 +50,11 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@louez/ui";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@louez/ui";
 import { toastManager } from "@louez/ui";
+import { CalendarCheckIcon, PurchaseIcon, TagIcon } from "@louez/ui/icons";
 import { cn, getCurrencySymbol, normalizeAxisKey, toDatePickerValue } from "@louez/utils";
 
 import { VariantManagerDrawer } from "@/components/dashboard/variant-manager";
+import { WhatsNewLinkCard } from "@/components/dashboard/whats-new-link-card";
 import { ReservationDatePickerControl } from "@/components/form/form-reservation-date-picker";
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { orpc } from "@/lib/orpc/react";
@@ -858,6 +857,12 @@ export function UnitTrackingEditor({
   );
 
   const [variantManagerOpen, setVariantManagerOpen] = useState(false);
+  // The "Learn more" popover is controlled for one reason: its changelog card
+  // can lift a demo into the media viewer, which is portalled to the body. Every
+  // press in there would read as an outside press and dismiss the popover — and
+  // the viewer with it — so closing is refused while the demo is up.
+  const [learnMoreOpen, setLearnMoreOpen] = useState(false);
+  const [isDemoViewerOpen, setIsDemoViewerOpen] = useState(false);
 
   // System presets resolved with the current locale's labels
   const resolvedPresets = useMemo(() => resolveVariantPresets((key) => String(t.raw(key))), [t]);
@@ -1227,7 +1232,13 @@ export function UnitTrackingEditor({
               <Badge variant="expired">{t("advancedBadge")}</Badge>
             </div>
             <p className="text-muted-foreground mt-1 text-xs">{t("modeUnitsDescription")}</p>
-            <Popover>
+            <Popover
+              open={learnMoreOpen}
+              onOpenChange={(open) => {
+                if (!open && isDemoViewerOpen) return;
+                setLearnMoreOpen(open);
+              }}
+            >
               <PopoverTrigger
                 render={
                   <button
@@ -1244,18 +1255,24 @@ export function UnitTrackingEditor({
                   <p className="text-muted-foreground text-sm">{t("toggleDescription")}</p>
                   <ul className="text-muted-foreground space-y-1.5 text-sm">
                     <li className="flex items-start gap-2">
-                      <Tag className="mt-0.5 h-4 w-4 shrink-0" />
+                      <TagIcon className="mt-0.5 h-4 w-4 shrink-0" />
                       {t("benefitIdentify")}
                     </li>
                     <li className="flex items-start gap-2">
-                      <CalendarCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                      <CalendarCheckIcon className="mt-0.5 h-4 w-4 shrink-0" />
                       {t("benefitAvailability")}
                     </li>
                     <li className="flex items-start gap-2">
-                      <Receipt className="mt-0.5 h-4 w-4 shrink-0" />
+                      <PurchaseIcon className="mt-0.5 h-4 w-4 shrink-0" />
                       {t("benefitInventory")}
                     </li>
                   </ul>
+                  {/* The popover sells the mode in three lines; the changelog
+                      entry is where the whole thing is explained. */}
+                  <WhatsNewLinkCard
+                    announcementId="product-variants"
+                    onMediaViewerOpenChange={setIsDemoViewerOpen}
+                  />
                 </div>
               </PopoverContent>
             </Popover>

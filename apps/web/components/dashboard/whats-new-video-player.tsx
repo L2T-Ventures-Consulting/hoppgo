@@ -9,7 +9,10 @@ import { Button, MediaLightbox } from "@louez/ui";
 
 import type { WhatsNewMedia } from "@/lib/whats-new.constants";
 
-import { useWhatsNewVideoPlayer, type WhatsNewVideoPlayerApi } from "./use-whats-new-video-player";
+import {
+  useWhatsNewVideoPlayer,
+  type WhatsNewVideoPlayerApi,
+} from "@/hooks/use-whats-new-video-player";
 
 /** The demos' own ratio, so the viewer frames them without bars or cropping. */
 const MEDIA_ASPECT_RATIO = 1734 / 1080;

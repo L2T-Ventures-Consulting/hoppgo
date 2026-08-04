@@ -104,7 +104,7 @@ export default async function AiCreditsPage({
     <div className="mx-auto w-full min-w-0 max-w-5xl">
       <AiCreditsHeader
         totalCredits={totalCredits}
-        low={totalCredits !== null && totalCredits < LOW_BALANCE_CREDITS}
+        low={!isNewcomer && totalCredits !== null && totalCredits < LOW_BALANCE_CREDITS}
         packages={packages}
         voiceCreditsPerMinute={voiceCreditsPerMinute > 0 ? voiceCreditsPerMinute : null}
         numberRentalCredits={numberRentalCredits > 0 ? numberRentalCredits : null}
@@ -127,6 +127,7 @@ export default async function AiCreditsPage({
           monthlyIncludedCredits={monthlyIncludedCredits}
           monthlyRemainingCredits={monthlyRemainingCredits}
           prepaidCredits={prepaidCredits}
+          isNewcomer={isNewcomer}
           canTopup={packages.length > 0}
         />
 

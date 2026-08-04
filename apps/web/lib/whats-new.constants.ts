@@ -1,18 +1,17 @@
 import type { ComponentProps, ComponentType } from "react";
 
-import {
-  CalendarPlus,
-  CalendarRange,
-  Keyboard,
-  LayoutDashboard,
-  PackagePlus,
-  PanelLeft,
-  Search,
-  Shapes,
-  WandSparkles,
-} from "lucide-react";
-
 import type { Badge } from "@louez/ui";
+import {
+  AccentSparklesIcon,
+  CalendarPlusIcon,
+  KeyboardIcon,
+  LayersIcon,
+  LayoutIcon,
+  PanelLeftIcon,
+  ProductIcon,
+  ReservationsIcon,
+  SearchIcon,
+} from "@louez/ui/icons";
 
 type BadgeVariant = NonNullable<ComponentProps<typeof Badge>["variant"]>;
 
@@ -120,7 +119,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
       src: "/videos/whats-new/product-image-ai.mp4",
       posterSrc: "/images/whats-new/product-image-ai.webp",
     },
-    icon: WandSparkles,
+    icon: AccentSparklesIcon,
   },
   {
     id: "sidebar-simplified",
@@ -133,7 +132,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
       src: "/videos/whats-new/sidebar-simplified.mp4",
       posterSrc: "/images/whats-new/sidebar-simplified.webp",
     },
-    icon: PanelLeft,
+    icon: PanelLeftIcon,
   },
   {
     id: "navigation-refresh",
@@ -148,7 +147,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
       src: "/videos/whats-new/navigation-refresh.mp4",
       posterSrc: "/images/whats-new/navigation-refresh.webp",
     },
-    icon: Search,
+    icon: SearchIcon,
   },
   {
     id: "product-variants",
@@ -163,7 +162,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
       src: "/videos/whats-new/product-variants.mp4",
       posterSrc: "/images/whats-new/product-variants.webp",
     },
-    icon: Shapes,
+    icon: LayersIcon,
   },
   {
     id: "product-detail-hub",
@@ -178,7 +177,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
       src: "/videos/whats-new/product-detail-hub.mp4",
       posterSrc: "/images/whats-new/product-detail-hub.webp",
     },
-    icon: LayoutDashboard,
+    icon: LayoutIcon,
   },
   {
     id: "reservations-unified-views",
@@ -193,7 +192,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
       src: "/videos/whats-new/reservations-unified-views.mp4",
       posterSrc: "/images/whats-new/reservations-unified-views.webp",
     },
-    icon: CalendarRange,
+    icon: ReservationsIcon,
   },
   {
     id: "product-creation-flow-redesign",
@@ -203,7 +202,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.product-creation-flow-redesign.description",
     featureId: "product-creation-flow-redesign",
     href: "/dashboard/products/new",
-    icon: PackagePlus,
+    icon: ProductIcon,
   },
   {
     id: "reservation-creation-simplified",
@@ -218,7 +217,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
       src: "/videos/whats-new/reservation-creation-simplified.mp4",
       posterSrc: "/images/whats-new/reservation-creation-simplified.webp",
     },
-    icon: CalendarPlus,
+    icon: CalendarPlusIcon,
   },
   {
     id: "keyboard-shortcuts",
@@ -228,7 +227,7 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.keyboard-shortcuts.description",
     featureId: "keyboard-shortcuts",
     href: "/dashboard/account",
-    icon: Keyboard,
+    icon: KeyboardIcon,
   },
 ];
 

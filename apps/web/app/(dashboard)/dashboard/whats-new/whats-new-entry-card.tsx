@@ -8,6 +8,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { Badge, Button } from "@louez/ui";
 import { cn } from "@louez/utils";
 
+import { WhatsNewEntryThumbnail } from "@/components/dashboard/whats-new-entry-thumbnail";
 import { useWhatsNew } from "@/hooks/use-whats-new";
 
 import {
@@ -18,7 +19,6 @@ import {
 } from "@/lib/whats-new.constants";
 
 import { useWhatsNewAnchorId } from "./use-whats-new-anchor";
-import { WhatsNewEntryThumbnail } from "./whats-new-entry-thumbnail";
 
 interface WhatsNewEntryCardProps {
   announcement: WhatsNewAnnouncement;

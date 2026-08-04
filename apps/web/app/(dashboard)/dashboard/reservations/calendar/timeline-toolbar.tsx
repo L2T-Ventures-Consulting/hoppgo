@@ -68,6 +68,7 @@ const TIMELINE_FILTERS_STORAGE_PREFIX = "reservations-timeline-filters:v1";
 
 export interface TimelineFilters {
   range: CalendarRange;
+  hasActiveFilters: boolean;
   /** Empty means "all products" */
   selectedProductIds: Set<string>;
   selectedProducts: Product[];
@@ -78,6 +79,7 @@ export interface TimelineFilters {
   toggleStatus: (status: string) => void;
   setVisibleStatuses: (visible: Set<string>) => void;
   setTodayOperation: (operation: TodayOperation | null) => void;
+  resetFilters: () => void;
 }
 
 export function useTimelineFilters(products: Product[], storeId: string): TimelineFilters {
@@ -121,6 +123,12 @@ export function useTimelineFilters(products: Product[], storeId: string): Timeli
       new Set<string>(RESERVATION_STATUSES.filter((status) => !state.statuses.includes(status))),
     [state.statuses],
   );
+
+  const hasCustomStatuses =
+    state.statuses.length !== DEFAULT_VISIBLE_STATUSES.length ||
+    DEFAULT_VISIBLE_STATUSES.some((status) => !state.statuses.includes(status));
+  const hasActiveFilters =
+    selectedProductIds.size > 0 || state.operation !== null || hasCustomStatuses;
 
   // URL values win so shared links stay deterministic. Missing filters are
   // restored from storage after hydration, scoped to the active store.
@@ -207,6 +215,7 @@ export function useTimelineFilters(products: Product[], storeId: string): Timeli
 
   return {
     range: state.range,
+    hasActiveFilters,
     selectedProductIds,
     selectedProducts,
     hiddenStatuses,
@@ -227,6 +236,14 @@ export function useTimelineFilters(products: Product[], storeId: string): Timeli
       void setState({
         operation,
         period: operation ? "today" : null,
+      }),
+    resetFilters: () =>
+      void setState({
+        productIds: [],
+        productId: null,
+        statuses: DEFAULT_VISIBLE_STATUSES,
+        operation: null,
+        period: null,
       }),
   };
 }

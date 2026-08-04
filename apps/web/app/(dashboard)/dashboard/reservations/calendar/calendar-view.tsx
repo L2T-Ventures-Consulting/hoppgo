@@ -8,6 +8,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useQueries } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 
+import { Alert, AlertDescription, Button } from "@louez/ui";
+import { ReservationsGlassIcon } from "@louez/ui/icons/glass";
 import { cn } from "@louez/utils";
 
 import {
@@ -21,9 +23,12 @@ import {
   compareByDisplayOrder,
   computeMonthSegments,
   diffInDays,
+  findNearestTimelineItem,
   formatDeliveryAddress,
+  getTimelineNavigationBufferDirection,
   isWeekend,
   stackReservations,
+  timelineRangesOverlap,
 } from "@/components/dashboard/reservations-timeline/timeline-utils";
 import { reservationCalendarQueries } from "@/lib/queries/reservation-calendar.queries";
 
@@ -157,7 +162,7 @@ export function ReservationsCalendarView({
     [windowStart, daysCount],
   );
 
-  const { reservations, isFetching, hasLoadedOnce } = useQueries({
+  const { reservations, isFetching, hasError, retry } = useQueries({
     queries: chunkQueries,
     combine: (results) => {
       const byId = new Map<string, Reservation>();
@@ -169,10 +174,20 @@ export function ReservationsCalendarView({
       return {
         reservations: Array.from(byId.values()),
         isFetching: results.some((result) => result.isFetching),
-        hasLoadedOnce: results.some((result) => result.data !== undefined),
+        hasError: results.some((result) => result.isError),
+        retry: () => Promise.all(results.map((result) => result.refetch())),
       };
     },
   });
+
+  const [hasCompletedInitialLoad, setHasCompletedInitialLoad] = useState(false);
+
+  useEffect(() => {
+    if (hasCompletedInitialLoad || isFetching) return;
+    setHasCompletedInitialLoad(true);
+  }, [hasCompletedInitialLoad, isFetching]);
+
+  const showInitialLoadingOverlay = !hasCompletedInitialLoad && isFetching && !hasError;
 
   // ---------------------------------------------------------------------------
   // Derived layout data
@@ -295,7 +310,20 @@ export function ReservationsCalendarView({
   const [visibleMonthLabel, setVisibleMonthLabel] = useState(() =>
     formatMonthLabel(anchorDateRef.current),
   );
-  const [leftmostVisibleDayIndex, setLeftmostVisibleDayIndex] = useState(0);
+  const [visibleDayRange, setVisibleDayRange] = useState({ startIndex: 0, endIndex: 0 });
+
+  const hasReservationInVisiblePeriod = useMemo(
+    () => placed.some((item) => timelineRangesOverlap(item, visibleDayRange)),
+    [placed, visibleDayRange],
+  );
+
+  const nearestReservation = useMemo(
+    () => findNearestTimelineItem(placed, visibleDayRange),
+    [placed, visibleDayRange],
+  );
+
+  const showEmptyVisiblePeriod =
+    hasCompletedInitialLoad && !hasError && !hasReservationInVisiblePeriod;
 
   // ---------------------------------------------------------------------------
   // Scrolling: initial position, label sync, infinite extension
@@ -306,11 +334,17 @@ export function ReservationsCalendarView({
       0,
       Math.min(daysCount - 1, Math.floor(element.scrollLeft / dayWidth)),
     );
+    const rightmostIndex = Math.max(
+      leftmostIndex,
+      Math.min(daysCount - 1, Math.ceil((element.scrollLeft + element.clientWidth) / dayWidth) - 1),
+    );
     const centerOffset = element.scrollLeft + element.clientWidth / 2;
     const index = Math.max(0, Math.min(daysCount - 1, Math.floor(centerOffset / dayWidth)));
     const label = formatMonthLabel(addDays(windowStart, index));
-    setLeftmostVisibleDayIndex((previous) =>
-      previous === leftmostIndex ? previous : leftmostIndex,
+    setVisibleDayRange((previous) =>
+      previous.startIndex === leftmostIndex && previous.endIndex === rightmostIndex
+        ? previous
+        : { startIndex: leftmostIndex, endIndex: rightmostIndex },
     );
     setVisibleMonthLabel((previous) => (previous === label ? previous : label));
   };
@@ -351,6 +385,40 @@ export function ReservationsCalendarView({
   useEffect(() => {
     appendLockRef.current = false;
   }, [daysCount]);
+
+  // When the empty state points to a reservation near a loaded edge, extend
+  // that edge in the background before the user clicks. Otherwise the click's
+  // smooth scroll triggers infinite loading, shifts the timeline, and leaves
+  // the user needing a second click to reach the reservation.
+  useEffect(() => {
+    const element = scrollerRef.current;
+    if (
+      !showEmptyVisiblePeriod ||
+      !nearestReservation ||
+      isFetching ||
+      daysCount >= MAX_DAYS_COUNT ||
+      !element
+    ) {
+      return;
+    }
+
+    const direction = getTimelineNavigationBufferDirection({
+      item: nearestReservation.item,
+      dayWidth,
+      daysCount,
+      viewportWidth: element.clientWidth,
+      edgeThreshold: EXTEND_THRESHOLD_PX,
+    });
+
+    if (direction === "previous" && pendingPrependRef.current === 0) {
+      pendingPrependRef.current = EXTEND_CHUNK_DAYS;
+      setWindowStart((previous) => addDays(previous, -EXTEND_CHUNK_DAYS));
+      setDaysCount((previous) => previous + EXTEND_CHUNK_DAYS);
+    } else if (direction === "next" && !appendLockRef.current) {
+      appendLockRef.current = true;
+      setDaysCount((previous) => previous + EXTEND_CHUNK_DAYS);
+    }
+  }, [dayWidth, daysCount, isFetching, nearestReservation, showEmptyVisiblePeriod]);
 
   useEffect(
     () => () => {
@@ -510,152 +578,233 @@ export function ReservationsCalendarView({
         products={products}
         filters={filters}
         monthLabel={visibleMonthLabel}
-        isFetching={isFetching && hasLoadedOnce}
+        isFetching={isFetching && hasCompletedInitialLoad}
         onPrevious={() => scrollByDays(-NAV_DAYS[zoom])}
         onNext={() => scrollByDays(NAV_DAYS[zoom])}
         onToday={goToToday}
         onRangeChange={handleZoomChange}
       />
 
-      {/* Timeline grid */}
-      <div
-        ref={scrollerRef}
-        onScroll={handleScroll}
-        className="bg-card relative min-h-0 flex-1 overflow-auto overscroll-x-contain rounded-lg border select-none"
-      >
-        <div className="relative flex min-h-full flex-col" style={{ width: timelineWidth }}>
-          {/* Sticky header: months + days */}
-          <div
-            className="bg-card sticky top-0 z-30 shrink-0 border-b"
-            style={{ height: HEADER_HEIGHT }}
-          >
-            {/* Month row — labels stay pinned until pushed by the next month */}
-            <div className="relative border-b" style={{ height: MONTH_ROW_HEIGHT }}>
-              {monthSegments.map((segment) => (
-                <div
-                  key={segment.startIndex}
-                  className="absolute inset-y-0 flex items-center overflow-clip border-r whitespace-nowrap last:border-r-0"
-                  style={{
-                    left: segment.startIndex * dayWidth,
-                    width: segment.days * dayWidth,
-                  }}
-                >
-                  <span className="text-muted-foreground sticky left-0 inline-block px-2 text-[11px] font-medium">
-                    {formatMonthLabel(segment.date)}
-                  </span>
-                </div>
-              ))}
-            </div>
+      {hasError && (
+        <Alert variant="error">
+          <AlertDescription className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            {tTimeline("loadError")}
+            <Button variant="outline" size="sm" disabled={isFetching} onClick={() => void retry()}>
+              {tTimeline("retry")}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
-            {/* Day row */}
-            <div className="flex" style={{ height: DAY_ROW_HEIGHT }}>
-              {days.map((date, index) => {
-                const isToday = index === todayIndex;
-                return (
+      {/* Timeline grid */}
+      <div className="relative min-h-0 flex-1">
+        <div
+          ref={scrollerRef}
+          onScroll={handleScroll}
+          className="bg-card absolute inset-0 overflow-auto overscroll-x-contain rounded-lg border select-none"
+        >
+          <div className="relative flex min-h-full flex-col" style={{ width: timelineWidth }}>
+            {/* Sticky header: months + days */}
+            <div
+              className="bg-card sticky top-0 z-30 shrink-0 border-b"
+              style={{ height: HEADER_HEIGHT }}
+            >
+              {/* Month row — labels stay pinned until pushed by the next month */}
+              <div className="relative border-b" style={{ height: MONTH_ROW_HEIGHT }}>
+                {monthSegments.map((segment) => (
                   <div
-                    key={index}
-                    className={cn(
-                      "flex shrink-0 flex-col items-center justify-center",
-                      isWeekend(date) && "bg-muted/40",
-                      isToday && "bg-primary/10",
-                    )}
-                    style={{ width: dayWidth }}
+                    key={segment.startIndex}
+                    className="absolute inset-y-0 flex items-center overflow-clip border-r whitespace-nowrap last:border-r-0"
+                    style={{
+                      left: segment.startIndex * dayWidth,
+                      width: segment.days * dayWidth,
+                    }}
                   >
-                    {zoom !== "month" && (
-                      <span
-                        className={cn(
-                          "text-[10px] font-medium uppercase",
-                          isToday ? "text-primary" : "text-muted-foreground",
-                        )}
-                      >
-                        {dayNameFormatter.format(date)}
-                      </span>
-                    )}
-                    <span
-                      className={cn(
-                        "flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-semibold tabular-nums",
-                        isToday && "bg-primary text-primary-foreground",
-                      )}
-                    >
-                      {date.getDate()}
+                    <span className="text-muted-foreground sticky left-0 inline-block px-2 text-[11px] font-medium">
+                      {formatMonthLabel(segment.date)}
                     </span>
                   </div>
-                );
-              })}
+                ))}
+              </div>
+
+              {/* Day row */}
+              <div className="flex" style={{ height: DAY_ROW_HEIGHT }}>
+                {days.map((date, index) => {
+                  const isToday = index === todayIndex;
+                  return (
+                    <div
+                      key={index}
+                      className={cn(
+                        "flex shrink-0 flex-col items-center justify-center",
+                        isWeekend(date) && "bg-muted/40",
+                        isToday && "bg-primary/10",
+                      )}
+                      style={{ width: dayWidth }}
+                    >
+                      {zoom !== "month" && (
+                        <span
+                          className={cn(
+                            "text-[10px] font-medium uppercase",
+                            isToday ? "text-primary" : "text-muted-foreground",
+                          )}
+                        >
+                          {dayNameFormatter.format(date)}
+                        </span>
+                      )}
+                      <span
+                        className={cn(
+                          "flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-semibold tabular-nums",
+                          isToday && "bg-primary text-primary-foreground",
+                        )}
+                      >
+                        {date.getDate()}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Body */}
-          <div className="relative flex-1" style={{ minHeight: bodyHeight }}>
-            {/* Background: weekends + day grid lines + today */}
-            <div
-              aria-hidden
-              className="absolute inset-0"
-              style={{
-                backgroundImage: [
-                  // Weekend shading — windowStart is always Monday aligned
-                  `repeating-linear-gradient(to right, transparent 0, transparent ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${7 * dayWidth}px)`,
-                  // Day grid lines
-                  `repeating-linear-gradient(to right, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent ${dayWidth}px)`,
-                ].join(", "),
-              }}
-            >
-              {/* Today column */}
-              {todayIndex >= 0 && todayIndex < daysCount && (
-                <div
-                  className="bg-primary/5 absolute inset-y-0"
-                  style={{ left: todayIndex * dayWidth, width: dayWidth }}
-                />
-              )}
-            </div>
+            {/* Body */}
+            <div className="relative flex-1" style={{ minHeight: bodyHeight }}>
+              {/* Background: weekends + day grid lines + today */}
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: [
+                    // Weekend shading — windowStart is always Monday aligned
+                    `repeating-linear-gradient(to right, transparent 0, transparent ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${7 * dayWidth}px)`,
+                    // Day grid lines
+                    `repeating-linear-gradient(to right, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent ${dayWidth}px)`,
+                  ].join(", "),
+                }}
+              >
+                {/* Today column */}
+                {todayIndex >= 0 && todayIndex < daysCount && (
+                  <div
+                    className="bg-primary/5 absolute inset-y-0"
+                    style={{ left: todayIndex * dayWidth, width: dayWidth }}
+                  />
+                )}
+              </div>
 
-            {/* Initial loading shimmer */}
-            {!hasLoadedOnce && <div className="bg-muted/40 absolute inset-0 animate-pulse" />}
-
-            {/* Lane area: drag-to-create + stacked reservation bars */}
-            <div
-              className="absolute inset-0 cursor-crosshair"
-              onPointerDown={handleLanePointerDown}
-              onPointerMove={handleLanePointerMove}
-              onPointerUp={handleLanePointerUp}
-              onPointerCancel={handleLanePointerCancel}
-            >
-              {/* Drag-to-create selection */}
-              {dragSelection && (
-                <div
-                  className="border-primary/60 bg-primary/10 pointer-events-none absolute inset-y-1 z-6 rounded-md border-2 border-dashed"
-                  style={{
-                    left: dragSelection.startIndex * dayWidth + 1,
-                    width: (dragSelection.endIndex - dragSelection.startIndex + 1) * dayWidth - 2,
-                  }}
-                />
-              )}
-
-              {/* Reservations */}
-              {placed.map((item) => {
-                const from = Math.max(0, item.startIndex);
-                const to = Math.min(daysCount - 1, item.endIndex);
-                if (to < from) return null;
-
-                return (
-                  <TimelineReservationBar
-                    key={item.reservation.id}
-                    reservation={item.reservation}
-                    currency={currency}
-                    isLabelSticky
-                    continuesBeforeViewport={item.startIndex < leftmostVisibleDayIndex}
+              {/* Lane area: drag-to-create + stacked reservation bars */}
+              <div
+                className="absolute inset-0 cursor-crosshair"
+                onPointerDown={handleLanePointerDown}
+                onPointerMove={handleLanePointerMove}
+                onPointerUp={handleLanePointerUp}
+                onPointerCancel={handleLanePointerCancel}
+              >
+                {/* Drag-to-create selection */}
+                {dragSelection && (
+                  <div
+                    className="border-primary/60 bg-primary/10 pointer-events-none absolute inset-y-1 z-6 rounded-md border-2 border-dashed"
                     style={{
-                      left: from * dayWidth + 4,
-                      width: (to - from + 1) * dayWidth - 8,
-                      top: item.laneIndex * ROW_HEIGHT + (ROW_HEIGHT - BAR_HEIGHT) / 2,
-                      height: BAR_HEIGHT,
+                      left: dragSelection.startIndex * dayWidth + 1,
+                      width: (dragSelection.endIndex - dragSelection.startIndex + 1) * dayWidth - 2,
                     }}
                   />
-                );
-              })}
+                )}
+
+                {/* Reservations */}
+                {placed.map((item) => {
+                  const from = Math.max(0, item.startIndex);
+                  const to = Math.min(daysCount - 1, item.endIndex);
+                  if (to < from) return null;
+
+                  return (
+                    <TimelineReservationBar
+                      key={item.reservation.id}
+                      reservation={item.reservation}
+                      currency={currency}
+                      isLabelSticky
+                      continuesBeforeViewport={item.startIndex < visibleDayRange.startIndex}
+                      style={{
+                        left: from * dayWidth + 4,
+                        width: (to - from + 1) * dayWidth - 8,
+                        top: item.laneIndex * ROW_HEIGHT + (ROW_HEIGHT - BAR_HEIGHT) / 2,
+                        height: BAR_HEIGHT,
+                      }}
+                    />
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
+
+        {showInitialLoadingOverlay && (
+          <div
+            className="bg-card/90 absolute inset-0 z-50 flex items-center justify-center rounded-lg backdrop-blur-xs"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="flex flex-col items-center gap-3 text-center">
+              <div className="relative flex size-16 items-center justify-center">
+                <span
+                  aria-hidden
+                  className="border-muted border-t-primary motion-safe:animate-spin absolute inset-0 rounded-full border-2"
+                />
+                <ReservationsGlassIcon className="size-8" aria-hidden />
+              </div>
+              <p className="text-muted-foreground text-sm font-medium">
+                {tTimeline("loadingReservations")}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {showEmptyVisiblePeriod && (
+          <div className="bg-card/60 pointer-events-none absolute inset-x-0 top-17 bottom-0 z-20 flex items-center justify-center rounded-b-lg p-6 backdrop-blur-xs">
+            <div className="bg-card/95 pointer-events-auto flex w-full max-w-sm flex-col items-center rounded-xl border p-6 text-center shadow-lg">
+              <ReservationsGlassIcon className="mb-3 size-10" aria-hidden />
+              <p className="text-sm font-semibold">{tTimeline("emptyPeriodTitle")}</p>
+              <p className="text-muted-foreground mt-1 text-xs">
+                {tTimeline("emptyPeriodDescription")}
+              </p>
+              {(filters.hasActiveFilters || nearestReservation) && (
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  {filters.hasActiveFilters && (
+                    <Button variant="outline" size="sm" onClick={filters.resetFilters}>
+                      {tTimeline("resetFilters")}
+                    </Button>
+                  )}
+                  {nearestReservation && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      isPending={isFetching}
+                      onClick={() => {
+                        const element = scrollerRef.current;
+                        if (!element) return;
+
+                        const reservationCenter =
+                          (nearestReservation.item.startIndex + nearestReservation.item.endIndex) /
+                          2;
+                        const target = reservationCenter * dayWidth - element.clientWidth / 2;
+                        const reduceMotion = window.matchMedia(
+                          "(prefers-reduced-motion: reduce)",
+                        ).matches;
+                        element.scrollTo({
+                          left: Math.max(0, target),
+                          behavior: reduceMotion ? "auto" : "smooth",
+                        });
+                      }}
+                    >
+                      {tTimeline(
+                        nearestReservation.direction === "previous"
+                          ? "viewPreviousReservation"
+                          : "viewNextReservation",
+                      )}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <p className="text-muted-foreground hidden text-xs sm:block">{tTimeline("dragHint")}</p>

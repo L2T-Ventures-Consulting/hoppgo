@@ -7,25 +7,32 @@ import { useTranslations } from "next-intl";
 
 import { cn } from "@louez/utils";
 
+import { WhatsNewVideoViewer } from "@/components/dashboard/whats-new-video-player";
 import { SharedImage } from "@/components/ui/shared-image";
 import type { WhatsNewMedia } from "@/lib/whats-new.constants";
-
-import { WhatsNewVideoViewer } from "./whats-new-video-player";
 
 interface WhatsNewEntryThumbnailProps {
   className?: string;
   /** Describes the media for assistive tech — the announcement title. */
   label: string;
   media: WhatsNewMedia;
+  /**
+   * Reports the media viewer's lifetime — `true` on open, `false` once it
+   * landed back. A thumbnail shown inside a popup needs it: the viewer is
+   * portalled to the body, so every press in it reads as an outside press, and
+   * the popup has to be told to stay open rather than take the thumbnail down
+   * with it.
+   */
+  onViewerOpenChange?: (open: boolean) => void;
 }
 
 /**
- * An announcement's demo, playing beside the copy. Images stay inert — the
- * card's stretched title link covers them, so a click opens the announcement.
- * Videos take the click instead: the recordings are small next to the copy, so
- * the thumbnail is a button that lifts the demo into the media viewer, where it
- * plays full size with controls. It has to sit above the title link's stretch
- * overlay (`z-10`) to be reachable at all.
+ * An announcement's demo, playing beside the copy. Images stay inert — on the
+ * changelog the card's stretched title link covers them, so a click opens the
+ * announcement. Videos take the click instead: the recordings are small next to
+ * the copy, so the thumbnail is a button that lifts the demo into the media
+ * viewer, where it plays full size with controls. It has to sit above the title
+ * link's stretch overlay (`z-10`) to be reachable at all.
  *
  * Playback is tied to visibility. `preload="none"` keeps the changelog from
  * pulling every demo at once; a video only downloads when it scrolls into view,
@@ -37,6 +44,7 @@ export const WhatsNewEntryThumbnail = ({
   className,
   label,
   media,
+  onViewerOpenChange,
 }: WhatsNewEntryThumbnailProps) => {
   const t = useTranslations("dashboard.whatsNew");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -134,6 +142,7 @@ export const WhatsNewEntryThumbnail = ({
         onClick={() => {
           setIsViewerMounted(true);
           setIsViewerOpen(true);
+          onViewerOpenChange?.(true);
         }}
         type="button"
       >
@@ -144,7 +153,10 @@ export const WhatsNewEntryThumbnail = ({
         <WhatsNewVideoViewer
           label={label}
           media={media}
-          onClosed={() => setIsViewerMounted(false)}
+          onClosed={() => {
+            setIsViewerMounted(false);
+            onViewerOpenChange?.(false);
+          }}
           onOpenChange={(next) => {
             if (!next) setIsViewerOpen(false);
           }}

@@ -767,6 +767,8 @@ export function ProductForm({
         <ProductImageEnhancePromoDialog
           open={media.isEnhancePromoOpen}
           onClose={media.closeEnhancePromo}
+          reason={media.enhancePromoReason ?? "feature-unavailable"}
+          creditsPerImage={media.imageEnhance.credits.enhanceCredits}
         />
       </>
     );
@@ -930,6 +932,8 @@ export function ProductForm({
       <ProductImageEnhancePromoDialog
         open={media.isEnhancePromoOpen}
         onClose={media.closeEnhancePromo}
+        reason={media.enhancePromoReason ?? "feature-unavailable"}
+        creditsPerImage={media.imageEnhance.credits.enhanceCredits}
       />
     </>
   );

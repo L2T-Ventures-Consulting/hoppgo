@@ -6,10 +6,13 @@ import {
   computeDailyAvailability,
   computeMonthSegments,
   diffInDays,
+  findNearestTimelineItem,
   getMondayOf,
+  getTimelineNavigationBufferDirection,
   placeDowntimes,
   placeReservations,
   stackReservations,
+  timelineRangesOverlap,
   type TimelineLane,
   type TimelineDowntime,
   type TimelineReservation,
@@ -62,6 +65,66 @@ test("getMondayOf returns the Monday of the week at midnight", () => {
   assert.equal(monday.getDay(), 1);
   assert.equal(diffInDays(WINDOW_START, monday), 0);
   assert.equal(monday.getHours(), 0);
+});
+
+test("timeline range helpers detect visible items and find the nearest direction", () => {
+  const visibleRange = { startIndex: 20, endIndex: 26 };
+  const previous = { id: "previous", startIndex: 10, endIndex: 14 };
+  const next = { id: "next", startIndex: 29, endIndex: 31 };
+
+  assert.equal(timelineRangesOverlap(previous, visibleRange), false);
+  assert.deepEqual(findNearestTimelineItem([previous, next], visibleRange), {
+    item: next,
+    direction: "next",
+  });
+  assert.deepEqual(
+    findNearestTimelineItem(
+      [previous, { id: "far-next", startIndex: 40, endIndex: 42 }],
+      visibleRange,
+    ),
+    {
+      item: previous,
+      direction: "previous",
+    },
+  );
+  assert.equal(
+    findNearestTimelineItem(
+      [previous, { id: "visible", startIndex: 22, endIndex: 24 }],
+      visibleRange,
+    ),
+    null,
+  );
+});
+
+test("timeline navigation requests a buffer before centering an edge reservation", () => {
+  const common = {
+    dayWidth: 96,
+    daysCount: 84,
+    viewportWidth: 1_920,
+    edgeThreshold: 320,
+  };
+
+  assert.equal(
+    getTimelineNavigationBufferDirection({
+      ...common,
+      item: { startIndex: 8, endIndex: 10 },
+    }),
+    "previous",
+  );
+  assert.equal(
+    getTimelineNavigationBufferDirection({
+      ...common,
+      item: { startIndex: 73, endIndex: 75 },
+    }),
+    "next",
+  );
+  assert.equal(
+    getTimelineNavigationBufferDirection({
+      ...common,
+      item: { startIndex: 39, endIndex: 41 },
+    }),
+    null,
+  );
 });
 
 test("overlapping reservations land on different lanes", () => {
