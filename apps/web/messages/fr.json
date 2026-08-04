@@ -6245,7 +6245,10 @@
       "rentalPeriod": "Période de location",
       "yourReservation": "Votre réservation",
       "proceedPayment": "Procéder au paiement",
-      "signContract": "N'oubliez pas de signer votre contrat de location avant de récupérer votre matériel."
+      "legalAcceptance": "La validation de votre réservation vaut acceptation du contrat de location et des conditions générales.",
+      "contractAvailable": "Retrouvez le contrat de location associé à votre réservation.",
+      "viewContract": "Consulter le contrat",
+      "viewTerms": "Consulter les conditions générales"
     },
     "requestRejected": {
       "subject": "Demande de réservation #{number}",

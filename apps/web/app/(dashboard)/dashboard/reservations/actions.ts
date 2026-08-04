@@ -109,6 +109,7 @@ import {
 } from "@/lib/product-analytics/analytics";
 import { productAnalyticsEvents } from "@/lib/product-analytics/analytics-events";
 import { resolveReservationLocationSnapshot } from "@/lib/reservations/location-snapshots";
+import { createReservationInstantAccessUrl } from "@/lib/reservations/instant-access";
 import {
   isSmsConfigured,
   sendAccessLinkSms,
@@ -135,8 +136,6 @@ import { calculateTotalDeliveryFee, validateDelivery } from "@/lib/utils/geo";
 import { evaluateReservationRules } from "@/lib/utils/reservation-rules";
 import { buildUnitEvent } from "@/lib/utils/unit-mutations";
 
-const INSTANT_ACCESS_TOKEN_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
-
 function getActionErrorKey(error: unknown, fallback: string): string {
   if (error instanceof Error && error.message.startsWith("errors.")) {
     return error.message;
@@ -147,42 +146,6 @@ function getActionErrorKey(error: unknown, fallback: string): string {
 
 async function getStoreForUser() {
   return getCurrentStore();
-}
-
-async function createReservationInstantAccessUrl({
-  storeId,
-  storeSlug,
-  customerEmail,
-  reservationId,
-  redirectPath,
-}: {
-  storeId: string;
-  storeSlug: string;
-  customerEmail: string;
-  reservationId: string;
-  redirectPath?: string;
-}) {
-  const token = nanoid(64);
-  const expiresAt = new Date(Date.now() + INSTANT_ACCESS_TOKEN_DURATION_MS);
-
-  await db.insert(verificationCodes).values({
-    id: nanoid(),
-    email: customerEmail,
-    storeId,
-    code: "",
-    type: "instant_access",
-    token,
-    reservationId,
-    expiresAt,
-    createdAt: new Date(),
-  });
-
-  const searchParams = new URLSearchParams({ token });
-  if (redirectPath) {
-    searchParams.set("redirect", redirectPath);
-  }
-
-  return getStorefrontUrl(storeSlug, `/r/${reservationId}?${searchParams.toString()}`);
 }
 
 export async function getManualReservationAvailability(input: StorefrontAvailabilityInput) {
@@ -519,13 +482,28 @@ export async function updateReservationStatus(
       totalPrice: parseFloat(item.totalPrice),
     }));
 
-    dispatchCustomerNotification("customer_request_accepted", {
-      ...customerNotificationCtx,
-      items: emailItems,
-      paymentUrl: null,
-    }).catch((error: unknown) => {
+    try {
+      const contractUrl = await createReservationInstantAccessUrl({
+        storeId: store.id,
+        storeSlug: store.slug,
+        customerEmail: reservation.customer.email,
+        reservationId,
+        redirectPath: `/account/reservations/${reservationId}/contract`,
+      });
+      const termsUrl = store.cgv?.trim() ? getStorefrontUrl(store.slug, "/terms") : null;
+
+      dispatchCustomerNotification("customer_request_accepted", {
+        ...customerNotificationCtx,
+        items: emailItems,
+        contractUrl,
+        termsUrl,
+        paymentUrl: null,
+      }).catch((error: unknown) => {
+        console.error("Failed to dispatch customer request accepted notification:", error);
+      });
+    } catch (error) {
       console.error("Failed to dispatch customer request accepted notification:", error);
-    });
+    }
   } else if (status === "rejected") {
     // Request rejected
     dispatchCustomerNotification("customer_request_rejected", {
@@ -4125,7 +4103,7 @@ export async function sendReservationModificationEmail(
   // sendEmail degrades to a logged no-op without a transport; a manual send
   // must not pretend it delivered anything.
   if (!isEmailConfigured()) {
-    return { error: 'errors.emailSendFailed' };
+    return { error: "errors.emailSendFailed" };
   }
 
   const store = await getStoreForUser();
@@ -4410,7 +4388,7 @@ export async function generateAccessUrl(reservationId: string) {
 
 export async function sendAccessLink(reservationId: string) {
   if (!isEmailConfigured()) {
-    return { error: 'errors.accessLinkSendFailed' };
+    return { error: "errors.accessLinkSendFailed" };
   }
 
   const store = await getStoreForUser();

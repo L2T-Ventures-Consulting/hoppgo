@@ -98,9 +98,9 @@ function createCandidateId(index: number) {
   return `product-image-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-// Decoded manually instead of fetch(dataUrl): third-party fetch wrappers
-// (e.g. Gleap's network logger) break fetch on data: URLs.
-const dataUrlToFile = async (dataUrl: string, filename: string) => {
+// Decode locally: fetch(dataUrl) is blocked by connect-src in production and
+// can also be intercepted by third-party network instrumentation.
+const dataUrlToFile = (dataUrl: string, filename: string) => {
   const [header = "", payload = ""] = dataUrl.split(",");
   const mimeType = header.match(/^data:([^;,]+)/)?.[1] || "image/jpeg";
 
@@ -108,8 +108,8 @@ const dataUrlToFile = async (dataUrl: string, filename: string) => {
   if (header.includes(";base64")) {
     const binary = atob(payload);
     bytes = new Uint8Array(new ArrayBuffer(binary.length));
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
     }
   } else {
     const encoded = new TextEncoder().encode(decodeURIComponent(payload));
@@ -258,7 +258,7 @@ export function useProductFormMedia({
 
           let historySourceUrl = prepared.sourceUrl;
           if (prepared.sourceDataUrl) {
-            const sourceFile = await dataUrlToFile(
+            const sourceFile = dataUrlToFile(
               prepared.sourceDataUrl,
               `product-${Date.now()}-${prepared.order}-original`,
             );
@@ -269,10 +269,7 @@ export function useProductFormMedia({
             inFlightUploadsRef.current.add(sourceUpload.url);
           }
 
-          const file = await dataUrlToFile(
-            prepared.dataUrl,
-            `product-${Date.now()}-${prepared.order}`,
-          );
+          const file = dataUrlToFile(prepared.dataUrl, `product-${Date.now()}-${prepared.order}`);
           const uploaded = await uploadImage(file);
           pendingUploadsRef.current.add(uploaded.url);
           // Shielded from the reconciliation effect until the whole batch is

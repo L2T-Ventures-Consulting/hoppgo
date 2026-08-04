@@ -6059,7 +6059,10 @@
       "rentalPeriod": "Periodo de alquiler",
       "yourReservation": "Su reserva",
       "proceedPayment": "Proceder al pago",
-      "signContract": "No olvide firmar su contrato de alquiler antes de recoger su equipo."
+      "legalAcceptance": "La validación de su reserva implica la aceptación del contrato de alquiler y de los términos y condiciones.",
+      "contractAvailable": "Consulte el contrato de alquiler asociado a su reserva.",
+      "viewContract": "Consultar el contrato",
+      "viewTerms": "Consultar los términos y condiciones"
     },
     "requestRejected": {
       "subject": "Solicitud de reserva #{number}",

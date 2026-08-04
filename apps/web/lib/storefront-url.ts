@@ -6,6 +6,18 @@ import { env } from '@/env'
 
 const APP_DOMAIN = env.NEXT_PUBLIC_APP_DOMAIN
 
+function getStorefrontProtocol(): 'http' | 'https' {
+  if (env.NEXT_PUBLIC_APP_URL?.startsWith('https://')) {
+    return 'https'
+  }
+
+  if (env.NEXT_PUBLIC_APP_URL?.startsWith('http://')) {
+    return 'http'
+  }
+
+  return process.env.NODE_ENV === 'production' ? 'https' : 'http'
+}
+
 /**
  * Build an absolute storefront URL for server-side redirects.
  *
@@ -32,7 +44,7 @@ export function getStorefrontUrl(slug: string, path: string = '/'): string {
   // slash — callers can safely append (`${url}/foo`), and it matches the
   // pre-standalone output byte-for-byte.
   const suffix = normalizedPath === '/' ? '' : normalizedPath
-  const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http'
+  const protocol = getStorefrontProtocol()
 
   // Standalone: one store on one origin — the storefront lives at the root of
   // the app URL and the proxy injects the slug internally, so links never

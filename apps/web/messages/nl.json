@@ -6053,7 +6053,10 @@
       "rentalPeriod": "Huurperiode",
       "yourReservation": "Uw reservering",
       "proceedPayment": "Doorgaan naar betaling",
-      "signContract": "Vergeet niet uw huurcontract te ondertekenen voordat u uw materiaal ophaalt."
+      "legalAcceptance": "De bevestiging van uw reservering geldt als aanvaarding van de huurovereenkomst en de algemene voorwaarden.",
+      "contractAvailable": "Bekijk de huurovereenkomst die bij uw reservering hoort.",
+      "viewContract": "Huurovereenkomst bekijken",
+      "viewTerms": "Algemene voorwaarden bekijken"
     },
     "requestRejected": {
       "subject": "Reserveringsaanvraag #{number}",

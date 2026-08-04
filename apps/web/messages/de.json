@@ -6053,7 +6053,10 @@
       "rentalPeriod": "Mietzeitraum",
       "yourReservation": "Ihre Reservierung",
       "proceedPayment": "Zur Zahlung",
-      "signContract": "Vergessen Sie nicht, Ihren Mietvertrag zu unterschreiben, bevor Sie Ihre Ausrüstung abholen."
+      "legalAcceptance": "Die Bestätigung Ihrer Reservierung gilt als Zustimmung zum Mietvertrag und zu den allgemeinen Geschäftsbedingungen.",
+      "contractAvailable": "Rufen Sie den Mietvertrag zu Ihrer Reservierung auf.",
+      "viewContract": "Mietvertrag ansehen",
+      "viewTerms": "Allgemeine Geschäftsbedingungen ansehen"
     },
     "requestRejected": {
       "subject": "Reservierungsanfrage #{number}",

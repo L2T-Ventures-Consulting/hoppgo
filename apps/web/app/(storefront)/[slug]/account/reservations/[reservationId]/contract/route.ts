@@ -3,6 +3,7 @@ import { db } from '@louez/db'
 import { reservations, stores } from '@louez/db'
 import { eq, and } from 'drizzle-orm'
 import { generateContract, getContractPdfBuffer } from '@/lib/pdf/generate'
+import { storefrontRedirect } from '@/lib/storefront-url'
 import { getCustomerSession } from '../../../actions'
 import type { SupportedLocale } from '@/lib/pdf/contract'
 
@@ -50,7 +51,12 @@ export async function GET(
   const session = await getCustomerSession(slug)
 
   if (!session) {
-    return new NextResponse('Unauthorized', { status: 401 })
+    storefrontRedirect(
+      slug,
+      `/account/login?redirect=${encodeURIComponent(
+        `/account/reservations/${reservationId}/contract`
+      )}`
+    )
   }
 
   // Get reservation and verify it belongs to the customer

@@ -6245,7 +6245,10 @@
       "rentalPeriod": "Rental period",
       "yourReservation": "Your reservation",
       "proceedPayment": "Proceed to payment",
-      "signContract": "Don't forget to sign your rental contract before picking up your equipment."
+      "legalAcceptance": "The validation of your reservation constitutes acceptance of the rental contract and terms and conditions.",
+      "contractAvailable": "View the rental contract associated with your reservation.",
+      "viewContract": "View the contract",
+      "viewTerms": "View terms and conditions"
     },
     "requestRejected": {
       "subject": "Reservation request #{number}",

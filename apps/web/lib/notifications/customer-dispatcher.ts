@@ -113,6 +113,8 @@ export interface CustomerNotificationContext {
   reservation: CustomerNotificationReservation;
   items?: Array<{ name: string; quantity: number; unitPrice: number; totalPrice: number }>;
   reservationUrl?: string;
+  contractUrl?: string;
+  termsUrl?: string | null;
   paymentUrl?: string | null;
   reason?: string | null;
   // Payment request specific fields
@@ -296,6 +298,8 @@ async function sendCustomerEmail(
         ...emailParams,
         items: ctx.items || [],
         reservationUrl: ctx.reservationUrl || "",
+        contractUrl: ctx.contractUrl || "",
+        termsUrl: ctx.termsUrl,
         paymentUrl: ctx.paymentUrl,
       });
 
@@ -379,6 +383,8 @@ async function sendCustomerEmail(
         ...emailParams,
         items: ctx.items || [],
         reservationUrl: ctx.reservationUrl || "",
+        contractUrl: ctx.contractUrl || "",
+        termsUrl: ctx.termsUrl,
         paymentUrl: ctx.paymentUrl,
       });
 
