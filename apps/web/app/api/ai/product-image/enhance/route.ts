@@ -34,7 +34,7 @@ import {
   imageEnhanceCost,
 } from "@/lib/ai/pricing";
 import { auth } from "@/lib/auth";
-import { useLogger, withEvlog } from "@/lib/evlog";
+import { log, useLogger, withEvlog } from "@/lib/evlog";
 import { getStorePlan } from "@/lib/plan-limits";
 import { areAiCreditsEnabled } from "@/lib/plans";
 import { getImageFiles } from "@/lib/storage/files";
@@ -336,6 +336,21 @@ const handlePost = async (request: Request) => {
         usageCaptured: processed.imageUsage !== null,
       },
     });
+    // The standalone Next.js runtime currently does not execute evlog's
+    // deferred filesystem drain. Emit this critical diagnostic immediately so
+    // container stdout still proves whether the private artifacts were saved.
+    log.info({
+      imageDebug: {
+        captured: imageDebugCaptured,
+        enabled: imageDebugEnabled,
+        runId,
+      },
+      imageProviderCost: {
+        microUsd: enhanceCost?.microUsd ?? null,
+        source: enhanceCost?.source ?? null,
+        usageCaptured: processed.imageUsage !== null,
+      },
+    });
   } catch (error) {
     // Diagnostics must never withhold a valid customer-facing result.
     logger.error(
@@ -348,6 +363,17 @@ const handlePost = async (request: Request) => {
         },
       },
     );
+    log.error({
+      imageDebug: {
+        captured: false,
+        enabled: imageDebugEnabled,
+        runId,
+      },
+      error: {
+        message: error instanceof Error ? error.message : String(error),
+        name: error instanceof Error ? error.name : "UnknownError",
+      },
+    });
   }
 
   return NextResponse.json({
