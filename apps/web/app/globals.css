@@ -167,10 +167,31 @@
   animation: none;
 }
 
+/* Periodic revolving-door turn on the "What's new" sidebar icon while entries
+   are unread — the badge alone is easy to scroll past. `perspective()` sits in
+   the transform list rather than on the parent so the icon needs no wrapper and
+   the button keeps its stacking context (its hover glow is a `-z-10` pseudo
+   element). The hover zoom uses the standalone `scale` property, which composes
+   with `transform` instead of fighting it. */
+@keyframes whats-new-flip {
+  from {
+    transform: perspective(100px) rotateY(0deg);
+  }
+  to {
+    transform: perspective(100px) rotateY(360deg);
+  }
+}
+
+/* Pure rotation reads best accelerating and decelerating, hence in-out. */
+.animate-whats-new-flip {
+  animation: whats-new-flip 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .timeline-dot-pulse,
   .timeline-dash-flow,
-  .animate-attention-pulse {
+  .animate-attention-pulse,
+  .animate-whats-new-flip {
     animation: none;
   }
 }

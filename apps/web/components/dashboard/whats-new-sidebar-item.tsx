@@ -6,8 +6,10 @@ import { useTranslations } from "next-intl";
 
 import { SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem } from "@louez/ui";
 import { WhatsNewGlassIcon } from "@louez/ui/icons/glass";
+import { cn } from "@louez/utils";
 
 import { SidebarLink } from "@/components/dashboard/sidebar-link";
+import { usePeriodicFlip } from "@/components/dashboard/use-periodic-flip";
 import { useWhatsNew } from "@/hooks/use-whats-new";
 import { WHATS_NEW_PAGE_PATH } from "@/lib/whats-new.constants";
 
@@ -23,6 +25,7 @@ export const WhatsNewSidebarItem = () => {
   const { unseenCount } = useWhatsNew();
 
   const active = pathname === WHATS_NEW_PAGE_PATH || pathname.startsWith(`${WHATS_NEW_PAGE_PATH}/`);
+  const { flipping, onFlipEnd } = usePeriodicFlip(unseenCount > 0);
 
   return (
     <SidebarMenuItem>
@@ -31,7 +34,12 @@ export const WhatsNewSidebarItem = () => {
         render={<SidebarLink href={WHATS_NEW_PAGE_PATH} />}
         tooltip={t("title")}
       >
-        <WhatsNewGlassIcon />
+        {/* Periodic 3D turn while entries are unread — the badge alone is easy
+              to scroll past. */}
+        <WhatsNewGlassIcon
+          className={cn(flipping && "animate-whats-new-flip")}
+          onAnimationEnd={onFlipEnd}
+        />
         <span>{t("title")}</span>
       </SidebarMenuButton>
       {unseenCount > 0 && (
