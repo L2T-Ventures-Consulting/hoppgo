@@ -5,10 +5,18 @@ This product includes icons from Nucleo (https://nucleoapp.com),
 Copyright © Nucleo. All rights reserved.
 
 The Nucleo icons are NOT covered by this repository's Apache 2.0 +
-Commons Clause license. They are used under the Nucleo license
-(https://nucleoapp.com/license), which for open source projects permits
-a maximum of 100 icons and requires this copyright notice. The icon
-source files are not redistributed in this repository: they are consumed
-at install time from the official `nucleo-glass` npm package published
-by Nucleo. You may not extract, sublicense, resell, share, or
+Commons Clause license. Their use requires a valid Nucleo license
+(https://nucleoapp.com/license). The official terms cap templates,
+themes, plugins, and open-source projects at 100 icons and require this
+copyright notice. This project intentionally stays below that ceiling.
+The icon source files are not redistributed in this repository: they are
+consumed at install time from the official `nucleo-glass` npm package
+published by Nucleo. You may not extract, sublicense, resell, share, or
 redistribute these icons outside of this application.
+
+The background-removal container includes rembg
+(https://github.com/danielgatis/rembg), Copyright (c) 2020-present
+Daniel Gatis, licensed under the MIT License.
+
+The default `isnet-general-use` model is from the DIS/IS-Net project
+(https://github.com/xuebinqin/DIS), licensed under the Apache License 2.0.

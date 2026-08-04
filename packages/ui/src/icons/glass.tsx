@@ -4,10 +4,11 @@
 // is themed globally through the `--nc-*` CSS variables in styles/globals.css.
 //
 // License (see /NOTICE): © Nucleo, used under https://nucleoapp.com/license —
-// NOT covered by the repository license. An open source project may use at
-// most 100 Nucleo icons, so every icon this app uses must be re-exported from
-// this barrel to keep the count auditable. Never copy the SVG sources into the
-// repo; they are consumed from Nucleo's official `nucleo-glass` npm package.
+// NOT covered by the repository license and requires a valid Nucleo license.
+// The most restrictive standard-license project category is capped at 100
+// icons, so every icon this app uses must be re-exported from this barrel to
+// keep the count auditable. Never copy the SVG sources into the repo; they are
+// consumed from Nucleo's official `nucleo-glass` npm package.
 export {
   IconBot as AiAssistantGlassIcon,
   IconBox as ProductGlassIcon,

@@ -8,13 +8,13 @@
 
 # 🏠 Louez
 
-### The Open-Source Equipment Rental Platform
+### The Source-Available Equipment Rental Platform
 
 **Stop paying for expensive SaaS. Own your rental business software.**
 
 [![Docker](https://img.shields.io/badge/Docker-synapsr%2Flouez-2496ED?style=for-the-badge&logo=docker)](https://hub.docker.com/r/synapsr/louez)
 [![GitHub Stars](https://img.shields.io/github/stars/Synapsr/Louez?style=for-the-badge&logo=github)](https://github.com/Synapsr/Louez)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0_%2B_Commons_Clause-orange?style=for-the-badge)](LICENSE)
 
 [☁️ Cloud](https://louez.io) • [🚀 Self-Host](#-self-host-in-one-command) • [✨ Features](#-features) • [📋 Changelog](CHANGELOG.md)
 
@@ -95,7 +95,7 @@ The bundled [docker-compose.yml](docker-compose.yml) is a complete, self-contain
 
 - 🗄️ **Database included** — MySQL runs alongside the app, and the schema installs itself on first boot
 - 🖼️ **Image storage included** — a private MinIO bucket, served through the app (no extra ports, no CDN setup)
-- ✂️ **Background removal included** — a private OSS worker enables one-click product isolation without an API key
+- ✂️ **Background removal included** — a private worker built on MIT-licensed `rembg` enables one-click product isolation without an API key
 - 🔑 **No secrets to generate** — an auth secret is created and persisted automatically
 - ✉️ **No email server required** — sign in with a password; plug in any SMTP provider later to enable outgoing email
 - 🏪 **Single-store mode** — the instance hosts your store, not a SaaS
@@ -229,7 +229,7 @@ The bundled docker-compose deployment configures all of the required variables f
 | `S3_*`                                  |          | S3-compatible storage for images (bundled MinIO in compose)               |
 | `LOUEZ_MODE`                            |          | `standalone` (default) or `platform` (multi-tenant routing)               |
 | `BACKGROUND_REMOVAL_API_TOKEN`          |          | Shared Bearer token when the image worker is publicly reachable           |
-| `AI_IMAGE_OPENAI_API_KEY`               |          | Enables optional GPT Image enhancement; OSS background removal is bundled |
+| `AI_IMAGE_OPENAI_API_KEY`               |          | Enables optional GPT Image enhancement; local background removal is bundled |
 | `SMTP_*`                                |          | Outgoing email — optional; email features disable gracefully              |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` |          | Google sign-in — optional                                                 |
 | `STRIPE_*`                              |          | Online payments — optional; storefronts fall back to booking requests     |
@@ -321,7 +321,9 @@ See [SECURITY.md](SECURITY.md) for our full security policy.
 
 ## 📄 License
 
-**Apache 2.0 with Commons Clause** — see [LICENSE](LICENSE)
+**Source-available under Apache 2.0 with Commons Clause** — see [LICENSE](LICENSE).
+The Commons Clause restricts selling the software itself, so this is not an
+OSI-approved open-source license.
 
 ✅ Free for personal and internal use
 ✅ Modify and customize freely
@@ -330,7 +332,9 @@ See [SECURITY.md](SECURITY.md) for our full security policy.
 
 ### Third-party assets
 
-The dashboard uses icons from [Nucleo](https://nucleoapp.com) © Nucleo — see [NOTICE](NOTICE). They are **not** covered by this repository's license: they are used under the [Nucleo license](https://nucleoapp.com/license), which allows open source projects to use up to 100 icons with a copyright notice. The icon sources are not vendored here — they come from the official [`nucleo-glass`](https://www.npmjs.com/package/nucleo-glass) npm package at install time. Don't extract or reuse these icons outside the app, and when contributing keep the total Nucleo icon count under 100 (tracked in `packages/ui/src/icons/glass.tsx`).
+The dashboard uses icons from [Nucleo](https://nucleoapp.com) © Nucleo — see [NOTICE](NOTICE). They are **not** covered by this repository's license and require a valid [Nucleo license](https://nucleoapp.com/license). The icon sources are not vendored here — they come from the official [`nucleo-glass`](https://www.npmjs.com/package/nucleo-glass) npm package at install time. Don't extract or reuse these icons outside the app. Contributors must keep the total below 100 (tracked in `packages/ui/src/icons/glass.tsx`); self-hosters remain responsible for ensuring their use is licensed.
+
+The background-removal image includes MIT-licensed [`rembg`](https://github.com/danielgatis/rembg) and the Apache-2.0 [`isnet-general-use` model from DIS/IS-Net](https://github.com/xuebinqin/DIS). Their attribution is recorded in [NOTICE](NOTICE).
 
 ---
 

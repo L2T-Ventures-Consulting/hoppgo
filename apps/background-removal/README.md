@@ -4,6 +4,9 @@ Private CPU sidecar used by Louez to remove product-image backgrounds with
 MIT-licensed `rembg`. Its small FastAPI wrapper intentionally excludes rembg's
 optional Gradio UI and dependencies.
 
+The default `isnet-general-use` model comes from the Apache-2.0 DIS/IS-Net
+project. See the repository-level `NOTICE` file for both attributions.
+
 The worker owns its model choice: the web app only sends image bytes. The default
 `isnet-general-use` model handles product details such as wheel spokes and
 transparent openings more reliably than the former lightweight default. A

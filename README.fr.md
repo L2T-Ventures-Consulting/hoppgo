@@ -8,13 +8,13 @@
 
 # 🏠 Louez
 
-### La plateforme open-source de gestion de location
+### La plateforme source-available de gestion de location
 
 **Arrêtez de payer des abonnements SaaS coûteux. Possédez votre logiciel de location.**
 
 [![Docker](https://img.shields.io/badge/Docker-synapsr%2Flouez-2496ED?style=for-the-badge&logo=docker)](https://hub.docker.com/r/synapsr/louez)
 [![GitHub Stars](https://img.shields.io/github/stars/Synapsr/Louez?style=for-the-badge&logo=github)](https://github.com/Synapsr/Louez)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0_%2B_Commons_Clause-orange?style=for-the-badge)](LICENSE)
 
 [☁️ Cloud](https://louez.io) • [🚀 Auto-hébergé](#-auto-hébergez-en-une-commande) • [✨ Fonctionnalités](#-fonctionnalités) • [📋 Changelog](CHANGELOG.md)
 
@@ -312,7 +312,9 @@ Voir [SECURITY.md](SECURITY.md) pour notre politique de sécurité complète.
 
 ## 📄 Licence
 
-**Apache 2.0 avec Commons Clause** — voir [LICENSE](LICENSE)
+**Code source disponible sous Apache 2.0 avec Commons Clause** — voir [LICENSE](LICENSE).
+La Commons Clause interdit la revente du logiciel lui-même : il ne s'agit donc
+pas d'une licence open source approuvée par l'OSI.
 
 ✅ Gratuit pour un usage personnel et interne
 ✅ Modification et personnalisation libres
@@ -321,7 +323,9 @@ Voir [SECURITY.md](SECURITY.md) pour notre politique de sécurité complète.
 
 ### Ressources tierces
 
-Le dashboard utilise des icônes [Nucleo](https://nucleoapp.com) © Nucleo — voir [NOTICE](NOTICE). Elles ne sont **pas** couvertes par la licence de ce dépôt : elles sont utilisées selon la [licence Nucleo](https://nucleoapp.com/license), qui autorise les projets open source à utiliser jusqu'à 100 icônes avec une mention de copyright. Les sources des icônes ne sont pas incluses dans le dépôt — elles proviennent du package npm officiel [`nucleo-glass`](https://www.npmjs.com/package/nucleo-glass) à l'installation. N'extrayez pas et ne réutilisez pas ces icônes hors de l'application, et lors d'une contribution, gardez le total d'icônes Nucleo sous 100 (suivi dans `packages/ui/src/icons/glass.tsx`).
+Le dashboard utilise des icônes [Nucleo](https://nucleoapp.com) © Nucleo — voir [NOTICE](NOTICE). Elles ne sont **pas** couvertes par la licence de ce dépôt et nécessitent une [licence Nucleo](https://nucleoapp.com/license) valide. Les sources ne sont pas incluses dans le dépôt — elles proviennent du package npm officiel [`nucleo-glass`](https://www.npmjs.com/package/nucleo-glass) à l'installation. N'extrayez pas et ne réutilisez pas ces icônes hors de l'application. Les contributeurs doivent garder le total sous 100 (suivi dans `packages/ui/src/icons/glass.tsx`) ; chaque personne qui auto-héberge Louez reste responsable de la conformité de son usage.
+
+L'image de détourage inclut [`rembg`](https://github.com/danielgatis/rembg) sous licence MIT et le [modèle `isnet-general-use` de DIS/IS-Net](https://github.com/xuebinqin/DIS) sous licence Apache 2.0. Leurs attributions figurent dans [NOTICE](NOTICE).
 
 ---
 
