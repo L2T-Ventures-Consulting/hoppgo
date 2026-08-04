@@ -160,10 +160,8 @@ export function ProductAssuranceDialog({
           {draft && (
             <div className="space-y-4 py-2">
               <div className="flex items-center gap-2">
-                <Badge variant={hasValidMapping ? 'success' : 'secondary'} size="sm">
-                  {hasValidMapping
-                    ? tAssurance('statusMapped')
-                    : tAssurance('statusNotMapped')}
+                <Badge variant={hasValidMapping ? 'success' : 'expired'} size="sm">
+                  {hasValidMapping ? tAssurance('statusMapped') : tAssurance('statusNotMapped')}
                 </Badge>
                 {hasValidMapping && mappedTulipProduct && (
                   <span className="text-muted-foreground text-sm">

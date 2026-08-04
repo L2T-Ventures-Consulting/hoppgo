@@ -8,13 +8,13 @@
 
 # 🏠 Louez
 
-### La plateforme open-source de gestion de location
+### La plateforme source-available de gestion de location
 
 **Arrêtez de payer des abonnements SaaS coûteux. Possédez votre logiciel de location.**
 
 [![Docker](https://img.shields.io/badge/Docker-synapsr%2Flouez-2496ED?style=for-the-badge&logo=docker)](https://hub.docker.com/r/synapsr/louez)
 [![GitHub Stars](https://img.shields.io/github/stars/Synapsr/Louez?style=for-the-badge&logo=github)](https://github.com/Synapsr/Louez)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0_%2B_Commons_Clause-orange?style=for-the-badge)](LICENSE)
 
 [☁️ Cloud](https://louez.io) • [🚀 Auto-hébergé](#-auto-hébergez-en-une-commande) • [✨ Fonctionnalités](#-fonctionnalités) • [📋 Changelog](CHANGELOG.md)
 
@@ -42,8 +42,8 @@ Que vous louiez des appareils photo, des outils, du matériel événementiel ou 
 | :------------------------------------------------------------------------------: | :-------------------------------------------------------------------------: | :------------------------------------------------: |
 | Auto-hébergez gratuitement. Pas d'abonnement, pas de commission par réservation. | Chaque boutique dispose d'un catalogue en ligne personnalisable et élégant. | Votre serveur, votre base de données, vos clients. |
 
-|                 ⚡ **Déployez en minutes**                 |                     🌍 **Multilingue**                     |            📱 **Mobile Ready**             |
-| :--------------------------------------------------------: | :--------------------------------------------------------: | :----------------------------------------: |
+|                ⚡ **Déployez en minutes**                 |                  🌍 **Multilingue**                   |            📱 **Mobile Ready**             |
+| :-------------------------------------------------------: | :---------------------------------------------------: | :----------------------------------------: |
 | Une commande et c'est en ligne — base de données incluse. | 8 langues intégrées : FR, EN, DE, ES, IT, NL, PL, PT. | Design responsive pour tous les appareils. |
 
 ---
@@ -124,16 +124,16 @@ Louez peut aussi tourner en plateforme multi-boutiques (comme [louez.io](https:/
 
 Tout ce qu'il faut pour gérer votre activité de location au même endroit.
 
-|     | Fonctionnalité    | Ce qu'elle apporte                                                              |
-| :-: | ----------------- | ------------------------------------------------------------------------------- |
-| 📦  | **Produits**      | Gérez l'inventaire avec images, tarifs flexibles et suivi du stock               |
-| 📅  | **Réservations**  | Gérez les demandes, les statuts, les départs et les retours                      |
-| 🗓️  | **Calendrier**    | Vue semaine/mois de toutes vos réservations                                     |
-| 👥  | **Clients**       | Base clients complète avec historique                                            |
-| 📈  | **Statistiques**  | Chiffre d'affaires, meilleurs produits, taux d'occupation                        |
-| 📄  | **Contrats**      | Contrats PDF générés automatiquement                                             |
-| ✉️  | **Emails**        | Confirmations, rappels et notifications automatiques                             |
-| 👨‍👩‍👧‍👦  | **Équipe**        | Invitez vos collaborateurs avec des permissions par rôle                         |
+|     | Fonctionnalité   | Ce qu'elle apporte                                                 |
+| :-: | ---------------- | ------------------------------------------------------------------ |
+| 📦  | **Produits**     | Gérez l'inventaire avec images, tarifs flexibles et suivi du stock |
+| 📅  | **Réservations** | Gérez les demandes, les statuts, les départs et les retours        |
+| 🗓️  | **Calendrier**   | Vue semaine/mois de toutes vos réservations                        |
+| 👥  | **Clients**      | Base clients complète avec historique                              |
+| 📈  | **Statistiques** | Chiffre d'affaires, meilleurs produits, taux d'occupation          |
+| 📄  | **Contrats**     | Contrats PDF générés automatiquement                               |
+| ✉️  | **Emails**       | Confirmations, rappels et notifications automatiques               |
+| 👨‍👩‍👧‍👦  | **Équipe**       | Invitez vos collaborateurs avec des permissions par rôle           |
 
 ### 🛍️ Des vitrines élégantes
 
@@ -151,7 +151,7 @@ Chaque activité de location dispose de sa propre boutique en ligne à son image
 Louez embarque une couche IA complète qui travaille pour votre boutique en continu.
 
 - 💬 **Conseiller IA sur la vitrine** — un assistant de chat sur votre boutique qui recommande le bon matériel depuis votre catalogue en direct, vérifie la vraie disponibilité aux dates du client, répond aux questions sur vos horaires et conditions, et accompagne les visiteurs jusqu'à la réservation. Vous le briefez en langage naturel, comme un nouvel employé.
-- 📞 **Réceptionniste vocal IA** — un assistant qui répond à la ligne téléphonique de votre boutique : il traite les questions sur les produits, les prix et la disponibilité, prend des *demandes* de réservation que vous validez depuis le tableau de bord, envoie un récapitulatif SMS à l'appelant et peut transférer vers un humain. Choisissez sa voix (avec pré-écoute), sa langue (8 disponibles), et s'il répond à tous les appels ou seulement hors horaires d'ouverture. Vous pouvez même obtenir un numéro de téléphone sans quitter le tableau de bord.
+- 📞 **Réceptionniste vocal IA** — un assistant qui répond à la ligne téléphonique de votre boutique : il traite les questions sur les produits, les prix et la disponibilité, prend des _demandes_ de réservation que vous validez depuis le tableau de bord, envoie un récapitulatif SMS à l'appelant et peut transférer vers un humain. Choisissez sa voix (avec pré-écoute), sa langue (8 disponibles), et s'il répond à tous les appels ou seulement hors horaires d'ouverture. Vous pouvez même obtenir un numéro de téléphone sans quitter le tableau de bord.
 - 🎛️ **Un seul panneau de contrôle** — configurez les deux assistants, réécoutez les conversations et les appels, et voyez quels échanges se sont transformés en réservations.
 
 L'assistant IA est disponible immédiatement sur **[Louez Cloud](https://louez.io)**. Les auto-hébergeurs peuvent connecter leurs propres fournisseurs d'IA et de téléphonie — la configuration se trouve dans [.env.example](.env.example).
@@ -189,17 +189,17 @@ Ouvrez [http://localhost:3000](http://localhost:3000) 🎉
 
 Construit avec des technologies modernes et éprouvées :
 
-|     | Technologie      | Rôle                                                |
-| :-: | ---------------- | --------------------------------------------------- |
-| ⚡  | **Next.js 16**   | Framework React avec App Router                     |
-| 📘  | **TypeScript**   | Développement typé                                  |
-| 🎨  | **Tailwind CSS 4** | Styles utilitaires                                |
-| 🧩  | **Base UI**      | Primitives UI accessibles                           |
-| 🗄️  | **Drizzle ORM**  | Requêtes typées vers la base (MySQL)                |
-| 🔐  | **better-auth**  | Authentification (mot de passe, codes email, Google) |
-| ✉️  | **React Email**  | Templates d'emails soignés                          |
-| 📄  | **React PDF**    | Génération des contrats                             |
-| 🌍  | **next-intl**    | Internationalisation                                |
+|     | Technologie        | Rôle                                                 |
+| :-: | ------------------ | ---------------------------------------------------- |
+| ⚡  | **Next.js 16**     | Framework React avec App Router                      |
+| 📘  | **TypeScript**     | Développement typé                                   |
+| 🎨  | **Tailwind CSS 4** | Styles utilitaires                                   |
+| 🧩  | **Base UI**        | Primitives UI accessibles                            |
+| 🗄️  | **Drizzle ORM**    | Requêtes typées vers la base (MySQL)                 |
+| 🔐  | **better-auth**    | Authentification (mot de passe, codes email, Google) |
+| ✉️  | **React Email**    | Templates d'emails soignés                           |
+| 📄  | **React PDF**      | Génération des contrats                              |
+| 🌍  | **next-intl**      | Internationalisation                                 |
 
 ---
 
@@ -212,18 +212,18 @@ Construit avec des technologies modernes et éprouvées :
 
 Le déploiement docker-compose fourni configure toutes les variables requises pour vous. Pour un déploiement personnalisé :
 
-| Variable | Requise | Description |
-|----------|:-------:|-------------|
-| `DATABASE_URL` | ✅ | Chaîne de connexion MySQL |
-| `NEXT_PUBLIC_APP_URL` | ✅ | URL publique de votre application |
-| `NEXT_PUBLIC_APP_DOMAIN` | ✅ | Domaine public de votre application |
-| `AUTH_URL` | ✅ | URL de connexion (généralement l'URL de l'application) |
-| `AUTH_SECRET` | | Secret aléatoire (généré automatiquement par le compose) |
-| `S3_*` | | Stockage S3-compatible pour les images (MinIO inclus dans le compose) |
-| `LOUEZ_MODE` | | `standalone` (défaut) ou `platform` (routage multi-boutiques) |
-| `SMTP_*` | | Emails sortants — optionnel ; les fonctions email se désactivent proprement |
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | | Connexion Google — optionnel |
-| `STRIPE_*` | | Paiements en ligne — optionnel ; la vitrine bascule en mode demande de réservation |
+| Variable                                | Requise | Description                                                                        |
+| --------------------------------------- | :-----: | ---------------------------------------------------------------------------------- |
+| `DATABASE_URL`                          |   ✅    | Chaîne de connexion MySQL                                                          |
+| `NEXT_PUBLIC_APP_URL`                   |   ✅    | URL publique de votre application                                                  |
+| `NEXT_PUBLIC_APP_DOMAIN`                |   ✅    | Domaine public de votre application                                                |
+| `AUTH_URL`                              |   ✅    | URL de connexion (généralement l'URL de l'application)                             |
+| `AUTH_SECRET`                           |         | Secret aléatoire (généré automatiquement par le compose)                           |
+| `S3_*`                                  |         | Stockage S3-compatible pour les images (MinIO inclus dans le compose)              |
+| `LOUEZ_MODE`                            |         | `standalone` (défaut) ou `platform` (routage multi-boutiques)                      |
+| `SMTP_*`                                |         | Emails sortants — optionnel ; les fonctions email se désactivent proprement        |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` |         | Connexion Google — optionnel                                                       |
+| `STRIPE_*`                              |         | Paiements en ligne — optionnel ; la vitrine bascule en mode demande de réservation |
 
 Les intégrations avancées (fournisseurs d'IA, téléphonie, SMS, analytics, synchronisation calendrier…) sont documentées dans [.env.example](.env.example).
 
@@ -312,12 +312,20 @@ Voir [SECURITY.md](SECURITY.md) pour notre politique de sécurité complète.
 
 ## 📄 Licence
 
-**Apache 2.0 avec Commons Clause** — voir [LICENSE](LICENSE)
+**Code source disponible sous Apache 2.0 avec Commons Clause** — voir [LICENSE](LICENSE).
+La Commons Clause interdit la revente du logiciel lui-même : il ne s'agit donc
+pas d'une licence open source approuvée par l'OSI.
 
 ✅ Gratuit pour un usage personnel et interne
 ✅ Modification et personnalisation libres
 ✅ Contributions bienvenues
 ❌ Revente en tant que service commercial interdite sans accord
+
+### Ressources tierces
+
+Le dashboard utilise des icônes [Nucleo](https://nucleoapp.com) © Nucleo — voir [NOTICE](NOTICE). Elles ne sont **pas** couvertes par la licence de ce dépôt et nécessitent une [licence Nucleo](https://nucleoapp.com/license) valide. Les sources ne sont pas incluses dans le dépôt — elles proviennent du package npm officiel [`nucleo-glass`](https://www.npmjs.com/package/nucleo-glass) à l'installation. N'extrayez pas et ne réutilisez pas ces icônes hors de l'application. Les contributeurs doivent garder le total sous 100 (suivi dans `packages/ui/src/icons/glass.tsx`) ; chaque personne qui auto-héberge Louez reste responsable de la conformité de son usage.
+
+L'image de détourage inclut [`rembg`](https://github.com/danielgatis/rembg) sous licence MIT et le [modèle `isnet-general-use` de DIS/IS-Net](https://github.com/xuebinqin/DIS) sous licence Apache 2.0. Leurs attributions figurent dans [NOTICE](NOTICE).
 
 ---
 

@@ -27,6 +27,8 @@ import {
 } from '@louez/ui'
 import { cn } from '@louez/utils'
 
+import { DashboardIconTile } from '@/components/dashboard/shared/dashboard-icon-tile'
+
 import { listVoiceOptions } from './voice-catalog-actions'
 
 interface VoicePickerProps {
@@ -194,9 +196,7 @@ export const VoicePicker = ({ value, onChange, language }: VoicePickerProps) => 
         <DialogPopup className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2.5">
-              <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
-                <AudioLines className="text-primary h-5 w-5" />
-              </div>
+              <DashboardIconTile icon={AudioLines} accent="primary" />
               {t('voiceModal.title')}
             </DialogTitle>
             <DialogDescription>{t('voiceModal.description')}</DialogDescription>

@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 
 import { format } from 'date-fns';
@@ -8,7 +7,6 @@ import { fr } from 'date-fns/locale';
 import {
   ArrowRight,
   CalendarDays,
-  ImageIcon,
   Minus,
   Plus,
   ShoppingCart,
@@ -43,6 +41,8 @@ import {
 } from '@louez/ui';
 import { Badge } from '@louez/ui';
 import { cn, formatCurrency } from '@louez/utils';
+
+import { ProductImage } from '@/components/product/product-image';
 
 import { calculateCartItemPrice } from '@/lib/utils/cart-pricing';
 
@@ -130,7 +130,7 @@ export function CartSidebar({
             {' → '}
             {format(new Date(globalEndDate), 'dd MMM yyyy', { locale: fr })}
           </p>
-          <Badge variant="secondary" className="mt-2">
+          <Badge variant="expired" className="mt-2">
             {durationLabel}
           </Badge>
         </div>
@@ -155,20 +155,12 @@ export function CartSidebar({
                   className="bg-muted/30 flex gap-3 rounded-lg p-3"
                 >
                   {/* Image */}
-                  <div className="bg-muted relative aspect-4/3 h-16 flex-shrink-0 overflow-hidden rounded-md">
-                    {item.productImage ? (
-                      <Image
-                        src={item.productImage}
-                        alt={item.productName}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <ImageIcon className="text-muted-foreground h-6 w-6" />
-                      </div>
-                    )}
-                  </div>
+                  <ProductImage
+                    src={item.productImage}
+                    alt={item.productName}
+                    sizes="88px"
+                    containerClassName="h-16 shrink-0 rounded-md"
+                  />
 
                   {/* Info */}
                   <div className="min-w-0 flex-1">
@@ -354,9 +346,7 @@ export function CartSidebar({
               {t('title')}
             </span>
             {itemCount > 0 && (
-              <Badge variant="secondary">
-                {t('itemsPlural', { count: itemCount })}
-              </Badge>
+              <Badge variant="expired">{t('itemsPlural', { count: itemCount })}</Badge>
             )}
           </CardTitle>
         </CardHeader>
@@ -376,7 +366,7 @@ export function CartSidebar({
             <ShoppingCart className="mr-2 h-5 w-5" />
             {t('title')}
             {itemCount > 0 && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="expired" className="ml-2">
                 {itemCount}
               </Badge>
             )}
@@ -387,9 +377,7 @@ export function CartSidebar({
                 <ShoppingCart className="h-5 w-5" />
                 {t('title')}
                 {itemCount > 0 && (
-                  <Badge variant="secondary">
-                    {t('itemsPlural', { count: itemCount })}
-                  </Badge>
+                  <Badge variant="expired">{t('itemsPlural', { count: itemCount })}</Badge>
                 )}
               </SheetTitle>
             </SheetHeader>

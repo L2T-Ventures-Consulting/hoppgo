@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { CheckSolidIcon } from '@louez/ui/icons'
+
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 
 import {
   AlertCircle,
@@ -434,22 +436,16 @@ export function UnitAssignmentSelector({
         </div>
         <div className="flex items-center gap-2">
           {allAssigned ? (
-            <Badge
-              variant="outline"
-              className="border-green-500 text-green-600"
-            >
-              <Check className="mr-1 h-3 w-3" />
+            <Badge variant="success" className="">
+              <CheckSolidIcon className="mr-1 h-3 w-3" />
               {t('allAssigned')}
             </Badge>
           ) : noneAssigned ? (
-            <Badge variant="outline" className="text-muted-foreground">
+            <Badge variant="expired" className="">
               {t('noneAssigned')}
             </Badge>
           ) : (
-            <Badge
-              variant="outline"
-              className="border-amber-500 text-amber-600"
-            >
+            <Badge variant="pending" className="">
               {t('assignedCount', { assigned: assignedCount, total: quantity })}
             </Badge>
           )}
@@ -463,7 +459,7 @@ export function UnitAssignmentSelector({
           </span>
           <div className="flex flex-wrap gap-1">
             {displayAttributes.map((attr) => (
-              <Badge key={attr.key} variant="outline" className="text-xs">
+              <Badge key={attr.key} variant="expired" className="text-xs">
                 {attr.label}: {attr.value}
               </Badge>
             ))}

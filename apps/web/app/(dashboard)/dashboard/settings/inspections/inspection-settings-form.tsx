@@ -4,16 +4,21 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ClipboardCheck, Camera, PenLine, FileText, Settings2, FileCheck2 } from "lucide-react";
-import { toastManager } from "@louez/ui";
+import { PenLine } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Input,
+  toastManager,
+} from "@louez/ui";
+import { CameraIcon, ClipboardIcon, CogIcon, FileCheckIcon, FileTextIcon } from "@louez/ui/icons";
 import { useStore } from "@tanstack/react-form";
 
-import { Switch } from "@louez/ui";
-import { Input } from "@louez/ui";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
-import { RadioGroup, RadioGroupItem } from "@louez/ui";
-import { Label } from "@louez/ui";
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
+import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
 import { updateInspectionSettings } from "./actions";
 import type { StoreSettings, InspectionSettings } from "@louez/types";
 import { useAppForm } from "@/hooks/form/form";
@@ -89,8 +94,6 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
 
   const isDirty = useStore(form.store, (s) => s.isDirty);
   const isEnabled = useStore(form.store, (s) => s.values.enabled);
-  const _mode = useStore(form.store, (s) => s.values.mode);
-
   return (
     <form.AppForm>
       <form.Form className="space-y-6">
@@ -100,7 +103,7 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ClipboardCheck className="h-5 w-5 text-primary" />
+              <ClipboardIcon className="h-5 w-5 shrink-0" />
               {t("enableSection")}
             </CardTitle>
             <CardDescription>{t("enableSectionDescription")}</CardDescription>
@@ -119,64 +122,36 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings2 className="h-5 w-5 text-primary" />
+                <CogIcon className="h-5 w-5 shrink-0" />
                 {t("modeSection")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <form.Field name="mode">
                 {(field) => (
-                  <div className="grid gap-2">
-                    <RadioGroup
-                      value={field.state.value}
-                      onValueChange={(val) => field.handleChange(val)}
-                      className="space-y-3"
-                    >
-                      <label
-                        htmlFor="optional"
-                        className="flex cursor-pointer items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
-                      >
-                        <RadioGroupItem value="optional" id="optional" className="mt-1" />
-                        <div className="flex-1">
-                          <span className="text-base font-medium">{t("modeOptional")}</span>
-                          <p className="text-sm text-muted-foreground">
-                            {t("modeOptionalDescription")}
-                          </p>
-                        </div>
-                      </label>
-
-                      <label
-                        htmlFor="recommended"
-                        className="flex cursor-pointer items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
-                      >
-                        <RadioGroupItem value="recommended" id="recommended" className="mt-1" />
-                        <div className="flex-1">
-                          <span className="text-base font-medium">{t("modeRecommended")}</span>
-                          <p className="text-sm text-muted-foreground">
-                            {t("modeRecommendedDescription")}
-                          </p>
-                        </div>
-                      </label>
-
-                      <label
-                        htmlFor="required"
-                        className="flex cursor-pointer items-start space-x-3 rounded-lg border p-4 transition-colors hover:bg-muted/50 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-primary/5"
-                      >
-                        <RadioGroupItem value="required" id="required" className="mt-1" />
-                        <div className="flex-1">
-                          <span className="text-base font-medium">{t("modeRequired")}</span>
-                          <p className="text-sm text-muted-foreground">
-                            {t("modeRequiredDescription")}
-                          </p>
-                        </div>
-                      </label>
-                    </RadioGroup>
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-destructive text-sm">
-                        {getFieldError(field.state.meta.errors[0])}
-                      </p>
-                    )}
-                  </div>
+                  <FormRadioCardGroup
+                    value={field.state.value}
+                    onChange={field.handleChange}
+                    options={[
+                      {
+                        value: "optional",
+                        label: t("modeOptional"),
+                        description: t("modeOptionalDescription"),
+                      },
+                      {
+                        value: "recommended",
+                        label: t("modeRecommended"),
+                        description: t("modeRecommendedDescription"),
+                      },
+                      {
+                        value: "required",
+                        label: t("modeRequired"),
+                        description: t("modeRequiredDescription"),
+                      },
+                    ]}
+                    columns={1}
+                    errors={field.state.meta.errors}
+                  />
                 )}
               </form.Field>
             </CardContent>
@@ -188,54 +163,30 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileCheck2 className="h-5 w-5 text-primary" />
+                <FileCheckIcon className="h-5 w-5 shrink-0" />
                 {t("signatureSection")}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <form.Field name="requireCustomerSignature">
+              <form.AppField name="requireCustomerSignature">
                 {(field) => (
-                  <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="flex items-center gap-3">
-                      <PenLine className="h-5 w-5 text-muted-foreground" />
-                      <div className="space-y-0.5">
-                        <Label htmlFor={field.name} className="text-base">
-                          {t("requireCustomerSignature")}
-                        </Label>
-                        <p className="text-muted-foreground text-sm">
-                          {t("requireCustomerSignatureDescription")}
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={field.state.value}
-                      onCheckedChange={(checked) => field.handleChange(checked)}
-                    />
-                  </div>
+                  <field.Switch
+                    label={t("requireCustomerSignature")}
+                    description={t("requireCustomerSignatureDescription")}
+                    icon={<PenLine className="size-5" />}
+                  />
                 )}
-              </form.Field>
+              </form.AppField>
 
-              <form.Field name="autoGeneratePdf">
+              <form.AppField name="autoGeneratePdf">
                 {(field) => (
-                  <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-muted-foreground" />
-                      <div className="space-y-0.5">
-                        <Label htmlFor={field.name} className="text-base">
-                          {t("autoGeneratePdf")}
-                        </Label>
-                        <p className="text-muted-foreground text-sm">
-                          {t("autoGeneratePdfDescription")}
-                        </p>
-                      </div>
-                    </div>
-                    <Switch
-                      checked={field.state.value}
-                      onCheckedChange={(checked) => field.handleChange(checked)}
-                    />
-                  </div>
+                  <field.Switch
+                    label={t("autoGeneratePdf")}
+                    description={t("autoGeneratePdfDescription")}
+                    icon={<FileTextIcon className="size-5" />}
+                  />
                 )}
-              </form.Field>
+              </form.AppField>
             </CardContent>
           </Card>
         )}
@@ -245,7 +196,7 @@ export function InspectionSettingsForm({ store }: InspectionSettingsFormProps) {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Camera className="h-5 w-5 text-primary" />
+                <CameraIcon className="h-5 w-5 shrink-0" />
                 {t("maxPhotosPerItem")}
               </CardTitle>
             </CardHeader>

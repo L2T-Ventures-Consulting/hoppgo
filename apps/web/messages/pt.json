@@ -4,6 +4,8 @@
     "description": "Plataforma de aluguel de equipamentos simples e moderna"
   },
   "common": {
+    "duration": "Duração",
+    "price": "Preço",
     "save": "Salvar",
     "unsavedChanges": "Alterações não salvas",
     "cancel": "Cancelar",
@@ -23,6 +25,9 @@
     "success": "Sucesso",
     "confirm": "Confirmar",
     "close": "Fechar",
+    "play": "Reproduzir",
+    "pause": "Pausa",
+    "seek": "Avançar",
     "yes": "Sim",
     "no": "Nao",
     "view": "Ver",
@@ -116,12 +121,16 @@
       "select": "Selecionar",
       "naturalPlaceholder": "ex.: amanhã às 14h ou 12 de maio às 13h",
       "time": "Hora",
+      "startTime": "Início",
+      "endTime": "Fim",
       "confirm": "Confirmar"
     },
     "customerSearch": {
       "placeholder": "Pesquisar cliente...",
       "noResults": "Nenhum cliente encontrado",
-      "selectCustomer": "Selecionar um cliente"
+      "selectCustomer": "Selecionar um cliente",
+      "createCustomer": "Criar um cliente",
+      "createNamed": "Criar «{query}»"
     }
   },
   "auth": {
@@ -229,7 +238,14 @@
         "subtitle": "A sua loja aconselha, responde e reserva — automaticamente",
         "credits": "{count} créditos",
         "creditsUnlimited": "Créditos ilimitados",
-        "recharge": "Recarregar"
+        "recharge": "Recarregar",
+        "manageCredits": "Gerir"
+      },
+      "tabs": {
+        "label": "Secções do assistente de IA",
+        "advisor": "Consultor online",
+        "voice": "Agente de voz",
+        "conversations": "Conversas"
       },
       "hero": {
         "eyebrow": "Assistente IA",
@@ -318,7 +334,20 @@
       "newReservation": "Nova reserva",
       "reservationLimitReached": "Limite atingido",
       "help": "Ajuda",
-      "feedback": "Ajuda e feedback"
+      "feedback": "Ajuda e feedback",
+      "aiCreditsLow": "Saldo de créditos baixo"
+    },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Abrir a paleta de comandos",
+        "aiAssistant": "Abrir o assistente de IA",
+        "sidebar": "Mostrar ou ocultar a barra lateral",
+        "search": "Focar a pesquisa",
+        "createReservation": "Criar uma reserva",
+        "goToReservations": "Ir para as reservas",
+        "goToCalendar": "Ir para o calendário",
+        "save": "Guardar o formulário ativo"
+      }
     },
     "storeSwitcher": {
       "selectStore": "Selecionar uma loja",
@@ -568,7 +597,8 @@
       "settings": "Configuracoes",
       "store": "Minha loja",
       "analytics": "Análises",
-      "multiStore": "Multi-lojas"
+      "multiStore": "Multi-lojas",
+      "aiCredits": "Créditos IA"
     },
     "home": {
       "viewAll": "Ver tudo",
@@ -758,16 +788,6 @@
         "archived": "Arquivados"
       },
       "form": {
-        "steps": {
-          "photos": "Fotos",
-          "photosDescription": "Imagens do produto",
-          "info": "Informacoes",
-          "infoDescription": "Nome e descricao",
-          "pricing": "Precos",
-          "pricingDescription": "Preco e tarifas",
-          "preview": "Publicar",
-          "previewDescription": "Revisar e publicar"
-        },
         "photos": "Fotos",
         "photosDescription": "Adicione ate 5 fotos do seu produto",
         "addImage": "Adicionar",
@@ -779,6 +799,22 @@
         "uploading": "Enviando...",
         "imageUploadError": "Falha no envio",
         "recropImage": "Recortar novamente",
+        "openImageViewer": "Ver a foto",
+        "imageHistoryAction": "Ver histórico",
+        "imageHistoryTitle": "Histórico da fotografia",
+        "imageHistoryDescription": "Veja todas as versões desta fotografia e escolha qual utilizar. As versões anteriores são preservadas.",
+        "imageHistoryOriginal": "Fotografia original",
+        "imageHistoryCropped": "Após o recorte",
+        "imageHistoryAiEnhanced": "Após melhoria por IA",
+        "imageHistoryBackgroundRemoved": "Após remoção do fundo",
+        "imageHistoryCurrent": "Em utilização",
+        "imageHistoryInitialVersion": "Versão inicial",
+        "imageHistoryUseVersion": "Utilizar esta versão",
+        "imageHistoryDeleteVersion": "Eliminar esta versão",
+        "imageHistoryDeleteTitle": "Eliminar esta versão?",
+        "imageHistoryDeleteDescription": "Esta versão será removida do histórico. As outras versões continuarão disponíveis.",
+        "imageHistoryDeleteCancel": "Cancelar",
+        "imageHistoryDeleteConfirm": "Eliminar",
         "cropUnsupportedFormat": "Este formato de imagem não pode ser recortado novamente",
         "cropDialogTitle": "Ajuste suas fotos",
         "cropDialogDescription": "Use recorte 4:3 para manter o visual consistente na vitrine",
@@ -797,6 +833,129 @@
         "cropPreviewTitle": "Pré-visualização",
         "cropPreviewDescription": "É assim que a sua foto aparecerá na loja",
         "cropUploadSelected": "Enviar selecionadas",
+        "aiEnhanceAction": "Melhorar com IA",
+        "removeBackgroundAction": "Remover fundo",
+        "aiEnhanceLoading": "A processar…",
+        "aiEnhanceReadyBadge": "Para revisar",
+        "aiEnhanceQueuedBadge": "Na fila",
+        "aiEnhancedBadge": "Melhorada com IA",
+        "backgroundRemovedBadge": "Fundo removido",
+        "aiEnhanceErrorAlreadyProcessed": "Esta foto já foi processada",
+        "aiEnhanceBatchAction": "Uniformizar as fotos",
+        "aiEnhanceBatchHint": "Recorta seus produtos e os centraliza em um enquadramento 4:3",
+        "aiEnhanceBatchProgress": "Foto {current} de {total}…",
+        "aiEnhanceDialogTitle": "Antes / Depois",
+        "removeBackgroundDialogTitle": "Fundo removido",
+        "aiEnhanceDialogDescription": "Compare o resultado antes de substituir sua foto.",
+        "aiEnhanceRemaining": "{count, plural, one {# foto para revisar} other {# fotos para revisar}}",
+        "aiEnhanceBefore": "Antes",
+        "aiEnhanceAfter": "Depois",
+        "aiEnhanceAccept": "Usar esta versão",
+        "aiEnhanceReject": "Manter original",
+        "aiEnhanceTransparencyHint": "Fundo transparente, produto centralizado em um enquadramento 4:3",
+        "aiEnhanceTransparencyHintPreserve": "Fundo transparente, enquadramento original mantido em 4:3",
+        "aiEnhanceBackgroundCheckerboard": "Xadrez",
+        "aiEnhanceBackgroundWhite": "Branco",
+        "aiEnhanceError": "Não foi possível melhorar a foto",
+        "aiEnhanceErrorCredits": "Seus créditos de IA acabaram. Recarregue-os para continuar melhorando suas fotos.",
+        "aiEnhanceErrorDisabled": "A melhoria por IA não está disponível no momento.",
+        "removeBackgroundErrorDisabled": "A remoção de fundo não está disponível no momento.",
+        "aiEnhanceErrorInvalidImage": "Esta imagem não pode ser melhorada",
+        "aiEnhanceErrorEmptyImage": "Nenhum produto foi detectado nesta foto",
+        "aiEnhanceErrorProvider": "O serviço de melhoria está temporariamente indisponível. Tente novamente em alguns instantes.",
+        "removeBackgroundErrorProvider": "O serviço de remoção de fundo está temporariamente indisponível. Tente novamente em alguns instantes.",
+        "aiEnhanceOriginalMissing": "A foto original não está mais no formulário",
+        "aiEnhanceSavedToHistory": "A versão de IA foi mantida no histórico",
+        "aiEnhanceCropAction": "Melhorar com IA",
+        "aiEnhancePromoTitle": "Melhore suas fotos com IA",
+        "aiEnhancePromoDescription": "Imagens de loja nítidas e consistentes em um clique.",
+        "aiEnhancePromoBenefitBackground": "O fundo é removido e substituído por transparência",
+        "aiEnhancePromoBenefitFraming": "Seu produto fica perfeitamente centralizado em um enquadramento 4:3",
+        "aiEnhancePromoBenefitConsistency": "Um visual uniforme em toda a sua loja",
+        "aiEnhancePromoNote": "Este recurso exige a ativação da IA na sua conta.",
+        "aiEnhancePromoCta": "Ativar a IA",
+        "aiEnhancePromoClose": "Mais tarde",
+        "video": "Vídeo",
+        "aiCreditsPerImage": "{count, plural, one {# crédito} other {# créditos}} / foto",
+        "aiCreditsBgRemoval": "Apenas remoção de fundo: {count, plural, one {# crédito} other {# créditos}}",
+        "aiCreditsBgRemovalFree": "Remoção de fundo incluída",
+        "aiCreditsBalance": "Saldo: {count, plural, one {# crédito} other {# créditos}}",
+        "aiCreditsBalanceUnlimited": "Créditos ilimitados",
+        "aiCreditsBatchEstimate": "Cerca de {credits, plural, one {# crédito} other {# créditos}} para {images, plural, one {# foto} other {# fotos}}",
+        "aiCreditsLearnMore": "Saber mais",
+        "aiCreditsLearnMoreTitle": "Fotos que vendem",
+        "aiCreditsLearnMoreValue": "A IA recorta o seu produto, uniformiza o fundo e reenquadra a imagem: visuais de qualidade profissional que dão confiança aos clientes e melhoram a conversão.",
+        "aiCreditsLearnMoreCost": "Cada foto melhorada custa {count, plural, one {# crédito} other {# créditos}}, descontados primeiro dos créditos mensais e depois dos pré-pagos.",
+        "aiCreditsLearnMoreLink": "Ver os meus créditos de IA",
+        "aiCreditsExhaustedTitle": "Créditos de IA insuficientes",
+        "aiCreditsExhaustedDescription": "A melhoria de fotos está em pausa: o seu saldo já não cobre uma foto. Recarregue os créditos para continuar.",
+        "aiCreditsRecharge": "Recarregar",
+        "aiChoiceTitle": "O que fazer com esta foto?",
+        "aiChoiceDescription": "Escolha o resultado — pode sempre alterá-lo depois.",
+        "aiChoiceEnhanceDescription": "Qualidade profissional: fundo limpo, produto recortado e centrado",
+        "aiChoiceRemoveBackgroundDescription": "Mantém a sua foto e substitui apenas o fundo",
+        "aiChoiceCrop": "Recortar eu mesmo",
+        "aiChoiceCropDescription": "Defina o enquadramento 4:3 à mão",
+        "aiChoiceUseAsIs": "Usar tal como está",
+        "aiChoiceBatchEnhance": "{count, plural, one {Melhorar a # foto} other {Melhorar as # fotos}}",
+        "cropBackToChoice": "Voltar às opções",
+        "aiCreditsChip": "{count, plural, one {# crédito} other {# créditos}}",
+        "aiCreditsChipIncluded": "Incluído",
+        "aiCreditsTooltipTitle": "Melhoria com IA",
+        "aiCreditsTooltipWhat": "O seu produto é recortado, o fundo uniformizado e a imagem reenquadrada em 4:3 — um resultado de estúdio.",
+        "aiCreditsTooltipCost": "{count, plural, one {# crédito} other {# créditos}} por foto",
+        "aiCreditsTooltipBgTitle": "Remoção do fundo",
+        "aiCreditsTooltipBgWhat": "A sua foto fica exatamente como está: só o fundo é removido.",
+        "aiCreditsTooltipFree": "Incluído no seu plano",
+        "aiProcessingTitle": "A melhorar a sua foto",
+        "aiProcessingTitleBackground": "A remover o fundo",
+        "aiProcessingDescription": "Não precisa de esperar aqui: o processamento continua se fechar.",
+        "aiProcessingContinueBackground": "Continuar em segundo plano",
+        "aiProcessingFailedTitle": "O processamento não foi concluído",
+        "aiProcessingFailedDescription": "As suas fotos foram adicionadas na mesma. Pode relançar o processamento quando quiser.",
+        "aiProcessingRetry": "Tentar novamente",
+        "aiProcessingClose": "Fechar",
+        "aiStepPrepareLabel": "Preparação",
+        "aiStepPrepareMessage1": "A analisar a sua foto…",
+        "aiStepPrepareMessage2": "A localizar o produto na imagem.",
+        "aiStepPrepareMessage3": "A medir a luz e as cores.",
+        "aiStepEnhanceLabel": "Melhoria com IA",
+        "aiStepEnhanceMessage1": "A IA está a trabalhar a luz e a nitidez.",
+        "aiStepEnhanceMessage2": "As cores são ajustadas para um resultado fiel.",
+        "aiStepEnhanceMessage3": "É a etapa mais longa — vale a pena esperar.",
+        "aiStepEnhanceMessage4": "A sua imagem está cada vez mais próxima de um estúdio.",
+        "aiStepCutoutLabel": "Recorte",
+        "aiStepCutoutMessage1": "A separar o produto do fundo.",
+        "aiStepCutoutMessage2": "Os contornos são afinados pixel a pixel.",
+        "aiStepCutoutMessage3": "Um fundo limpo destaca o seu produto.",
+        "aiStepFinishLabel": "Acabamentos",
+        "aiStepFinishMessage1": "Enquadramento 4:3 e centragem do produto.",
+        "aiStepFinishMessage2": "Últimos ajustes antes de lhe mostrarmos o resultado.",
+        "aiStepFinishMessage3": "Só mais um instante…",
+        "aiEnhanceLearnMoreTitle": "Fotos que dão vontade de alugar",
+        "aiEnhanceLearnMoreDescription": "A IA transforma uma foto rápida de telemóvel numa imagem de catálogo.",
+        "aiEnhanceLearnMoreBenefit1": "Um acabamento profissional sem estúdio nem equipamento: o seu produto fica nítido e bem iluminado.",
+        "aiEnhanceLearnMoreBenefit2": "Um catálogo uniforme: todos os anúncios partilham o mesmo enquadramento e o mesmo fundo.",
+        "aiEnhanceLearnMoreBenefit3": "Imagens cuidadas geram confiança e os clientes reservam com mais facilidade.",
+        "aiEnhanceLearnMoreGalleryTitle": "Exemplos de outras lojas",
+        "aiEnhanceLearnMoreHeroAlt": "Exemplo de foto melhorada pela IA",
+        "aiEnhanceLearnMoreExampleAlt": "Exemplo {index}: foto antes e depois da melhoria",
+        "removeBackgroundLearnMoreTitle": "Um fundo que se afasta para mostrar o produto",
+        "removeBackgroundLearnMoreDescription": "Mantemos a sua foto tal como está e removemos apenas o fundo.",
+        "removeBackgroundLearnMoreBenefit1": "O fundo da sua montra assume o lugar: o produto encaixa em qualquer sítio, sem margem branca.",
+        "removeBackgroundLearnMoreBenefit2": "Acabaram-se as garagens ou salas em fundo que desviam a atenção do produto.",
+        "removeBackgroundLearnMoreBenefit3": "Ideal quando a sua foto já é boa e só o cenário a prejudica.",
+        "removeBackgroundLearnMoreThemeTitle": "Adapta-se ao tema claro e ao tema escuro",
+        "removeBackgroundLearnMoreThemeDescription": "O produto recortado assenta no fundo da sua montra, por isso fica impecável seja qual for o tema escolhido pelo visitante.",
+        "removeBackgroundLearnMoreThemeLight": "Tema claro",
+        "removeBackgroundLearnMoreThemeDark": "Tema escuro",
+        "removeBackgroundLearnMoreAlt": "Exemplo de produto recortado",
+        "removeImage": "Remover a foto",
+        "aiActionWithCost": "{action} — {cost}",
+        "aiEnhanceCancelled": "Geração cancelada",
+        "aiCancelGeneration": "Cancelar a geração",
+        "aiCancelledTitle": "Geração cancelada",
+        "aiCancelledDescription": "Não foi cobrado nenhum crédito. As suas fotos foram adicionadas — relance o processamento quando quiser.",
         "information": "Informacoes",
         "name": "Nome do produto",
         "namePlaceholder": "Ex: Bicicleta de Montanha XC 500",
@@ -892,7 +1051,9 @@
             "strictLine": "Níveis fixos",
             "progressiveLine": "Progressivo",
             "savings": "Economia do cliente",
-            "basePricing": "Tarifas base"
+            "basePricing": "Tarifas base",
+            "title": "Simulação de preço",
+            "subtitle": "Preço total consoante a duração do aluguer"
           }
         },
         "unitTracking": {
@@ -932,7 +1093,7 @@
           "bookingAttributesEmpty": "Nenhum atributo de reserva configurado. Todas as unidades rastreadas partilham a combinação padrão.",
           "bookingAttributeValuePlaceholder": "Valor de {label}",
           "combinationKey": "Combinação",
-          "missingAttributesWarning": "{count, plural, one {# unidade ativa não tem pelo menos um valor de atributo} other {# unidades ativas não têm pelo menos um valor de atributo}}",
+          "missingAttributesWarning": "{count, plural, one {# unidade não tem todos os valores de variantes} other {# unidades não têm todos os valores de variantes}}",
           "manageAttributes": "Gerir atributos",
           "manageAttributesDescription": "Os atributos permitem que os clientes escolham características específicas ao reservar (ex: tamanho, cor). Cada unidade é etiquetada com os seus valores de atributo, e o sistema atribui automaticamente uma unidade correspondente no checkout.",
           "manageAttributesExample": "Exemplo: para aluguer de caiaque, adicione \"Tamanho\" (S, M, L) e \"Cor\" (Vermelho, Azul). Um cliente que reserve um caiaque Médio Vermelho receberá uma unidade disponível correspondente.",
@@ -948,7 +1109,89 @@
           "purchaseDetails": "Detalhes de compra",
           "unitDetails": "Detalhes",
           "existingUnitDetailsHint": "Os detalhes de compra, notas e ciclo de vida são geridos no inventário.",
-          "openInventoryDetails": "Abrir inventário"
+          "openInventoryDetails": "Abrir inventário",
+          "benefitIdentify": "Identifique cada exemplar com um número de série ou referência",
+          "benefitAvailability": "Acompanhe a disponibilidade e os alugueres de cada exemplar",
+          "benefitInventory": "Registe o preço e a data de compra para o seu inventário",
+          "modeQuantity": "Quantidade simples",
+          "modeQuantityDescription": "Indique simplesmente quantos exemplares estão disponíveis para alugar.",
+          "modeUnits": "Rastreio por unidade",
+          "modeUnitsDescription": "Cada exemplar tem o seu próprio identificador.",
+          "variantsTitle": "Variantes",
+          "variantsHelp": "Até 3 variantes (tamanho, cor…). Cada unidade indica o seu valor e o cliente escolhe na reserva.",
+          "variantsEmptyHint": "Cria um produto por tamanho? Adicione antes uma variante «Tamanho»: cada unidade tem o seu e o cliente escolhe na reserva.",
+          "variantPlaceholder": "ex.: Tamanho",
+          "addVariant": "Adicionar uma variante",
+          "variantsMaxReached": "Máximo de 3 variantes",
+          "defaultBadge": "Padrão",
+          "advancedBadge": "Avançado",
+          "learnMore": "Saber mais",
+          "addRefPlaceholder": "Escreva uma referência e prima Enter",
+          "generateSeries": "Gerar uma série",
+          "changeMode": "Mudar de modo",
+          "createVariantValue": "Criar «{value}» ({axis})",
+          "chooseColor": "Escolher uma cor",
+          "colorPickerDescription": "Ajuste a cor ou introduza um valor hexadecimal.",
+          "colorHue": "Matiz",
+          "hexColor": "Cor hexadecimal",
+          "presetSuggestions": "Sugestões",
+          "valuesCount": "{count, plural, one {# valor} other {# valores}}",
+          "presets": {
+            "size": {
+              "label": "Tamanho"
+            },
+            "shoeSize": {
+              "label": "Tamanho do calçado"
+            },
+            "color": {
+              "label": "Cor",
+              "values": {
+                "black": "Preto",
+                "white": "Branco",
+                "gray": "Cinzento",
+                "red": "Vermelho",
+                "orange": "Laranja",
+                "yellow": "Amarelo",
+                "green": "Verde",
+                "blue": "Azul",
+                "purple": "Roxo",
+                "pink": "Rosa",
+                "brown": "Castanho",
+                "beige": "Bege"
+              }
+            },
+            "material": {
+              "label": "Material",
+              "values": {
+                "cotton": "Algodão",
+                "leather": "Couro",
+                "wood": "Madeira",
+                "metal": "Metal",
+                "plastic": "Plástico",
+                "aluminum": "Alumínio",
+                "carbon": "Carbono"
+              }
+            }
+          },
+          "manageVariants": "Gerir variantes",
+          "managerTitle": "Variantes",
+          "managerDescription": "Definições partilhadas entre todos os seus produtos (tamanho, cor…).",
+          "activeVariantsCount": "{active} ativas de {total}",
+          "variantActive": "Ativa",
+          "variantInactive": "Inativa",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Nova variante",
+          "newVariantDescription": "Crie uma variante partilhada entre os seus produtos (ex.: Tamanho).",
+          "editVariant": "Renomear variante",
+          "editVariantDescription": "O nome é atualizado no catálogo partilhado.",
+          "editValue": "Editar valor",
+          "editValueDescription": "A etiqueta é atualizada no catálogo partilhado.",
+          "deleteVariantTitle": "Eliminar a variante?",
+          "deleteVariantDescription": "«{name}» e os seus valores serão removidos do catálogo. Os produtos que a utilizam mantêm os valores atuais.",
+          "addValuePlaceholder": "Novo valor…",
+          "noVariants": "Sem variantes",
+          "variantsCount": "{count, plural, one {# variante} other {# variantes}}",
+          "unitImages": "Fotos da unidade"
         },
         "previewTitle": "Previa",
         "previewDescription": "Veja como seu produto aparecera no catalogo",
@@ -956,8 +1199,6 @@
         "noName": "Sem nome",
         "units": "unidade(s)",
         "recommended": "Recomendado",
-        "previous": "Anterior",
-        "next": "Seguinte",
         "videoUrl": "Video do YouTube",
         "videoUrlPlaceholder": "https://www.youtube.com/watch?v=...",
         "videoUrlHelp": "Opcional - Adicione um video de apresentacao do seu produto",
@@ -1077,12 +1318,35 @@
         },
         "aiContext": "Contexto para o consultor IA",
         "aiContextPlaceholder": "Ex: requer carteira de motorista B, não adequado para crianças menores de 12 anos, pergunte sempre a data do evento e o tamanho do grupo…",
-        "aiContextHint": "Informações adicionais visíveis apenas para o consultor IA — ele as usa para aconselhar os clientes e verificar requisitos. Nunca são exibidas na loja."
+        "aiContextHint": "Informações adicionais visíveis apenas para o consultor IA — ele as usa para aconselhar os clientes e verificar requisitos. Nunca são exibidas na loja.",
+        "createAndDuplicate": "Criar e duplicar",
+        "productCreatedCopyReady": "A cópia pré-preenchida está pronta para editar.",
+        "copySuffix": "(cópia)",
+        "productSection": "Produto",
+        "productSectionDescription": "Nome, fotos e descrição do seu produto",
+        "addVideo": "Adicionar um vídeo do YouTube",
+        "categories": "Categorias",
+        "categorySearchPlaceholder": "Pesquisar ou criar…",
+        "categoryCreateOption": "Criar «{name}»",
+        "categoryNoResults": "Nenhuma categoria encontrada",
+        "manageCategories": "Gerenciar categorias",
+        "summary": {
+          "checklistTitle": "Progresso",
+          "required": "Obrigatório"
+        },
+        "videoTileLabel": "Vídeo",
+        "videoInvalid": "Link do YouTube inválido",
+        "editVideo": "Editar o vídeo",
+        "removeVideo": "Remover o vídeo"
       },
       "deleteConfirm": {
         "title": "Excluir este produto?",
         "description": "Esta acao e irreversivel. O produto sera excluido permanentemente."
-      }
+      },
+      "categoriesSelected": "{count} categorias",
+      "filterByCategory": "Filtrar por categoria",
+      "searchCategories": "Procurar uma categoria...",
+      "noCategoriesFound": "Nenhuma categoria encontrada"
     },
     "inventory": {
       "title": "Inventário",
@@ -1507,11 +1771,7 @@
       "manualForm": {
         "title": "Nova reserva manual",
         "selectCustomer": "Selecionar um cliente",
-        "newCustomer": "Novo cliente",
-        "newCustomerDescription": "Criar um novo cliente para esta reserva",
         "newCustomerBadge": "Novo cliente",
-        "existingCustomer": "Cliente existente",
-        "existingCustomerDescription": "Selecionar um cliente do seu banco de dados",
         "selectProducts": "Selecionar produtos",
         "selectPeriod": "Selecionar periodo",
         "addProduct": "Adicionar um produto",
@@ -1526,17 +1786,13 @@
           "shortfall": "Solicitado: {requested} · Disponível: {available}",
           "createAnyway": "Criar mesmo assim"
         },
+        "addUnavailable": {
+          "title": "Produto indisponível",
+          "description": "«{name}» já não tem disponibilidade no período selecionado. Adicioná-lo pode causar overbooking.",
+          "confirm": "Adicionar mesmo assim"
+        },
         "customer": "Cliente",
         "customerStepDescription": "Selecione um cliente existente ou crie um novo",
-        "chooseCustomer": "Escolher um cliente",
-        "email": "Email",
-        "emailPlaceholder": "cliente@email.com",
-        "firstName": "Nome",
-        "firstNamePlaceholder": "Joao",
-        "lastName": "Sobrenome",
-        "lastNamePlaceholder": "Silva",
-        "phone": "Telefone (opcional)",
-        "phonePlaceholder": "+351 912 345 678",
         "period": "Periodo",
         "periodStepDescription": "Defina as datas de inicio e fim do aluguel",
         "startDate": "Data de inicio",
@@ -1549,7 +1805,7 @@
         "noProductsFound": "Nenhum produto encontrado",
         "noProductsFoundHint": "Nenhum produto corresponde a \"{search}\".",
         "noProducts": "Nenhum produto selecionado",
-        "noProductsHint": "Use o menu acima para adicionar produtos",
+        "noProductsHint": "Adicione um produto a esta reserva para começar",
         "perHour": "h",
         "perDay": "d",
         "available": "disponivel",
@@ -1571,7 +1827,6 @@
         "selectDatesError": "Por favor, selecione as datas",
         "addProductError": "Por favor, adicione pelo menos um produto",
         "selectCustomerError": "Por favor, selecione um cliente",
-        "fillCustomerInfoError": "Por favor, preencha as informacoes do cliente",
         "confirmTitle": "Resumo",
         "confirmDescription": "Revise as informacoes antes de criar a reserva",
         "steps": {
@@ -1661,7 +1916,11 @@
           "apply": "Aplicar",
           "modified": "Preco modificado",
           "priceUpdated": "Preco atualizado",
-          "priceReset": "Preco redefinido"
+          "priceReset": "Preco redefinido",
+          "modeUnit": "Preço unitário",
+          "modeTotal": "Preço total",
+          "modePercent": "Desconto %",
+          "resultingUnitPrice": "Preço unitário resultante"
         },
         "warnings": {
           "advanceNotice": "A data de início é anterior ao período de aviso prévio",
@@ -1701,6 +1960,11 @@
           "optionalLabel": "Ativar cobertura para esta reserva",
           "insurableProduct": "Segurável",
           "assuredProduct": "Segurado"
+        },
+        "globalDiscount": {
+          "label": "Desconto",
+          "add": "Adicionar um desconto",
+          "remove": "Remover o desconto"
         }
       },
       "rejectDialog": {
@@ -1712,8 +1976,6 @@
       },
       "awaitingResponse": "Aguardando resposta",
       "itemsCount": "{count, plural, one {# item} other {# itens}}",
-      "viewTable": "Vista tabela",
-      "viewCards": "Vista cartões",
       "pagination": {
         "showing": "Mostrando {start} a {end} de {total}",
         "perPage": "Por página",
@@ -2084,6 +2346,12 @@
         "viewConversation": "Ver conversa",
         "sheetTitle": "Conversa com o consultor",
         "sheetDescription": "Conversa entre o cliente e o consultor IA para esta reserva."
+      },
+      "views": {
+        "label": "Modo de visualização",
+        "list": "Lista",
+        "calendar": "Calendario",
+        "planning": "Planning"
       }
     },
     "customers": {
@@ -2192,6 +2460,10 @@
         "CA": "Canada",
         "US": "Estados Unidos",
         "GB": "Reino Unido"
+      },
+      "quickCreate": {
+        "title": "Novo cliente",
+        "description": "O cliente será criado e selecionado automaticamente."
       }
     },
     "calendar": {
@@ -2265,39 +2537,49 @@
         "reservationsCount": "{count, plural, one {# reserva} other {# reservas}}"
       },
       "timeline": {
-        "products": "Produtos",
-        "quantity": "{count, plural, one {# unidade} other {# unidades}}",
-        "available": "Disponível",
-        "noProducts": "Nenhum produto para exibir"
+        "previous": "Período anterior",
+        "next": "Período seguinte",
+        "statusFilter": "Filtrar por estado",
+        "operationFilter": "Filtrar pela operação de hoje",
+        "allOperations": "Todas as operações",
+        "todaysDepartures": "Saídas de hoje",
+        "todaysReturns": "Devoluções de hoje",
+        "showAll": "Mostrar tudo",
+        "retry": "Tentar novamente",
+        "dragHint": "Dica: clique e arraste sobre um intervalo vazio para criar uma reserva pré-preenchida.",
+        "searchProductsPlaceholder": "Pesquisar em {count} produtos...",
+        "noProductsFound": "Nenhum produto encontrado",
+        "productsSelected": "{count} produtos"
       },
       "export": {
-        "button": "Exportar calendario",
-        "title": "Exportar para calendario",
-        "description": "Sincronize suas reservas com seu calendario favorito copiando o link abaixo.",
-        "urlLabel": "Link do calendario ICS",
-        "loading": "Carregando...",
-        "instructions": {
-          "title": "Como adicionar este calendario?",
-          "google": {
-            "step1": "Abra o Google Agenda",
-            "step2": "Clique no + ao lado de \"Outras agendas\" e depois em \"A partir do URL\"",
-            "step3": "Cole o link e clique em \"Adicionar agenda\"",
-            "openLink": "Abrir Google Agenda",
-            "freshnessNote": "Louez publica as alteracoes imediatamente e solicita atualizacao a cada 5 minutos. O Google ainda pode aplicar seu proprio atraso de sincronizacao."
-          },
-          "apple": {
-            "step1": "Abra o app Calendario no Mac ou iPhone",
-            "step2": "Arquivo > Nova Assinatura de Calendario (Mac) ou Adicionar Conta > Outra > Adicionar Calendario Assinado (iOS)",
-            "step3": "Cole o link e confirme"
-          },
-          "outlook": {
-            "step1": "Abra o Outlook Calendar",
-            "step2": "Clique em \"Adicionar calendario\" e depois em \"Assinar da web\"",
-            "step3": "Cole o link e de um nome ao calendario"
-          }
+        "button": "Sincronizar o calendário",
+        "title": "Sincronizar o calendário",
+        "description": "Adicione as suas reservas ao calendário que já utiliza.",
+        "loading": "A carregar...",
+        "done": "Concluído",
+        "cancel": "Cancelar",
+        "google": {
+          "title": "Google Calendar",
+          "recommended": "Recomendado",
+          "connected": "Ligado",
+          "connect": "Ligar",
+          "manage": "Gerir",
+          "help": "Sincronização automática: cores, visibilidade privada, disponibilidade e novas tentativas automáticas. A opção mais fiável."
         },
-        "regenerate": "Regenerar link",
-        "regenerateHint": "Regenerar o link invalidara links compartilhados anteriormente."
+        "subscribe": {
+          "title": "Subscrever com um link",
+          "help": "Subscrição só de leitura. A Louez publica as alterações de imediato, mas cada aplicação de calendário decide com que frequência atualiza.",
+          "apple": "Calendário Apple",
+          "outlook": "Outlook",
+          "google": "Google Calendar",
+          "copy": "Copiar o link",
+          "copied": "Copiado"
+        },
+        "regenerate": {
+          "action": "Regenerar o link",
+          "confirmTitle": "Regenerar o link?",
+          "hint": "Os links já partilhados deixarão de funcionar e cada calendário subscrito terá de ser adicionado novamente."
+        }
       }
     },
     "statistics": {
@@ -3961,7 +4243,18 @@
         "deleteAccountWarning": "Esta acao e irreversivel. Todos os seus dados serao excluidos.",
         "signOut": "Sair",
         "comingSoon": "Em breve",
-        "administration": "Administração"
+        "administration": "Administração",
+        "keyboardShortcuts": {
+          "title": "Atalhos de teclado",
+          "description": "Personalize os atalhos utilizados no seu espaço de trabalho.",
+          "recording": "Prima as teclas…",
+          "recordingSequence": "Introduza a sequência e prima Enter…",
+          "sequenceTooShort": "Uma sequência deve conter pelo menos dois atalhos.",
+          "hint": "Selecione um atalho. Para uma sequência, prima as teclas por ordem e depois Enter.",
+          "saved": "Atalhos guardados",
+          "conflict": "Este atalho já é utilizado para «{action}».",
+          "resetAction": "Repor «{action}»"
+        }
       },
       "admin": {
         "title": "Admin plataforma",
@@ -4330,9 +4623,13 @@
           "unlinkConfirmBody": "O número {number} será desassociado do seu agente de voz. Mantém o número com o seu fornecedor.",
           "searching": "A procurar números disponíveis…",
           "searchHint": "Escolha um país e procure um número disponível para provisionar.",
-          "areaCodePlaceholder": "ex. 21",
+          "areaCodePlaceholder": "ex. 415",
           "manualSetup": "Como associar um número existente",
-          "copy": "Copiar"
+          "copy": "Copiar",
+          "areaCodeHint": "Filtra os números por código de área (ex. 415 para São Francisco).",
+          "contains": "Dígitos pretendidos (opcional)",
+          "containsPlaceholder": "ex. 06",
+          "containsHint": "Mostra apenas os números que contêm esta sequência de dígitos."
         },
         "notConfigured": {
           "title": "Telefonia não configurada",
@@ -4367,6 +4664,21 @@
         },
         "voicePreview": "Ouvir",
         "voiceRecommended": "Recomendada"
+      },
+      "settingsNavigation": {
+        "label": "Navegação das configurações",
+        "mobileLabel": "Escolher uma página de configurações",
+        "search": {
+          "label": "Pesquisar nas configurações",
+          "placeholder": "Pesquisar configurações…",
+          "noResults": "Nenhuma configuração corresponde à pesquisa."
+        },
+        "groups": {
+          "store": "Loja",
+          "rental": "Alugueres",
+          "communication": "Comunicação",
+          "accountData": "Conta e dados"
+        }
       }
     },
     "commandPalette": {
@@ -4436,6 +4748,7 @@
       "sms": "SMS",
       "subscription": "Subscrição",
       "account": "Conta",
+      "whatsNew": "Novidades",
       "settings": "Definições",
       "settingsAdmin": "Administração",
       "settingsApi": "API",
@@ -4451,7 +4764,9 @@
       "settingsPayments": "Pagamentos",
       "settingsPromoCodes": "Códigos promocionais",
       "settingsReviewBooster": "Impulso de avaliações",
-      "settingsTaxes": "Impostos"
+      "settingsTaxes": "Impostos",
+      "productsEdit": "Editar",
+      "reservationsEdit": "Editar"
     },
     "notificationsCenter": {
       "title": "Notificações",
@@ -4460,6 +4775,69 @@
       "emptyTitle": "Nada para rever",
       "emptyDescription": "Novos pedidos aparecerão aqui.",
       "viewAllPending": "Ver todos os pedidos pendentes"
+    },
+    "whatsNew": {
+      "title": "Novidades",
+      "description": "As últimas melhorias do Louez",
+      "pageDescription": "Tudo o que lançámos no Louez, do mais recente ao mais antigo — e porquê.",
+      "newLabel": "Novo",
+      "newFeatureLabel": "Nova funcionalidade",
+      "unread": "Não lida",
+      "markAsRead": "Marcar como lida",
+      "markAllAsRead": "Marcar tudo como lido",
+      "watchDemo": "Ver a demonstração de {title}",
+      "tryIt": "Experimentar",
+      "viewAll": "Ver todas as novidades",
+      "backToList": "Todas as novidades",
+      "emptyTitle": "Ainda não há nada aqui",
+      "empty": "Ainda não há novidades.",
+      "filterEmpty": "Ainda não há novidades nesta categoria.",
+      "filters": {
+        "all": "Tudo"
+      },
+      "categories": {
+        "feature": "Novidade",
+        "improvement": "Melhoria",
+        "fix": "Correção"
+      },
+      "announcements": {
+        "product-image-ai": {
+          "title": "As suas fotos de produto passam pelo estúdio",
+          "description": "Ao carregar, a IA recorta o seu produto, limpa o fundo e centra-o — ou remove apenas o fundo se preferir manter o seu enquadramento. E cada versão fica guardada no histórico da foto: compare, mude de ideias, volte à original."
+        },
+        "sidebar-simplified": {
+          "title": "Um menu mais curto, páginas mais bem arrumadas",
+          "description": "O calendário junta-se às reservas, o inventário à ficha de produto, a subscrição e as recomendações às definições: menos quatro entradas no menu, sem perder nada."
+        },
+        "product-variants": {
+          "title": "Variantes, de forma simples",
+          "description": "Os atributos que escrevia à mão passam a ser variantes a sério, partilhadas por toda a sua loja. Tamanho e Cor estão prontos assim que ativa o acompanhamento por exemplar, Número de calçado e Material acrescentam-se com um clique — e deixa de precisar de uma ficha de produto por tamanho."
+        },
+        "product-detail-hub": {
+          "title": "Cada produto tem agora a sua ficha",
+          "description": "Abrir um produto era abrir o seu formulário. Agora tem uma ficha a sério: o que rende, com que frequência sai, como está o stock, quem o reservou e o que aconteceu a cada exemplar."
+        },
+        "reservations-unified-views": {
+          "title": "As suas reservas abrem no calendário",
+          "description": "A página Reservas abre agora no calendário. Desliza continuamente, de uma semana para a outra sem mudar de página, e basta passar o rato para ver a reserva inteira. A lista e o planeamento por produto ficam a um clique."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Duas secções e o seu produto está online",
+          "description": "O assistente de quatro etapas dá lugar a uma só página. Os acessórios e o seguro deixam de ser pedidos na criação — acrescenta-os depois, se precisar. À direita, uma pré-visualização da ficha e a lista do que falta preencher."
+        },
+        "keyboard-shortcuts": {
+          "title": "Para quem não larga o teclado",
+          "description": "Oito ações do dia a dia abrem-se pelo teclado, e cada uma pode ser redefinida na sua conta — sequências de duas teclas incluídas. Se passa os dias na Louez, isto é para si. Caso contrário, tudo continua a funcionar com o rato."
+        },
+        "navigation-refresh": {
+          "title": "⌘K leva-o a qualquer lado",
+          "description": "A paleta de comandos abre qualquer página, qualquer definição, qualquer produto, cliente ou reserva. Nas definições, uma pesquisa leva-o à definição exata e destaca-a. E o caminho de navegação diz-lhe sempre onde está."
+        },
+        "reservation-creation-simplified": {
+          "title": "Uma reserva, uma só página",
+          "description": "Acabaram-se as etapas encadeadas: cliente, período, produtos e entrega cabem numa página, com o resumo sempre ao lado. E tudo o que obrigava a reabrir a reserva depois — um desconto, um preço negociado, a caução, um cliente de passagem — resolve-se agora ali mesmo."
+        }
+      }
     },
     "aiCredits": {
       "title": "Créditos IA",
@@ -4518,6 +4896,61 @@
         "errors": {
           "generic": "Algo correu mal. Tente novamente."
         }
+      },
+      "page": {
+        "title": "Créditos IA",
+        "subtitle": "A carteira que alimenta todas as funcionalidades de IA da sua loja",
+        "totalTitle": "Saldo total",
+        "totalUnlimitedHint": "O seu plano não limita a utilização",
+        "monthlyTitle": "Incluídos este mês",
+        "monthlyUsedHint": "{used} de {included} utilizados",
+        "monthlyUnlimitedHint": "Sem limite no seu plano",
+        "monthlyNoneHint": "O seu plano não inclui créditos",
+        "prepaidTitle": "Créditos pré-pagos",
+        "prepaidHint": "Nunca expiram",
+        "pitchTitle": "O que os seus créditos desbloqueiam",
+        "pitchDescription": "Uma só carteira para todas as funcionalidades de IA da loja.",
+        "perkAdvisorTitle": "Um consultor 24 horas por dia",
+        "perkAdvisorDescription": "Os clientes perguntam sobre o catálogo e recebem resposta na hora, mesmo de noite.",
+        "perkVoiceTitle": "Um agente que atende",
+        "perkVoiceDescription": "As chamadas perdidas passam a pedidos qualificados, com número próprio se quiser.",
+        "perkImagesTitle": "Fotos de produto impecáveis",
+        "perkImagesDescription": "Remova o fundo e melhore as imagens num clique, a partir da própria ficha de produto.",
+        "pitchSecondaryCta": "Conhecer o assistente de IA",
+        "pitchFootnote": "Paga apenas o que consome e os créditos não expiram.",
+        "recapTitle": "Os seus créditos este mês",
+        "recapDescription": "O que os seus créditos fizeram pela loja desde o início do mês.",
+        "recapConversations": "Conversas",
+        "recapCalls": "Chamadas atendidas",
+        "recapImages": "Imagens melhoradas",
+        "recapCredits": "Créditos gastos",
+        "recapCallTime": "No total, {minutes} min de chamadas.",
+        "historyTitle": "Histórico",
+        "historyDescription": "O detalhe do que consumiu e do que comprou.",
+        "tabUsage": "Utilização",
+        "tabPurchases": "Compras",
+        "usageEmpty": "Sem consumo",
+        "usageEmptyDescription": "Assim que a IA trabalhar para si, cada gasto aparece aqui.",
+        "purchasesEmpty": "Sem compras",
+        "purchasesEmptyDescription": "Aqui verá os seus carregamentos e os créditos oferecidos.",
+        "usageConversation": "Conversa do consultor",
+        "usageVoiceCall": "Chamada de voz",
+        "usageCallDuration": "{minutes} min faturados",
+        "usageNumberRental": "Aluguer do número",
+        "usageImageEnhancement": "Melhoria de imagem",
+        "columnDate": "Data",
+        "columnDetail": "Detalhe",
+        "columnCredits": "Créditos",
+        "columnAmount": "Valor",
+        "columnStatus": "Estado",
+        "status": {
+          "completed": "Concluído",
+          "pending": "Pendente",
+          "failed": "Falhou"
+        },
+        "pagination": "Página {page} de {totalPages}",
+        "previousPage": "Página anterior",
+        "nextPage": "Página seguinte"
       }
     }
   },
@@ -5549,6 +5982,10 @@
     "noCategories": "Nenhuma categoria",
     "noCategoriesDescription": "Crie sua primeira categoria para organizar seus produtos",
     "emptyDescription": "As categorias ajudam voce a organizar seus produtos e facilitam a navegacao para os clientes.",
+    "searchPlaceholder": "Pesquisar categorias…",
+    "noSearchResults": "Nenhuma categoria corresponde à sua pesquisa.",
+    "totalCount": "{count, plural, =0 {Nenhuma categoria} one {# categoria} other {# categorias}}",
+    "actionsFor": "Ações para {name}",
     "newCategoryDescription": "Crie uma nova categoria para organizar seus produtos",
     "editCategoryDescription": "Edite o nome da categoria",
     "namePlaceholder": "Nome da categoria",
@@ -5563,7 +6000,9 @@
       "title": "Excluir esta categoria?",
       "description": "Esta acao e irreversivel. Os produtos desta categoria nao serao excluidos.",
       "descriptionWithName": "Esta acao e irreversivel. A categoria \"{name}\" sera excluida.",
-      "productsWarning": "{count, plural, one {O produto desta categoria sera movido para \"Sem categoria\".} other {Os # produtos desta categoria serao movidos para \"Sem categoria\"."
+      "productsWarning": "{count, plural, one {Esta categoria será removida de # produto.} other {Esta categoria será removida de # produtos.}}",
+      "reassignLabel": "Reatribuir produtos a",
+      "keepExisting": "Manter as outras categorias"
     }
   },
   "emails": {

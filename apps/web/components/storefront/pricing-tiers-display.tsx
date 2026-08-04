@@ -111,10 +111,7 @@ export function PricingTiersDisplay({
                     {tier.minDuration}+ {unitLabel}
                   </span>
                   {isDiscountVisible(discountPercent) && (
-                    <Badge
-                      variant="secondary"
-                      className={`text-xs ${isApplied ? "bg-primary/15 text-primary" : "bg-muted"}`}
-                    >
+                    <Badge variant={isApplied ? "progress" : "expired"} className="text-xs">
                       -{Math.floor(discountPercent)}%
                     </Badge>
                   )}
@@ -170,7 +167,7 @@ export function PricingTiersInline({
         });
 
         return (
-          <Badge key={tier.id} variant="outline" className="text-xs font-normal">
+          <Badge key={tier.id} variant="expired" className="text-xs font-normal">
             {tier.minDuration ?? 1}+ → {formatCurrency(effectivePrice, currency)}/{unitLabelShort}
           </Badge>
         );

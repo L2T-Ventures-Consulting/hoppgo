@@ -1,275 +1,143 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import {
-  ArrowDownRight,
-  ArrowUpRight,
-  Clock,
-  Euro,
-  Package,
-  TrendingDown,
-  TrendingUp,
-  Users,
-} from 'lucide-react';
-import { useTranslations } from 'next-intl';
+  CalendarSolidIcon,
+  ClockSolidIcon,
+  CreditCardSolidIcon,
+  ParticipantsSolidIcon,
+  ProductSolidIcon,
+} from "@louez/ui/icons";
+import { formatCurrency } from "@louez/utils";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@louez/ui';
-import { Badge } from '@louez/ui';
-import { cn, formatCurrency } from '@louez/utils';
-
-// Types imported inline to avoid server-only module
-interface StoreMetrics {
-  productCount: number;
-  activeProductCount: number;
-  draftProductCount: number;
-  customerCount: number;
-  newCustomersThisMonth: number;
-  totalReservations: number;
-  completedReservations: number;
-  pendingReservations: number;
-  confirmedReservations: number;
-  ongoingReservations: number;
-  todaysDepartures: number;
-  todaysReturns: number;
-  monthlyRevenue: number;
-  lastMonthRevenue: number;
-  allTimeRevenue: number;
-}
-
-type StoreState = 'virgin' | 'building' | 'starting' | 'active' | 'established';
-
-/**
- * Calculate revenue growth percentage
- */
-function calculateGrowth(current: number, previous: number): number | null {
-  if (previous === 0) {
-    return current > 0 ? 100 : null;
-  }
-  return Math.round(((current - previous) / previous) * 100);
-}
+import { DashboardStatCard } from "@/components/dashboard/shared/dashboard-stat-card";
+import type { StoreMetrics, StoreState } from "./home-types";
+import { calculateGrowth } from "./home-utils";
+import { ReservationCalendarPrefetchBoundary } from "./reservation-calendar-prefetch-boundary";
 
 interface AdaptiveStatsProps {
   metrics: StoreMetrics;
   storeState: StoreState;
 }
 
-type IconVariant = 'emerald' | 'blue' | 'orange' | 'purple' | 'primary';
-
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  icon: React.ElementType;
-  iconVariant?: IconVariant;
-  subtitle?: string;
-  badge?: string;
-  trend?: number | null;
-  href?: string;
-}
-
-const iconTextColors: Record<IconVariant, string> = {
-  emerald: 'text-emerald-600 dark:text-emerald-400',
-  blue: 'text-blue-600 dark:text-blue-400',
-  orange: 'text-orange-600 dark:text-orange-400',
-  purple: 'text-purple-600 dark:text-purple-400',
-  primary: 'text-primary',
-};
-
-const StatCard = ({
-  title,
-  value,
-  icon: Icon,
-  iconVariant = 'primary',
-  subtitle,
-  badge,
-  trend,
-  href,
-}: StatCardProps) => {
-  const card = (
-    <Card
-      className={cn(
-        'stat-card h-full',
-        href && 'group-hover:bg-muted/50 cursor-pointer transition-colors',
-      )}
-    >
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-muted-foreground text-sm font-medium">
-          {title}
-        </CardTitle>
-        <div className={cn('stat-icon-bg', `stat-icon-bg--${iconVariant}`)}>
-          <Icon className={cn('h-4 w-4', iconTextColors[iconVariant])} />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center gap-2">
-          <span className="text-2xl font-bold">{value}</span>
-          {badge && (
-            <Badge
-              variant="secondary"
-              className="bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400"
-            >
-              {badge}
-            </Badge>
-          )}
-          {trend !== null && trend !== undefined && (
-            <Badge
-              variant="secondary"
-              className={cn(
-                'gap-0.5',
-                trend > 0
-                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                  : trend < 0
-                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    : 'bg-muted text-muted-foreground',
-              )}
-            >
-              {trend > 0 ? (
-                <TrendingUp className="h-3 w-3" />
-              ) : trend < 0 ? (
-                <TrendingDown className="h-3 w-3" />
-              ) : null}
-              {trend > 0 ? '+' : ''}
-              {trend}%
-            </Badge>
-          )}
-        </div>
-        {subtitle && (
-          <p className="text-muted-foreground mt-1 text-xs">{subtitle}</p>
-        )}
-      </CardContent>
-    </Card>
-  );
-
-  if (href) {
-    return (
-      <Link
-        href={href}
-        className="group focus-visible:ring-ring block h-full rounded-lg focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-      >
-        {card}
-      </Link>
-    );
-  }
-
-  return card;
-};
+/** Two columns on phones, one row of four from `lg` — same rhythm everywhere. */
+const GRID_CLASS_NAME = "grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4";
 
 export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
-  const t = useTranslations('dashboard.home');
+  const t = useTranslations("dashboard.home");
 
-  // For virgin/building stores, show catalog-focused stats
-  if (storeState === 'virgin' || storeState === 'building') {
+  // Catalog-focused stats while the store is still being set up.
+  if (storeState === "virgin" || storeState === "building") {
     return (
-      <div className="grid gap-4 sm:grid-cols-2">
-        <StatCard
-          title={t('stats.products')}
+      <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        <DashboardStatCard
+          title={t("stats.products")}
           value={metrics.activeProductCount}
-          icon={Package}
-          iconVariant="primary"
+          icon={ProductSolidIcon}
+          accent="submitted"
           href="/dashboard/products"
           subtitle={
             metrics.draftProductCount > 0
-              ? t('stats.drafts', { count: metrics.draftProductCount })
+              ? t("stats.drafts", { count: metrics.draftProductCount })
               : undefined
           }
         />
-        <StatCard
-          title={t('stats.customers')}
+        <DashboardStatCard
+          title={t("stats.customers")}
           value={metrics.customerCount}
-          icon={Users}
-          iconVariant="blue"
+          icon={ParticipantsSolidIcon}
+          accent="progress"
           href="/dashboard/customers"
         />
       </div>
     );
   }
 
-  // For starting stores, show a mix of operational and growth stats
-  if (storeState === 'starting') {
+  if (storeState === "starting") {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatCard
-          title={t('stats.todaysDepartures')}
-          value={metrics.todaysDepartures}
-          icon={ArrowUpRight}
-          iconVariant="emerald"
-          href="/dashboard/reservations?status=confirmed&period=today&operation=departure"
-          subtitle={t('stats.toDeliver')}
-        />
-        <StatCard
-          title={t('stats.todaysReturns')}
-          value={metrics.todaysReturns}
-          icon={ArrowDownRight}
-          iconVariant="blue"
-          href="/dashboard/reservations?status=ongoing&period=today&operation=return"
-          subtitle={t('stats.toRecover')}
-        />
-        <StatCard
-          title={t('stats.pendingRequests')}
+      <div className={GRID_CLASS_NAME}>
+        <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed">
+          <DashboardStatCard
+            title={t("stats.todaysDepartures")}
+            value={metrics.todaysDepartures}
+            icon={ArrowUpRight}
+            accent="success"
+            href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
+            subtitle={t("stats.toDeliver")}
+          />
+        </ReservationCalendarPrefetchBoundary>
+        <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing">
+          <DashboardStatCard
+            title={t("stats.todaysReturns")}
+            value={metrics.todaysReturns}
+            icon={ArrowDownRight}
+            accent="progress"
+            href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
+            subtitle={t("stats.toRecover")}
+          />
+        </ReservationCalendarPrefetchBoundary>
+        <DashboardStatCard
+          title={t("stats.pendingRequests")}
           value={metrics.pendingReservations}
-          icon={Clock}
-          iconVariant="orange"
+          icon={ClockSolidIcon}
+          accent="pending"
           href="/dashboard/reservations?status=pending"
-          badge={
-            metrics.pendingReservations > 0 ? t('stats.toProcess') : undefined
-          }
+          badge={metrics.pendingReservations > 0 ? t("stats.toProcess") : undefined}
         />
-        <StatCard
-          title={t('stats.totalReservations')}
+        <DashboardStatCard
+          title={t("stats.totalReservations")}
           value={metrics.totalReservations}
-          icon={Package}
-          iconVariant="primary"
+          icon={CalendarSolidIcon}
+          accent="neutral"
           href="/dashboard/reservations"
-          subtitle={t('stats.completed', {
-            count: metrics.completedReservations,
-          })}
+          subtitle={t("stats.completed", { count: metrics.completedReservations })}
         />
       </div>
     );
   }
 
-  // For active/established stores, show full operational stats with trends
-  const revenueGrowth = calculateGrowth(
-    metrics.monthlyRevenue,
-    metrics.lastMonthRevenue,
-  );
+  const revenueGrowth = calculateGrowth(metrics.monthlyRevenue, metrics.lastMonthRevenue);
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <StatCard
-        title={t('stats.todaysDepartures')}
-        value={metrics.todaysDepartures}
-        icon={ArrowUpRight}
-        iconVariant="emerald"
-        href="/dashboard/reservations?status=confirmed&period=today&operation=departure"
-        subtitle={t('stats.toDeliver')}
-      />
-      <StatCard
-        title={t('stats.todaysReturns')}
-        value={metrics.todaysReturns}
-        icon={ArrowDownRight}
-        iconVariant="blue"
-        href="/dashboard/reservations?status=ongoing&period=today&operation=return"
-        subtitle={t('stats.toRecover')}
-      />
-      <StatCard
-        title={t('stats.pendingRequests')}
+    <div className={GRID_CLASS_NAME}>
+      <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed">
+        <DashboardStatCard
+          title={t("stats.todaysDepartures")}
+          value={metrics.todaysDepartures}
+          icon={ArrowUpRight}
+          accent="success"
+          href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
+          subtitle={t("stats.toDeliver")}
+        />
+      </ReservationCalendarPrefetchBoundary>
+      <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing">
+        <DashboardStatCard
+          title={t("stats.todaysReturns")}
+          value={metrics.todaysReturns}
+          icon={ArrowDownRight}
+          accent="progress"
+          href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
+          subtitle={t("stats.toRecover")}
+        />
+      </ReservationCalendarPrefetchBoundary>
+      <DashboardStatCard
+        title={t("stats.pendingRequests")}
         value={metrics.pendingReservations}
-        icon={Clock}
-        iconVariant="orange"
+        icon={ClockSolidIcon}
+        accent="pending"
         href="/dashboard/reservations?status=pending"
-        badge={
-          metrics.pendingReservations > 0 ? t('stats.toProcess') : undefined
-        }
+        badge={metrics.pendingReservations > 0 ? t("stats.toProcess") : undefined}
       />
-      <StatCard
-        title={t('stats.monthlyRevenue')}
+      <DashboardStatCard
+        title={t("stats.monthlyRevenue")}
         value={formatCurrency(metrics.monthlyRevenue)}
-        icon={Euro}
-        iconVariant="purple"
+        icon={CreditCardSolidIcon}
+        accent="submitted"
         href="/dashboard/analytics?tab=sales&includeManual=true"
         trend={revenueGrowth}
-        subtitle={t('stats.vsLastMonth')}
+        subtitle={t("stats.vsLastMonth")}
       />
     </div>
   );

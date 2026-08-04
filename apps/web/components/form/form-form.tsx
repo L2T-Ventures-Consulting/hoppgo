@@ -106,6 +106,7 @@ export function FormForm({
         }
       }}
       {...props}
+      data-keyboard-shortcut-submit
     >
       {children}
     </form>

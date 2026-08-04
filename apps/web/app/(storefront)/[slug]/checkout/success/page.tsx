@@ -20,6 +20,10 @@ import {
 } from '@/lib/product-analytics/analytics'
 import { productAnalyticsEvents } from '@/lib/product-analytics/analytics-events'
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 interface SuccessPageProps {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ reservation?: string; session_id?: string }>

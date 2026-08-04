@@ -1,38 +1,33 @@
-import Link from 'next/link'
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 
-import { ArrowLeft } from 'lucide-react'
-import { getTranslations } from 'next-intl/server'
+import { getTranslations } from "next-intl/server";
 
-import { getCurrentStore } from '@/lib/store-context'
+import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
+import { getCurrentStore } from "@/lib/store-context";
 
-import { ApiKeysPageContent } from './api-keys-page-content'
+import { ApiKeysPageContent } from "./api-keys-page-content";
+
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export default async function McpIntegrationPage() {
-  const store = await getCurrentStore()
+  const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding')
+    redirect("/onboarding");
   }
 
-  const t = await getTranslations('dashboard.settings.api')
+  const t = await getTranslations("dashboard.settings.api");
+  const tHub = await getTranslations("dashboard.settings.integrationsHub");
 
   return (
-    <div className="space-y-6">
-      <Link
-        href="/dashboard/settings/integrations"
-        className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        {t('backToIntegrations')}
-      </Link>
-
-      <div>
-        <h2 className="text-lg font-semibold">MCP</h2>
-        <p className="text-muted-foreground text-sm">{t('description')}</p>
-      </div>
-
+    <SettingsPageShell
+      back={{ href: "/dashboard/settings/integrations", label: t("backToIntegrations") }}
+      title={tHub("builtIn.mcp.name")}
+      description={t("description")}
+    >
       <ApiKeysPageContent />
-    </div>
-  )
+    </SettingsPageShell>
+  );
 }

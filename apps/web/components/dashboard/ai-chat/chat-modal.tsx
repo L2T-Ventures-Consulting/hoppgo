@@ -42,11 +42,7 @@ import { ChatMessages } from './chat-messages'
 const SUGGESTION_ICONS = [CalendarDays, BarChart3, Package, Users] as const
 
 /** Error codes returned by the API route */
-const RATE_LIMIT_CODES = new Set([
-  'rate_limit:minute',
-  'rate_limit:hour',
-  'rate_limit:day',
-])
+const RATE_LIMIT_CODES = new Set(['rate_limit:minute', 'rate_limit:hour', 'rate_limit:day'])
 
 type ChatModalProps = {
   open: boolean
@@ -64,20 +60,17 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
   const historyRef = useRef<ChatHistoryHandle>(null)
 
   // Custom fetch to intercept X-Chat-Id header from the API response
-  const customFetch = useCallback(
-    async (input: RequestInfo | URL, init?: RequestInit) => {
-      const res = await fetch(input, init)
-      const newChatId = res.headers.get('X-Chat-Id')
-      if (newChatId && newChatId !== chatIdRef.current) {
-        chatIdRef.current = newChatId
-        setChatId(newChatId)
-        // Refresh history sidebar so the new conversation appears
-        historyRef.current?.refresh()
-      }
-      return res
-    },
-    [],
-  )
+  const customFetch = useCallback(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const res = await fetch(input, init)
+    const newChatId = res.headers.get('X-Chat-Id')
+    if (newChatId && newChatId !== chatIdRef.current) {
+      chatIdRef.current = newChatId
+      setChatId(newChatId)
+      // Refresh history sidebar so the new conversation appears
+      historyRef.current?.refresh()
+    }
+    return res
+  }, [])
 
   const transport = useMemo(
     () =>
@@ -88,8 +81,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
     [customFetch],
   )
 
-  const { messages, sendMessage, status, setMessages, error, clearError } =
-    useChat({ transport })
+  const { messages, sendMessage, status, setMessages, error, clearError } = useChat({ transport })
 
   const isLoading = status === 'submitted' || status === 'streaming'
 
@@ -186,12 +178,8 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
               <Sparkles className="h-3.5 w-3.5 text-primary" />
             </div>
             <div>
-              <DialogTitle className="text-sm font-medium leading-none">
-                {t('title')}
-              </DialogTitle>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">
-                {t('subtitle')}
-              </p>
+              <DialogTitle className="text-sm font-medium leading-none">{t('title')}</DialogTitle>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('subtitle')}</p>
             </div>
           </div>
 
@@ -276,10 +264,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
           {/* Chat area */}
           <div className="flex min-w-0 flex-1 flex-col">
             {/* Messages area */}
-            <div
-              ref={scrollRef}
-              className="relative flex-1 overflow-y-auto scroll-smooth"
-            >
+            <div ref={scrollRef} className="relative flex-1 overflow-y-auto scroll-smooth">
               {/* Animated gradient mesh background — only when empty */}
               {messages.length === 0 && (
                 <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -289,10 +274,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
                 </div>
               )}
 
-              <div
-                className="relative px-5 py-4"
-                style={{ minHeight: '100%' }}
-              >
+              <div className="relative px-5 py-4" style={{ minHeight: '100%' }}>
                 {messages.length === 0 ? (
                   <div
                     className="flex flex-col items-center justify-center px-4"
@@ -301,12 +283,8 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
                       <Sparkles className="h-6 w-6 text-primary" />
                     </div>
-                    <p className="text-foreground mb-1 text-base font-medium">
-                      {t('emptyState')}
-                    </p>
-                    <p className="text-muted-foreground mb-8 text-xs">
-                      {t('emptyStateHint')}
-                    </p>
+                    <p className="text-foreground mb-1 text-base font-medium">{t('emptyState')}</p>
+                    <p className="text-muted-foreground mb-8 text-xs">{t('emptyStateHint')}</p>
                     <div className="grid w-full max-w-md grid-cols-2 gap-2.5">
                       {suggestions.map((suggestion, i) => {
                         const Icon = SUGGESTION_ICONS[i]
@@ -325,9 +303,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
                             <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-primary/8 transition-colors group-hover:bg-primary/15">
                               <Icon className="h-3 w-3 text-primary/70 transition-colors group-hover:text-primary" />
                             </div>
-                            <span className="leading-snug">
-                              {suggestion.prompt}
-                            </span>
+                            <span className="leading-snug">{suggestion.prompt}</span>
                           </button>
                         )
                       })}
@@ -353,7 +329,7 @@ export function ChatModal({ open, onOpenChange }: ChatModalProps) {
                 <span className="flex-1">{errorMessage}</span>
                 {(isUpgradeRequired || isRateLimited) && (
                   <Link
-                    href="/dashboard/subscription"
+                    href="/dashboard/settings/subscription"
                     onClick={() => onOpenChange(false)}
                     className="inline-flex shrink-0 items-center gap-1 rounded-lg bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground transition-colors hover:bg-primary/90"
                   >

@@ -1,137 +1,104 @@
-'use client';
+"use client";
 
-import { useCallback } from 'react';
+import { useMemo } from "react";
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useTranslations } from "next-intl";
+import { parseAsArrayOf, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
 
-import { useTranslations } from 'next-intl';
+import { Badge, Tabs, TabsList, TabsTab } from "@louez/ui";
 
-import { Button, SelectPopup } from '@louez/ui';
 import {
-  Select,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@louez/ui';
-import { Badge } from '@louez/ui';
+  CategoryFilterCombobox,
+  type CategoryFilterOption,
+} from "./category-filter-combobox";
+import {
+  PRODUCT_STATUS_FILTERS,
+  type ProductCounts,
+  type ProductStatusFilter,
+} from "./types";
 
-interface Category {
-  id: string;
-  name: string;
-}
+/**
+ * Products list filters, kept in the URL so links stay shareable.
+ *
+ * `category` holds a comma-separated list of ids (nuqs' array format), which
+ * keeps older single-category links (`?category=<id>`) working.
+ * Navigation is shallow: the list itself is refetched by React Query.
+ */
+export function useProductsFilters() {
+  const [state, setFilters] = useQueryStates(
+    {
+      status: parseAsStringLiteral(PRODUCT_STATUS_FILTERS).withDefault("all"),
+      category: parseAsArrayOf(parseAsString).withDefault([]),
+    },
+    { history: "push", shallow: true, clearOnDefault: true },
+  );
 
-interface ProductCounts {
-  all: number;
-  active: number;
-  draft: number;
-  archived: number;
+  // `all` is the legacy "no category filter" value of the former single select
+  const categoryIds = useMemo(
+    () => state.category.filter((id) => id && id !== "all"),
+    [state.category],
+  );
+
+  return {
+    status: state.status,
+    categoryIds,
+    setStatus: (status: ProductStatusFilter) => void setFilters({ status }),
+    setCategoryIds: (category: string[]) => void setFilters({ category }),
+  };
 }
 
 interface ProductsFiltersProps {
-  categories: Category[];
+  categories: CategoryFilterOption[];
   counts: ProductCounts;
-  currentStatus?: string;
-  currentCategory?: string;
+  isLoadingCategories?: boolean;
 }
 
-export function ProductsFilters({
+export const ProductsFilters = ({
   categories,
   counts,
-  currentStatus = 'all',
-  currentCategory = 'all',
-}: ProductsFiltersProps) {
-  const t = useTranslations('dashboard.products');
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  isLoadingCategories = false,
+}: ProductsFiltersProps) => {
+  const t = useTranslations("dashboard.products");
+  const { status, categoryIds, setStatus, setCategoryIds } = useProductsFilters();
 
-  const STATUS_OPTIONS = [
-    { value: 'all', label: t('filters.all') },
-    { value: 'active', label: t('filters.active') },
-    { value: 'draft', label: t('filters.draft') },
-    { value: 'archived', label: t('filters.archived') },
-  ];
-
-  const createQueryString = useCallback(
-    (name: string, value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      if (value === 'all') {
-        params.delete(name);
-      } else {
-        params.set(name, value);
-      }
-      return params.toString();
-    },
-    [searchParams],
-  );
-
-  const handleStatusChange = (value: string) => {
-    router.push(`/dashboard/products?${createQueryString('status', value)}`);
-  };
-
-  const handleCategoryChange = (value: string | null) => {
-    if (value === null) return;
-    router.push(`/dashboard/products?${createQueryString('category', value)}`);
-  };
+  const statusOptions = [
+    { value: "all", label: t("filters.all") },
+    { value: "active", label: t("filters.active") },
+    { value: "draft", label: t("filters.draft") },
+    { value: "archived", label: t("filters.archived") },
+  ] as const;
 
   return (
     <div className="flex flex-wrap items-center gap-2 sm:gap-4">
-      {/* Status Tabs - horizontally scrollable when overflowing */}
+      {/* Status filter — same underlined tabs as the reservations page,
+          horizontally scrollable when overflowing */}
       <div className="-mx-1 min-w-0 max-w-full overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="bg-muted/50 inline-flex items-center gap-1 rounded-lg border p-1">
-          {STATUS_OPTIONS.map((option) => {
-            const count =
-              option.value === 'all'
-                ? counts.all
-                : counts[option.value as keyof Omit<ProductCounts, 'all'>];
-            const isActive = currentStatus === option.value;
+        <Tabs value={status} onValueChange={(value) => setStatus(value as ProductStatusFilter)}>
+          <TabsList variant="underline">
+            {statusOptions.map((option) => {
+              const isActive = status === option.value;
 
-            return (
-              <Button
-                key={option.value}
-                variant={isActive ? 'secondary' : 'ghost'}
-                className="shrink-0 gap-2"
-                onClick={() => handleStatusChange(option.value)}
-              >
-                {option.label}
-                <Badge
-                  variant={isActive ? 'default' : 'secondary'}
-                  className="ml-1 h-5 min-w-5 px-1.5"
-                >
-                  {count}
-                </Badge>
-              </Button>
-            );
-          })}
-        </div>
+              return (
+                <TabsTab key={option.value} value={option.value}>
+                  {option.label}
+                  <Badge variant={isActive ? "progress" : "expired"} size="sm">
+                    {counts[option.value]}
+                  </Badge>
+                </TabsTab>
+              );
+            })}
+          </TabsList>
+        </Tabs>
       </div>
 
-      {/* Category Filter */}
-      {categories.length > 0 && (
-        <Select value={currentCategory} onValueChange={handleCategoryChange}>
-          <SelectTrigger className="w-full sm:w-[180px]">
-            <SelectValue placeholder={t('category')}>
-              {currentCategory === 'all'
-                ? t('allCategories')
-                : categories.find((category) => category.id === currentCategory)
-                    ?.name}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectPopup>
-            <SelectItem value="all" label={t('allCategories')}>
-              {t('allCategories')}
-            </SelectItem>
-            {categories.map((category) => (
-              <SelectItem
-                key={category.id}
-                value={category.id}
-                label={category.name}
-              >
-                {category.name}
-              </SelectItem>
-            ))}
-          </SelectPopup>
-        </Select>
+      {(categories.length > 0 || categoryIds.length > 0) && (
+        <CategoryFilterCombobox
+          categories={categories}
+          isLoading={isLoadingCategories}
+          selectedCategoryIds={categoryIds}
+          onChange={setCategoryIds}
+        />
       )}
     </div>
   );
-}
+};

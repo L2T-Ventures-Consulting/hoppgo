@@ -1,15 +1,16 @@
 'use client'
 
+import { TrendingDownSolidIcon } from '@louez/ui/icons'
 import { useState, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import { useTranslations } from 'next-intl'
-import { ImageIcon, Calendar, TrendingDown } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 
 import { Card, CardContent } from '@louez/ui'
 import { Badge } from '@louez/ui'
 import { Button } from '@louez/ui'
 import { formatCurrency, minutesToPriceDuration } from '@louez/utils'
 import { useStoreCurrency, useStoreMaxDiscountPercent } from '@/contexts/store-context'
+import { ProductImage } from '@/components/product/product-image'
 import { ProductPreviewModal } from './product-preview-modal'
 import type { PricingMode } from '@louez/types'
 import type { BusinessHours } from '@louez/types'
@@ -87,24 +88,19 @@ function ProductCardInteractive({
       <Card className="relative overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-border/50 hover:border-primary/20 bg-card p-0 gap-0">
         {/* Image container */}
         <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-          {mainImage ? (
-            <Image
-              src={mainImage}
-              alt={product.name}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center">
-              <ImageIcon className="h-12 w-12 text-muted-foreground/30" />
-            </div>
-          )}
+          <ProductImage
+            src={mainImage}
+            alt={product.name}
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 25vw"
+            inset={false}
+            className="transition-transform duration-500 group-hover:scale-105"
+            containerClassName="absolute inset-0 rounded-none"
+          />
 
           {/* Unavailable overlay */}
           {!isAvailable && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/90 backdrop-blur-sm">
-              <Badge variant="secondary" className="text-sm px-4 py-1.5">
+              <Badge variant="failed" className="text-sm px-4 py-1.5">
                 {tCatalog('unavailable')}
               </Badge>
             </div>
@@ -122,11 +118,8 @@ function ProductCardInteractive({
 
           {/* Discount badge */}
           {isAvailable && cardDiscount > 0 && product.quantity > 2 && (
-            <Badge
-              className="absolute top-3 left-3 text-xs font-medium bg-primary/10 text-primary"
-            >
-              <TrendingDown className="h-3 w-3 mr-1" />
-              -{Math.floor(cardDiscount)}%
+            <Badge variant="progress" className="absolute top-3 left-3 text-xs font-medium">
+              <TrendingDownSolidIcon className="h-3 w-3 mr-1" />-{Math.floor(cardDiscount)}%
             </Badge>
           )}
         </div>

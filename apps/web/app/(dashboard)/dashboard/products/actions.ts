@@ -10,6 +10,7 @@ import {
   categories,
   getBlockingReservationStatuses,
   productAccessories,
+  productCategories,
   productPricingTiers,
   productUnits,
   products,
@@ -28,10 +29,8 @@ import {
   validatePricingTiers,
 } from "@louez/utils";
 import {
-  type CategoryInput,
   type ProductInput,
   type ProductUnitInput,
-  categorySchema,
   isOwnedImageUrl,
   productSchema,
 } from "@louez/validations";
@@ -48,6 +47,11 @@ import {
   updateUnits,
 } from "@/lib/utils/unit-mutations";
 
+import {
+  hasTrackedUnitCapacityConflict,
+  shouldValidateTrackedUnitCapacity,
+} from "./util.product-unit-capacity";
+
 async function getStoreForUser() {
   return getCurrentStore();
 }
@@ -60,6 +64,45 @@ async function getActorUserId(): Promise<string | null> {
 const UNIT_LIFECYCLE = {
   active: "active",
 } satisfies { active: "active" };
+
+type ProductMutationTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+
+// Resolve the submitted category selection to store-owned category ids,
+// preserving order and de-duplicating. Falls back to the legacy single
+// `categoryId` when `categoryIds` is absent (API/MCP callers).
+async function resolveCategoryIds(
+  storeId: string,
+  data: Pick<ProductInput, "categoryId" | "categoryIds">,
+): Promise<string[]> {
+  const requested = data.categoryIds ?? (data.categoryId ? [data.categoryId] : []);
+  const unique = Array.from(new Set(requested.filter(Boolean)));
+  if (unique.length === 0) return [];
+
+  const owned = await db.query.categories.findMany({
+    where: and(eq(categories.storeId, storeId), inArray(categories.id, unique)),
+    columns: { id: true },
+  });
+  const ownedIds = new Set(owned.map((category) => category.id));
+  return unique.filter((id) => ownedIds.has(id));
+}
+
+async function replaceProductCategories(
+  tx: ProductMutationTx | typeof db,
+  productId: string,
+  categoryIds: string[],
+) {
+  await tx.delete(productCategories).where(eq(productCategories.productId, productId));
+  if (categoryIds.length > 0) {
+    await tx.insert(productCategories).values(
+      categoryIds.map((categoryId, index) => ({
+        id: nanoid(),
+        productId,
+        categoryId,
+        position: index,
+      })),
+    );
+  }
+}
 
 function normalizeBookingAttributeAxes(
   axes: ProductInput["bookingAttributeAxes"],
@@ -115,6 +158,14 @@ function getNewUnitPurchasePriceInput(unit: ProductUnitInput): string | null | u
 
 function getNewUnitPurchasedAtInput(unit: ProductUnitInput): string | Date | null | undefined {
   return "purchasedAt" in unit ? unit.purchasedAt : undefined;
+}
+
+function getNewUnitImagesInput(unit: ProductUnitInput): string[] {
+  return "images" in unit && Array.isArray(unit.images) ? unit.images : [];
+}
+
+function getProductImageHistoryUrls(data: ProductInput): string[] {
+  return data.imageHistory?.flatMap((history) => history.versions.map(({ url }) => url)) ?? [];
 }
 
 async function getAssignedBlockingUnitIds({
@@ -245,7 +296,11 @@ export async function createProduct(data: ProductInput) {
     return { error: "errors.invalidData" };
   }
 
-  if (validated.data.images?.some((image) => !isOwnedImageUrl(image, `${store.id}/products`))) {
+  const submittedImageUrls = [
+    ...(validated.data.images ?? []),
+    ...getProductImageHistoryUrls(validated.data),
+  ];
+  if (submittedImageUrls.some((image) => !isOwnedImageUrl(image, `${store.id}/products`))) {
     return { error: "errors.invalidData" };
   }
 
@@ -288,6 +343,7 @@ export async function createProduct(data: ProductInput) {
 
   const productId = nanoid();
   const actorUserId = trackUnits && units.length > 0 ? await getActorUserId() : null;
+  const categoryIds = await resolveCategoryIds(store.id, validated.data);
 
   try {
     await db.transaction(async (tx) => {
@@ -296,10 +352,8 @@ export async function createProduct(data: ProductInput) {
         storeId: store.id,
         name: validated.data.name,
         description: validated.data.description || null,
-        aiContext: validated.data.aiContext?.trim()
-          ? validated.data.aiContext.trim()
-          : null,
-        categoryId: validated.data.categoryId || null,
+        aiContext: validated.data.aiContext?.trim() || null,
+        categoryId: categoryIds[0] ?? null,
         price: price,
         deposit: deposit,
         pricingMode: legacyPricingMode,
@@ -307,6 +361,7 @@ export async function createProduct(data: ProductInput) {
         ...(!trackUnits ? { quantity: manualQuantity } : {}),
         status: validated.data.status,
         images: validated.data.images || [],
+        imageHistory: validated.data.imageHistory || [],
         videoUrl: validated.data.videoUrl || null,
         taxSettings: validated.data.taxSettings || null,
         enforceStrictTiers: validated.data.enforceStrictTiers || false,
@@ -314,6 +369,8 @@ export async function createProduct(data: ProductInput) {
         bookingAttributeAxes:
           trackUnits && bookingAttributeAxes.length > 0 ? bookingAttributeAxes : null,
       });
+
+      await replaceProductCategories(tx, productId, categoryIds);
 
       // Create pricing tiers if provided
       if (rateTierRows.length > 0) {
@@ -344,6 +401,7 @@ export async function createProduct(data: ProductInput) {
             notes: getNewUnitNotesInput(unit)?.trim() || null,
             purchasePrice: normalizeNullablePriceInput(getNewUnitPurchasePriceInput(unit)),
             purchasedAt: normalizeNullableDateInput(getNewUnitPurchasedAtInput(unit)),
+            images: getNewUnitImagesInput(unit),
             lifecycleStatus: UNIT_LIFECYCLE.active,
           };
         });
@@ -389,7 +447,8 @@ export async function createProduct(data: ProductInput) {
       track_units: trackUnits,
       available_unit_count: trackUnits ? units.length : null,
       manual_quantity: trackUnits ? null : manualQuantity,
-      has_category: Boolean(validated.data.categoryId),
+      has_category: categoryIds.length > 0,
+      category_count: categoryIds.length,
       image_count: validated.data.images?.length ?? 0,
       has_video: Boolean(validated.data.videoUrl),
       has_rate_tiers: rateTierRows.length > 0,
@@ -402,7 +461,6 @@ export async function createProduct(data: ProductInput) {
   });
 
   revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/inventory");
   return { success: true, productId };
 }
 
@@ -435,9 +493,16 @@ export async function updateProduct(productId: string, data: ProductInput) {
     return { error: "errors.productNotFound" };
   }
 
-  const existingImages = new Set(product.images ?? []);
+  const existingImages = new Set([
+    ...(product.images ?? []),
+    ...(product.imageHistory?.flatMap((history) => history.versions.map(({ url }) => url)) ?? []),
+  ]);
+  const submittedImageUrls = [
+    ...(validated.data.images ?? []),
+    ...getProductImageHistoryUrls(validated.data),
+  ];
   if (
-    validated.data.images?.some(
+    submittedImageUrls.some(
       (image) => !existingImages.has(image) && !isOwnedImageUrl(image, `${store.id}/products`),
     )
   ) {
@@ -531,9 +596,18 @@ export async function updateProduct(productId: string, data: ProductInput) {
   }
 
   // Prevent edits that would make active unit capacity lower than
-  // active/future reserved quantities for any combination.
+  // the peak concurrent active/future reserved quantities.
   if (trackUnits) {
+    const capacityCheckStart = new Date();
+    const currentAvailableByCombination = new Map<string, number>();
     const proposedAvailableByCombination = new Map<string, number>();
+
+    for (const unit of editableExistingUnits) {
+      currentAvailableByCombination.set(
+        unit.combinationKey,
+        (currentAvailableByCombination.get(unit.combinationKey) || 0) + 1,
+      );
+    }
 
     for (const unit of unitsToUpdate) {
       if (!unit.id) continue;
@@ -557,51 +631,52 @@ export async function updateProduct(productId: string, data: ProductInput) {
       );
     }
 
-    const reservedRows = await db
-      .select({
-        combinationKey: reservationItems.combinationKey,
-        quantity: reservationItems.quantity,
+    if (
+      shouldValidateTrackedUnitCapacity({
+        wasTrackingUnits: product.trackUnits,
+        currentAvailableByCombination,
+        proposedAvailableByCombination,
       })
-      .from(reservationItems)
-      .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
-      .where(
-        and(
-          eq(reservationItems.productId, productId),
-          inArray(reservations.status, blockingStatuses),
-          gte(reservations.endDate, new Date()),
-        ),
-      );
+    ) {
+      const reservedRows = await db
+        .select({
+          startDate: reservations.startDate,
+          endDate: reservations.endDate,
+          combinationKey: reservationItems.combinationKey,
+          quantity: reservationItems.quantity,
+        })
+        .from(reservationItems)
+        .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
+        .where(
+          and(
+            eq(reservationItems.productId, productId),
+            eq(reservations.storeId, store.id),
+            inArray(reservations.status, blockingStatuses),
+            gte(reservations.endDate, capacityCheckStart),
+          ),
+        );
 
-    const reservedByCombination = new Map<string, number>();
-    for (const row of reservedRows) {
-      const combinationKey = row.combinationKey || DEFAULT_COMBINATION_KEY;
-      reservedByCombination.set(
-        combinationKey,
-        (reservedByCombination.get(combinationKey) || 0) + row.quantity,
-      );
-    }
-
-    const hasCapacityConflict = [...reservedByCombination.entries()].some(
-      ([combinationKey, reservedQty]) => {
-        const availableQty = proposedAvailableByCombination.get(combinationKey) || 0;
-        return reservedQty > availableQty;
-      },
-    );
-
-    if (hasCapacityConflict) {
-      return { error: "errors.unitStatusConflictsWithReservations" };
+      if (
+        hasTrackedUnitCapacityConflict({
+          availableByCombination: proposedAvailableByCombination,
+          reservations: reservedRows,
+          from: capacityCheckStart,
+        })
+      ) {
+        return { error: "errors.unitStatusConflictsWithReservations" };
+      }
     }
   }
+
+  const categoryIds = await resolveCategoryIds(store.id, validated.data);
 
   await db
     .update(products)
     .set({
       name: validated.data.name,
       description: validated.data.description || null,
-      aiContext: validated.data.aiContext?.trim()
-        ? validated.data.aiContext.trim()
-        : null,
-      categoryId: validated.data.categoryId || null,
+      aiContext: validated.data.aiContext?.trim() || null,
+      categoryId: categoryIds[0] ?? null,
       price: price,
       deposit: deposit,
       pricingMode: legacyPricingMode,
@@ -609,6 +684,7 @@ export async function updateProduct(productId: string, data: ProductInput) {
       ...(!trackUnits ? { quantity: manualQuantity } : {}),
       status: validated.data.status,
       images: validated.data.images || [],
+      imageHistory: validated.data.imageHistory || [],
       videoUrl: validated.data.videoUrl || null,
       taxSettings: validated.data.taxSettings || null,
       enforceStrictTiers: validated.data.enforceStrictTiers || false,
@@ -618,6 +694,8 @@ export async function updateProduct(productId: string, data: ProductInput) {
       updatedAt: new Date(),
     })
     .where(eq(products.id, productId));
+
+  await replaceProductCategories(db, productId, categoryIds);
 
   // Update pricing tiers: delete all existing and insert new ones
   await db.delete(productPricingTiers).where(eq(productPricingTiers.productId, productId));
@@ -706,6 +784,7 @@ export async function updateProduct(productId: string, data: ProductInput) {
         notes: getNewUnitNotesInput(unit)?.trim() || null,
         purchasePrice: normalizeNullablePriceInput(getNewUnitPurchasePriceInput(unit)),
         purchasedAt: normalizeNullableDateInput(getNewUnitPurchasedAtInput(unit)),
+        images: getNewUnitImagesInput(unit),
         lifecycleStatus: UNIT_LIFECYCLE.active,
         attributes,
         combinationKey: buildCombinationKey(bookingAttributeAxes, attributes),
@@ -785,8 +864,8 @@ export async function updateProduct(productId: string, data: ProductInput) {
   ).catch(() => {});
 
   revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/inventory");
   revalidatePath(`/dashboard/products/${productId}`);
+  revalidatePath(`/dashboard/products/${productId}/edit`);
   return { success: true };
 }
 
@@ -865,6 +944,8 @@ export async function deleteProduct(productId: string) {
         ),
       );
 
+    await tx.delete(productCategories).where(eq(productCategories.productId, productId));
+
     await deleteUnits(
       tx,
       unitsToDelete.map((unit) => ({
@@ -921,7 +1002,6 @@ export async function duplicateProduct(productId: string) {
     storeId: store.id,
     name: `${product.name} (copy)`,
     description: product.description,
-    aiContext: product.aiContext,
     categoryId: product.categoryId,
     price: product.price,
     deposit: product.deposit,
@@ -936,6 +1016,22 @@ export async function duplicateProduct(productId: string) {
     trackUnits: false, // Units cannot be duplicated - they have unique identifiers
     bookingAttributeAxes: null,
   });
+
+  // Duplicate category links if any
+  const categoryLinks = await db.query.productCategories.findMany({
+    where: eq(productCategories.productId, productId),
+    orderBy: [productCategories.position],
+  });
+  if (categoryLinks.length > 0) {
+    await db.insert(productCategories).values(
+      categoryLinks.map((link) => ({
+        id: nanoid(),
+        productId: newProductId,
+        categoryId: link.categoryId,
+        position: link.position,
+      })),
+    );
+  }
 
   // Duplicate pricing tiers if any
   if (product.pricingTiers && product.pricingTiers.length > 0) {
@@ -1016,105 +1112,6 @@ export async function getAvailableAccessories(excludeProductId?: string) {
   }
 
   return allProducts;
-}
-
-// Categories
-export async function createCategory(data: CategoryInput) {
-  const store = await getStoreForUser();
-  if (!store) {
-    return { error: "errors.unauthorized" };
-  }
-
-  const validated = categorySchema.safeParse(data);
-  if (!validated.success) {
-    return { error: "errors.invalidData" };
-  }
-
-  // Get max order
-  const existingCategories = await db.query.categories.findMany({
-    where: eq(categories.storeId, store.id),
-  });
-  const maxOrder = Math.max(0, ...existingCategories.map((c) => c.order || 0));
-
-  await db.insert(categories).values({
-    storeId: store.id,
-    name: validated.data.name,
-    description: validated.data.description || null,
-    order: maxOrder + 1,
-  });
-
-  revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/categories");
-  return { success: true };
-}
-
-export async function updateCategory(categoryId: string, data: CategoryInput) {
-  const store = await getStoreForUser();
-  if (!store) {
-    return { error: "errors.unauthorized" };
-  }
-
-  const validated = categorySchema.safeParse(data);
-  if (!validated.success) {
-    return { error: "errors.invalidData" };
-  }
-
-  const category = await db.query.categories.findFirst({
-    where: and(eq(categories.id, categoryId), eq(categories.storeId, store.id)),
-  });
-
-  if (!category) {
-    return { error: "errors.categoryNotFound" };
-  }
-
-  await db
-    .update(categories)
-    .set({
-      name: validated.data.name,
-      description: validated.data.description || null,
-      updatedAt: new Date(),
-    })
-    .where(eq(categories.id, categoryId));
-
-  revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/categories");
-  return { success: true };
-}
-
-export async function deleteCategory(categoryId: string) {
-  const store = await getStoreForUser();
-  if (!store) {
-    return { error: "errors.unauthorized" };
-  }
-
-  const category = await db.query.categories.findFirst({
-    where: and(eq(categories.id, categoryId), eq(categories.storeId, store.id)),
-  });
-
-  if (!category) {
-    return { error: "errors.categoryNotFound" };
-  }
-
-  // Remove category from products
-  await db.update(products).set({ categoryId: null }).where(eq(products.categoryId, categoryId));
-
-  await db.delete(categories).where(eq(categories.id, categoryId));
-
-  revalidatePath("/dashboard/products");
-  revalidatePath("/dashboard/categories");
-  return { success: true };
-}
-
-export async function getCategories() {
-  const store = await getStoreForUser();
-  if (!store) {
-    return [];
-  }
-
-  return db.query.categories.findMany({
-    where: eq(categories.storeId, store.id),
-    orderBy: [categories.order],
-  });
 }
 
 export async function updateProductsOrder(productIds: string[]) {

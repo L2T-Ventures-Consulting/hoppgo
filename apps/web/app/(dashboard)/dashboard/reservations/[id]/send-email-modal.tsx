@@ -1,5 +1,6 @@
 'use client'
 
+import { CheckSolidIcon } from '@louez/ui/icons'
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -230,21 +231,33 @@ export function SendEmailModal({
                         template.iconBg
                       )}
                     >
-                      {template.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">
-                          {t(`templates.${template.id}.name`)}
-                        </span>
-                        {wasSent && (
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] px-1.5 py-0 h-4 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                          >
-                            <Check className="h-2.5 w-2.5 mr-0.5" />
-                            {t('alreadySent')}
-                          </Badge>
+                      <div className={cn('mt-0.5 p-2 rounded-lg shrink-0', template.iconBg)}>
+                        {template.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm">
+                            {t(`templates.${template.id}.name`)}
+                          </span>
+                          {wasSent && (
+                            <Badge variant="success" className="text-[10px] px-1.5 py-0 h-4">
+                              <CheckSolidIcon className="h-2.5 w-2.5 mr-0.5" />
+                              {t('alreadySent')}
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {t(`templates.${template.id}.description`)}
+                        </p>
+                      </div>
+                      <div
+                        className={cn(
+                          'w-4 h-4 rounded-full border-2 shrink-0 mt-1 transition-colors',
+                          isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30',
+                        )}
+                      >
+                        {isSelected && (
+                          <Check className="h-full w-full p-0.5 text-primary-foreground" />
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">

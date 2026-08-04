@@ -4,6 +4,8 @@
     "description": "Simple and modern equipment rental platform"
   },
   "common": {
+    "duration": "Duration",
+    "price": "Price",
     "save": "Save",
     "unsavedChanges": "Unsaved changes",
     "cancel": "Cancel",
@@ -23,6 +25,9 @@
     "success": "Success",
     "confirm": "Confirm",
     "close": "Close",
+    "play": "Play",
+    "pause": "Pause",
+    "seek": "Seek",
     "yes": "Yes",
     "no": "No",
     "view": "View",
@@ -116,12 +121,16 @@
       "select": "Select",
       "naturalPlaceholder": "e.g. tomorrow at 2pm or May 12 at 1pm",
       "time": "Time",
+      "startTime": "Start",
+      "endTime": "End",
       "confirm": "Confirm"
     },
     "customerSearch": {
       "placeholder": "Search customer...",
       "noResults": "No customer found",
-      "selectCustomer": "Select a customer"
+      "selectCustomer": "Select a customer",
+      "createCustomer": "Create a customer",
+      "createNamed": "Create “{query}”"
     }
   },
   "auth": {
@@ -229,7 +238,14 @@
         "subtitle": "Your store advises, answers and books — automatically",
         "credits": "{count} credits",
         "creditsUnlimited": "Unlimited credits",
-        "recharge": "Recharge"
+        "recharge": "Recharge",
+        "manageCredits": "Manage"
+      },
+      "tabs": {
+        "label": "AI assistant sections",
+        "advisor": "Online advisor",
+        "voice": "Voice agent",
+        "conversations": "Conversations"
       },
       "hero": {
         "eyebrow": "AI Assistant",
@@ -318,7 +334,20 @@
       "newReservation": "New reservation",
       "reservationLimitReached": "Limit reached",
       "help": "Help",
-      "feedback": "Help and feedback"
+      "feedback": "Help and feedback",
+      "aiCreditsLow": "Credit balance running low"
+    },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Open the command palette",
+        "aiAssistant": "Open the AI assistant",
+        "sidebar": "Show or hide the sidebar",
+        "search": "Focus search",
+        "createReservation": "Create a reservation",
+        "goToReservations": "Go to reservations",
+        "goToCalendar": "Go to calendar",
+        "save": "Save the active form"
+      }
     },
     "storeSwitcher": {
       "selectStore": "Select a store",
@@ -568,7 +597,8 @@
       "subscription": "Subscription",
       "settings": "Settings",
       "store": "My store",
-      "multiStore": "Multi-store"
+      "multiStore": "Multi-store",
+      "aiCredits": "AI credits"
     },
     "multiStore": {
       "title": "Multi-store",
@@ -797,16 +827,6 @@
         "archived": "Archived"
       },
       "form": {
-        "steps": {
-          "photos": "Photos",
-          "photosDescription": "Product images",
-          "info": "Information",
-          "infoDescription": "Name and description",
-          "pricing": "Pricing",
-          "pricingDescription": "Price and rates",
-          "preview": "Publish",
-          "previewDescription": "Review and publish"
-        },
         "photos": "Photos",
         "photosDescription": "Add up to 5 photos of your product",
         "addImage": "Add",
@@ -818,6 +838,22 @@
         "uploading": "Uploading...",
         "imageUploadError": "Failed to upload image",
         "recropImage": "Re-crop",
+        "openImageViewer": "View photo",
+        "imageHistoryAction": "View history",
+        "imageHistoryTitle": "Photo history",
+        "imageHistoryDescription": "See every version of this photo and choose which one to use. Transformations never erase previous versions.",
+        "imageHistoryOriginal": "Original photo",
+        "imageHistoryCropped": "After cropping",
+        "imageHistoryAiEnhanced": "After AI enhancement",
+        "imageHistoryBackgroundRemoved": "After background removal",
+        "imageHistoryCurrent": "In use",
+        "imageHistoryInitialVersion": "Initial version",
+        "imageHistoryUseVersion": "Use this version",
+        "imageHistoryDeleteVersion": "Delete this version",
+        "imageHistoryDeleteTitle": "Delete this version?",
+        "imageHistoryDeleteDescription": "This version will be removed from the history. The other versions will remain available.",
+        "imageHistoryDeleteCancel": "Cancel",
+        "imageHistoryDeleteConfirm": "Delete",
         "cropUnsupportedFormat": "This image format cannot be recropped",
         "cropDialogTitle": "Adjust your photos",
         "cropDialogDescription": "Use a 4:3 frame for better storefront consistency",
@@ -836,6 +872,129 @@
         "cropPreviewTitle": "Preview",
         "cropPreviewDescription": "This is how your photo will appear in the storefront",
         "cropUploadSelected": "Upload selected",
+        "aiEnhanceAction": "Enhance with AI",
+        "removeBackgroundAction": "Remove background",
+        "aiEnhanceLoading": "Processing…",
+        "aiEnhanceReadyBadge": "To review",
+        "aiEnhanceQueuedBadge": "Queued",
+        "aiEnhancedBadge": "AI enhanced",
+        "backgroundRemovedBadge": "Background removed",
+        "aiEnhanceErrorAlreadyProcessed": "This photo has already been processed",
+        "aiEnhanceBatchAction": "Uniformize photos",
+        "aiEnhanceBatchHint": "Cuts out your products and centers them on a 4:3 frame",
+        "aiEnhanceBatchProgress": "Photo {current} of {total}…",
+        "aiEnhanceDialogTitle": "Before / After",
+        "removeBackgroundDialogTitle": "Background removed",
+        "aiEnhanceDialogDescription": "Compare the result before replacing your photo.",
+        "aiEnhanceRemaining": "{count, plural, one {# photo to review} other {# photos to review}}",
+        "aiEnhanceBefore": "Before",
+        "aiEnhanceAfter": "After",
+        "aiEnhanceAccept": "Use this version",
+        "aiEnhanceReject": "Keep the original",
+        "aiEnhanceTransparencyHint": "Transparent background, product centered on a 4:3 frame",
+        "aiEnhanceTransparencyHintPreserve": "Transparent background, original framing preserved in 4:3",
+        "aiEnhanceBackgroundCheckerboard": "Checkerboard",
+        "aiEnhanceBackgroundWhite": "White",
+        "aiEnhanceError": "Photo enhancement failed",
+        "aiEnhanceErrorCredits": "Your AI credits are exhausted. Top them up to keep enhancing your photos.",
+        "aiEnhanceErrorDisabled": "AI enhancement is not available right now.",
+        "removeBackgroundErrorDisabled": "Background removal is not available right now.",
+        "aiEnhanceErrorInvalidImage": "This image cannot be enhanced",
+        "aiEnhanceErrorEmptyImage": "No product was detected in this photo",
+        "aiEnhanceErrorProvider": "The enhancement service is temporarily unavailable. Please try again in a moment.",
+        "removeBackgroundErrorProvider": "The background removal service is temporarily unavailable. Please try again in a moment.",
+        "aiEnhanceOriginalMissing": "The original photo is no longer in the form",
+        "aiEnhanceSavedToHistory": "The AI version was kept in the history",
+        "aiEnhanceCropAction": "Enhance with AI",
+        "aiEnhancePromoTitle": "Enhance your photos with AI",
+        "aiEnhancePromoDescription": "Sharp, consistent store visuals in a single click.",
+        "aiEnhancePromoBenefitBackground": "The background is removed and replaced with transparency",
+        "aiEnhancePromoBenefitFraming": "Your product is perfectly centered in a 4:3 frame",
+        "aiEnhancePromoBenefitConsistency": "A consistent look across your whole store",
+        "aiEnhancePromoNote": "This feature requires AI to be activated on your account.",
+        "aiEnhancePromoCta": "Activate AI",
+        "aiEnhancePromoClose": "Maybe later",
+        "video": "Video",
+        "aiCreditsPerImage": "{count, plural, one {# credit} other {# credits}} / photo",
+        "aiCreditsBgRemoval": "Background removal only: {count, plural, one {# credit} other {# credits}}",
+        "aiCreditsBgRemovalFree": "Background removal only included",
+        "aiCreditsBalance": "Balance: {count, plural, one {# credit} other {# credits}}",
+        "aiCreditsBalanceUnlimited": "Unlimited credits",
+        "aiCreditsBatchEstimate": "About {credits, plural, one {# credit} other {# credits}} for {images, plural, one {# photo} other {# photos}}",
+        "aiCreditsLearnMore": "Learn more",
+        "aiCreditsLearnMoreTitle": "Photos that sell",
+        "aiCreditsLearnMoreValue": "The AI cuts out your product, unifies the background and reframes the shot: pro-quality visuals that reassure your customers and lift conversion.",
+        "aiCreditsLearnMoreCost": "Each enhanced photo costs {count, plural, one {# credit} other {# credits}}, taken from your monthly credits first, then from your prepaid balance.",
+        "aiCreditsLearnMoreLink": "View my AI credits",
+        "aiCreditsExhaustedTitle": "Not enough AI credits",
+        "aiCreditsExhaustedDescription": "Photo enhancement is paused: your balance no longer covers a single photo. Top up your credits to resume.",
+        "aiCreditsRecharge": "Top up",
+        "aiChoiceTitle": "What should we do with this photo?",
+        "aiChoiceDescription": "Pick a look — you can always change it afterwards.",
+        "aiChoiceEnhanceDescription": "Pro-quality shot: clean background, product cut out and centred",
+        "aiChoiceRemoveBackgroundDescription": "Keeps your photo and only replaces the background",
+        "aiChoiceCrop": "Crop it myself",
+        "aiChoiceCropDescription": "Set the 4:3 framing by hand",
+        "aiChoiceUseAsIs": "Use as is",
+        "aiChoiceBatchEnhance": "{count, plural, one {Enhance the # photo} other {Enhance all # photos}}",
+        "cropBackToChoice": "Back to options",
+        "aiCreditsChip": "{count, plural, one {# credit} other {# credits}}",
+        "aiCreditsChipIncluded": "Included",
+        "aiCreditsTooltipTitle": "AI enhancement",
+        "aiCreditsTooltipWhat": "Your product is cut out, the background unified and the shot reframed to 4:3 — a studio-grade result.",
+        "aiCreditsTooltipCost": "{count, plural, one {# credit} other {# credits}} per photo",
+        "aiCreditsTooltipBgTitle": "Background removal",
+        "aiCreditsTooltipBgWhat": "Your photo stays exactly as it is: only the background is removed.",
+        "aiCreditsTooltipFree": "Included in your plan",
+        "aiProcessingTitle": "Enhancing your photo",
+        "aiProcessingTitleBackground": "Removing the background",
+        "aiProcessingDescription": "No need to wait here — the work carries on if you close this.",
+        "aiProcessingContinueBackground": "Continue in the background",
+        "aiProcessingFailedTitle": "The processing did not complete",
+        "aiProcessingFailedDescription": "Your photos were added just fine. You can run the processing again whenever you like.",
+        "aiProcessingRetry": "Try again",
+        "aiProcessingClose": "Close",
+        "aiStepPrepareLabel": "Preparing",
+        "aiStepPrepareMessage1": "Reading your photo…",
+        "aiStepPrepareMessage2": "Locating the product in the frame.",
+        "aiStepPrepareMessage3": "Measuring light and colours.",
+        "aiStepEnhanceLabel": "AI enhancement",
+        "aiStepEnhanceMessage1": "The AI is working on light and sharpness.",
+        "aiStepEnhanceMessage2": "Colours are tuned for a faithful result.",
+        "aiStepEnhanceMessage3": "This is the longest step — it is worth the wait.",
+        "aiStepEnhanceMessage4": "Your shot is getting close to a studio one.",
+        "aiStepCutoutLabel": "Cutting out",
+        "aiStepCutoutMessage1": "Separating the product from its background.",
+        "aiStepCutoutMessage2": "Edges are being refined pixel by pixel.",
+        "aiStepCutoutMessage3": "A clean background puts your product first.",
+        "aiStepFinishLabel": "Finishing",
+        "aiStepFinishMessage1": "Reframing to 4:3 and centring the product.",
+        "aiStepFinishMessage2": "Final touches before showing you the result.",
+        "aiStepFinishMessage3": "Just a few more moments…",
+        "aiEnhanceLearnMoreTitle": "Photos that make people want to book",
+        "aiEnhanceLearnMoreDescription": "The AI turns a quick phone snapshot into a catalogue-grade visual.",
+        "aiEnhanceLearnMoreBenefit1": "A professional look with no studio and no gear: your product comes out sharp and well lit.",
+        "aiEnhanceLearnMoreBenefit2": "A consistent catalogue: every listing shares the same framing and the same background.",
+        "aiEnhanceLearnMoreBenefit3": "Polished visuals build trust, and customers book more easily.",
+        "aiEnhanceLearnMoreGalleryTitle": "Examples from other shops",
+        "aiEnhanceLearnMoreHeroAlt": "Example of a photo enhanced by the AI",
+        "aiEnhanceLearnMoreExampleAlt": "Example {index}: photo before and after enhancement",
+        "removeBackgroundLearnMoreTitle": "A background that steps aside for your product",
+        "removeBackgroundLearnMoreDescription": "We keep your photo exactly as it is and remove only the background.",
+        "removeBackgroundLearnMoreBenefit1": "Your storefront's own background takes over: the product fits in anywhere, with no white edge.",
+        "removeBackgroundLearnMoreBenefit2": "No more garage or living-room backdrops pulling attention away from the product.",
+        "removeBackgroundLearnMoreBenefit3": "Perfect when your photo is already good and only the surroundings let it down.",
+        "removeBackgroundLearnMoreThemeTitle": "Works in light mode and dark mode alike",
+        "removeBackgroundLearnMoreThemeDescription": "The cut-out product sits on your storefront's own background, so it looks right whichever theme your visitor picks.",
+        "removeBackgroundLearnMoreThemeLight": "Light theme",
+        "removeBackgroundLearnMoreThemeDark": "Dark theme",
+        "removeBackgroundLearnMoreAlt": "Example of a cut-out product",
+        "removeImage": "Remove photo",
+        "aiActionWithCost": "{action} — {cost}",
+        "aiEnhanceCancelled": "Generation cancelled",
+        "aiCancelGeneration": "Cancel the generation",
+        "aiCancelledTitle": "Generation cancelled",
+        "aiCancelledDescription": "No credits were charged. Your photos were added just fine — run the processing again whenever you like.",
         "information": "Information",
         "name": "Product name",
         "namePlaceholder": "E.g., Mountain Bike XC 500",
@@ -931,7 +1090,9 @@
             "strictLine": "Fixed tiers",
             "progressiveLine": "Progressive",
             "savings": "Customer savings",
-            "basePricing": "Base pricing"
+            "basePricing": "Base pricing",
+            "title": "Price simulation",
+            "subtitle": "Total price charged by rental duration"
           }
         },
         "unitTracking": {
@@ -950,7 +1111,7 @@
           "bookingAttributesEmpty": "No booking attributes configured. All tracked units share the default combination.",
           "bookingAttributeValuePlaceholder": "{label} value",
           "combinationKey": "Combination",
-          "missingAttributesWarning": "{count, plural, one {# active unit is missing at least one attribute value} other {# active units are missing at least one attribute value}}",
+          "missingAttributesWarning": "{count, plural, one {# unit is missing variant values} other {# units are missing variant values}}",
           "manageAttributes": "Manage attributes",
           "manageAttributesDescription": "Attributes let customers choose specific characteristics when booking (e.g., size, color). Each unit is tagged with its attribute values, and the system automatically assigns a matching unit at checkout.",
           "manageAttributesExample": "Example: for a kayak rental, add \"Size\" (S, M, L) and \"Color\" (Red, Blue). A customer booking a Medium Red kayak will be assigned a matching available unit.",
@@ -987,7 +1148,89 @@
           "purchaseDetails": "Purchase details",
           "unitDetails": "Details",
           "existingUnitDetailsHint": "Purchase details, notes, and lifecycle are managed from inventory.",
-          "openInventoryDetails": "Open inventory"
+          "openInventoryDetails": "Open inventory",
+          "benefitIdentify": "Give each item a serial number or reference",
+          "benefitAvailability": "Track each item's availability and rentals",
+          "benefitInventory": "Record purchase price and date for your inventory",
+          "modeQuantity": "Simple quantity",
+          "modeQuantityDescription": "Just set how many items are available to rent.",
+          "modeUnits": "Per-unit tracking",
+          "modeUnitsDescription": "Each item gets its own identifier.",
+          "variantsTitle": "Variants",
+          "variantsHelp": "Up to 3 variants (size, color…). Each unit sets its value and customers pick one when booking.",
+          "variantsEmptyHint": "Creating one product per size? Add a \"Size\" variant instead: each unit carries its own and customers choose when booking.",
+          "variantPlaceholder": "e.g. Size",
+          "addVariant": "Add a variant",
+          "variantsMaxReached": "Maximum 3 variants",
+          "defaultBadge": "Default",
+          "advancedBadge": "Advanced",
+          "learnMore": "Learn more",
+          "addRefPlaceholder": "Type a reference and press Enter",
+          "generateSeries": "Generate a series",
+          "changeMode": "Change mode",
+          "createVariantValue": "Create \"{value}\" ({axis})",
+          "chooseColor": "Choose a color",
+          "colorPickerDescription": "Adjust the color or enter a hexadecimal value.",
+          "colorHue": "Hue",
+          "hexColor": "Hex color",
+          "presetSuggestions": "Suggestions",
+          "valuesCount": "{count, plural, one {# value} other {# values}}",
+          "presets": {
+            "size": {
+              "label": "Size"
+            },
+            "shoeSize": {
+              "label": "Shoe size"
+            },
+            "color": {
+              "label": "Color",
+              "values": {
+                "black": "Black",
+                "white": "White",
+                "gray": "Gray",
+                "red": "Red",
+                "orange": "Orange",
+                "yellow": "Yellow",
+                "green": "Green",
+                "blue": "Blue",
+                "purple": "Purple",
+                "pink": "Pink",
+                "brown": "Brown",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Material",
+              "values": {
+                "cotton": "Cotton",
+                "leather": "Leather",
+                "wood": "Wood",
+                "metal": "Metal",
+                "plastic": "Plastic",
+                "aluminum": "Aluminum",
+                "carbon": "Carbon"
+              }
+            }
+          },
+          "manageVariants": "Manage variants",
+          "managerTitle": "Variants",
+          "managerDescription": "Definitions shared across all your products (size, color…).",
+          "activeVariantsCount": "{active} active out of {total}",
+          "variantActive": "Active",
+          "variantInactive": "Inactive",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "New variant",
+          "newVariantDescription": "Create a variant shared across your products (e.g. Size).",
+          "editVariant": "Rename variant",
+          "editVariantDescription": "The name is updated in the shared catalog.",
+          "editValue": "Edit value",
+          "editValueDescription": "The label is updated in the shared catalog.",
+          "deleteVariantTitle": "Delete this variant?",
+          "deleteVariantDescription": "\"{name}\" and its values will be removed from the catalog. Products using it keep their current values.",
+          "addValuePlaceholder": "New value…",
+          "noVariants": "No variants",
+          "variantsCount": "{count, plural, one {# variant} other {# variants}}",
+          "unitImages": "Unit photos"
         },
         "previewTitle": "Preview",
         "previewDescription": "Here's how your product will appear in the catalog",
@@ -995,8 +1238,6 @@
         "noName": "No name",
         "units": "unit(s)",
         "recommended": "Recommended",
-        "previous": "Previous",
-        "next": "Next",
         "videoUrl": "YouTube Video",
         "videoUrlPlaceholder": "https://www.youtube.com/watch?v=...",
         "videoUrlHelp": "Optional - Add a presentation video for your product",
@@ -1122,11 +1363,121 @@
         },
         "aiContext": "AI advisor context",
         "aiContextPlaceholder": "E.g. requires a B licence, not suitable for children under 12, always ask for the event date and group size…",
-        "aiContextHint": "Extra details only the AI advisor can see — it uses them to advise customers and check requirements. Never shown on the storefront."
+        "aiContextHint": "Extra details only the AI advisor can see — it uses them to advise customers and check requirements. Never shown on the storefront.",
+        "createAndDuplicate": "Create and duplicate",
+        "productCreatedCopyReady": "The pre-filled copy is ready to edit.",
+        "copySuffix": "(copy)",
+        "productSection": "Product",
+        "productSectionDescription": "Name, photos and description of your product",
+        "addVideo": "Add a YouTube video",
+        "categories": "Categories",
+        "categorySearchPlaceholder": "Search or create…",
+        "categoryCreateOption": "Create “{name}”",
+        "categoryNoResults": "No category found",
+        "manageCategories": "Manage categories",
+        "summary": {
+          "checklistTitle": "Progress",
+          "required": "Required"
+        },
+        "videoTileLabel": "Video",
+        "videoInvalid": "Invalid YouTube link",
+        "editVideo": "Edit video",
+        "removeVideo": "Remove video"
       },
       "deleteConfirm": {
         "title": "Delete this product?",
         "description": "This action is irreversible. The product will be permanently deleted."
+      },
+      "categoriesSelected": "{count} categories",
+      "filterByCategory": "Filter by category",
+      "searchCategories": "Search a category...",
+      "noCategoriesFound": "No category found",
+      "detail": {
+        "viewOnStorefront": "View on storefront",
+        "stats": {
+          "revenue": "Revenue",
+          "vsPrevious30Days": "vs previous 30 days",
+          "reservations": "Reservations",
+          "reservationsSubtitle": "{upcoming} upcoming · {completed} completed",
+          "utilization": "Utilization",
+          "utilizationSubtitle": "Last 30 days",
+          "stock": "Stock",
+          "unitsActiveValue": "{active}/{total} active"
+        },
+        "inventory": {
+          "title": "Inventory",
+          "manageStock": "Manage stock",
+          "quantity": "Quantity",
+          "available": "Available",
+          "noUnits": "No units registered",
+          "identifier": "Identifier",
+          "attributes": "Attributes",
+          "unitStatus": "Status",
+          "lifecycle": "Lifecycle",
+          "inDowntime": "In maintenance",
+          "busyToday": "Busy today",
+          "active": "Active",
+          "retired": "Retired"
+        },
+        "reservations": {
+          "title": "Reservations",
+          "empty": "No reservations for this product yet",
+          "dates": "Dates",
+          "quantity": "Qty",
+          "viewAllHint": "Showing the 10 most recent of {total} reservations.",
+          "viewAllLink": "View all reservations",
+          "viewList": "List",
+          "viewCalendar": "Calendar",
+          "timeline": {
+            "stock": "Stock",
+            "statusFilter": "Filter by status",
+            "showAll": "Show all",
+            "previous": "Previous period",
+            "next": "Next period",
+            "retry": "Retry",
+            "noUnits": "No active units to display",
+            "availableOn": "{date}: {count, plural, =0 {fully booked} one {# unit available} other {# units available}}",
+            "dragHint": "Tip: click and drag on an empty range to create a prefilled reservation."
+          }
+        },
+        "info": {
+          "title": "Product information",
+          "noDescription": "No description provided",
+          "seasonalPricing": "Seasonal pricing",
+          "accessories": "Accessories",
+          "noAccessories": "No accessories linked",
+          "gallery": "Photos",
+          "galleryImageAlt": "Photo {index}",
+          "noImages": "No photos added"
+        },
+        "quickFacts": {
+          "title": "Quick facts",
+          "createdAt": "Created",
+          "updatedAt": "Last updated",
+          "deposit": "Deposit",
+          "noDeposit": "No deposit",
+          "tax": "Tax",
+          "taxInherited": "Store default",
+          "taxCustomRate": "Custom rate ({rate}%)",
+          "bookingAxes": "Booking attributes"
+        },
+        "activity": {
+          "title": "Unit activity",
+          "empty": "No activity recorded yet",
+          "types": {
+            "created": "Unit created",
+            "deleted": "Unit deleted",
+            "downtime_declared": "Downtime declared",
+            "downtime_updated": "Downtime updated",
+            "downtime_closed": "Downtime closed",
+            "downtime_deleted": "Downtime deleted",
+            "retired": "Unit retired",
+            "reinstated": "Unit reinstated",
+            "assigned": "Assigned to reservation",
+            "unassigned": "Unassigned from reservation",
+            "updated": "Unit updated"
+          }
+        }
       }
     },
     "inventory": {
@@ -1561,11 +1912,7 @@
       "manualForm": {
         "title": "New manual reservation",
         "selectCustomer": "Select a customer",
-        "newCustomer": "New customer",
-        "newCustomerDescription": "Create a new customer for this reservation",
         "newCustomerBadge": "New customer",
-        "existingCustomer": "Existing customer",
-        "existingCustomerDescription": "Select a customer from your database",
         "selectProducts": "Select products",
         "selectPeriod": "Select period",
         "addProduct": "Add a product",
@@ -1573,15 +1920,6 @@
         "sendConfirmationEmail": "Send confirmation to customer",
         "customer": "Customer",
         "customerStepDescription": "Select an existing customer or create a new one",
-        "chooseCustomer": "Choose a customer",
-        "email": "Email",
-        "emailPlaceholder": "customer@email.com",
-        "firstName": "First name",
-        "firstNamePlaceholder": "John",
-        "lastName": "Last name",
-        "lastNamePlaceholder": "Doe",
-        "phone": "Phone (optional)",
-        "phonePlaceholder": "+1 234 567 8900",
         "period": "Period",
         "periodStepDescription": "Set the start and end dates for the rental",
         "startDate": "Start date",
@@ -1594,7 +1932,7 @@
         "noProductsFound": "No products found",
         "noProductsFoundHint": "No products match \"{search}\".",
         "noProducts": "No products selected",
-        "noProductsHint": "Use the menu above to add products",
+        "noProductsHint": "Add a product to this reservation to get started",
         "perHour": "h",
         "perDay": "d",
         "perWeek": "week",
@@ -1642,7 +1980,6 @@
         "selectDatesError": "Please select dates",
         "addProductError": "Please add at least one product",
         "selectCustomerError": "Please select a customer",
-        "fillCustomerInfoError": "Please fill in customer information",
         "confirmTitle": "Summary",
         "confirmDescription": "Review the information before creating the reservation",
         "steps": {
@@ -1736,7 +2073,11 @@
           "apply": "Apply",
           "modified": "Price modified",
           "priceUpdated": "Price updated",
-          "priceReset": "Price reset"
+          "priceReset": "Price reset",
+          "modeUnit": "Unit price",
+          "modeTotal": "Total price",
+          "modePercent": "Discount %",
+          "resultingUnitPrice": "Resulting unit price"
         },
         "warnings": {
           "advanceNotice": "Start date is before the advance notice period",
@@ -1766,6 +2107,16 @@
           "combination": "Combination: {combination}",
           "shortfall": "Requested: {requested} · Available: {available}",
           "createAnyway": "Create anyway"
+        },
+        "addUnavailable": {
+          "title": "Product unavailable",
+          "description": "“{name}” has no availability left for the selected period. Adding it may cause overbooking.",
+          "confirm": "Add anyway"
+        },
+        "globalDiscount": {
+          "label": "Discount",
+          "add": "Add a discount",
+          "remove": "Remove discount"
         }
       },
       "rejectDialog": {
@@ -1777,8 +2128,6 @@
       },
       "awaitingResponse": "Awaiting response",
       "itemsCount": "{count, plural, one {# item} other {# items}}",
-      "viewTable": "Table view",
-      "viewCards": "Card view",
       "pagination": {
         "showing": "Showing {start} to {end} of {total}",
         "perPage": "Per page",
@@ -2147,7 +2496,15 @@
         "viewConversation": "View conversation",
         "sheetTitle": "Advisor conversation",
         "sheetDescription": "Chat between the customer and the AI advisor for this reservation."
-      }
+      },
+      "views": {
+        "label": "View mode",
+        "list": "List",
+        "calendar": "Calendar",
+        "planning": "Planning"
+      },
+      "displayCards": "Card view",
+      "displayTable": "Table view"
     },
     "customers": {
       "title": "Customers",
@@ -2255,6 +2612,10 @@
         "CA": "Canada",
         "US": "United States",
         "GB": "United Kingdom"
+      },
+      "quickCreate": {
+        "title": "New customer",
+        "description": "The customer will be created and selected automatically."
       }
     },
     "calendar": {
@@ -2328,48 +2689,49 @@
         "reservationsCount": "{count, plural, one {# reservation} other {# reservations}}"
       },
       "timeline": {
-        "products": "Products",
-        "quantity": "{count, plural, one {# unit} other {# units}}",
-        "available": "Available",
-        "noProducts": "No products to display"
+        "previous": "Previous period",
+        "next": "Next period",
+        "statusFilter": "Filter by status",
+        "operationFilter": "Filter by today's operation",
+        "allOperations": "All operations",
+        "todaysDepartures": "Today's departures",
+        "todaysReturns": "Today's returns",
+        "showAll": "Show all",
+        "retry": "Retry",
+        "dragHint": "Tip: click and drag on an empty range to create a prefilled reservation.",
+        "searchProductsPlaceholder": "Search in {count} products...",
+        "noProductsFound": "No products found",
+        "productsSelected": "{count} products"
       },
       "export": {
         "button": "Sync calendar",
         "title": "Sync calendar",
-        "description": "Connect a calendar integration or use the universal ICS link.",
-        "integration": {
-          "title": "Recommended calendar integration",
-          "description": "Connect Google Calendar to sync reservations automatically, with colors, private visibility, availability and retries.",
-          "button": "Configure Google Calendar"
-        },
-        "ics": {
-          "title": "Universal ICS link",
-          "description": "Compatible with Apple Calendar, Outlook and other calendars. Freshness depends on the subscribed app."
-        },
-        "urlLabel": "ICS calendar link",
+        "description": "Add your reservations to the calendar you already use.",
         "loading": "Loading...",
-        "instructions": {
-          "title": "Add the ICS link manually",
-          "google": {
-            "step1": "Open Google Calendar",
-            "step2": "Click the + next to \"Other calendars\" then \"From URL\"",
-            "step3": "Paste the link and click \"Add calendar\"",
-            "openLink": "Open Google Calendar",
-            "freshnessNote": "Louez publishes changes immediately and asks clients to refresh every 5 minutes. Google may still apply its own sync delay."
-          },
-          "apple": {
-            "step1": "Open the Calendar app on Mac or iPhone",
-            "step2": "File > New Calendar Subscription (Mac) or Add Account > Other > Add Subscribed Calendar (iOS)",
-            "step3": "Paste the link and confirm"
-          },
-          "outlook": {
-            "step1": "Open Outlook Calendar",
-            "step2": "Click \"Add calendar\" then \"Subscribe from web\"",
-            "step3": "Paste the link and give the calendar a name"
-          }
+        "done": "Done",
+        "cancel": "Cancel",
+        "google": {
+          "title": "Google Calendar",
+          "recommended": "Recommended",
+          "connected": "Connected",
+          "connect": "Connect",
+          "manage": "Manage",
+          "help": "Automatic sync: colors, private visibility, availability and automatic retries. The most reliable option."
         },
-        "regenerate": "Regenerate link",
-        "regenerateHint": "Regenerating the link will invalidate previously shared links."
+        "subscribe": {
+          "title": "Subscribe with a link",
+          "help": "Read-only subscription. Louez publishes changes immediately, but each calendar app decides how often it refreshes.",
+          "apple": "Apple Calendar",
+          "outlook": "Outlook",
+          "google": "Google Calendar",
+          "copy": "Copy link",
+          "copied": "Copied"
+        },
+        "regenerate": {
+          "action": "Regenerate link",
+          "confirmTitle": "Regenerate the link?",
+          "hint": "Previously shared links will stop working and every subscribed calendar will have to be added again."
+        }
       }
     },
     "statistics": {
@@ -3908,9 +4270,8 @@
             "note": "Return inspection - reservation #{reservationNumber}",
             "noneSelected": "Select at least one unit",
             "createdToast": "{count, plural, one {Repair downtime created} other {Repair downtimes created}}",
-            "conflictsToast": "Conflicts detected - manage them in Inventory",
-            "conflictsDescription": "Conflicts detected. Manage them in Inventory.",
-            "openInventory": "Open Inventory",
+            "conflictsToast": "Conflicts detected - manage them from the product page",
+            "conflictsDescription": "Conflicts detected. Manage them from the affected product's page.",
             "skip": "Skip",
             "submit": "Create repair downtime",
             "done": "Done"
@@ -4196,7 +4557,18 @@
         "deleteAccountWarning": "This action is irreversible. All your data will be deleted.",
         "signOut": "Sign out",
         "comingSoon": "Coming soon",
-        "administration": "Administration"
+        "administration": "Administration",
+        "keyboardShortcuts": {
+          "title": "Keyboard shortcuts",
+          "description": "Customize the shortcuts used in your workspace.",
+          "recording": "Press the keys…",
+          "recordingSequence": "Enter the sequence, then press Enter…",
+          "sequenceTooShort": "A sequence must contain at least two shortcuts.",
+          "hint": "Select a shortcut. For a sequence, press the keys in order and then press Enter.",
+          "saved": "Shortcuts saved",
+          "conflict": "This shortcut is already used for “{action}”.",
+          "resetAction": "Reset “{action}”"
+        }
       },
       "admin": {
         "title": "Platform Admin",
@@ -4437,9 +4809,13 @@
           "unlinkConfirmBody": "The number {number} will be unlinked from your voice agent. You keep the number with your provider.",
           "searching": "Searching for available numbers…",
           "searchHint": "Choose a country and search for an available number to provision.",
-          "areaCodePlaceholder": "e.g. 75",
+          "areaCodePlaceholder": "e.g. 415",
           "manualSetup": "How to link an existing number",
-          "copy": "Copy"
+          "copy": "Copy",
+          "areaCodeHint": "Filters numbers by regional area code (e.g. 415 for San Francisco).",
+          "contains": "Preferred digits (optional)",
+          "containsPlaceholder": "e.g. 06",
+          "containsHint": "Only shows numbers containing this digit sequence."
         },
         "notConfigured": {
           "title": "Telephony not configured",
@@ -4474,6 +4850,21 @@
         },
         "voicePreview": "Preview",
         "voiceRecommended": "Recommended"
+      },
+      "settingsNavigation": {
+        "label": "Settings navigation",
+        "mobileLabel": "Choose a settings page",
+        "search": {
+          "label": "Search settings",
+          "placeholder": "Search settings…",
+          "noResults": "No settings match your search."
+        },
+        "groups": {
+          "store": "Store",
+          "rental": "Rentals",
+          "communication": "Communication",
+          "accountData": "Account and data"
+        }
       }
     },
     "commandPalette": {
@@ -4543,6 +4934,7 @@
       "sms": "SMS",
       "subscription": "Subscription",
       "account": "Account",
+      "whatsNew": "What's new",
       "settings": "Settings",
       "settingsAdmin": "Administration",
       "settingsApi": "API",
@@ -4558,7 +4950,9 @@
       "settingsPayments": "Payments",
       "settingsPromoCodes": "Promo codes",
       "settingsReviewBooster": "Review booster",
-      "settingsTaxes": "Taxes"
+      "settingsTaxes": "Taxes",
+      "productsEdit": "Edit",
+      "reservationsEdit": "Edit"
     },
     "notificationsCenter": {
       "title": "Notifications",
@@ -4567,6 +4961,69 @@
       "emptyTitle": "Nothing to review",
       "emptyDescription": "New requests will appear here.",
       "viewAllPending": "View all pending requests"
+    },
+    "whatsNew": {
+      "title": "What's new",
+      "description": "The latest improvements to Louez",
+      "pageDescription": "Everything we shipped to Louez, newest first — and why we built it.",
+      "newLabel": "New",
+      "newFeatureLabel": "New feature",
+      "unread": "Unread",
+      "markAsRead": "Mark as read",
+      "markAllAsRead": "Mark all as read",
+      "watchDemo": "Watch the demo for {title}",
+      "tryIt": "Try it",
+      "viewAll": "See all updates",
+      "backToList": "All updates",
+      "emptyTitle": "Nothing here yet",
+      "empty": "No updates yet.",
+      "filterEmpty": "No update in this category yet.",
+      "filters": {
+        "all": "All"
+      },
+      "categories": {
+        "feature": "New",
+        "improvement": "Improved",
+        "fix": "Fixed"
+      },
+      "announcements": {
+        "product-image-ai": {
+          "title": "Your product photos get the studio treatment",
+          "description": "On upload, AI cuts out your product, cleans up the background and centres it — or only removes the backdrop if you'd rather keep your framing. And every version stays in the photo's history: compare, change your mind, go back to the original."
+        },
+        "sidebar-simplified": {
+          "title": "A shorter menu, pages where you expect them",
+          "description": "The calendar joins reservations, inventory joins the product page, subscription and referrals join settings: four fewer entries in the menu, and nothing lost along the way."
+        },
+        "product-variants": {
+          "title": "Variants, made simple",
+          "description": "The attributes you used to type by hand are now proper variants, shared across your whole store. Size and Colour are ready as soon as you turn on per-unit tracking, Shoe size and Material are one click away — and you no longer need one product page per size."
+        },
+        "product-detail-hub": {
+          "title": "Every product now has a page of its own",
+          "description": "Opening a product used to mean opening its form. It now has a real page: what it earns, how often it goes out, where its stock stands, who booked it and what happened to each of its units."
+        },
+        "reservations-unified-views": {
+          "title": "Your reservations now open on the calendar",
+          "description": "The Reservations page now opens on the calendar. It scrolls continuously, from one week to the next without changing page, and a hover gives you the whole reservation. The list and the per-product planning stay one click away."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Two sections, and your product is live",
+          "description": "The four-step wizard gives way to a single page. Accessories and insurance are no longer asked for at creation time — you add them later if you need them. On the right, a preview of the listing and a list of what is left to fill in."
+        },
+        "keyboard-shortcuts": {
+          "title": "For those who never leave the keyboard",
+          "description": "Eight everyday actions open from the keyboard, and every one of them can be remapped in your account — two-key sequences included. If you spend your days in Louez, this is for you. If not, everything still works with the mouse."
+        },
+        "navigation-refresh": {
+          "title": "⌘K takes you anywhere",
+          "description": "The command palette opens any page, any setting, any product, customer or reservation. In settings, a search box takes you to the exact setting and highlights it. And breadcrumbs always tell you where you are."
+        },
+        "reservation-creation-simplified": {
+          "title": "One reservation, one page",
+          "description": "No more steps to walk through: customer, period, products and delivery all fit on one page, with the summary always beside you. And everything that used to mean reopening the reservation afterwards — a discount, a negotiated price, the deposit, a walk-in customer — is now settled on the spot."
+        }
+      }
     },
     "aiCredits": {
       "title": "AI credits",
@@ -4625,6 +5082,61 @@
         "errors": {
           "generic": "Something went wrong. Please try again."
         }
+      },
+      "page": {
+        "title": "AI credits",
+        "subtitle": "The wallet behind every AI feature in your shop",
+        "totalTitle": "Total balance",
+        "totalUnlimitedHint": "Your plan doesn't cap usage",
+        "monthlyTitle": "Included this month",
+        "monthlyUsedHint": "{used} of {included} used",
+        "monthlyUnlimitedHint": "Unlimited on your plan",
+        "monthlyNoneHint": "Your plan includes no credits",
+        "prepaidTitle": "Prepaid credits",
+        "prepaidHint": "They never expire",
+        "pitchTitle": "What your credits unlock",
+        "pitchDescription": "One wallet for every AI feature in your shop.",
+        "perkAdvisorTitle": "An advisor around the clock",
+        "perkAdvisorDescription": "Customers ask about your catalogue and get an answer straight away, even at night.",
+        "perkVoiceTitle": "An agent that picks up",
+        "perkVoiceDescription": "Missed calls turn into qualified enquiries, with a dedicated number if you want one.",
+        "perkImagesTitle": "Sharper product photos",
+        "perkImagesDescription": "Remove the background and polish your shots in one click, right from the product page.",
+        "pitchSecondaryCta": "Explore the AI assistant",
+        "pitchFootnote": "You only pay for what you use, and credits never expire.",
+        "recapTitle": "Your credits this month",
+        "recapDescription": "What your credits have done for the shop since the start of the month.",
+        "recapConversations": "Conversations",
+        "recapCalls": "Calls answered",
+        "recapImages": "Images enhanced",
+        "recapCredits": "Credits spent",
+        "recapCallTime": "That's {minutes} min of calls in total.",
+        "historyTitle": "History",
+        "historyDescription": "Everything you have used and everything you have bought.",
+        "tabUsage": "Usage",
+        "tabPurchases": "Purchases",
+        "usageEmpty": "Nothing used yet",
+        "usageEmptyDescription": "As soon as the AI works for you, every spend shows up here.",
+        "purchasesEmpty": "No purchases yet",
+        "purchasesEmptyDescription": "Your top-ups and free credits will be listed here.",
+        "usageConversation": "Advisor conversation",
+        "usageVoiceCall": "Voice call",
+        "usageCallDuration": "{minutes} min billed",
+        "usageNumberRental": "Number rental",
+        "usageImageEnhancement": "Image enhancement",
+        "columnDate": "Date",
+        "columnDetail": "Details",
+        "columnCredits": "Credits",
+        "columnAmount": "Amount",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Completed",
+          "pending": "Pending",
+          "failed": "Failed"
+        },
+        "pagination": "Page {page} of {totalPages}",
+        "previousPage": "Previous page",
+        "nextPage": "Next page"
       }
     }
   },
@@ -5662,6 +6174,10 @@
     "noCategories": "No categories",
     "noCategoriesDescription": "Create your first category to organize your products",
     "emptyDescription": "Categories help you organize your products and make it easier for customers to browse.",
+    "searchPlaceholder": "Search categories…",
+    "noSearchResults": "No category matches your search.",
+    "totalCount": "{count, plural, =0 {No categories} one {# category} other {# categories}}",
+    "actionsFor": "Actions for {name}",
     "newCategoryDescription": "Create a new category to organize your products",
     "editCategoryDescription": "Edit the category name",
     "namePlaceholder": "Category name",
@@ -5676,7 +6192,9 @@
       "title": "Delete this category?",
       "description": "This action is irreversible. Products in this category will not be deleted.",
       "descriptionWithName": "This action is irreversible. The category \"{name}\" will be deleted.",
-      "productsWarning": "{count, plural, one {The product in this category will be moved to \"Uncategorized\".} other {The # products in this category will be moved to \"Uncategorized\"."
+      "productsWarning": "{count, plural, one {This category will be removed from # product.} other {This category will be removed from # products.}}",
+      "reassignLabel": "Reassign products to",
+      "keepExisting": "Keep their other categories"
     }
   },
   "emails": {

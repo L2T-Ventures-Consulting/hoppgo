@@ -36,6 +36,7 @@ export interface RepairDowntimeSuggestion {
     id: string;
     identifier: string;
     productName: string;
+    productId: string;
   }>;
 }
 
@@ -286,6 +287,7 @@ export async function completeInspection(
         id: productUnits.id,
         identifier: productUnits.identifier,
         productName: products.name,
+        productId: productUnits.productId,
       })
       .from(inspectionItems)
       .innerJoin(productUnits, eq(productUnits.id, inspectionItems.productUnitId))

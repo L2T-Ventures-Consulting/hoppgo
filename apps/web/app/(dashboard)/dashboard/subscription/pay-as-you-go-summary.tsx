@@ -1,5 +1,6 @@
 'use client'
 
+import { ZapSolidIcon } from '@louez/ui/icons'
 import { useState, useTransition } from 'react'
 
 import Link from 'next/link'
@@ -68,12 +69,12 @@ interface PayAsYouGoSummaryProps {
 
 const INVOICE_BADGE_VARIANT: Record<
   InvoiceSummary['status'],
-  'success' | 'warning' | 'destructive' | 'outline'
+  'success' | 'pending' | 'failed' | 'expired'
 > = {
   paid: 'success',
-  open: 'warning',
-  failed: 'destructive',
-  void: 'outline',
+  open: 'pending',
+  failed: 'failed',
+  void: 'expired',
 }
 
 const INVOICE_STATUS_KEY: Record<InvoiceSummary['status'], string> = {
@@ -206,13 +207,13 @@ export function PayAsYouGoSummary({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Badge className="gap-1">
-                <Zap className="h-3.5 w-3.5" />
+                <ZapSolidIcon className="h-3.5 w-3.5" />
                 {t('badge')}
               </Badge>
               <Button
                 variant="outline"
                 size="sm"
-                render={<Link href="/dashboard/subscription?plans=1" />}
+                render={<Link href="/dashboard/settings/subscription?plans=1" />}
               >
                 <Package className="mr-2 h-4 w-4" />
                 {t('switchToPlan')}
@@ -235,9 +236,7 @@ export function PayAsYouGoSummary({
         </CardHeader>
         <CardContent>
           {locationCount === 0 && (
-            <p className="text-muted-foreground mb-4 text-sm">
-              {t('emptyState')}
-            </p>
+            <p className="text-muted-foreground mb-4 text-sm">{t('emptyState')}</p>
           )}
 
           <div className="grid gap-4 sm:grid-cols-3">
@@ -266,12 +265,8 @@ export function PayAsYouGoSummary({
                 <Zap className="h-4 w-4" />
                 {t('collectedAtSource')}
               </div>
-              <p className="mt-1 text-2xl font-bold">
-                {money(collectedAtSourceCents)}
-              </p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                {t('collectedAtSourceHint')}
-              </p>
+              <p className="mt-1 text-2xl font-bold">{money(collectedAtSourceCents)}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{t('collectedAtSourceHint')}</p>
             </div>
           </div>
 
@@ -284,11 +279,7 @@ export function PayAsYouGoSummary({
       {/* Pricing and invoice history side by side: the tariff ladder is narrow, so
           giving it its own column keeps the rates easy to read. Stacks on mobile. */}
       <div className="grid items-start gap-6 lg:grid-cols-2">
-        <PayAsYouGoPricing
-          flatRateCents={flatRateCents}
-          bands={bands}
-          currency={currency}
-        />
+        <PayAsYouGoPricing flatRateCents={flatRateCents} bands={bands} currency={currency} />
 
         <Card>
           <CardHeader>
@@ -299,38 +290,38 @@ export function PayAsYouGoSummary({
             <CardDescription>{t('invoiceHistoryDescription')}</CardDescription>
           </CardHeader>
           <CardContent>
-          {invoices.length === 0 ? (
-            <p className="text-muted-foreground text-sm">{t('noInvoicesYet')}</p>
-          ) : (
-            <ul className="divide-y">
-              {invoices.map((invoice) => (
-                <li
-                  key={invoice.billingMonth}
-                  className="flex flex-wrap items-center justify-between gap-2 py-3"
-                >
-                  <div className="min-w-0">
-                    <p className="font-medium capitalize">
-                      {monthLabel(invoice.billingMonth)}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {t('invoiceLocations', { count: invoice.locationCount })}
-                      {invoice.paidAt
-                        ? ` · ${t('paidOn', { date: dateLabel(invoice.paidAt) })}`
-                        : ''}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-medium">
-                      {money(invoice.invoicedAmountCents, invoice.currency)}
-                    </span>
-                    <Badge variant={INVOICE_BADGE_VARIANT[invoice.status]}>
-                      {t(INVOICE_STATUS_KEY[invoice.status])}
-                    </Badge>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+            {invoices.length === 0 ? (
+              <p className="text-muted-foreground text-sm">{t('noInvoicesYet')}</p>
+            ) : (
+              <ul className="divide-y">
+                {invoices.map((invoice) => (
+                  <li
+                    key={invoice.billingMonth}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="font-medium capitalize">{monthLabel(invoice.billingMonth)}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {t('invoiceLocations', {
+                          count: invoice.locationCount,
+                        })}
+                        {invoice.paidAt
+                          ? ` · ${t('paidOn', { date: dateLabel(invoice.paidAt) })}`
+                          : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-medium">
+                        {money(invoice.invoicedAmountCents, invoice.currency)}
+                      </span>
+                      <Badge variant={INVOICE_BADGE_VARIANT[invoice.status]}>
+                        {t(INVOICE_STATUS_KEY[invoice.status])}
+                      </Badge>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
           </CardContent>
         </Card>
       </div>

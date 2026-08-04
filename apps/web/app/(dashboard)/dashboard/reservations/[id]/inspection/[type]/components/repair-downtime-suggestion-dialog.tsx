@@ -20,12 +20,18 @@ import {
   toastManager,
 } from '@louez/ui';
 
-import { declareDowntime } from '@/app/(dashboard)/dashboard/inventory/actions';
-import { getTranslatedActionError } from '@/app/(dashboard)/dashboard/inventory/components/util.inventory-format';
+import { declareDowntime } from '@/app/(dashboard)/dashboard/products/[id]/actions';
+import { getTranslatedActionError } from '@/app/(dashboard)/dashboard/products/[id]/components/inventory/util.inventory-format';
 
 interface RepairDowntimeSuggestionUnit {
   id: string;
   identifier: string;
+  productName: string;
+  productId: string;
+}
+
+interface ConflictedProduct {
+  productId: string;
   productName: string;
 }
 
@@ -53,6 +59,9 @@ export const RepairDowntimeSuggestionDialog = ({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [conflictsDetected, setConflictsDetected] = useState(false);
+  const [conflictedProducts, setConflictedProducts] = useState<
+    ConflictedProduct[]
+  >([]);
 
   useEffect(() => {
     if (!open) {
@@ -62,6 +71,7 @@ export const RepairDowntimeSuggestionDialog = ({
     setSelectedUnitIds(new Set(units.map((unit) => unit.id)));
     setIsSubmitting(false);
     setConflictsDetected(false);
+    setConflictedProducts([]);
   }, [open, units]);
 
   const selectedUnits = useMemo(
@@ -90,7 +100,7 @@ export const RepairDowntimeSuggestionDialog = ({
     const startsAt = new Date();
     const note = t('note', { reservationNumber });
     const remainingUnitIds = new Set(selectedUnitIds);
-    let hasConflicts = false;
+    const conflictedUnits: RepairDowntimeSuggestionUnit[] = [];
 
     setIsSubmitting(true);
 
@@ -117,7 +127,9 @@ export const RepairDowntimeSuggestionDialog = ({
         }
 
         remainingUnitIds.delete(unit.id);
-        hasConflicts = hasConflicts || result.conflicts.length > 0;
+        if (result.conflicts.length > 0) {
+          conflictedUnits.push(unit);
+        }
       }
 
       toastManager.add({
@@ -125,8 +137,18 @@ export const RepairDowntimeSuggestionDialog = ({
         type: 'success',
       });
 
-      if (hasConflicts) {
+      if (conflictedUnits.length > 0) {
+        const distinctProducts = Array.from(
+          new Map(
+            conflictedUnits.map((unit) => [
+              unit.productId,
+              { productId: unit.productId, productName: unit.productName },
+            ]),
+          ).values(),
+        );
+
         setConflictsDetected(true);
+        setConflictedProducts(distinctProducts);
         setSelectedUnitIds(new Set());
         toastManager.add({ title: t('conflictsToast'), type: 'warning' });
         return;
@@ -201,12 +223,17 @@ export const RepairDowntimeSuggestionDialog = ({
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
                 <div className="space-y-1 text-sm">
                   <p>{t('conflictsDescription')}</p>
-                  <Link
-                    href="/dashboard/inventory"
-                    className="text-primary font-medium hover:underline"
-                  >
-                    {t('openInventory')}
-                  </Link>
+                  <div className="flex flex-col items-start gap-0.5">
+                    {conflictedProducts.map((product) => (
+                      <Link
+                        key={product.productId}
+                        href={`/dashboard/products/${product.productId}`}
+                        className="text-primary font-medium hover:underline"
+                      >
+                        {product.productName}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
             ) : null}

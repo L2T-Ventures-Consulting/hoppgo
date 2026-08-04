@@ -11,6 +11,7 @@ import { db, effectiveProductQuantitySql } from '@louez/db';
 import {
   categories,
   productAccessories,
+  productCategories,
   productPricingTiers,
   productSeasonalPricing,
   productSeasonalPricingTiers,
@@ -23,6 +24,8 @@ import { Skeleton } from '@louez/ui';
 
 import { generateStoreMetadata } from '@/lib/seo';
 import { storefrontRedirect } from '@/lib/storefront-url';
+import { filterActiveVariantAxes } from '@/lib/util.variant-visibility';
+import { getStoreVariantActivity } from '@/lib/util.variant-visibility.server';
 import { getCurrentDowntimeUnitIds } from '@/lib/utils/unit-current-downtime';
 
 import { RentalContent } from './rental-content';
@@ -36,6 +39,8 @@ interface RentalPageProps {
     search?: string;
   }>;
 }
+
+export const instant = false;
 
 export async function generateMetadata({
   params,
@@ -118,6 +123,8 @@ export default async function RentalPage({
     notFound();
   }
 
+  const variantActivity = await getStoreVariantActivity(store.id);
+
   // Fetch categories
   const storeCategories = await db.query.categories.findMany({
     where: eq(categories.storeId, store.id),
@@ -130,7 +137,15 @@ export default async function RentalPage({
     eq(products.status, 'active'),
   ];
   if (categoryId) {
-    conditions.push(eq(products.categoryId, categoryId));
+    conditions.push(
+      inArray(
+        products.id,
+        db
+          .select({ id: productCategories.productId })
+          .from(productCategories)
+          .where(eq(productCategories.categoryId, categoryId)),
+      ),
+    );
   }
 
   // Fetch product IDs first (lightweight query)
@@ -463,6 +478,7 @@ export default async function RentalPage({
         // Advisor-only context — intentionally not selected nor sent to the storefront
         aiContext: null,
         images: row.images,
+        imageHistory: [],
         price: row.price,
         deposit: row.deposit,
         basePeriodMinutes: row.basePeriodMinutes,
@@ -476,7 +492,10 @@ export default async function RentalPage({
         taxSettings: row.taxSettings,
         enforceStrictTiers: row.enforceStrictTiers,
         trackUnits: row.trackUnits,
-        bookingAttributeAxes: row.bookingAttributeAxes,
+        bookingAttributeAxes: filterActiveVariantAxes(
+          row.bookingAttributeAxes ?? [],
+          variantActivity,
+        ),
         units: productUnitsByProductId.get(row.id) || [],
         displayQuantity: row.trackUnits
           ? (productUnitsByProductId.get(row.id) || []).filter(

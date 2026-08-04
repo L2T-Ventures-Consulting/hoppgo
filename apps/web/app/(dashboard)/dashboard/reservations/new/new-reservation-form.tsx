@@ -1,16 +1,13 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { useStore } from '@tanstack/react-form';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { enUS, fr } from 'date-fns/locale';
+import { revalidateLogic, useStore } from "@tanstack/react-form";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
-  ArrowLeft,
-  ArrowRight,
   Calendar,
   Check,
   FileText,
@@ -18,29 +15,18 @@ import {
   PenLine,
   Plus,
   ShieldCheckIcon,
-} from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import { usePostHog } from "posthog-js/react";
 
-import type { PricingMode, UnitAttributes } from '@louez/types';
-import { toastManager } from '@louez/ui';
-import { Button } from '@louez/ui';
-import { Input } from '@louez/ui';
-import { Textarea } from '@louez/ui';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@louez/ui';
-import { StepActions, StepContent, Stepper } from '@louez/ui';
+import type { PricingMode, UnitAttributes } from "@louez/types";
+import { toastManager } from "@louez/ui";
+import { Button } from "@louez/ui";
+import { Input } from "@louez/ui";
+import { Textarea } from "@louez/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
+import { InputPrice, StepActions, Tabs, TabsList, TabsTrigger } from "@louez/ui";
 import {
   Dialog,
   DialogDescription,
@@ -49,49 +35,52 @@ import {
   DialogPanel,
   DialogPopup,
   DialogTitle,
-} from '@louez/ui';
-import { Label } from '@louez/ui';
-import { Checkbox } from '@louez/ui';
-import { cn, formatCurrency } from '@louez/utils';
+} from "@louez/ui";
+import { Label } from "@louez/ui";
+import { cn, formatCurrency } from "@louez/utils";
 
-import { invalidateReservationList } from '@/lib/orpc/invalidation';
-import { trackOpenReplayEvent } from '@/lib/openreplay/client';
-import { openReplayEvents } from '@/lib/openreplay/events';
-import { orpc } from '@/lib/orpc/react';
-import { formatStoreDate } from '@/lib/utils/store-date';
+import { invalidateReservationList } from "@/lib/orpc/invalidation";
+import { trackOpenReplayEvent } from "@/lib/openreplay/client";
+import { openReplayEvents } from "@/lib/openreplay/events";
+import { orpc } from "@/lib/orpc/react";
+import {
+  dashboardReservationAnalyticsBaseProperties,
+  productAnalyticsEvents,
+} from "@/lib/product-analytics/analytics-events";
+import { formatStoreDate } from "@/lib/utils/store-date";
 
-import { useAppForm } from '@/hooks/form/form';
+import { useAppForm } from "@/hooks/form/form";
 
-import { useStoreTimezone } from '@/contexts/store-context';
+import { useStoreTimezone } from "@/contexts/store-context";
 
-import { getManualReservationAvailability } from '../actions';
-import { NewReservationStepCustomer } from './components/new-reservation-step-customer';
-import { NewReservationStepDelivery } from './components/new-reservation-step-delivery';
-import { NewReservationStepProducts } from './components/new-reservation-step-products';
-import { NewReservationStepReview } from './components/new-reservation-step-review';
-import { useNewReservationDelivery } from './hooks/use-new-reservation-delivery';
-import { useNewReservationPricing } from './hooks/use-new-reservation-pricing';
-import { useNewReservationStepFlow } from './hooks/use-new-reservation-step-flow';
+import { getManualReservationAvailability } from "../actions";
+import { NewReservationStepCustomer } from "./components/new-reservation-step-customer";
+import { NewReservationStepDelivery } from "./components/new-reservation-step-delivery";
+import { NewReservationStepProducts } from "./components/new-reservation-step-products";
+import {
+  NewReservationSummaryPanel,
+  type ReservationSectionId,
+} from "./components/new-reservation-summary-panel";
+import { useNewReservationDelivery } from "./hooks/use-new-reservation-delivery";
+import { useNewReservationPricing } from "./hooks/use-new-reservation-pricing";
 import {
   getPeriodAvailability,
   useNewReservationWarnings,
-} from './hooks/use-new-reservation-warnings';
+} from "./hooks/use-new-reservation-warnings";
 import type {
+  Customer,
   CustomItem,
   NewReservationFormComponentApi,
   NewReservationFormProps,
   NewReservationFormValues,
-  ProductPricingDetails,
   SelectedProduct,
   StepFieldName,
-} from './types';
-import { getLineQuantityConstraints } from './utils/variant-lines';
+} from "./types";
+import { buildProductCombinations, getLineQuantityConstraints } from "./utils/variant-lines";
+import { createManualReservationSchema } from "./validation";
 
 function createLineId() {
-  if (
-    typeof crypto !== 'undefined' &&
-    typeof crypto.randomUUID === 'function'
-  ) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
 
@@ -99,10 +88,12 @@ function createLineId() {
 }
 
 function pricingModeToBasePeriodMinutes(mode: PricingMode): number {
-  if (mode === 'hour') return 60;
-  if (mode === 'week') return 10080;
+  if (mode === "hour") return 60;
+  if (mode === "week") return 10080;
   return 1440;
 }
+
+type PriceOverrideMode = "unit" | "total" | "percent";
 
 type ManualReservationShortfall = {
   productId: string;
@@ -113,17 +104,17 @@ type ManualReservationShortfall = {
 };
 
 function isInsufficientCapacityResult(result: unknown): result is {
-  error: 'errors.insufficientCapacity';
+  error: "errors.insufficientCapacity";
   shortfalls: ManualReservationShortfall[];
 } {
-  if (!result || typeof result !== 'object') {
+  if (!result || typeof result !== "object") {
     return false;
   }
 
   return (
-    'error' in result &&
-    result.error === 'errors.insufficientCapacity' &&
-    'shortfalls' in result &&
+    "error" in result &&
+    result.error === "errors.insufficientCapacity" &&
+    "shortfalls" in result &&
     Array.isArray(result.shortfalls)
   );
 }
@@ -145,31 +136,31 @@ export function NewReservationForm({
   storeLocations,
 }: NewReservationFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const queryClient = useQueryClient();
-  const locale = useLocale();
   const timezone = useStoreTimezone();
-  const t = useTranslations('dashboard.reservations.manualForm');
-  const tCommon = useTranslations('common');
-  const tErrors = useTranslations('errors');
-  const tValidation = useTranslations('validation');
+  const t = useTranslations("dashboard.reservations.manualForm");
+  const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
+  const tValidation = useTranslations("validation");
+  const posthog = usePostHog();
 
   useEffect(() => {
-    trackOpenReplayEvent(
-      openReplayEvents.dashboardReservationCreationStarted,
-      {
-        journey: 'reservation_creation',
-        step: 'started',
-        source: openReplaySource,
-      },
-    );
-  }, [openReplaySource]);
+    trackOpenReplayEvent(openReplayEvents.dashboardReservationCreationStarted, {
+      journey: "reservation_creation",
+      step: "started",
+      source: openReplaySource,
+    });
 
-  const dateLocale = locale === 'fr' ? fr : enUS;
-  const getTimeSlotsForDate = (
-    date: Date | undefined,
-  ): { minTime: string; maxTime: string } => {
+    posthog.capture(productAnalyticsEvents.dashboardReservationCreationStarted, {
+      ...dashboardReservationAnalyticsBaseProperties,
+      source: openReplaySource,
+    });
+  }, [openReplaySource, posthog]);
+
+  const getTimeSlotsForDate = (date: Date | undefined): { minTime: string; maxTime: string } => {
     void date;
-    return { minTime: '00:00', maxTime: '23:30' };
+    return { minTime: "00:00", maxTime: "23:30" };
   };
 
   const [endDatePickerOpen, setEndDatePickerOpen] = useState(false);
@@ -181,31 +172,33 @@ export function NewReservationForm({
     const rounded = Math.ceil(totalMinutes / 30) * 30;
     const h = Math.floor(rounded / 60);
     const m = rounded % 60;
-    if (h >= 24) return '23:30';
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+    if (h >= 24) return "23:30";
+    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
   }, []);
 
-  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
-    [],
-  );
+  const [createdCustomers, setCreatedCustomers] = useState<Customer[]>([]);
+  const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([]);
   const [customItems, setCustomItems] = useState<CustomItem[]>([]);
   const [showCustomItemDialog, setShowCustomItemDialog] = useState(false);
   const [customItemForm, setCustomItemForm] = useState({
-    name: '',
-    description: '',
-    unitPrice: '',
-    totalPrice: '',
-    deposit: '',
-    quantity: '1',
-    pricingMode: 'day' as PricingMode,
+    name: "",
+    description: "",
+    unitPrice: "",
+    totalPrice: "",
+    deposit: "",
+    quantity: "1",
+    pricingMode: "day" as PricingMode,
   });
-  const [priceInputMode, setPriceInputMode] = useState<'unit' | 'total'>(
-    'total',
-  );
+  const [priceInputMode, setPriceInputMode] = useState<"unit" | "total">("total");
   const [sendConfirmationEmail, setSendConfirmationEmail] = useState(true);
+  const [globalDiscount, setGlobalDiscount] = useState<{
+    mode: "amount" | "percent";
+    value: number | null;
+  }>({ mode: "amount", value: null });
+  const [depositOverride, setDepositOverride] = useState<number | null>(null);
   const sendAsQuoteRef = useRef(false);
   const [tulipInsuranceOptIn, setTulipInsuranceOptIn] = useState(
-    tulipInsuranceMode === 'required' || tulipInsuranceMode === 'optional',
+    tulipInsuranceMode === "required" || tulipInsuranceMode === "optional",
   );
   const [overbookingDialog, setOverbookingDialog] = useState<{
     isOpen: boolean;
@@ -216,27 +209,31 @@ export function NewReservationForm({
   });
 
   const isDeliveryEnabled = Boolean(
-    (deliverySettings?.enabled &&
-      storeLatitude != null &&
-      storeLongitude != null) ||
+    (deliverySettings?.enabled && storeLatitude != null && storeLongitude != null) ||
     deliverySettings?.multiLocationEnabled,
   );
 
-  // Price override dialog state
+  // Price override dialog state. The admin can express the new price as a
+  // unit price, a total for the period, or a discount percentage — all three
+  // resolve to the same stored unit price.
   const [priceOverrideDialog, setPriceOverrideDialog] = useState<{
     isOpen: boolean;
     lineId: string | null;
     currentPrice: number;
-    newPrice: string;
     pricingMode: PricingMode;
     duration: number;
+    quantity: number;
+    mode: PriceOverrideMode;
+    value: number | null;
   }>({
     isOpen: false,
     lineId: null,
     currentPrice: 0,
-    newPrice: '',
-    pricingMode: 'day',
+    pricingMode: "day",
     duration: 0,
+    quantity: 1,
+    mode: "unit",
+    value: null,
   });
 
   const createReservationMutation = useMutation({
@@ -249,168 +246,134 @@ export function NewReservationForm({
 
   const getActionErrorMessage = (error: unknown) => {
     if (error instanceof Error) {
-      if (error.message.startsWith('errors.')) {
-        return tErrors(error.message.replace('errors.', ''));
+      if (error.message.startsWith("errors.")) {
+        return tErrors(error.message.replace("errors.", ""));
       }
       return error.message;
     }
 
-    return tErrors('generic');
+    return tErrors("generic");
   };
 
   const getFieldErrorMessage = (error: unknown) => {
-    if (typeof error === 'string' && error.length > 0) {
+    if (typeof error === "string" && error.length > 0) {
       return error;
     }
 
     if (
-      typeof error === 'object' &&
+      typeof error === "object" &&
       error !== null &&
-      'message' in error &&
-      typeof error.message === 'string'
+      "message" in error &&
+      typeof error.message === "string"
     ) {
       return error.message;
     }
 
-    return tErrors('generic');
+    return tErrors("generic");
   };
 
-  function validateCurrentStep(): boolean {
-    let isValid = true;
-    const stepId = currentStepId;
-
-    switch (stepId) {
-      case 'customer':
-        if (watchCustomerType === 'existing') {
-          clearStepFieldError('email');
-          clearStepFieldError('firstName');
-          clearStepFieldError('lastName');
-
-          if (!watchCustomerId?.trim()) {
-            setStepFieldError('customerId', tValidation('required'));
-            isValid = false;
-          } else {
-            clearStepFieldError('customerId');
-          }
-        } else {
-          clearStepFieldError('customerId');
-
-          const { email, firstName, lastName } = watchedValues;
-
-          if (!email?.trim()) {
-            setStepFieldError('email', tValidation('required'));
-            isValid = false;
-          } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-            setStepFieldError('email', tValidation('email'));
-            isValid = false;
-          } else {
-            clearStepFieldError('email');
-          }
-
-          if (!firstName?.trim()) {
-            setStepFieldError('firstName', tValidation('required'));
-            isValid = false;
-          } else {
-            clearStepFieldError('firstName');
-          }
-
-          if (!lastName?.trim()) {
-            setStepFieldError('lastName', tValidation('required'));
-            isValid = false;
-          } else {
-            clearStepFieldError('lastName');
-          }
-        }
-
-        if (!isValid) {
-          toastManager.add({
-            title: t('fillCustomerInfoError'),
-            type: 'error',
-          });
-        }
-
-        return isValid;
-      case 'period':
-        if (!watchStartDate) {
-          setStepFieldError('startDate', tValidation('required'));
-          isValid = false;
-        } else {
-          clearStepFieldError('startDate');
-        }
-
-        if (!watchEndDate) {
-          setStepFieldError('endDate', tValidation('required'));
-          isValid = false;
-        } else if (watchStartDate && watchEndDate < watchStartDate) {
-          setStepFieldError('endDate', tValidation('endDateBeforeStart'));
-          isValid = false;
-        } else {
-          clearStepFieldError('endDate');
-        }
-
-        if (!isValid) {
-          toastManager.add({ title: t('selectDatesError'), type: 'error' });
-        }
-
-        return isValid;
-      case 'products':
-        if (selectedProducts.length === 0 && customItems.length === 0) {
-          toastManager.add({ title: t('addProductError'), type: 'error' });
-          return false;
-        }
-        return true;
-      case 'delivery':
-        return delivery.canContinue;
-      case 'confirm':
-        return true;
-      default:
-        return true;
-    }
+  function trackStepValidationFailed(stepId: string, failedFields: string[]) {
+    posthog.capture(productAnalyticsEvents.dashboardReservationStepValidationFailed, {
+      ...dashboardReservationAnalyticsBaseProperties,
+      step: stepId,
+      failed_fields: failedFields,
+      source: openReplaySource,
+    });
   }
 
-  const {
-    steps,
-    currentStep,
-    currentStepId,
-    stepDirection,
-    goToNextStep,
-    goToPreviousStep,
-    goToStep,
-  } = useNewReservationStepFlow({
-    validateCurrentStep,
-    isDeliveryEnabled,
-  });
+  type SectionValidationFailure = {
+    section: ReservationSectionId;
+    failedFields: string[];
+  };
+
+  const scrollToSection = (sectionId: ReservationSectionId) => {
+    document
+      .getElementById(`section-${sectionId}`)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const getSectionErrorMessage = (sectionId: ReservationSectionId) => {
+    switch (sectionId) {
+      case "customer":
+        return t("selectCustomerError");
+      case "period":
+        return t("selectDatesError");
+      case "products":
+        return t("addItemError");
+      case "delivery":
+        return t("deliveryHasError");
+    }
+  };
+
+  // Sections whose state lives outside the form (product lines, delivery hook)
+  // are validated here; form fields are covered by the Zod schema.
+  function getNonFieldSectionFailures(): SectionValidationFailure[] {
+    const failures: SectionValidationFailure[] = [];
+
+    if (selectedProducts.length === 0 && customItems.length === 0) {
+      failures.push({ section: "products", failedFields: ["items"] });
+    }
+
+    if (isDeliveryEnabled && !delivery.canContinue) {
+      failures.push({ section: "delivery", failedFields: ["delivery"] });
+    }
+
+    return failures;
+  }
+
+  function getFieldSectionFailures(): SectionValidationFailure[] {
+    const sections: Array<[ReservationSectionId, StepFieldName[]]> = [
+      ["customer", ["customerId"]],
+      ["period", ["startDate", "endDate"]],
+    ];
+
+    const failures: SectionValidationFailure[] = [];
+    for (const [section, fields] of sections) {
+      const failedFields = fields.filter(
+        (name) => (form.getFieldMeta(name)?.errors?.length ?? 0) > 0,
+      );
+      if (failedFields.length > 0) {
+        failures.push({ section, failedFields });
+      }
+    }
+
+    return failures;
+  }
+
+  const handleInvalidSections = (failures: SectionValidationFailure[]) => {
+    if (failures.length === 0) return;
+
+    for (const failure of failures) {
+      trackStepValidationFailed(failure.section, failure.failedFields);
+    }
+
+    toastManager.add({
+      title: getSectionErrorMessage(failures[0].section),
+      type: "error",
+    });
+    scrollToSection(failures[0].section);
+  };
 
   const submitManualReservation = async (
     value: NewReservationFormValues,
     options: { allowOverbooking?: boolean } = {},
   ) => {
     if (!value.startDate || !value.endDate) {
-      toastManager.add({ title: t('selectDatesError'), type: 'error' });
+      toastManager.add({ title: t("selectDatesError"), type: "error" });
       return;
     }
 
     try {
       const effectiveTulipInsuranceOptIn =
-        tulipInsuranceMode === 'required'
+        tulipInsuranceMode === "required"
           ? true
-          : tulipInsuranceMode === 'optional'
+          : tulipInsuranceMode === "optional"
             ? tulipInsuranceOptIn
             : false;
 
       const result = await createReservationMutation.mutateAsync({
         payload: {
-          customerId:
-            value.customerType === 'existing' ? value.customerId : undefined,
-          newCustomer:
-            value.customerType === 'new'
-              ? {
-                  email: value.email.trim().toLowerCase(),
-                  firstName: value.firstName,
-                  lastName: value.lastName,
-                  phone: value.phone || undefined,
-                }
-              : undefined,
+          customerId: value.customerId,
           startDate: value.startDate,
           endDate: value.endDate,
           items: selectedProducts,
@@ -424,11 +387,11 @@ export function NewReservationForm({
           })),
           delivery: {
             outbound:
-              delivery.outboundMethod === 'address' &&
+              delivery.outboundMethod === "address" &&
               delivery.outboundAddress.latitude !== null &&
               delivery.outboundAddress.longitude !== null
                 ? {
-                    method: 'address' as const,
+                    method: "address" as const,
                     address: delivery.outboundAddress.address,
                     city: delivery.outboundAddress.city,
                     postalCode: delivery.outboundAddress.postalCode,
@@ -437,15 +400,15 @@ export function NewReservationForm({
                     longitude: delivery.outboundAddress.longitude,
                   }
                 : {
-                    method: 'store' as const,
+                    method: "store" as const,
                     locationId: delivery.pickupLocationId,
                   },
             return:
-              delivery.returnMethod === 'address' &&
+              delivery.returnMethod === "address" &&
               delivery.returnAddress.latitude !== null &&
               delivery.returnAddress.longitude !== null
                 ? {
-                    method: 'address' as const,
+                    method: "address" as const,
                     address: delivery.returnAddress.address,
                     city: delivery.returnAddress.city,
                     postalCode: delivery.returnAddress.postalCode,
@@ -454,21 +417,28 @@ export function NewReservationForm({
                     longitude: delivery.returnAddress.longitude,
                   }
                 : {
-                    method: 'store' as const,
+                    method: "store" as const,
                     locationId: delivery.returnLocationId,
                   },
           },
           internalNotes: value.internalNotes || undefined,
+          discountAmount:
+            globalDiscountAmount > 0 ? Math.round(globalDiscountAmount * 100) / 100 : undefined,
+          depositOverride: depositOverride ?? undefined,
           tulipInsuranceOptIn: effectiveTulipInsuranceOptIn,
-          sendConfirmationEmail: sendAsQuoteRef.current
-            ? true
-            : sendConfirmationEmail,
+          sendConfirmationEmail: sendAsQuoteRef.current ? true : sendConfirmationEmail,
           sendAsQuote: sendAsQuoteRef.current,
           allowOverbooking: options.allowOverbooking,
         },
       });
 
       if (isInsufficientCapacityResult(result)) {
+        posthog.capture(productAnalyticsEvents.dashboardReservationCapacityBlocked, {
+          ...dashboardReservationAnalyticsBaseProperties,
+          shortfall_count: result.shortfalls.length,
+          shortfall_product_ids: result.shortfalls.map((shortfall) => shortfall.productId),
+          source: openReplaySource,
+        });
         setOverbookingDialog({
           isOpen: true,
           shortfalls: result.shortfalls,
@@ -476,91 +446,101 @@ export function NewReservationForm({
         return;
       }
 
-      if ('error' in result && result.error) {
+      if ("error" in result && result.error) {
+        posthog.capture(productAnalyticsEvents.dashboardReservationCreationFailed, {
+          ...dashboardReservationAnalyticsBaseProperties,
+          error_code: result.error,
+          source: openReplaySource,
+        });
         toastManager.add({
-          title: tErrors(result.error.replace('errors.', '')),
-          type: 'error',
+          title: tErrors(result.error.replace("errors.", "")),
+          type: "error",
         });
         return;
       }
 
-      trackOpenReplayEvent(
-        openReplayEvents.dashboardReservationCreationCompleted,
-        {
-          journey: 'reservation_creation',
-          step: 'completed',
-          source: openReplaySource,
-        },
-      );
+      trackOpenReplayEvent(openReplayEvents.dashboardReservationCreationCompleted, {
+        journey: "reservation_creation",
+        step: "completed",
+        source: openReplaySource,
+      });
 
       toastManager.add({
-        title: sendAsQuoteRef.current
-          ? t('quoteSent')
-          : t('reservationCreated'),
-        type: 'success',
+        title: sendAsQuoteRef.current ? t("quoteSent") : t("reservationCreated"),
+        type: "success",
       });
       router.push(`/dashboard/reservations/${result.reservationId}`);
     } catch (error) {
+      posthog.capture(productAnalyticsEvents.dashboardReservationCreationFailed, {
+        ...dashboardReservationAnalyticsBaseProperties,
+        error_code: error instanceof Error ? error.message : "unknown",
+        source: openReplaySource,
+      });
       toastManager.add({
         title: getActionErrorMessage(error),
-        type: 'error',
+        type: "error",
       });
     }
   };
 
+  const reservationSchema = useMemo(
+    () => createManualReservationSchema(tValidation),
+    [tValidation],
+  );
+
   const form = useAppForm({
     defaultValues: {
-      customerType: (customers.length > 0 ? 'existing' : 'new') as
-        | 'existing'
-        | 'new',
-      customerId: '',
-      email: '',
-      firstName: '',
-      lastName: '',
-      phone: '',
+      customerId: "",
       startDate: undefined as Date | undefined,
       endDate: undefined as Date | undefined,
-      internalNotes: '',
+      internalNotes: "",
+    },
+    validationLogic: revalidateLogic({
+      mode: "submit",
+      modeAfterSubmission: "change",
+    }),
+    validators: {
+      onSubmit: reservationSchema,
+    },
+    onSubmitInvalid: () => {
+      handleInvalidSections([...getFieldSectionFailures(), ...getNonFieldSectionFailures()]);
     },
     onSubmit: async ({ value }) => {
-      if (currentStep !== steps.length - 1) {
+      const failures = getNonFieldSectionFailures();
+      if (failures.length > 0) {
+        handleInvalidSections(failures);
         return;
       }
-
-      if (!validateCurrentStep()) return;
 
       await submitManualReservation(value);
     },
   });
 
-  const watchCustomerType = useStore(
-    form.store,
-    (s) => s.values.customerType as NewReservationFormValues['customerType'],
-  );
   const watchCustomerId = useStore(form.store, (s) => s.values.customerId);
-  const watchStartDate = useStore(
-    form.store,
-    (s) => s.values.startDate as Date | undefined,
-  );
-  const watchEndDate = useStore(
-    form.store,
-    (s) => s.values.endDate as Date | undefined,
-  );
-  const watchedValues = useStore(
-    form.store,
-    (s) => s.values as NewReservationFormValues,
-  );
+  const watchStartDate = useStore(form.store, (s) => s.values.startDate as Date | undefined);
+  const watchEndDate = useStore(form.store, (s) => s.values.endDate as Date | undefined);
+  const watchedValues = useStore(form.store, (s) => s.values as NewReservationFormValues);
   const isSaving = createReservationMutation.isPending;
 
-  const selectedCustomer = customers.find((c) => c.id === watchCustomerId);
-  const hasSelectedPeriod = Boolean(watchStartDate && watchEndDate);
-  const availabilityProductIds = useMemo(
-    () => products.map((product) => product.id),
-    [products],
+  // Customers created from the picker are live in DB but absent from the server-rendered list.
+  const allCustomers = useMemo(
+    () => [...createdCustomers, ...customers],
+    [createdCustomers, customers],
   );
+  const selectedCustomer = allCustomers.find((c) => c.id === watchCustomerId);
+  const isNewCustomer = createdCustomers.some((c) => c.id === watchCustomerId);
+
+  const handleCustomerCreated = (customer: Customer) => {
+    setCreatedCustomers((prev) => [customer, ...prev]);
+    form.setFieldValue("customerId", customer.id);
+    clearStepFieldError("customerId");
+  };
+
+  const hasSelectedPeriod = Boolean(watchStartDate && watchEndDate);
+  const availabilityProductIds = useMemo(() => products.map((product) => product.id), [products]);
   const manualAvailabilityQuery = useQuery({
     queryKey: [
-      'manual-reservation-availability',
+      "manual-reservation-availability",
       watchStartDate?.toISOString() ?? null,
       watchEndDate?.toISOString() ?? null,
       availabilityProductIds,
@@ -577,7 +557,7 @@ export function NewReservationForm({
       });
 
       if (!result.success) {
-        throw new Error(result.error ?? 'errors.invalidData');
+        throw new Error(result.error ?? "errors.invalidData");
       }
 
       return result.availability.products;
@@ -646,9 +626,9 @@ export function NewReservationForm({
   });
 
   const effectiveTulipInsuranceOptInForPreview =
-    tulipInsuranceMode === 'required'
+    tulipInsuranceMode === "required"
       ? true
-      : tulipInsuranceMode === 'optional'
+      : tulipInsuranceMode === "optional"
         ? tulipInsuranceOptIn
         : false;
   const tulipInsuranceQuoteItems = useMemo(
@@ -672,58 +652,23 @@ export function NewReservationForm({
       return null;
     }
 
-    const basePayload = {
-      startDate: watchStartDate.toISOString(),
-      endDate: watchEndDate.toISOString(),
-      tulipInsuranceOptIn: true,
-      items: tulipInsuranceQuoteItems,
-    };
-
-    if (watchCustomerType === 'existing') {
-      if (!watchCustomerId?.trim()) {
-        return null;
-      }
-
-      return {
-        ...basePayload,
-        customerId: watchCustomerId,
-      };
-    }
-
-    const email = watchedValues.email?.trim() ?? '';
-    const firstName = watchedValues.firstName?.trim() ?? '';
-    const lastName = watchedValues.lastName?.trim() ?? '';
-    const phone = watchedValues.phone?.trim() ?? '';
-
-    if (
-      !email ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
-      !firstName ||
-      !lastName
-    ) {
+    if (!watchCustomerId?.trim()) {
       return null;
     }
 
     return {
-      ...basePayload,
-      newCustomer: {
-        email,
-        firstName,
-        lastName,
-        ...(phone && { phone }),
-      },
+      startDate: watchStartDate.toISOString(),
+      endDate: watchEndDate.toISOString(),
+      tulipInsuranceOptIn: true,
+      items: tulipInsuranceQuoteItems,
+      customerId: watchCustomerId,
     };
   }, [
     effectiveTulipInsuranceOptInForPreview,
     tulipInsuranceQuoteItems,
     watchCustomerId,
-    watchCustomerType,
     watchEndDate,
     watchStartDate,
-    watchedValues.email,
-    watchedValues.firstName,
-    watchedValues.lastName,
-    watchedValues.phone,
   ]);
   const tulipInsuranceQuoteInput = {
     payload:
@@ -750,17 +695,16 @@ export function NewReservationForm({
       (tulipInsuranceQuoteQuery.isFetching && !tulipInsuranceQuoteQuery.data));
   const tulipInsuranceQuotePreview = tulipInsuranceQuoteQuery.data;
   const isTulipInsuranceApplied =
-    effectiveTulipInsuranceOptInForPreview &&
-    tulipInsuranceQuotePreview?.appliedOptIn === true;
+    effectiveTulipInsuranceOptInForPreview && tulipInsuranceQuotePreview?.appliedOptIn === true;
   const tulipInsuranceAmount =
     isTulipInsuranceApplied && tulipInsuranceQuotePreview.amount > 0
       ? tulipInsuranceQuotePreview.amount
       : 0;
   const tulipInsuranceQuoteErrorKey = tulipInsuranceQuoteQuery.isError
-    ? 'errors.tulipQuoteFailed'
+    ? "errors.tulipQuoteFailed"
     : (tulipInsuranceQuotePreview?.quoteError ?? null);
   const tulipInsuranceQuoteErrorMessage = tulipInsuranceQuoteErrorKey
-    ? tErrors(tulipInsuranceQuoteErrorKey.replace('errors.', ''))
+    ? tErrors(tulipInsuranceQuoteErrorKey.replace("errors.", ""))
     : null;
   const delivery = useNewReservationDelivery({
     deliverySettings,
@@ -769,27 +713,49 @@ export function NewReservationForm({
     subtotal: subtotal + tulipInsuranceAmount,
   });
 
-  const addProduct = (productId: string) => {
+  // Commercial discount resolved in currency units; the % mode applies to the
+  // pre-delivery subtotal (products + custom items + insurance), like the
+  // server-side clamp.
+  const discountBase = subtotal + tulipInsuranceAmount;
+  const globalDiscountAmount =
+    globalDiscount.value == null || globalDiscount.value <= 0
+      ? 0
+      : globalDiscount.mode === "amount"
+        ? Math.min(globalDiscount.value, discountBase)
+        : Math.min((discountBase * globalDiscount.value) / 100, discountBase);
+
+  const addProduct = (productId: string, options: { allowUnavailable?: boolean } = {}) => {
     const product = products.find((item) => item.id === productId);
     if (!product) {
       return;
     }
 
     const bookingAttributeAxes = product.bookingAttributeAxes || [];
-    const supportsOptionLines =
-      product.trackUnits && bookingAttributeAxes.length > 0;
+    const supportsOptionLines = product.trackUnits && bookingAttributeAxes.length > 0;
 
     setSelectedProducts((prev) => {
       if (supportsOptionLines) {
+        // Pre-select the variant when a single combination remains bookable.
+        const availableCombinations = buildProductCombinations(
+          product,
+          periodAvailability.reservedByProductCombination,
+          hasSelectedPeriod,
+          getPeriodProductAvailability(product.id),
+        ).filter((combination) => combination.availableQuantity > 0);
+        const singleCombination =
+          availableCombinations.length === 1 ? availableCombinations[0] : null;
+        const preselectedAttributes =
+          singleCombination && Object.keys(singleCombination.selectedAttributes || {}).length > 0
+            ? singleCombination.selectedAttributes
+            : undefined;
+
         const nextLine: SelectedProduct = {
           lineId: createLineId(),
           productId,
           quantity: 1,
+          ...(preselectedAttributes ? { selectedAttributes: preselectedAttributes } : {}),
         };
-        const productLines = [
-          ...prev.filter((line) => line.productId === productId),
-          nextLine,
-        ];
+        const productLines = [...prev.filter((line) => line.productId === productId), nextLine];
         const constraints = getLineQuantityConstraints(
           product,
           nextLine,
@@ -799,7 +765,7 @@ export function NewReservationForm({
           hasSelectedPeriod,
           getPeriodProductAvailability(product.id),
         );
-        if (constraints.lineMaxQuantity <= 0) {
+        if (constraints.lineMaxQuantity <= 0 && !options.allowUnavailable) {
           return prev;
         }
 
@@ -822,7 +788,7 @@ export function NewReservationForm({
           hasSelectedPeriod,
           getPeriodProductAvailability(product.id),
         );
-        if (constraints.lineMaxQuantity <= 0) {
+        if (constraints.lineMaxQuantity <= 0 && !options.allowUnavailable) {
           return prev;
         }
 
@@ -839,10 +805,12 @@ export function NewReservationForm({
         hasSelectedPeriod,
         getPeriodProductAvailability(product.id),
       );
-      const nextQuantity = Math.min(
-        existingLine.quantity + 1,
-        Math.max(existingLine.quantity, constraints.lineMaxQuantity),
-      );
+      const nextQuantity = options.allowUnavailable
+        ? existingLine.quantity + 1
+        : Math.min(
+            existingLine.quantity + 1,
+            Math.max(existingLine.quantity, constraints.lineMaxQuantity),
+          );
 
       return prev.map((line) => {
         if (line.lineId !== existingLine.lineId) {
@@ -857,6 +825,34 @@ export function NewReservationForm({
     });
   };
 
+  // Prefill from query params (e.g. drag-to-create on the product timeline):
+  // ?startDate=<ISO>&endDate=<ISO>&productId=<id>
+  const didPrefillRef = useRef(false);
+  useEffect(() => {
+    if (didPrefillRef.current) return;
+    didPrefillRef.current = true;
+
+    const parseDateParam = (key: string): Date | null => {
+      const value = searchParams.get(key);
+      if (!value) return null;
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    };
+
+    const startDate = parseDateParam("startDate");
+    const endDate = parseDateParam("endDate");
+    if (startDate && endDate && startDate < endDate) {
+      form.setFieldValue("startDate", startDate);
+      form.setFieldValue("endDate", endDate);
+    }
+
+    const productId = searchParams.get("productId");
+    if (productId && products.some((product) => product.id === productId)) {
+      addProduct(productId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const updateQuantity = (lineId: string, delta: number) => {
     setSelectedProducts((prev) => {
       const currentLine = prev.find((line) => line.lineId === lineId);
@@ -868,16 +864,12 @@ export function NewReservationForm({
         return prev.filter((line) => line.lineId !== lineId);
       }
 
-      const product = products.find(
-        (item) => item.id === currentLine.productId,
-      );
+      const product = products.find((item) => item.id === currentLine.productId);
       if (!product) {
         return prev;
       }
 
-      const productLines = prev.filter(
-        (line) => line.productId === currentLine.productId,
-      );
+      const productLines = prev.filter((line) => line.productId === currentLine.productId);
       const constraints = getLineQuantityConstraints(
         product,
         currentLine,
@@ -889,10 +881,7 @@ export function NewReservationForm({
       );
       const nextQuantity = Math.max(
         1,
-        Math.min(
-          currentLine.quantity + delta,
-          Math.max(1, constraints.lineMaxQuantity),
-        ),
+        Math.min(currentLine.quantity + delta, Math.max(1, constraints.lineMaxQuantity)),
       );
 
       if (nextQuantity === currentLine.quantity) {
@@ -912,20 +901,14 @@ export function NewReservationForm({
     });
   };
 
-  const updateSelectedAttributes = (
-    lineId: string,
-    axisKey: string,
-    value: string | undefined,
-  ) => {
+  const updateSelectedAttributes = (lineId: string, axisKey: string, value: string | undefined) => {
     setSelectedProducts((prev) => {
       const currentLine = prev.find((line) => line.lineId === lineId);
       if (!currentLine) {
         return prev;
       }
 
-      const product = products.find(
-        (item) => item.id === currentLine.productId,
-      );
+      const product = products.find((item) => item.id === currentLine.productId);
       if (!product) {
         return prev;
       }
@@ -934,7 +917,7 @@ export function NewReservationForm({
         ...currentLine.selectedAttributes,
       };
 
-      if (!value || value === '__none__') {
+      if (!value || value === "__none__") {
         delete nextAttributes[axisKey];
       } else {
         nextAttributes[axisKey] = value;
@@ -942,8 +925,7 @@ export function NewReservationForm({
 
       const nextLine: SelectedProduct = {
         ...currentLine,
-        selectedAttributes:
-          Object.keys(nextAttributes).length > 0 ? nextAttributes : undefined,
+        selectedAttributes: Object.keys(nextAttributes).length > 0 ? nextAttributes : undefined,
       };
 
       const productLines = prev
@@ -958,10 +940,7 @@ export function NewReservationForm({
         hasSelectedPeriod,
         getPeriodProductAvailability(product.id),
       );
-      const nextQuantity = Math.min(
-        nextLine.quantity,
-        constraints.lineMaxQuantity,
-      );
+      const nextQuantity = Math.min(nextLine.quantity, constraints.lineMaxQuantity);
 
       const normalizedLine: SelectedProduct =
         nextQuantity > 0
@@ -981,60 +960,32 @@ export function NewReservationForm({
   };
 
   const removeSelectedProductLine = (lineId: string) => {
-    setSelectedProducts((prev) =>
-      prev.filter((line) => line.lineId !== lineId),
-    );
-  };
-
-  const updateProductTotalPrice = (
-    lineId: string,
-    totalPrice: number,
-    pricing: ProductPricingDetails,
-  ) => {
-    setSelectedProducts((prev) =>
-      prev.map((line) => {
-        if (line.lineId !== lineId) return line;
-
-        const divisor = pricing.productDuration * line.quantity;
-        const unitPrice = divisor > 0 ? totalPrice / divisor : totalPrice;
-        if (Math.abs(unitPrice - pricing.calculatedPrice) < 0.01) {
-          const nextLine = { ...line };
-          delete nextLine.priceOverride;
-          return nextLine;
-        }
-
-        return { ...line, priceOverride: { unitPrice } };
-      }),
-    );
+    setSelectedProducts((prev) => prev.filter((line) => line.lineId !== lineId));
   };
 
   // Custom item management
   const resetCustomItemForm = () => {
     setCustomItemForm({
-      name: '',
-      description: '',
-      unitPrice: '',
-      totalPrice: '',
-      deposit: '',
-      quantity: '1',
-      pricingMode: 'day',
+      name: "",
+      description: "",
+      unitPrice: "",
+      totalPrice: "",
+      deposit: "",
+      quantity: "1",
+      pricingMode: "day",
     });
   };
 
   const customItemDuration =
     watchStartDate && watchEndDate
-      ? calculateDurationForMode(
-          watchStartDate,
-          watchEndDate,
-          customItemForm.pricingMode,
-        )
+      ? calculateDurationForMode(watchStartDate, watchEndDate, customItemForm.pricingMode)
       : 0;
 
   // Calculate unit price from total price
   const calculateUnitPriceFromTotal = (totalPrice: string, qty: string) => {
     const total = parseFloat(totalPrice);
     const quantity = parseInt(qty) || 1;
-    if (isNaN(total) || total <= 0 || customItemDuration <= 0) return '';
+    if (isNaN(total) || total <= 0 || customItemDuration <= 0) return "";
     return (total / (quantity * customItemDuration)).toFixed(2);
   };
 
@@ -1042,7 +993,7 @@ export function NewReservationForm({
   const calculateTotalFromUnitPrice = (unitPrice: string, qty: string) => {
     const unit = parseFloat(unitPrice);
     const quantity = parseInt(qty) || 1;
-    if (isNaN(unit) || unit <= 0 || customItemDuration <= 0) return '';
+    if (isNaN(unit) || unit <= 0 || customItemDuration <= 0) return "";
     return (unit * quantity * customItemDuration).toFixed(2);
   };
 
@@ -1068,25 +1019,19 @@ export function NewReservationForm({
 
   // Handle quantity change for custom item form
   const handleCustomItemQuantityChange = (value: string) => {
-    if (priceInputMode === 'total') {
+    if (priceInputMode === "total") {
       // Recalculate unit price based on total
       setCustomItemForm({
         ...customItemForm,
         quantity: value,
-        unitPrice: calculateUnitPriceFromTotal(
-          customItemForm.totalPrice,
-          value,
-        ),
+        unitPrice: calculateUnitPriceFromTotal(customItemForm.totalPrice, value),
       });
     } else {
       // Recalculate total based on unit price
       setCustomItemForm({
         ...customItemForm,
         quantity: value,
-        totalPrice: calculateTotalFromUnitPrice(
-          customItemForm.unitPrice,
-          value,
-        ),
+        totalPrice: calculateTotalFromUnitPrice(customItemForm.unitPrice, value),
       });
     }
   };
@@ -1094,21 +1039,21 @@ export function NewReservationForm({
   const handleAddCustomItem = () => {
     let unitPrice: number;
 
-    if (priceInputMode === 'total') {
+    if (priceInputMode === "total") {
       // Calculate unit price from total
       const totalPrice = parseFloat(customItemForm.totalPrice);
       const quantity = parseInt(customItemForm.quantity) || 1;
       if (isNaN(totalPrice) || totalPrice <= 0) {
         toastManager.add({
-          title: t('customItem.priceRequired'),
-          type: 'error',
+          title: t("customItem.priceRequired"),
+          type: "error",
         });
         return;
       }
       if (customItemDuration <= 0) {
         toastManager.add({
-          title: t('customItem.selectPeriodFirst'),
-          type: 'error',
+          title: t("customItem.selectPeriodFirst"),
+          type: "error",
         });
         return;
       }
@@ -1117,8 +1062,8 @@ export function NewReservationForm({
       unitPrice = parseFloat(customItemForm.unitPrice);
       if (isNaN(unitPrice) || unitPrice <= 0) {
         toastManager.add({
-          title: t('customItem.priceRequired'),
-          type: 'error',
+          title: t("customItem.priceRequired"),
+          type: "error",
         });
         return;
       }
@@ -1128,7 +1073,7 @@ export function NewReservationForm({
     const quantity = parseInt(customItemForm.quantity) || 1;
 
     if (!customItemForm.name.trim()) {
-      toastManager.add({ title: t('customItem.nameRequired'), type: 'error' });
+      toastManager.add({ title: t("customItem.nameRequired"), type: "error" });
       return;
     }
 
@@ -1140,15 +1085,13 @@ export function NewReservationForm({
       deposit,
       quantity,
       pricingMode: customItemForm.pricingMode,
-      basePeriodMinutes: pricingModeToBasePeriodMinutes(
-        customItemForm.pricingMode,
-      ),
+      basePeriodMinutes: pricingModeToBasePeriodMinutes(customItemForm.pricingMode),
     };
 
     setCustomItems([...customItems, newItem]);
     resetCustomItemForm();
     setShowCustomItemDialog(false);
-    toastManager.add({ title: t('customItem.added'), type: 'success' });
+    toastManager.add({ title: t("customItem.added"), type: "success" });
   };
 
   const updateCustomItemQuantity = (id: string, delta: number) => {
@@ -1169,44 +1112,72 @@ export function NewReservationForm({
     setCustomItems(customItems.filter((item) => item.id !== id));
   };
 
-  const updateCustomItemTotalPrice = (id: string, totalPrice: number) => {
-    setCustomItems((prev) =>
-      prev.map((item) => {
-        if (item.id !== id || !watchStartDate || !watchEndDate) return item;
+  // Price override functions
+  const roundCurrency = (value: number) => Math.round(value * 100) / 100;
 
-        const itemDuration = calculateDurationForMode(
-          watchStartDate,
-          watchEndDate,
-          item.pricingMode,
-        );
-        const divisor = itemDuration * item.quantity;
-        const unitPrice = divisor > 0 ? totalPrice / divisor : totalPrice;
+  const priceOverrideDivisor = priceOverrideDialog.duration * priceOverrideDialog.quantity;
 
-        return { ...item, unitPrice };
-      }),
-    );
+  const resolveOverrideUnitPrice = (state: typeof priceOverrideDialog): number | null => {
+    if (state.value == null) return null;
+    if (state.mode === "unit") return state.value;
+    if (state.mode === "total") {
+      const divisor = state.duration * state.quantity;
+      return divisor > 0 ? state.value / divisor : state.value;
+    }
+    return state.currentPrice * (1 - state.value / 100);
   };
 
-  // Price override functions
+  const resolvedOverrideUnitPrice = resolveOverrideUnitPrice(priceOverrideDialog);
+
   const openPriceOverrideDialog = (
     lineId: string,
     calculatedPrice: number,
     pricingMode: PricingMode,
     duration: number,
+    quantity: number,
   ) => {
-    const existingOverride = selectedProducts.find(
-      (line) => line.lineId === lineId,
-    )?.priceOverride;
+    const existingOverride = selectedProducts.find((line) => line.lineId === lineId)?.priceOverride;
     setPriceOverrideDialog({
       isOpen: true,
       lineId,
       currentPrice: calculatedPrice,
-      newPrice: existingOverride
-        ? existingOverride.unitPrice.toString()
-        : calculatedPrice.toString(),
       pricingMode,
       duration,
+      quantity: Math.max(1, quantity),
+      mode: "unit",
+      value: roundCurrency(existingOverride ? existingOverride.unitPrice : calculatedPrice),
     });
+  };
+
+  const setPriceOverrideMode = (mode: PriceOverrideMode) => {
+    setPriceOverrideDialog((current) => {
+      if (mode === current.mode) return current;
+
+      const divisor = current.duration * current.quantity;
+      const unitPrice = resolveOverrideUnitPrice(current) ?? current.currentPrice;
+      const value =
+        mode === "unit"
+          ? roundCurrency(unitPrice)
+          : mode === "total"
+            ? roundCurrency(unitPrice * divisor)
+            : current.currentPrice > 0
+              ? roundCurrency((1 - unitPrice / current.currentPrice) * 100)
+              : 0;
+
+      return { ...current, mode, value };
+    });
+  };
+
+  const resetPriceOverride = () => {
+    setPriceOverrideDialog((current) => ({
+      ...current,
+      value:
+        current.mode === "unit"
+          ? roundCurrency(current.currentPrice)
+          : current.mode === "total"
+            ? roundCurrency(current.currentPrice * current.duration * current.quantity)
+            : 0,
+    }));
   };
 
   const closePriceOverrideDialog = () => {
@@ -1214,52 +1185,43 @@ export function NewReservationForm({
       isOpen: false,
       lineId: null,
       currentPrice: 0,
-      newPrice: '',
-      pricingMode: 'day',
+      pricingMode: "day",
       duration: 0,
+      quantity: 1,
+      mode: "unit",
+      value: null,
     });
   };
 
   const applyPriceOverride = () => {
     if (!priceOverrideDialog.lineId) return;
 
-    const newPrice = parseFloat(priceOverrideDialog.newPrice);
-    if (isNaN(newPrice)) {
-      toastManager.add({ title: t('customItem.priceRequired'), type: 'error' });
+    const unitPrice = resolvedOverrideUnitPrice;
+    if (unitPrice == null || Number.isNaN(unitPrice) || unitPrice < 0) {
+      toastManager.add({ title: t("customItem.priceRequired"), type: "error" });
       return;
     }
 
     setSelectedProducts((prev) =>
       prev.map((line) => {
         if (line.lineId === priceOverrideDialog.lineId) {
-          // Si le nouveau prix est égal au prix calculé, on supprime l'override
-          if (Math.abs(newPrice - priceOverrideDialog.currentPrice) < 0.01) {
+          // Removing the override when the price matches the calculated one.
+          if (Math.abs(unitPrice - priceOverrideDialog.currentPrice) < 0.01) {
             const nextLine = { ...line };
             delete nextLine.priceOverride;
             return nextLine;
           }
-          return { ...line, priceOverride: { unitPrice: newPrice } };
+          return { ...line, priceOverride: { unitPrice } };
         }
         return line;
       }),
     );
 
     toastManager.add({
-      title: t('priceOverride.priceUpdated'),
-      type: 'success',
+      title: t("priceOverride.priceUpdated"),
+      type: "success",
     });
     closePriceOverrideDialog();
-  };
-
-  const setStepFieldError = (name: StepFieldName, message: string) => {
-    form.setFieldMeta(name, (prev) => ({
-      ...prev,
-      isTouched: true,
-      errorMap: {
-        ...prev?.errorMap,
-        onSubmit: message,
-      },
-    }));
   };
 
   const clearStepFieldError = (name: StepFieldName) => {
@@ -1274,9 +1236,9 @@ export function NewReservationForm({
 
   const getPricingUnitLabel = useCallback(
     (mode: PricingMode) => {
-      if (mode === 'hour') return t('perHour');
-      if (mode === 'week') return t('perWeek');
-      return t('perDay');
+      if (mode === "hour") return t("perHour");
+      if (mode === "week") return t("perWeek");
+      return t("perDay");
     },
     [t],
   );
@@ -1284,475 +1246,360 @@ export function NewReservationForm({
   return (
     <>
       <form.AppForm>
-        <form.Form className="space-y-6 pb-28">
-          {/* Stepper */}
-          <Card>
-            <CardContent className="pt-6">
-              <Stepper
-                steps={steps}
-                currentStep={currentStep}
-                onStepClick={goToStep}
-              />
-            </CardContent>
-          </Card>
-          {/* <Stepper
-              steps={steps}
-              currentStep={currentStep}
-              onStepClick={goToStep}
-            /> */}
+        <form.Form className="space-y-6">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+            <div className="min-w-0 flex-1 space-y-6">
+              <div id="section-customer" className="scroll-mt-8">
+                <NewReservationStepCustomer
+                  form={form as unknown as NewReservationFormComponentApi}
+                  customers={allCustomers}
+                  clearStepFieldError={clearStepFieldError}
+                  getFieldErrorMessage={getFieldErrorMessage}
+                  onCustomerCreated={handleCustomerCreated}
+                />
+              </div>
 
-          {/* Step: Customer */}
-          {currentStepId === 'customer' && (
-            <StepContent direction={stepDirection}>
-              <NewReservationStepCustomer
-                form={form as unknown as NewReservationFormComponentApi}
-                customers={customers}
-                customerType={watchCustomerType}
-                clearStepFieldError={clearStepFieldError}
-                getFieldErrorMessage={getFieldErrorMessage}
-              />
-            </StepContent>
-          )}
+              <div id="section-period" className="scroll-mt-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Calendar className="h-5 w-5" />
+                      {t("period")}
+                    </CardTitle>
+                    <CardDescription>{t("periodStepDescription")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid gap-6 sm:grid-cols-2">
+                      <form.AppField name="startDate">
+                        {(field) => {
+                          const timeSlots = getTimeSlotsForDate(field.state.value);
+                          return (
+                            <field.ReservationDatePicker
+                              id="reservation-start-date"
+                              label={t("startDate")}
+                              minTime={timeSlots.minTime}
+                              maxTime={timeSlots.maxTime}
+                              timezone={timezone}
+                              onChange={() => clearStepFieldError("startDate")}
+                              defaultTime={defaultTimeSlot}
+                              range={{
+                                role: "start",
+                                otherValue: watchEndDate,
+                                onOtherChange: (date) => {
+                                  form.setFieldValue("endDate", date);
+                                  clearStepFieldError("endDate");
+                                },
+                              }}
+                            />
+                          );
+                        }}
+                      </form.AppField>
+                      <form.AppField name="endDate">
+                        {(field) => {
+                          const timeSlots = getTimeSlotsForDate(field.state.value);
+                          return (
+                            <field.ReservationDatePicker
+                              id="reservation-end-date"
+                              label={t("endDate")}
+                              minTime={timeSlots.minTime}
+                              maxTime={timeSlots.maxTime}
+                              timezone={timezone}
+                              referenceDate={watchStartDate}
+                              open={endDatePickerOpen}
+                              onOpenChange={setEndDatePickerOpen}
+                              onChange={() => clearStepFieldError("endDate")}
+                              defaultTime={defaultTimeSlot}
+                              range={{
+                                role: "end",
+                                otherValue: watchStartDate,
+                                onOtherChange: (date) => {
+                                  form.setFieldValue("startDate", date);
+                                  clearStepFieldError("startDate");
+                                },
+                              }}
+                            />
+                          );
+                        }}
+                      </form.AppField>
+                    </div>
 
-          {/* Step: Period */}
-          {currentStepId === 'period' && (
-            <StepContent direction={stepDirection}>
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    {t('period')}
-                  </CardTitle>
-                  <CardDescription>
-                    {t('periodStepDescription')}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-6 sm:grid-cols-2">
-                    <form.AppField name="startDate">
-                      {(field) => {
-                        const timeSlots = getTimeSlotsForDate(
-                          field.state.value,
-                        );
-                        return (
-                          <field.ReservationDatePicker
-                            id="reservation-start-date"
-                            label={t('startDate')}
-                            minTime={timeSlots.minTime}
-                            maxTime={timeSlots.maxTime}
-                            timezone={timezone}
-                            autoCloseOnTimeSelect
-                            onChange={() => clearStepFieldError('startDate')}
-                            onAutoClose={() => {
-                              // Small delay to let the start popover close before opening end.
-                              setTimeout(() => setEndDatePickerOpen(true), 150);
-                            }}
-                            defaultTime={defaultTimeSlot}
-                          />
-                        );
-                      }}
-                    </form.AppField>
-                    <form.AppField name="endDate">
-                      {(field) => {
-                        const timeSlots = getTimeSlotsForDate(
-                          field.state.value,
-                        );
-                        return (
-                          <field.ReservationDatePicker
-                            id="reservation-end-date"
-                            label={t('endDate')}
-                            disabledDates={(date) => {
-                              // Only block dates before start date (logical constraint).
-                              if (watchStartDate) {
-                                const startDay = new Date(watchStartDate);
-                                startDay.setHours(0, 0, 0, 0);
-                                return date < startDay;
-                              }
-                              return false;
-                            }}
-                            minTime={timeSlots.minTime}
-                            maxTime={timeSlots.maxTime}
-                            timezone={timezone}
-                            referenceDate={watchStartDate}
-                            autoCloseOnTimeSelect
-                            open={endDatePickerOpen}
-                            onOpenChange={setEndDatePickerOpen}
-                            onChange={() => clearStepFieldError('endDate')}
-                            defaultTime={defaultTimeSlot}
-                          />
-                        );
-                      }}
-                    </form.AppField>
-                  </div>
-
-                  {watchStartDate && watchEndDate && duration > 0 && (
-                    <div className="mt-6 space-y-2.5">
-                      <div className="bg-card relative flex items-center justify-between gap-3 rounded-xl border px-4 py-3 sm:gap-4">
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium tabular-nums">
-                            {formatStoreDate(
-                              watchStartDate,
-                              timezone,
-                              'd MMM yyyy',
-                            )}
-                          </p>
-                          <p className="text-muted-foreground text-[11px] tabular-nums">
-                            {formatStoreDate(watchStartDate, timezone, 'HH:mm')}
-                          </p>
-                        </div>
-
-                        {detailedDuration && (
-                          <span className="bg-card max-w-20 shrink-0 rounded-full border px-2 py-0.5 text-center text-[11px] leading-tight font-semibold text-balance tabular-nums sm:hidden">
-                            {[
-                              detailedDuration.days > 0 &&
-                                `${detailedDuration.days} ${tCommon('dayUnit', { count: detailedDuration.days })}`,
-                              detailedDuration.hours > 0 &&
-                                `${detailedDuration.hours}h`,
-                              detailedDuration.minutes > 0 &&
-                                `${detailedDuration.minutes} min`,
-                            ]
-                              .filter(Boolean)
-                              .join(' · ') || `0 min`}
-                          </span>
-                        )}
-
-                        <div className="relative hidden h-3 flex-1 items-center justify-between sm:flex">
-                          <div className="timeline-dash-flow absolute inset-x-0 top-1/2 h-px -translate-y-1/2" />
-                          <div className="relative h-2 w-2 shrink-0">
-                            <span className="bg-primary timeline-dot-pulse absolute inset-0 rounded-full" />
-                            <span className="bg-primary ring-primary/15 relative block h-2 w-2 rounded-full ring-[3px]" />
+                    {watchStartDate && watchEndDate && duration > 0 && (
+                      <div className="mt-6 space-y-2.5">
+                        <div className="bg-card relative flex items-center justify-between gap-3 rounded-xl border px-4 py-3 sm:gap-4">
+                          <div className="min-w-0">
+                            <p className="text-xs font-medium tabular-nums">
+                              {formatStoreDate(watchStartDate, timezone, "d MMM yyyy")}
+                            </p>
+                            <p className="text-muted-foreground text-[11px] tabular-nums">
+                              {formatStoreDate(watchStartDate, timezone, "HH:mm")}
+                            </p>
                           </div>
-                          <div className="relative h-2 w-2 shrink-0">
-                            <span className="bg-primary timeline-dot-pulse absolute inset-0 rounded-full [animation-delay:1.2s]" />
-                            <span className="bg-primary ring-primary/15 relative block h-2 w-2 rounded-full ring-[3px]" />
-                          </div>
+
                           {detailedDuration && (
-                            <span className="bg-card absolute top-1/2 left-1/2 max-w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border px-2 py-0.5 text-center text-[11px] leading-tight font-semibold text-balance tabular-nums">
+                            <span className="bg-card max-w-20 shrink-0 rounded-full border px-2 py-0.5 text-center text-[11px] leading-tight font-semibold text-balance tabular-nums sm:hidden">
                               {[
                                 detailedDuration.days > 0 &&
-                                  `${detailedDuration.days} ${tCommon('dayUnit', { count: detailedDuration.days })}`,
-                                detailedDuration.hours > 0 &&
-                                  `${detailedDuration.hours}h`,
-                                detailedDuration.minutes > 0 &&
-                                  `${detailedDuration.minutes} min`,
+                                  `${detailedDuration.days} ${tCommon("dayUnit", { count: detailedDuration.days })}`,
+                                detailedDuration.hours > 0 && `${detailedDuration.hours}h`,
+                                detailedDuration.minutes > 0 && `${detailedDuration.minutes} min`,
                               ]
                                 .filter(Boolean)
-                                .join(' · ') || `0 min`}
+                                .join(" · ") || `0 min`}
                             </span>
                           )}
-                        </div>
 
-                        <div className="min-w-0 text-right">
-                          <p className="text-xs font-medium tabular-nums">
-                            {formatStoreDate(
-                              watchEndDate,
-                              timezone,
-                              'd MMM yyyy',
-                            )}
-                          </p>
-                          <p className="text-muted-foreground text-[11px] tabular-nums">
-                            {formatStoreDate(watchEndDate, timezone, 'HH:mm')}
-                          </p>
-                        </div>
-                      </div>
-
-                      {periodWarnings.length > 0 && (
-                        <div className="space-y-1.5">
-                          {periodWarnings.map((warning, index) => (
-                            <div
-                              key={`${warning.type}-${warning.field}-${index}`}
-                              className="bg-warning/10 flex items-start gap-2.5 rounded-lg px-3 py-2"
-                            >
-                              <AlertTriangle className="text-warning mt-0.5 h-3.5 w-3.5 shrink-0" />
-                              <div className="min-w-0 space-y-0.5">
-                                <p className="text-foreground text-xs font-medium">
-                                  {warning.message}
-                                </p>
-                                {warning.details && (
-                                  <p className="text-muted-foreground text-[11px]">
-                                    {warning.details}
-                                  </p>
-                                )}
-                              </div>
+                          <div className="relative hidden h-3 flex-1 items-center justify-between sm:flex">
+                            <div className="timeline-dash-flow absolute inset-x-0 top-1/2 h-px -translate-y-1/2" />
+                            <div className="relative h-2 w-2 shrink-0">
+                              <span className="bg-primary timeline-dot-pulse absolute inset-0 rounded-full" />
+                              <span className="bg-primary ring-primary/15 relative block h-2 w-2 rounded-full ring-[3px]" />
                             </div>
-                          ))}
-                          <p className="text-muted-foreground flex items-center gap-1.5 px-1 pt-1 text-[11px]">
-                            <ShieldCheckIcon className="h-3 w-3" />
-                            {t('warnings.canContinue')}
-                          </p>
+                            <div className="relative h-2 w-2 shrink-0">
+                              <span className="bg-primary timeline-dot-pulse absolute inset-0 rounded-full [animation-delay:1.2s]" />
+                              <span className="bg-primary ring-primary/15 relative block h-2 w-2 rounded-full ring-[3px]" />
+                            </div>
+                            {detailedDuration && (
+                              <span className="bg-card absolute top-1/2 left-1/2 max-w-24 -translate-x-1/2 -translate-y-1/2 rounded-full border px-2 py-0.5 text-center text-[11px] leading-tight font-semibold text-balance tabular-nums">
+                                {[
+                                  detailedDuration.days > 0 &&
+                                    `${detailedDuration.days} ${tCommon("dayUnit", { count: detailedDuration.days })}`,
+                                  detailedDuration.hours > 0 && `${detailedDuration.hours}h`,
+                                  detailedDuration.minutes > 0 && `${detailedDuration.minutes} min`,
+                                ]
+                                  .filter(Boolean)
+                                  .join(" · ") || `0 min`}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 text-right">
+                            <p className="text-xs font-medium tabular-nums">
+                              {formatStoreDate(watchEndDate, timezone, "d MMM yyyy")}
+                            </p>
+                            <p className="text-muted-foreground text-[11px] tabular-nums">
+                              {formatStoreDate(watchEndDate, timezone, "HH:mm")}
+                            </p>
+                          </div>
                         </div>
+
+                        {periodWarnings.length > 0 && (
+                          <div className="space-y-1.5">
+                            {periodWarnings.map((warning, index) => (
+                              <div
+                                key={`${warning.type}-${warning.field}-${index}`}
+                                className="bg-warning/10 flex items-start gap-2.5 rounded-lg px-3 py-2"
+                              >
+                                <AlertTriangle className="text-warning mt-0.5 h-3.5 w-3.5 shrink-0" />
+                                <div className="min-w-0 space-y-0.5">
+                                  <p className="text-foreground text-xs font-medium">
+                                    {warning.message}
+                                  </p>
+                                  {warning.details && (
+                                    <p className="text-muted-foreground text-[11px]">
+                                      {warning.details}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            <p className="text-muted-foreground flex items-center gap-1.5 px-1 pt-1 text-[11px]">
+                              <ShieldCheckIcon className="h-3 w-3" />
+                              {t("warnings.canContinue")}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div id="section-products" className="scroll-mt-8">
+                <NewReservationStepProducts
+                  products={products}
+                  selectedProducts={selectedProducts}
+                  customItems={customItems}
+                  tulipInsuranceMode={tulipInsuranceMode}
+                  tulipInsuranceOptIn={tulipInsuranceOptIn}
+                  tulipInsuranceAmount={tulipInsuranceAmount}
+                  isTulipInsuranceQuoteLoading={isTulipInsuranceQuoteLoading}
+                  tulipInsuranceQuoteErrorMessage={tulipInsuranceQuoteErrorMessage}
+                  startDate={watchStartDate}
+                  endDate={watchEndDate}
+                  availabilityWarnings={availabilityWarnings}
+                  periodAvailability={periodAvailability}
+                  hasSelectedPeriod={hasSelectedPeriod}
+                  hasItems={hasItems}
+                  subtotal={subtotal}
+                  originalSubtotal={originalSubtotal}
+                  totalSavings={totalSavings}
+                  deposit={deposit}
+                  addProduct={addProduct}
+                  updateQuantity={updateQuantity}
+                  updateSelectedAttributes={updateSelectedAttributes}
+                  removeSelectedProductLine={removeSelectedProductLine}
+                  onOpenCustomItemDialog={() => setShowCustomItemDialog(true)}
+                  updateCustomItemQuantity={updateCustomItemQuantity}
+                  removeCustomItem={removeCustomItem}
+                  onTulipInsuranceOptInChange={setTulipInsuranceOptIn}
+                  openPriceOverrideDialog={openPriceOverrideDialog}
+                  calculateDurationForMode={calculateDurationForMode}
+                  getProductPricingDetails={getProductPricingDetails}
+                  getCustomItemTotal={getCustomItemTotal}
+                />
+              </div>
+
+              {isDeliveryEnabled && deliverySettings && (
+                <div id="section-delivery" className="scroll-mt-8">
+                  <NewReservationStepDelivery
+                    deliverySettings={deliverySettings}
+                    subtotal={subtotal + tulipInsuranceAmount}
+                    currency="EUR"
+                    storeAddress={storeAddress}
+                    locations={storeLocations}
+                    isDeliveryForced={delivery.isDeliveryForced}
+                    isDeliveryIncluded={delivery.isDeliveryIncluded}
+                    outboundMethod={delivery.outboundMethod}
+                    pickupLocationId={delivery.pickupLocationId}
+                    outboundAddress={delivery.outboundAddress}
+                    outboundDistance={delivery.outboundDistance}
+                    outboundFee={delivery.outboundFee}
+                    outboundError={delivery.outboundError}
+                    onOutboundMethodChange={delivery.handleOutboundMethodChange}
+                    onPickupLocationChange={delivery.handlePickupLocationChange}
+                    onOutboundAddressChange={delivery.handleOutboundAddressChange}
+                    returnMethod={delivery.returnMethod}
+                    returnLocationId={delivery.returnLocationId}
+                    returnAddress={delivery.returnAddress}
+                    returnDistance={delivery.returnDistance}
+                    returnFee={delivery.returnFee}
+                    returnError={delivery.returnError}
+                    onReturnMethodChange={delivery.handleReturnMethodChange}
+                    onReturnLocationChange={delivery.handleReturnLocationChange}
+                    onReturnAddressChange={delivery.handleReturnAddressChange}
+                    totalFee={delivery.totalFee}
+                  />
+                </div>
+              )}
+
+              <div id="section-notes" className="scroll-mt-8">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{t("internalNotes")}</CardTitle>
+                    <CardDescription>{t("notesHint")}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <form.AppField name="internalNotes">
+                      {(field) => (
+                        <field.Textarea
+                          placeholder={t("notesPlaceholder")}
+                          className="min-h-30 resize-none"
+                        />
                       )}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </StepContent>
-          )}
+                    </form.AppField>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
 
-          {/* Step: Products */}
-          {currentStepId === 'products' && (
-            <StepContent direction={stepDirection}>
-              <NewReservationStepProducts
-                products={products}
-                selectedProducts={selectedProducts}
-                customItems={customItems}
-                tulipInsuranceMode={tulipInsuranceMode}
-                tulipInsuranceOptIn={tulipInsuranceOptIn}
-                tulipInsuranceAmount={tulipInsuranceAmount}
-                isTulipInsuranceQuoteLoading={isTulipInsuranceQuoteLoading}
-                tulipInsuranceQuoteErrorMessage={
-                  tulipInsuranceQuoteErrorMessage
-                }
-                startDate={watchStartDate}
-                endDate={watchEndDate}
-                availabilityWarnings={availabilityWarnings}
-                periodAvailability={periodAvailability}
-                hasSelectedPeriod={hasSelectedPeriod}
-                hasItems={hasItems}
-                subtotal={subtotal}
-                originalSubtotal={originalSubtotal}
-                totalSavings={totalSavings}
-                deposit={deposit}
-                addProduct={addProduct}
-                updateQuantity={updateQuantity}
-                updateSelectedAttributes={updateSelectedAttributes}
-                removeSelectedProductLine={removeSelectedProductLine}
-                onOpenCustomItemDialog={() => setShowCustomItemDialog(true)}
-                updateCustomItemQuantity={updateCustomItemQuantity}
-                removeCustomItem={removeCustomItem}
-                onTulipInsuranceOptInChange={setTulipInsuranceOptIn}
-                openPriceOverrideDialog={openPriceOverrideDialog}
-                calculateDurationForMode={calculateDurationForMode}
-                getProductPricingDetails={getProductPricingDetails}
-                getCustomItemTotal={getCustomItemTotal}
-              />
-            </StepContent>
-          )}
-
-          {/* Step: Delivery (conditional) */}
-          {currentStepId === 'delivery' && deliverySettings && (
-            <StepContent direction={stepDirection}>
-              <NewReservationStepDelivery
-                deliverySettings={deliverySettings}
-                subtotal={subtotal + tulipInsuranceAmount}
-                currency="EUR"
-                storeAddress={storeAddress}
-                locations={storeLocations}
-                isDeliveryForced={delivery.isDeliveryForced}
-                isDeliveryIncluded={delivery.isDeliveryIncluded}
-                outboundMethod={delivery.outboundMethod}
-                pickupLocationId={delivery.pickupLocationId}
-                outboundAddress={delivery.outboundAddress}
-                outboundDistance={delivery.outboundDistance}
-                outboundFee={delivery.outboundFee}
-                outboundError={delivery.outboundError}
-                onOutboundMethodChange={delivery.handleOutboundMethodChange}
-                onPickupLocationChange={delivery.handlePickupLocationChange}
-                onOutboundAddressChange={delivery.handleOutboundAddressChange}
-                returnMethod={delivery.returnMethod}
-                returnLocationId={delivery.returnLocationId}
-                returnAddress={delivery.returnAddress}
-                returnDistance={delivery.returnDistance}
-                returnFee={delivery.returnFee}
-                returnError={delivery.returnError}
-                onReturnMethodChange={delivery.handleReturnMethodChange}
-                onReturnLocationChange={delivery.handleReturnLocationChange}
-                onReturnAddressChange={delivery.handleReturnAddressChange}
-                totalFee={delivery.totalFee}
-              />
-            </StepContent>
-          )}
-
-          {/* Step: Confirmation */}
-          {currentStepId === 'confirm' && (
-            <StepContent direction={stepDirection}>
-              <NewReservationStepReview
-                form={form as unknown as NewReservationFormComponentApi}
-                customerType={watchCustomerType}
+            <aside className="w-full shrink-0 lg:sticky lg:top-16 lg:w-80 xl:w-88">
+              <NewReservationSummaryPanel
                 selectedCustomer={selectedCustomer}
-                values={watchedValues}
+                isNewCustomer={isNewCustomer}
                 startDate={watchStartDate}
                 endDate={watchEndDate}
                 duration={duration}
                 detailedDuration={detailedDuration}
-                locale={locale}
-                dateLocale={dateLocale}
-                selectedProducts={selectedProducts}
-                customItems={customItems}
-                products={products}
-                tulipInsuranceMode={tulipInsuranceMode}
-                tulipInsuranceOptIn={tulipInsuranceOptIn}
-                isTulipInsuranceApplied={isTulipInsuranceApplied}
+                timezone={timezone}
+                itemCount={selectedProducts.length + customItems.length}
+                isDeliveryEnabled={isDeliveryEnabled}
+                isDeliveryReady={delivery.canContinue}
+                subtotal={subtotal}
                 tulipInsuranceAmount={tulipInsuranceAmount}
                 isTulipInsuranceQuoteLoading={isTulipInsuranceQuoteLoading}
-                tulipInsuranceQuoteErrorMessage={
-                  tulipInsuranceQuoteErrorMessage
-                }
-                subtotal={subtotal}
-                deposit={deposit}
-                getProductPricingDetails={getProductPricingDetails}
-                getCustomItemTotal={getCustomItemTotal}
-                onProductTotalChange={updateProductTotalPrice}
-                onCustomItemTotalChange={updateCustomItemTotalPrice}
-                hasDeliveryLegs={
-                  delivery.outboundMethod === 'address' ||
-                  delivery.returnMethod === 'address'
-                }
                 deliveryFee={delivery.totalFee}
-                isDeliveryIncluded={delivery.isDeliveryIncluded}
-                outboundMethod={delivery.outboundMethod}
-                outboundAddress={delivery.outboundAddress}
-                outboundDistance={delivery.outboundDistance}
-                returnMethod={delivery.returnMethod}
-                returnAddress={delivery.returnAddress}
-                returnDistance={delivery.returnDistance}
-                storeAddress={storeAddress}
+                deposit={deposit}
+                discount={globalDiscount}
+                discountAmount={globalDiscountAmount}
+                onDiscountChange={setGlobalDiscount}
+                depositOverride={depositOverride}
+                onDepositOverrideChange={setDepositOverride}
+                sendConfirmationEmail={sendConfirmationEmail}
+                onSendConfirmationEmailChange={setSendConfirmationEmail}
+                onNavigateToSection={scrollToSection}
               />
-            </StepContent>
-          )}
+            </aside>
+          </div>
 
-          {/* Navigation */}
-          <StepActions
-            position="fixed"
-            className={cn(
-              'lg:left-64',
-              currentStep === steps.length - 1 &&
-                'flex-col items-stretch sm:flex-row sm:items-center',
-            )}
-          >
-            <div
-              className={cn(
-                currentStep === steps.length - 1 &&
-                  'flex items-center gap-3 sm:shrink-0',
-              )}
-            >
-              {currentStep > 0 ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={goToPreviousStep}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  {tCommon('previous')}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => router.push('/dashboard/reservations')}
-                >
-                  {tCommon('cancel')}
-                </Button>
-              )}
-
-              {currentStep === steps.length - 1 && (
-                <div className="flex min-w-0 flex-1 items-center space-x-2 sm:hidden">
-                  <Checkbox
-                    id="sendConfirmationEmailMobile"
-                    checked={sendConfirmationEmail}
-                    onCheckedChange={(checked) =>
-                      setSendConfirmationEmail(checked === true)
-                    }
-                  />
-                  <label
-                    htmlFor="sendConfirmationEmailMobile"
-                    className="text-muted-foreground min-w-0 cursor-pointer text-sm leading-tight"
-                  >
-                    {t('sendConfirmationEmail')}
-                  </label>
-                </div>
-              )}
+          {/* Actions */}
+          <StepActions>
+            <div>
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={() => router.push("/dashboard/reservations")}
+              >
+                {tCommon("cancel")}
+              </Button>
             </div>
 
-            <div
-              className={cn(
-                'flex items-center gap-3',
-                currentStep === steps.length - 1 &&
-                  'grid min-w-0 grid-cols-2 items-stretch sm:flex sm:items-center sm:justify-end',
-              )}
-            >
-              {currentStep < steps.length - 1 ? (
-                <Button type="button" onClick={goToNextStep}>
-                  {tCommon('next')}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              ) : (
-                <>
-                  <div className="hidden min-w-0 flex-1 items-center space-x-2 sm:flex sm:max-w-48">
-                    <Checkbox
-                      id="sendConfirmationEmail"
-                      checked={sendConfirmationEmail}
-                      onCheckedChange={(checked) =>
-                        setSendConfirmationEmail(checked === true)
-                      }
-                    />
-                    <label
-                      htmlFor="sendConfirmationEmail"
-                      className="text-muted-foreground min-w-0 cursor-pointer text-sm leading-tight"
-                    >
-                      {t('sendConfirmationEmail')}
-                    </label>
-                  </div>
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    disabled={isSaving}
-                    onClick={() => {
-                      sendAsQuoteRef.current = true;
-                    }}
-                    className="min-w-0 flex-1 sm:w-auto sm:flex-none"
-                  >
-                    {isSaving && sendAsQuoteRef.current ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <FileText className="mr-2 h-4 w-4" />
-                    )}
-                    {t('sendAsQuote')}
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={isSaving}
-                    onClick={() => {
-                      sendAsQuoteRef.current = false;
-                    }}
-                    className="min-w-0 flex-1 sm:w-auto sm:flex-none"
-                  >
-                    {isSaving && !sendAsQuoteRef.current ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <Check className="mr-2 h-4 w-4" />
-                    )}
-                    {t('create')}
-                  </Button>
-                </>
-              )}
+            <div className="flex min-w-0 items-center gap-3">
+              <Button
+                type="submit"
+                variant="outline"
+                size="lg"
+                disabled={isSaving}
+                onClick={() => {
+                  sendAsQuoteRef.current = true;
+                }}
+                className="min-w-0 flex-1 sm:flex-none"
+              >
+                {isSaving && sendAsQuoteRef.current ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <FileText className="mr-2 h-4 w-4" />
+                )}
+                {t("sendAsQuote")}
+              </Button>
+              <Button
+                type="submit"
+                size="lg"
+                disabled={isSaving}
+                onClick={() => {
+                  sendAsQuoteRef.current = false;
+                }}
+                className="min-w-0 flex-1 sm:flex-none"
+              >
+                {isSaving && !sendAsQuoteRef.current ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Check className="mr-2 h-4 w-4" />
+                )}
+                {t("create")}
+              </Button>
             </div>
           </StepActions>
         </form.Form>
       </form.AppForm>
 
       {/* Custom Item Dialog */}
-      <Dialog
-        open={showCustomItemDialog}
-        onOpenChange={setShowCustomItemDialog}
-      >
+      <Dialog open={showCustomItemDialog} onOpenChange={setShowCustomItemDialog}>
         <DialogPopup className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <PenLine className="h-5 w-5" />
-              {t('customItem.dialogTitle')}
+              {t("customItem.dialogTitle")}
             </DialogTitle>
-            <DialogDescription>
-              {t('customItem.dialogDescription')}
-            </DialogDescription>
+            <DialogDescription>{t("customItem.dialogDescription")}</DialogDescription>
           </DialogHeader>
           <DialogPanel>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="custom-name">{t('customItem.name')} *</Label>
+                <Label htmlFor="custom-name">{t("customItem.name")} *</Label>
                 <Input
                   id="custom-name"
-                  placeholder={t('customItem.namePlaceholder')}
+                  placeholder={t("customItem.namePlaceholder")}
                   value={customItemForm.name}
                   onChange={(e) =>
                     setCustomItemForm({
@@ -1763,12 +1610,10 @@ export function NewReservationForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="custom-description">
-                  {t('customItem.description')}
-                </Label>
+                <Label htmlFor="custom-description">{t("customItem.description")}</Label>
                 <Textarea
                   id="custom-description"
-                  placeholder={t('customItem.descriptionPlaceholder')}
+                  placeholder={t("customItem.descriptionPlaceholder")}
                   value={customItemForm.description}
                   onChange={(e) =>
                     setCustomItemForm({
@@ -1782,24 +1627,18 @@ export function NewReservationForm({
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="custom-quantity">
-                    {t('customItem.quantity')}
-                  </Label>
+                  <Label htmlFor="custom-quantity">{t("customItem.quantity")}</Label>
                   <Input
                     id="custom-quantity"
                     type="number"
                     min="1"
                     value={customItemForm.quantity}
-                    onChange={(e) =>
-                      handleCustomItemQuantityChange(e.target.value)
-                    }
+                    onChange={(e) => handleCustomItemQuantityChange(e.target.value)}
                     className="w-full"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="custom-deposit">
-                    {t('customItem.deposit')}
-                  </Label>
+                  <Label htmlFor="custom-deposit">{t("customItem.deposit")}</Label>
                   <div className="relative">
                     <Input
                       id="custom-deposit"
@@ -1823,9 +1662,7 @@ export function NewReservationForm({
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="custom-pricing-mode">
-                  {t('customItem.pricingPeriod')}
-                </Label>
+                <Label htmlFor="custom-pricing-mode">{t("customItem.pricingPeriod")}</Label>
                 <Select
                   value={customItemForm.pricingMode}
                   onValueChange={(value) =>
@@ -1837,17 +1674,17 @@ export function NewReservationForm({
                 >
                   <SelectTrigger id="custom-pricing-mode">
                     <SelectValue>
-                      {customItemForm.pricingMode === 'hour' && t('perHour')}
-                      {customItemForm.pricingMode === 'day' && t('perDay')}
-                      {customItemForm.pricingMode === 'week' && 'week'}
+                      {customItemForm.pricingMode === "hour" && t("perHour")}
+                      {customItemForm.pricingMode === "day" && t("perDay")}
+                      {customItemForm.pricingMode === "week" && "week"}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="hour" label={t('perHour')}>
-                      {t('perHour')}
+                    <SelectItem value="hour" label={t("perHour")}>
+                      {t("perHour")}
                     </SelectItem>
-                    <SelectItem value="day" label={t('perDay')}>
-                      {t('perDay')}
+                    <SelectItem value="day" label={t("perDay")}>
+                      {t("perDay")}
                     </SelectItem>
                     <SelectItem value="week" label="week">
                       week
@@ -1858,21 +1695,21 @@ export function NewReservationForm({
               {customItemDuration > 0 && (
                 <div className="bg-muted/30 space-y-3 rounded-lg border p-3">
                   <div className="text-muted-foreground flex items-center justify-between text-sm">
-                    <span>{t('customItem.pricingPeriod')}</span>
+                    <span>{t("customItem.pricingPeriod")}</span>
                     <span className="text-foreground font-medium">
-                      {customItemDuration}{' '}
-                      {customItemForm.pricingMode === 'hour'
-                        ? 'h'
-                        : customItemForm.pricingMode === 'week'
-                          ? 'sem'
-                          : 'j'}{' '}
+                      {customItemDuration}{" "}
+                      {customItemForm.pricingMode === "hour"
+                        ? "h"
+                        : customItemForm.pricingMode === "week"
+                          ? "sem"
+                          : "j"}{" "}
                       × {customItemForm.quantity || 1} unité(s)
                     </span>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="custom-total" className="text-xs">
-                        {t('customItem.totalPrice')} *
+                        {t("customItem.totalPrice")} *
                       </Label>
                       <div className="relative">
                         <Input
@@ -1882,10 +1719,8 @@ export function NewReservationForm({
                           min="0"
                           placeholder="0.00"
                           value={customItemForm.totalPrice}
-                          onChange={(e) =>
-                            handleTotalPriceChange(e.target.value)
-                          }
-                          onFocus={() => setPriceInputMode('total')}
+                          onChange={(e) => handleTotalPriceChange(e.target.value)}
+                          onFocus={() => setPriceInputMode("total")}
                           className="pr-8"
                         />
                         <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
@@ -1895,7 +1730,7 @@ export function NewReservationForm({
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="custom-unit" className="text-xs">
-                        {t('customItem.unitPrice')}
+                        {t("customItem.unitPrice")}
                       </Label>
                       <div className="relative">
                         <Input
@@ -1905,19 +1740,17 @@ export function NewReservationForm({
                           min="0"
                           placeholder="0.00"
                           value={customItemForm.unitPrice}
-                          onChange={(e) =>
-                            handleUnitPriceChange(e.target.value)
-                          }
-                          onFocus={() => setPriceInputMode('unit')}
+                          onChange={(e) => handleUnitPriceChange(e.target.value)}
+                          onFocus={() => setPriceInputMode("unit")}
                           className="pr-12"
                         />
                         <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
                           €/
-                          {customItemForm.pricingMode === 'hour'
-                            ? t('perHour')
-                            : customItemForm.pricingMode === 'week'
-                              ? 'week'
-                              : t('perDay')}
+                          {customItemForm.pricingMode === "hour"
+                            ? t("perHour")
+                            : customItemForm.pricingMode === "week"
+                              ? "week"
+                              : t("perDay")}
                         </span>
                       </div>
                     </div>
@@ -1926,7 +1759,7 @@ export function NewReservationForm({
               )}
               {customItemDuration === 0 && (
                 <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-600 dark:border-amber-800 dark:bg-amber-950/30">
-                  {t('customItem.selectPeriodFirst')}
+                  {t("customItem.selectPeriodFirst")}
                 </p>
               )}
             </div>
@@ -1940,11 +1773,11 @@ export function NewReservationForm({
                 setShowCustomItemDialog(false);
               }}
             >
-              {tCommon('cancel')}
+              {tCommon("cancel")}
             </Button>
             <Button type="button" onClick={handleAddCustomItem}>
               <Plus className="mr-1 h-4 w-4" />
-              {t('customItem.addButton')}
+              {t("customItem.addButton")}
             </Button>
           </DialogFooter>
         </DialogPopup>
@@ -1959,11 +1792,9 @@ export function NewReservationForm({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <PenLine className="h-5 w-5" />
-              {t('priceOverride.dialogTitle')}
+              {t("priceOverride.dialogTitle")}
             </DialogTitle>
-            <DialogDescription>
-              {t('priceOverride.dialogDescription')}
-            </DialogDescription>
+            <DialogDescription>{t("priceOverride.dialogDescription")}</DialogDescription>
           </DialogHeader>
           <DialogPanel>
             <div className="space-y-4">
@@ -1971,7 +1802,7 @@ export function NewReservationForm({
               <div className="bg-muted/50 rounded-lg p-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">
-                    {t('priceOverride.calculatedPrice')}
+                    {t("priceOverride.calculatedPrice")}
                   </span>
                   <span className="font-medium">
                     {formatCurrency(priceOverrideDialog.currentPrice)}/
@@ -1980,100 +1811,103 @@ export function NewReservationForm({
                 </div>
               </div>
 
-              {/* New price input */}
+              {/* Edit mode: unit price, total for the period, or discount % */}
+              <Tabs
+                value={priceOverrideDialog.mode}
+                onValueChange={(value) => setPriceOverrideMode(value as PriceOverrideMode)}
+              >
+                <TabsList className="w-full *:flex-1">
+                  <TabsTrigger value="unit">{t("priceOverride.modeUnit")}</TabsTrigger>
+                  <TabsTrigger value="total">{t("priceOverride.modeTotal")}</TabsTrigger>
+                  <TabsTrigger value="percent">{t("priceOverride.modePercent")}</TabsTrigger>
+                </TabsList>
+              </Tabs>
+
+              {/* Value input */}
               <div className="space-y-2">
-                <Label htmlFor="override-price">
-                  {t('priceOverride.newPrice')} *
-                </Label>
-                <div className="relative">
-                  <Input
-                    id="override-price"
-                    type="number"
-                    step="0.01"
-                    placeholder={t('priceOverride.newPricePlaceholder')}
-                    value={priceOverrideDialog.newPrice}
-                    onChange={(e) =>
-                      setPriceOverrideDialog({
-                        ...priceOverrideDialog,
-                        newPrice: e.target.value,
-                      })
-                    }
-                    className="pr-12"
-                    autoFocus
-                  />
-                  <span className="text-muted-foreground absolute top-1/2 right-3 -translate-y-1/2 text-sm">
-                    €/{getPricingUnitLabel(priceOverrideDialog.pricingMode)}
-                  </span>
-                </div>
+                <Label htmlFor="override-price">{t("priceOverride.newPrice")} *</Label>
+                <InputPrice
+                  value={priceOverrideDialog.value ?? 0}
+                  displayEmpty={priceOverrideDialog.value == null}
+                  onValueCommitted={(value) =>
+                    setPriceOverrideDialog((current) => ({ ...current, value }))
+                  }
+                  onEmptyCommitted={() =>
+                    setPriceOverrideDialog((current) => ({ ...current, value: null }))
+                  }
+                  placeholder={t("priceOverride.newPricePlaceholder")}
+                  suffix={
+                    priceOverrideDialog.mode === "unit"
+                      ? `€/${getPricingUnitLabel(priceOverrideDialog.pricingMode)}`
+                      : priceOverrideDialog.mode === "total"
+                        ? "€"
+                        : "%"
+                  }
+                  ariaLabel={t("priceOverride.newPrice")}
+                  className="w-full"
+                />
               </div>
 
-              {/* Total preview */}
-              {priceOverrideDialog.duration > 0 &&
-                priceOverrideDialog.newPrice && (
-                  <div className="rounded-lg border p-3">
-                    <div className="flex items-center justify-between text-sm">
+              {/* Live preview: resulting unit price + total, delta vs calculated */}
+              {resolvedOverrideUnitPrice != null && priceOverrideDialog.duration > 0 && (
+                <div className="space-y-1 rounded-lg border p-3 text-sm">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t("priceOverride.resultingUnitPrice")}
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {formatCurrency(resolvedOverrideUnitPrice)}/
+                      {getPricingUnitLabel(priceOverrideDialog.pricingMode)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">
+                      {t("priceOverride.totalForPeriod")}
+                    </span>
+                    <span className="font-medium tabular-nums">
+                      {formatCurrency(resolvedOverrideUnitPrice * priceOverrideDivisor)}
+                    </span>
+                  </div>
+                  {Math.abs(resolvedOverrideUnitPrice - priceOverrideDialog.currentPrice) >=
+                    0.005 && (
+                    <div className="flex items-center justify-between text-xs">
                       <span className="text-muted-foreground">
-                        {t('priceOverride.totalForPeriod')}
+                        vs.{" "}
+                        {formatCurrency(priceOverrideDialog.currentPrice * priceOverrideDivisor)}
                       </span>
-                      <span className="font-medium">
+                      <span
+                        className={cn(
+                          resolvedOverrideUnitPrice < priceOverrideDialog.currentPrice
+                            ? "text-green-600"
+                            : "text-orange-600",
+                        )}
+                      >
+                        {resolvedOverrideUnitPrice < priceOverrideDialog.currentPrice ? "-" : "+"}
                         {formatCurrency(
-                          parseFloat(priceOverrideDialog.newPrice || '0') *
-                            priceOverrideDialog.duration,
+                          Math.abs(resolvedOverrideUnitPrice - priceOverrideDialog.currentPrice) *
+                            priceOverrideDivisor,
                         )}
                       </span>
                     </div>
-                    {priceOverrideDialog.currentPrice !==
-                      parseFloat(priceOverrideDialog.newPrice || '0') && (
-                      <div className="mt-1 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground">
-                          vs.{' '}
-                          {formatCurrency(
-                            priceOverrideDialog.currentPrice *
-                              priceOverrideDialog.duration,
-                          )}
-                        </span>
-                        <span
-                          className={cn(
-                            parseFloat(priceOverrideDialog.newPrice || '0') <
-                              priceOverrideDialog.currentPrice
-                              ? 'text-green-600'
-                              : 'text-orange-600',
-                          )}
-                        >
-                          {parseFloat(priceOverrideDialog.newPrice || '0') <
-                          priceOverrideDialog.currentPrice
-                            ? `-${formatCurrency((priceOverrideDialog.currentPrice - parseFloat(priceOverrideDialog.newPrice || '0')) * priceOverrideDialog.duration)}`
-                            : `+${formatCurrency((parseFloat(priceOverrideDialog.newPrice || '0') - priceOverrideDialog.currentPrice) * priceOverrideDialog.duration)}`}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
             </div>
           </DialogPanel>
           <DialogFooter className="flex-col gap-2 sm:flex-row">
             <Button
               type="button"
               variant="outline"
-              onClick={() => {
-                setPriceOverrideDialog({
-                  ...priceOverrideDialog,
-                  newPrice: priceOverrideDialog.currentPrice.toString(),
-                });
-              }}
+              onClick={resetPriceOverride}
               className="sm:mr-auto"
             >
-              {t('priceOverride.reset')}
+              {t("priceOverride.reset")}
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={closePriceOverrideDialog}
-            >
-              {tCommon('cancel')}
+            <Button type="button" variant="outline" onClick={closePriceOverrideDialog}>
+              {tCommon("cancel")}
             </Button>
             <Button type="button" onClick={applyPriceOverride}>
-              {t('priceOverride.apply')}
+              {t("priceOverride.apply")}
             </Button>
           </DialogFooter>
         </DialogPopup>
@@ -2092,29 +1926,27 @@ export function NewReservationForm({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="text-destructive h-5 w-5" />
-              {t('overbooking.title')}
+              {t("overbooking.title")}
             </DialogTitle>
-            <DialogDescription>
-              {t('overbooking.description')}
-            </DialogDescription>
+            <DialogDescription>{t("overbooking.description")}</DialogDescription>
           </DialogHeader>
           <DialogPanel>
             <div className="space-y-2">
               {overbookingDialog.shortfalls.map((shortfall) => (
                 <div
-                  key={`${shortfall.productId}:${shortfall.combinationKey || 'product'}`}
+                  key={`${shortfall.productId}:${shortfall.combinationKey || "product"}`}
                   className="rounded-md border p-3"
                 >
                   <p className="text-sm font-medium">{shortfall.productName}</p>
                   {shortfall.combinationKey && (
                     <p className="text-muted-foreground mt-1 text-xs">
-                      {t('overbooking.combination', {
+                      {t("overbooking.combination", {
                         combination: shortfall.combinationKey,
                       })}
                     </p>
                   )}
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {t('overbooking.shortfall', {
+                    {t("overbooking.shortfall", {
                       requested: shortfall.requested,
                       available: shortfall.available,
                     })}
@@ -2127,17 +1959,20 @@ export function NewReservationForm({
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                setOverbookingDialog({ isOpen: false, shortfalls: [] })
-              }
+              onClick={() => setOverbookingDialog({ isOpen: false, shortfalls: [] })}
             >
-              {tCommon('cancel')}
+              {tCommon("cancel")}
             </Button>
             <Button
               type="button"
               variant="destructive"
               disabled={isSaving}
               onClick={async () => {
+                posthog.capture(productAnalyticsEvents.dashboardReservationOverbookingConfirmed, {
+                  ...dashboardReservationAnalyticsBaseProperties,
+                  shortfall_count: overbookingDialog.shortfalls.length,
+                  source: openReplaySource,
+                });
                 setOverbookingDialog({ isOpen: false, shortfalls: [] });
                 await submitManualReservation(watchedValues, {
                   allowOverbooking: true,
@@ -2145,7 +1980,7 @@ export function NewReservationForm({
               }}
             >
               {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-              {t('overbooking.createAnyway')}
+              {t("overbooking.createAnyway")}
             </Button>
           </DialogFooter>
         </DialogPopup>

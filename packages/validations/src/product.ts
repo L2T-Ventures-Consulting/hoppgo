@@ -2,18 +2,40 @@ import { z } from 'zod';
 
 import { AI_ADVISOR_PRODUCT_CONTEXT_MAX_LENGTH } from './ai-advisor';
 
-// Image URL validation - allows http/https URLs and legacy base64 data URIs
+// Image URL validation - allows public URLs, same-origin stored assets and
+// legacy base64 data URIs.
 // Note: base64 is allowed for backwards compatibility with old products,
 // but new uploads should go through S3
+const isProductImageUrl = (url: string) => {
+  if (url.startsWith('data:image/')) return true;
+  if (url.startsWith('/') && !url.startsWith('//')) return true;
+
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 const imageUrlSchema = z
   .string()
   .refine(
-    (url) =>
-      url.startsWith('http://') ||
-      url.startsWith('https://') ||
-      url.startsWith('data:image/'),
-    'Invalid image URL. Must be a valid HTTP(S) URL or image data URI.',
+    isProductImageUrl,
+    'Invalid image URL. Must be a valid stored image URL or image data URI.',
   );
+
+export const productImageVersionSchema = z.object({
+  id: z.string().min(1).max(128),
+  url: imageUrlSchema,
+  kind: z.enum(['original', 'cropped', 'ai-enhanced', 'background-removed']),
+  createdAt: z.iso.datetime().optional(),
+});
+
+export const productImageHistorySchema = z.object({
+  id: z.string().min(1).max(128),
+  versions: z.array(productImageVersionSchema).min(1).max(50),
+});
 
 // Pricing tier schema
 export const pricingTierSchema = z.object({
@@ -28,7 +50,13 @@ export const pricingTierSchema = z.object({
 export const durationUnitSchema = z.enum(['minute', 'hour', 'day', 'week']);
 
 export const priceDurationSchema = z.object({
-  price: z.string().regex(/^\d+([.,]\d{1,2})?$/, 'validation.positive'),
+  price: z
+    .string()
+    .regex(/^\d+([.,]\d{1,2})?$/, 'validation.positive')
+    .refine(
+      (price) => Number.parseFloat(price.replace(',', '.')) > 0,
+      'validation.positive',
+    ),
   duration: z.number().int().min(1, 'validation.minValue'),
   unit: durationUnitSchema,
 });
@@ -75,6 +103,7 @@ const newProductUnitDetailsSchema = z.object({
   notes: z.string().max(1000).optional().or(z.literal('')),
   purchasePrice: optionalMoneyInputSchema,
   purchasedAt: optionalDateInputSchema,
+  images: z.array(z.string().max(2048)).max(4).optional(),
 });
 
 // Product unit schema for individual unit tracking
@@ -167,7 +196,7 @@ export const createProductSchema = (
           AI_ADVISOR_PRODUCT_CONTEXT_MAX_LENGTH,
           t('maxLength', { max: AI_ADVISOR_PRODUCT_CONTEXT_MAX_LENGTH }),
         ),
-      categoryId: z.string().nullable(),
+      categoryIds: z.array(z.string()),
       price: z
         .string()
         .regex(/^\d+([.,]\d{1,2})?$/, t('positive'))
@@ -179,19 +208,18 @@ export const createProductSchema = (
       quantity: z.string().regex(/^\d+$/, t('integer')),
       status: z.enum(['draft', 'active', 'archived']),
       images: z.array(
-        z
-          .string()
-          .refine(
-            (url) =>
-              url.startsWith('http://') ||
-              url.startsWith('https://') ||
-              url.startsWith('data:image/'),
-            t('invalidImageUrl'),
-          ),
+        z.string().refine(isProductImageUrl, t('invalidImageUrl')),
       ),
+      imageHistory: z.array(productImageHistorySchema).max(5),
       pricingMode: z.enum(['hour', 'day', 'week']),
       basePriceDuration: z.object({
-        price: z.string().regex(/^\d+([.,]\d{1,2})?$/, t('positive')),
+        price: z
+          .string()
+          .regex(/^\d+([.,]\d{1,2})?$/, t('positive'))
+          .refine(
+            (price) => Number.parseFloat(price.replace(',', '.')) > 0,
+            t('positive'),
+          ),
         duration: z
           .number()
           .int()
@@ -254,6 +282,7 @@ export const createProductSchema = (
               .or(z.literal('')),
             purchasePrice: optionalMoneyInputSchema,
             purchasedAt: optionalDateInputSchema,
+            images: z.array(z.string().max(2048)).max(4).optional(),
             attributes: z.record(z.string(), z.string()).optional(),
             hasActiveAssignment: z.boolean().optional(),
           }),
@@ -362,7 +391,9 @@ export const productSchema = z
       .string()
       .max(AI_ADVISOR_PRODUCT_CONTEXT_MAX_LENGTH, 'validation.maxLength')
       .optional(),
+    // Legacy single category (kept for API/MCP backward compatibility).
     categoryId: z.string().optional().nullable(),
+    categoryIds: z.array(z.string()).optional(),
     price: z
       .string()
       .regex(/^\d+([.,]\d{1,2})?$/, 'validation.positive')
@@ -375,6 +406,7 @@ export const productSchema = z
     quantity: z.string().regex(/^\d+$/, 'validation.integer'),
     status: z.enum(['draft', 'active', 'archived']),
     images: z.array(imageUrlSchema).optional(),
+    imageHistory: z.array(productImageHistorySchema).max(5).optional(),
     pricingMode: z.enum(['hour', 'day', 'week']),
     basePriceDuration: priceDurationSchema,
     pricingTiers: z.array(pricingTierSchema).optional(),

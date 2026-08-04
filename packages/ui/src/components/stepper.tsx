@@ -245,7 +245,7 @@ export function StepActions({
     <div
       ref={ref}
       className={cn(
-        'bottom-0 z-20 flex items-center justify-between gap-3 border-t px-4 py-4 backdrop-blur-2xl transition-colors sm:px-6 lg:px-8',
+        'bottom-0 z-20 flex items-center justify-between gap-3 border-t p-3 backdrop-blur-2xl transition-colors sm:px-6 lg:px-8',
         showScrollBorder
           ? 'border-border bg-background/70'
           : 'bg-background/70 border-transparent',

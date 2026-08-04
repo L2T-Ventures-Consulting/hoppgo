@@ -63,6 +63,14 @@ export interface GeneratedPricingTier {
   updatedAt: Date;
 }
 
+export interface GeneratedProductCategory {
+  id: string;
+  productId: string;
+  categoryId: string;
+  position: number;
+  createdAt: Date;
+}
+
 export interface GeneratedProductAccessory {
   id: string;
   productId: string;
@@ -122,6 +130,7 @@ export interface GeneratedProductUnitEvent {
 export interface ProductsGeneratorResult {
   categories: GeneratedCategory[];
   products: GeneratedProduct[];
+  productCategories: GeneratedProductCategory[];
   pricingTiers: GeneratedPricingTier[];
   accessories: GeneratedProductAccessory[];
   productUnits: GeneratedProductUnit[];
@@ -243,6 +252,7 @@ export function generateProducts(
 
   const categories: GeneratedCategory[] = [];
   const products: GeneratedProduct[] = [];
+  const productCategories: GeneratedProductCategory[] = [];
   const pricingTiers: GeneratedPricingTier[] = [];
   const accessories: GeneratedProductAccessory[] = [];
   const productUnits: GeneratedProductUnit[] = [];
@@ -360,6 +370,16 @@ export function generateProducts(
       createdAt,
       updatedAt: now,
     });
+
+    if (categoryId) {
+      productCategories.push({
+        id: generateId(),
+        productId,
+        categoryId,
+        position: 0,
+        createdAt,
+      });
+    }
 
     // Generate pricing tiers
     if (template.pricingTiers && template.pricingTiers.length > 0) {
@@ -623,6 +643,7 @@ export function generateProducts(
   return {
     categories,
     products,
+    productCategories,
     pricingTiers,
     accessories,
     productUnits,

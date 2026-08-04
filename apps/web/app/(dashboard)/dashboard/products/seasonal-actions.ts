@@ -54,7 +54,7 @@ async function checkDateOverlap(
   productId: string,
   startDate: string,
   endDate: string,
-  excludeId?: string
+  excludeId?: string,
 ): Promise<boolean> {
   const conditions = [
     eq(productSeasonalPricing.productId, productId),
@@ -114,7 +114,11 @@ export async function createSeasonalPricing(input: SeasonalPricingInput) {
   if (!isOwned) return { error: 'errors.unauthorized' as const }
 
   // Check overlap
-  const hasOverlap = await checkDateOverlap(data.productId, data.startDate, data.endDate)
+  const hasOverlap = await checkDateOverlap(
+    data.productId,
+    data.startDate,
+    data.endDate,
+  )
   if (hasOverlap) {
     return { error: 'seasonOverlapError' as const }
   }
@@ -148,12 +152,13 @@ export async function createSeasonalPricing(input: SeasonalPricingInput) {
   }
 
   revalidatePath(`/dashboard/products/${data.productId}`)
+  revalidatePath(`/dashboard/products/${data.productId}/edit`)
   return { success: true, id: seasonId }
 }
 
 export async function updateSeasonalPricing(
   id: string,
-  input: Omit<SeasonalPricingInput, 'productId'>
+  input: Omit<SeasonalPricingInput, 'productId'>,
 ) {
   const store = await getCurrentStore()
   if (!store) return { error: 'errors.unauthorized' as const }
@@ -170,7 +175,9 @@ export async function updateSeasonalPricing(
   if (!isOwned) return { error: 'errors.unauthorized' as const }
 
   // Validate
-  const validated = seasonalPricingSchema.omit({ productId: true }).safeParse(input)
+  const validated = seasonalPricingSchema
+    .omit({ productId: true })
+    .safeParse(input)
   if (!validated.success) return { error: 'errors.invalidData' as const }
 
   const data = validated.data
@@ -184,7 +191,7 @@ export async function updateSeasonalPricing(
     existing.productId,
     data.startDate,
     data.endDate,
-    id
+    id,
   )
   if (hasOverlap) {
     return { error: 'seasonOverlapError' as const }
@@ -224,6 +231,7 @@ export async function updateSeasonalPricing(
   }
 
   revalidatePath(`/dashboard/products/${existing.productId}`)
+  revalidatePath(`/dashboard/products/${existing.productId}/edit`)
   return { success: true }
 }
 
@@ -251,6 +259,7 @@ export async function deleteSeasonalPricing(id: string) {
     .where(eq(productSeasonalPricing.id, id))
 
   revalidatePath(`/dashboard/products/${existing.productId}`)
+  revalidatePath(`/dashboard/products/${existing.productId}/edit`)
   return { success: true }
 }
 
@@ -276,7 +285,7 @@ export async function duplicateSeasonalPricing(id: string) {
   const hasOverlap = await checkDateOverlap(
     existing.productId,
     newStartDate,
-    newEndDate
+    newEndDate,
   )
   if (hasOverlap) {
     return { error: 'seasonOverlapError' as const }
@@ -308,6 +317,7 @@ export async function duplicateSeasonalPricing(id: string) {
   }
 
   revalidatePath(`/dashboard/products/${existing.productId}`)
+  revalidatePath(`/dashboard/products/${existing.productId}/edit`)
   return { success: true, id: newId }
 }
 

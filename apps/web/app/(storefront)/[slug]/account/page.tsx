@@ -1,3 +1,11 @@
+import {
+  ClockSolidIcon,
+  CreditCardSolidIcon,
+  ProductSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from '@louez/ui/icons'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
@@ -10,12 +18,7 @@ import {
   Calendar,
   Package,
   ChevronRight,
-  Clock,
-  CheckCircle,
-  XCircle,
-  FileText,
   Sparkles,
-  CreditCard,
   History,
 } from 'lucide-react'
 
@@ -34,6 +37,8 @@ import { formatStoreDate } from '@/lib/utils/store-date'
 interface AccountPageProps {
   params: Promise<{ slug: string }>
 }
+
+export const instant = false;
 
 export async function generateMetadata({
   params,
@@ -90,64 +95,64 @@ export default async function AccountPage({ params }: AccountPageProps) {
 
   const statusConfig: Record<ReservationStatus, {
     label: string
-    variant: 'secondary' | 'default' | 'outline' | 'error'
-    icon: typeof Clock
+    variant: 'pending' | 'progress' | 'submitted' | 'success' | 'failed' | 'expired'
+    icon: typeof ClockSolidIcon
     color: string
     bgColor: string
   }> = {
     pending: {
       label: t('status.pending'),
-      variant: 'secondary',
-      icon: Clock,
+      variant: 'pending',
+      icon: ClockSolidIcon,
       color: 'text-amber-600 dark:text-amber-400',
       bgColor: 'bg-amber-50 dark:bg-amber-950/30',
     },
     confirmed: {
       label: t('status.confirmed'),
-      variant: 'default',
-      icon: CheckCircle,
+      variant: 'success',
+      icon: SuccessSolidIcon,
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
     },
     ongoing: {
       label: t('status.ongoing'),
-      variant: 'default',
-      icon: Package,
+      variant: 'progress',
+      icon: ProductSolidIcon,
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-50 dark:bg-blue-950/30',
     },
     completed: {
       label: t('status.completed'),
-      variant: 'outline',
-      icon: CheckCircle,
+      variant: 'success',
+      icon: SuccessSolidIcon,
       color: 'text-gray-500',
       bgColor: 'bg-gray-50 dark:bg-gray-950/30',
     },
     cancelled: {
       label: t('status.cancelled'),
-      variant: 'error',
-      icon: XCircle,
+      variant: 'failed',
+      icon: XCircleSolidIcon,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-50 dark:bg-red-950/30',
     },
     rejected: {
       label: t('status.rejected'),
-      variant: 'error',
-      icon: XCircle,
+      variant: 'failed',
+      icon: XCircleSolidIcon,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-50 dark:bg-red-950/30',
     },
     quote: {
       label: t('status.quote'),
-      variant: 'secondary',
-      icon: FileText,
+      variant: 'submitted',
+      icon: SubmittedSolidIcon,
       color: 'text-violet-600 dark:text-violet-400',
       bgColor: 'bg-violet-50 dark:bg-violet-950/30',
     },
     declined: {
       label: t('status.declined'),
-      variant: 'outline',
-      icon: XCircle,
+      variant: 'expired',
+      icon: XCircleSolidIcon,
       color: 'text-slate-500',
       bgColor: 'bg-slate-50 dark:bg-slate-950/30',
     },
@@ -287,11 +292,8 @@ export default async function AccountPage({ params }: AccountPageProps) {
                               </span>
                               <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
                             </div>
-                            <Badge
-                              variant="outline"
-                              className={`text-xs ${isPaid ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-400 dark:border-emerald-800' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800'}`}
-                            >
-                              <CreditCard className="h-3 w-3 mr-1" />
+                            <Badge variant={isPaid ? 'success' : 'pending'} className="text-xs">
+                              <CreditCardSolidIcon className="h-3 w-3 mr-1" />
                               {isPaid ? t('paymentPaid') : t('paymentPending')}
                             </Badge>
                           </div>

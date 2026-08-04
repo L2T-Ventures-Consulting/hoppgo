@@ -8,13 +8,13 @@
 
 # 🏠 Louez
 
-### The Open-Source Equipment Rental Platform
+### The Source-Available Equipment Rental Platform
 
 **Stop paying for expensive SaaS. Own your rental business software.**
 
 [![Docker](https://img.shields.io/badge/Docker-synapsr%2Flouez-2496ED?style=for-the-badge&logo=docker)](https://hub.docker.com/r/synapsr/louez)
 [![GitHub Stars](https://img.shields.io/github/stars/Synapsr/Louez?style=for-the-badge&logo=github)](https://github.com/Synapsr/Louez)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-Apache_2.0_%2B_Commons_Clause-orange?style=for-the-badge)](LICENSE)
 
 [☁️ Cloud](https://louez.io) • [🚀 Self-Host](#-self-host-in-one-command) • [✨ Features](#-features) • [📋 Changelog](CHANGELOG.md)
 
@@ -28,7 +28,7 @@
 
 <video src="demo.mp4" width="100%" autoplay loop muted playsinline></video>
 
-*See Louez in action — from setup to first booking*
+_See Louez in action — from setup to first booking_
 
 </div>
 
@@ -38,14 +38,14 @@
 
 Whether you rent cameras, tools, party equipment, or vehicles — **Louez** gives you everything you need to run your rental business professionally.
 
-> 🇫🇷 *"Louez" means "rent" in French — because great software deserves a name that speaks to its purpose.*
+> 🇫🇷 _"Louez" means "rent" in French — because great software deserves a name that speaks to its purpose._
 
-| 💸 **No Monthly Fees** | 🎨 **Beautiful Storefronts** | 🔒 **Own Your Data** |
-|:----------------------:|:---------------------------:|:--------------------:|
+|                   💸 **No Monthly Fees**                   |               🎨 **Beautiful Storefronts**                |            🔒 **Own Your Data**             |
+| :--------------------------------------------------------: | :-------------------------------------------------------: | :-----------------------------------------: |
 | Self-host for free. No subscriptions, no per-booking fees. | Every store gets a stunning, customizable online catalog. | Your server, your database, your customers. |
 
-| ⚡ **Deploy in Minutes** | 🌍 **Multi-language** | 📱 **Mobile Ready** |
-|:-----------------------:|:---------------------:|:-------------------:|
+|             ⚡ **Deploy in Minutes**             |                 🌍 **Multi-language**                 |        📱 **Mobile Ready**         |
+| :----------------------------------------------: | :---------------------------------------------------: | :--------------------------------: |
 | One command and you're live — database included. | 8 languages built-in: EN, FR, DE, ES, IT, NL, PL, PT. | Responsive design for all devices. |
 
 ---
@@ -95,9 +95,14 @@ The bundled [docker-compose.yml](docker-compose.yml) is a complete, self-contain
 
 - 🗄️ **Database included** — MySQL runs alongside the app, and the schema installs itself on first boot
 - 🖼️ **Image storage included** — a private MinIO bucket, served through the app (no extra ports, no CDN setup)
+- ✂️ **Background removal included** — a private worker built on MIT-licensed `rembg` enables one-click product isolation without an API key
 - 🔑 **No secrets to generate** — an auth secret is created and persisted automatically
 - ✉️ **No email server required** — sign in with a password; plug in any SMTP provider later to enable outgoing email
 - 🏪 **Single-store mode** — the instance hosts your store, not a SaaS
+
+The lightweight image worker uses roughly 450 MB of RAM while loaded. Plan for
+at least 2 GB for the complete stack; 4 GB leaves comfortable production
+headroom.
 
 ### Using your own domain
 
@@ -110,7 +115,7 @@ AUTH_URL="https://rentals.example.com"
 
 ### One-click platforms
 
-The published image `synapsr/louez` runs in single-store mode by default — provide a MySQL database plus the variables above and it boots on EasyPanel, Dokploy, Coolify, Portainer or Railway. See [.env.example](.env.example) for the full configuration surface (S3 storage, SMTP, Stripe, and more).
+Import the bundled Compose stack in EasyPanel, Dokploy, Coolify or Portainer to deploy the web app, MySQL, MinIO and the private background-removal worker together. The published image `synapsr/louez` still runs independently in single-store mode, but image isolation requires its companion `synapsr/louez-background-removal` service. See [.env.example](.env.example) for the full configuration surface (S3 storage, SMTP, Stripe, AI, and more).
 
 ### Multi-tenant deployments
 
@@ -126,16 +131,16 @@ Louez can also run as a multi-store platform (the way [louez.io](https://louez.i
 
 Everything you need to manage your rental business in one place.
 
-| | Feature | What it does |
-|:-:|---------|-------------|
-| 📦 | **Products** | Manage inventory with images, flexible pricing tiers, and stock tracking |
-| 📅 | **Reservations** | Handle bookings, track status, manage pickups & returns |
-| 🗓️ | **Calendar** | Visual week/month view of all your reservations |
-| 👥 | **Customers** | Complete customer database with history |
-| 📈 | **Statistics** | Revenue charts, top products, occupancy insights |
-| 📄 | **Contracts** | Auto-generated PDF contracts |
-| ✉️ | **Emails** | Automated confirmations, reminders & notifications |
-| 👨‍👩‍👧‍👦 | **Team** | Invite staff with role-based permissions |
+|     | Feature          | What it does                                                             |
+| :-: | ---------------- | ------------------------------------------------------------------------ |
+| 📦  | **Products**     | Manage inventory with images, flexible pricing tiers, and stock tracking |
+| 📅  | **Reservations** | Handle bookings, track status, manage pickups & returns                  |
+| 🗓️  | **Calendar**     | Visual week/month view of all your reservations                          |
+| 👥  | **Customers**    | Complete customer database with history                                  |
+| 📈  | **Statistics**   | Revenue charts, top products, occupancy insights                         |
+| 📄  | **Contracts**    | Auto-generated PDF contracts                                             |
+| ✉️  | **Emails**       | Automated confirmations, reminders & notifications                       |
+| 👨‍👩‍👧‍👦  | **Team**         | Invite staff with role-based permissions                                 |
 
 ### 🛍️ Stunning Storefronts
 
@@ -153,7 +158,7 @@ Each rental business gets its own branded online store.
 Louez ships a full AI layer that works for your store around the clock.
 
 - 💬 **Storefront AI advisor** — a chat assistant on your storefront that recommends the right gear from your live catalog, checks real availability for the customer's dates, answers questions about your hours and policies, and guides visitors all the way to booking. You brief it in plain language, like a new employee.
-- 📞 **AI voice receptionist** — an assistant that answers your store's phone line: it handles questions about products, prices and availability, takes booking *requests* you review from the dashboard, sends the caller an SMS recap, and can hand over to a human. Pick its voice (with audio preview), its language (8 supported), and whether it answers every call or only outside opening hours. You can even get a phone number without leaving the dashboard.
+- 📞 **AI voice receptionist** — an assistant that answers your store's phone line: it handles questions about products, prices and availability, takes booking _requests_ you review from the dashboard, sends the caller an SMS recap, and can hand over to a human. Pick its voice (with audio preview), its language (8 supported), and whether it answers every call or only outside opening hours. You can even get a phone number without leaving the dashboard.
 - 🎛️ **One control panel** — configure both assistants, replay conversations and calls, and see which chats turned into reservations.
 
 The AI assistant is available out of the box on **[Louez Cloud](https://louez.io)**. Self-hosters can connect their own AI and telephony providers — the configuration lives in [.env.example](.env.example).
@@ -191,17 +196,17 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
 
 Built with modern, battle-tested technologies:
 
-| | Technology | Purpose |
-|:-:|------------|---------|
-| ⚡ | **Next.js 16** | React framework with App Router |
-| 📘 | **TypeScript** | Type-safe development |
-| 🎨 | **Tailwind CSS 4** | Utility-first styling |
-| 🧩 | **Base UI** | Accessible UI primitives |
-| 🗄️ | **Drizzle ORM** | Type-safe database queries (MySQL) |
-| 🔐 | **better-auth** | Authentication (password, email codes, Google) |
-| ✉️ | **React Email** | Beautiful email templates |
-| 📄 | **React PDF** | Contract generation |
-| 🌍 | **next-intl** | Internationalization |
+|     | Technology         | Purpose                                        |
+| :-: | ------------------ | ---------------------------------------------- |
+| ⚡  | **Next.js 16**     | React framework with App Router                |
+| 📘  | **TypeScript**     | Type-safe development                          |
+| 🎨  | **Tailwind CSS 4** | Utility-first styling                          |
+| 🧩  | **Base UI**        | Accessible UI primitives                       |
+| 🗄️  | **Drizzle ORM**    | Type-safe database queries (MySQL)             |
+| 🔐  | **better-auth**    | Authentication (password, email codes, Google) |
+| ✉️  | **React Email**    | Beautiful email templates                      |
+| 📄  | **React PDF**      | Contract generation                            |
+| 🌍  | **next-intl**      | Internationalization                           |
 
 ---
 
@@ -214,18 +219,20 @@ Built with modern, battle-tested technologies:
 
 The bundled docker-compose deployment configures all of the required variables for you. For custom deployments:
 
-| Variable | Required | Description |
-|----------|:--------:|-------------|
-| `DATABASE_URL` | ✅ | MySQL connection string |
-| `NEXT_PUBLIC_APP_URL` | ✅ | Public URL of your app |
-| `NEXT_PUBLIC_APP_DOMAIN` | ✅ | Public domain of your app |
-| `AUTH_URL` | ✅ | URL users sign in from (usually the app URL) |
-| `AUTH_SECRET` | | Random secret (auto-generated by the compose deployment) |
-| `S3_*` | | S3-compatible storage for images (bundled MinIO in compose) |
-| `LOUEZ_MODE` | | `standalone` (default) or `platform` (multi-tenant routing) |
-| `SMTP_*` | | Outgoing email — optional; email features disable gracefully |
-| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | | Google sign-in — optional |
-| `STRIPE_*` | | Online payments — optional; storefronts fall back to booking requests |
+| Variable                                | Required | Description                                                               |
+| --------------------------------------- | :------: | ------------------------------------------------------------------------- |
+| `DATABASE_URL`                          |    ✅    | MySQL connection string                                                   |
+| `NEXT_PUBLIC_APP_URL`                   |    ✅    | Public URL of your app                                                    |
+| `NEXT_PUBLIC_APP_DOMAIN`                |    ✅    | Public domain of your app                                                 |
+| `AUTH_URL`                              |    ✅    | URL users sign in from (usually the app URL)                              |
+| `AUTH_SECRET`                           |          | Random secret (auto-generated by the compose deployment)                  |
+| `S3_*`                                  |          | S3-compatible storage for images (bundled MinIO in compose)               |
+| `LOUEZ_MODE`                            |          | `standalone` (default) or `platform` (multi-tenant routing)               |
+| `BACKGROUND_REMOVAL_API_TOKEN`          |          | Shared Bearer token when the image worker is publicly reachable           |
+| `AI_IMAGE_OPENAI_API_KEY`               |          | Enables optional GPT Image enhancement; local background removal is bundled |
+| `SMTP_*`                                |          | Outgoing email — optional; email features disable gracefully              |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` |          | Google sign-in — optional                                                 |
+| `STRIPE_*`                              |          | Online payments — optional; storefronts fall back to booking requests     |
 
 Advanced integrations (AI providers, telephony, SMS, analytics, calendar sync…) are documented in [.env.example](.env.example).
 
@@ -314,12 +321,20 @@ See [SECURITY.md](SECURITY.md) for our full security policy.
 
 ## 📄 License
 
-**Apache 2.0 with Commons Clause** — see [LICENSE](LICENSE)
+**Source-available under Apache 2.0 with Commons Clause** — see [LICENSE](LICENSE).
+The Commons Clause restricts selling the software itself, so this is not an
+OSI-approved open-source license.
 
 ✅ Free for personal and internal use
 ✅ Modify and customize freely
 ✅ Contributions welcome
 ❌ Cannot sell as a commercial service without agreement
+
+### Third-party assets
+
+The dashboard uses icons from [Nucleo](https://nucleoapp.com) © Nucleo — see [NOTICE](NOTICE). They are **not** covered by this repository's license and require a valid [Nucleo license](https://nucleoapp.com/license). The icon sources are not vendored here — they come from the official [`nucleo-glass`](https://www.npmjs.com/package/nucleo-glass) npm package at install time. Don't extract or reuse these icons outside the app. Contributors must keep the total below 100 (tracked in `packages/ui/src/icons/glass.tsx`); self-hosters remain responsible for ensuring their use is licensed.
+
+The background-removal image includes MIT-licensed [`rembg`](https://github.com/danielgatis/rembg) and the Apache-2.0 [`isnet-general-use` model from DIS/IS-Net](https://github.com/xuebinqin/DIS). Their attribution is recorded in [NOTICE](NOTICE).
 
 ---
 

@@ -266,6 +266,8 @@ export interface BaseContext {
         };
       };
       internalNotes?: string;
+      discountAmount?: number;
+      depositOverride?: number;
       tulipInsuranceOptIn?: boolean;
       sendConfirmationEmail?: boolean;
       sendAsQuote?: boolean;

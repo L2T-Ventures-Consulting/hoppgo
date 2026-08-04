@@ -7,6 +7,7 @@ import {
   db,
   effectiveProductQuantitySql,
   getEffectiveProductQuantities,
+  productCategories,
   products,
   reservationItems,
   reservations,
@@ -48,7 +49,15 @@ export function registerProductTools(
         conditions.push(eq(products.status, status));
       }
       if (categoryId) {
-        conditions.push(eq(products.categoryId, categoryId));
+        conditions.push(
+          inArray(
+            products.id,
+            db
+              .select({ id: productCategories.productId })
+              .from(productCategories)
+              .where(eq(productCategories.categoryId, categoryId)),
+          ),
+        );
       }
       if (search) {
         conditions.push(like(products.name, `%${search}%`));
@@ -121,7 +130,7 @@ export function registerProductTools(
         product.id,
       ]);
       const effectiveQuantity = product.trackUnits
-        ? effectiveQuantities.get(product.id) ?? 0
+        ? (effectiveQuantities.get(product.id) ?? 0)
         : product.quantity;
 
       let text =
@@ -201,6 +210,14 @@ export function registerProductTools(
           status: 'active',
         })
         .$returningId();
+
+      if (categoryId) {
+        await db.insert(productCategories).values({
+          productId: created.id,
+          categoryId,
+          position: 0,
+        });
+      }
 
       return toolResult(
         `Product created successfully.\n\n` +

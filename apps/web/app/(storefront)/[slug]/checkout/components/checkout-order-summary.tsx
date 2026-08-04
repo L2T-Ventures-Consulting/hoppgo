@@ -1,10 +1,8 @@
 'use client';
 
-import Image from 'next/image';
-
 import { format } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
-import { ImageIcon, Shield, Tag, Truck } from 'lucide-react';
+import { Shield, Tag, Truck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import type { TaxSettings } from '@louez/types';
@@ -21,6 +19,8 @@ import {
   TooltipTrigger,
 } from '@louez/ui';
 import { formatCurrency } from '@louez/utils';
+
+import { ProductImage } from '@/components/product/product-image';
 
 import { getDetailedDuration } from '@/lib/utils/duration';
 import { calculateCartItemPrice } from '@/lib/utils/cart-pricing';
@@ -160,7 +160,7 @@ export function CheckoutOrderSummary({
                   locale: dateLocale,
                 })}
               </span>
-              <Badge variant="secondary">{durationLabel}</Badge>
+              <Badge variant="expired">{durationLabel}</Badge>
             </div>
           )}
 
@@ -190,20 +190,12 @@ export function CheckoutOrderSummary({
                     key={item.lineId || `${item.productId}-${index}`}
                     className="flex gap-3"
                   >
-                    <div className="bg-muted relative aspect-4/3 h-14 w-auto shrink-0 overflow-hidden rounded-lg">
-                      {item.productImage ? (
-                        <Image
-                          src={item.productImage}
-                          alt={item.productName}
-                          fill
-                          className="max-h-full max-w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <ImageIcon className="text-muted-foreground h-5 w-5" />
-                        </div>
-                      )}
-                    </div>
+                    <ProductImage
+                      src={item.productImage}
+                      alt={item.productName}
+                      sizes="76px"
+                      containerClassName="h-14 shrink-0"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1">
                         <p className="truncate text-sm font-medium">
@@ -261,13 +253,10 @@ export function CheckoutOrderSummary({
                       </p>
                       {discountPercent != null && discountPercent > 0 &&
                         (maxDiscountPercent == null || discountPercent <= maxDiscountPercent) && (
-                        <Badge
-                          variant="secondary"
-                          className="mt-1 bg-green-100 text-xs text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                        >
-                          -{Math.floor(discountPercent)}%
-                        </Badge>
-                      )}
+                          <Badge variant="success" className="mt-1 text-xs">
+                            -{Math.floor(discountPercent)}%
+                          </Badge>
+                        )}
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">

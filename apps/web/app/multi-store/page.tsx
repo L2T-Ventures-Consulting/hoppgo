@@ -1,5 +1,4 @@
 import { Suspense } from 'react'
-import { unstable_noStore as noStore } from 'next/cache'
 import { getTranslations } from 'next-intl/server'
 
 import { getUserStores } from '@/lib/store-context'
@@ -22,7 +21,9 @@ import {
   MultiStorePeriodFilter,
 } from './_components'
 
-export const dynamic = 'force-dynamic'
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 interface MultiStorePageProps {
   searchParams: Promise<{
@@ -200,8 +201,6 @@ async function RevenueChartSection({
 }
 
 export default async function MultiStorePage({ searchParams }: MultiStorePageProps) {
-  noStore()
-
   const stores = await getUserStores()
   const storeIds = stores.map((s) => s.id)
   const params = await searchParams

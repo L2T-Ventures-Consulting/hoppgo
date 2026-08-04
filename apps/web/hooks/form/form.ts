@@ -5,6 +5,8 @@ import { FormTextarea } from '@/components/form/form-textarea'
 import { FormSwitch } from '@/components/form/form-switch'
 import { FormSelect } from '@/components/form/form-select'
 import { FormCheckbox } from '@/components/form/form-checkbox'
+import { FormCombobox } from '@/components/form/form-combobox'
+import { FormDuration } from '@/components/form/form-duration'
 import { FormPriceDuration } from '@/components/form/form-price-duration'
 import { FormReservationDatePicker } from '@/components/form/form-reservation-date-picker'
 import { FormOtp } from '@/components/form/form-otp'
@@ -14,6 +16,7 @@ import { FormCountrySelect } from '@/components/form/form-country-select'
 import { FormCurrencySelect } from '@/components/form/form-currency-select'
 import { SubscribeButton } from '@/components/form/subscribe-button'
 import { FormForm } from '@/components/form/form-form'
+import { FormRadioGroup } from '@/components/form/form-radio-group'
 
 export const { useAppForm, withForm } = createFormHook({
   fieldComponents: {
@@ -22,16 +25,19 @@ export const { useAppForm, withForm } = createFormHook({
     Switch: FormSwitch,
     Select: FormSelect,
     Checkbox: FormCheckbox,
+    Combobox: FormCombobox,
     Otp: FormOtp,
     ImageUpload: FormImageUpload,
     PhoneInput: FormPhoneInput,
     CountrySelect: FormCountrySelect,
     CurrencySelect: FormCurrencySelect,
+    Duration: FormDuration,
     PriceDuration: FormPriceDuration,
     ReservationDatePicker: FormReservationDatePicker,
   },
   formComponents: {
     Form: FormForm,
+    RadioGroup: FormRadioGroup,
     SubscribeButton,
   },
   fieldContext,

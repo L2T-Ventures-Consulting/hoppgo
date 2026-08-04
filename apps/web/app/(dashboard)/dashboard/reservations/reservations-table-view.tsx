@@ -1,6 +1,15 @@
 'use client'
 
 import {
+  FailedSolidIcon,
+  PendingSolidIcon,
+  ProductSolidIcon,
+  ReviewSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from "@louez/ui/icons";
+import {
   Table,
   TableBody,
   TableCell,
@@ -29,17 +38,29 @@ import {
   ArrowUp,
   ArrowDown,
   CheckCircle,
-  AlertCircle,
-  Clock,
   Package,
-  Ban,
   XCircle,
-  FileText,
   MoreHorizontal,
   Loader2,
 } from 'lucide-react'
-import type { Reservation, ReservationStatus, SortField, SortDirection } from './reservations-types'
-import { STATUS_CONFIG, getPaymentStatus, PAYMENT_STATUS_CLASSES } from './reservations-utils'
+import type {
+  Reservation,
+  ReservationStatus,
+  SortField,
+  SortDirection,
+} from './reservations-types'
+import { PAYMENT_STATUS_VARIANTS, STATUS_CONFIG, getPaymentStatus } from './reservations-utils'
+
+const STATUS_ICON_MAP: Record<ReservationStatus, typeof PendingSolidIcon> = {
+  pending: PendingSolidIcon,
+  confirmed: SuccessSolidIcon,
+  ongoing: ProductSolidIcon,
+  completed: SuccessSolidIcon,
+  cancelled: FailedSolidIcon,
+  rejected: XCircleSolidIcon,
+  quote: SubmittedSolidIcon,
+  declined: FailedSolidIcon,
+}
 
 interface ReservationsTableViewProps {
   reservations: Reservation[]
@@ -55,17 +76,6 @@ interface ReservationsTableViewProps {
     newStatus: ReservationStatus
   ) => Promise<void>
   openRejectDialog: (e: React.MouseEvent, reservation: Reservation) => void
-}
-
-const STATUS_ICON_MAP: Record<ReservationStatus, typeof Clock> = {
-  pending: Clock,
-  confirmed: CheckCircle,
-  ongoing: Package,
-  completed: CheckCircle,
-  cancelled: Ban,
-  rejected: XCircle,
-  quote: FileText,
-  declined: XCircle,
 }
 
 function SortableHead({
@@ -258,10 +268,7 @@ export function ReservationsTableView({
 
                     {/* Status */}
                     <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={`gap-1 ${statusConfig.bgClass} ${statusConfig.className} border-0`}
-                      >
+                      <Badge variant={statusConfig.badgeVariant} className="gap-1">
                         <StatusIcon className="h-3 w-3" />
                         {t(`status.${status}`)}
                       </Badge>
@@ -271,16 +278,18 @@ export function ReservationsTableView({
                     <TableCell className="hidden lg:table-cell">
                       {showPaymentStatus && (
                         <Tooltip>
-                          <TooltipTrigger render={
-                            <Badge
-                              variant="secondary"
-                              className={`gap-1 text-xs ${PAYMENT_STATUS_CLASSES[paymentInfo.status]}`}
-                            />
-                          }>
+                          <TooltipTrigger
+                            render={
+                              <Badge
+                                variant={PAYMENT_STATUS_VARIANTS[paymentInfo.status]}
+                                className="gap-1 text-xs"
+                              />
+                            }
+                          >
                             {paymentInfo.status === 'paid' ? (
-                              <CheckCircle className="h-3 w-3" />
+                              <SuccessSolidIcon className="h-3 w-3" />
                             ) : (
-                              <AlertCircle className="h-3 w-3" />
+                              <ReviewSolidIcon className="h-3 w-3" />
                             )}
                             {t(`paymentStatus.${paymentInfo.status}`)}
                           </TooltipTrigger>

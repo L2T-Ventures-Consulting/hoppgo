@@ -78,6 +78,7 @@ interface RepairDowntimeSuggestionState {
     id: string;
     identifier: string;
     productName: string;
+    productId: string;
   }>;
 }
 
@@ -416,7 +417,7 @@ function StepSummary({ items, inspections, globalNotes, onGlobalNotesChange }: S
                       ) : null}
                     </span>
                   </div>
-                  <Badge variant={inspection.condition === "damage" ? "error" : "secondary"}>
+                  <Badge variant={inspection.condition === "damage" ? "failed" : "expired"}>
                     {t(`conditions.${inspection.condition}`)}
                   </Badge>
                 </div>

@@ -48,9 +48,14 @@ COPY packages/mcp/package.json ./packages/mcp/
 COPY apps/web/package.json ./apps/web/
 COPY apps/voice-relay/package.json ./apps/voice-relay/
 
-# Install dependencies using pnpm
+# Install dependencies using pnpm. The first pnpm invocation also makes
+# corepack download the pinned pnpm from the npm registry — the stage's first
+# network access — so both are retried: build hosts occasionally fail DNS
+# resolution transiently (EAI_AGAIN) and a blind retry is all it takes.
 RUN corepack enable pnpm && \
-    pnpm install --frozen-lockfile
+    (pnpm install --frozen-lockfile || \
+     (sleep 10 && pnpm install --frozen-lockfile) || \
+     (sleep 30 && pnpm install --frozen-lockfile))
 
 # -----------------------------------------------------------------------------
 # Stage 2: Builder
@@ -76,6 +81,9 @@ ARG NEXT_PUBLIC_POSTHOG_HOST
 ARG NEXT_PUBLIC_UMAMI_SCRIPT_URL
 ARG NEXT_PUBLIC_UMAMI_WEBSITE_ID
 ARG NEXT_PUBLIC_GLEAP_API_KEY
+ARG NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY
+ARG NEXT_PUBLIC_OPENREPLAY_STOREFRONT_PROJECT_KEY
+ARG NEXT_PUBLIC_OPENREPLAY_INGEST_POINT
 ARG NEXT_PUBLIC_FROMHELLO_API_URL
 ARG NEXT_PUBLIC_FROMHELLO_KEY
 ARG NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN
@@ -112,9 +120,18 @@ ENV NEXT_PUBLIC_POSTHOG_HOST=${NEXT_PUBLIC_POSTHOG_HOST}
 ENV NEXT_PUBLIC_UMAMI_SCRIPT_URL=${NEXT_PUBLIC_UMAMI_SCRIPT_URL}
 ENV NEXT_PUBLIC_UMAMI_WEBSITE_ID=${NEXT_PUBLIC_UMAMI_WEBSITE_ID}
 ENV NEXT_PUBLIC_GLEAP_API_KEY=${NEXT_PUBLIC_GLEAP_API_KEY}
+ENV NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY=${NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY}
+ENV NEXT_PUBLIC_OPENREPLAY_STOREFRONT_PROJECT_KEY=${NEXT_PUBLIC_OPENREPLAY_STOREFRONT_PROJECT_KEY}
+ENV NEXT_PUBLIC_OPENREPLAY_INGEST_POINT=${NEXT_PUBLIC_OPENREPLAY_INGEST_POINT}
 ENV NEXT_PUBLIC_FROMHELLO_API_URL=${NEXT_PUBLIC_FROMHELLO_API_URL}
 ENV NEXT_PUBLIC_FROMHELLO_KEY=${NEXT_PUBLIC_FROMHELLO_KEY}
 ENV NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN=${NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN}
+
+# Reuse the pnpm tarball corepack already fetched in `deps`. Each stage has its
+# own filesystem, so without this the builder downloads pnpm from the npm
+# registry a second time — a second chance for a build to die on a transient DNS
+# or registry failure, having nothing to do with the code being built.
+COPY --from=deps /root/.cache/node/corepack /root/.cache/node/corepack
 
 # Build the application using Turborepo. CI supplies the commit SHA; direct
 # EasyPanel builds fall back to a unique build identifier without manual input.
@@ -170,6 +187,11 @@ COPY --from=builder --chown=nextjs:nodejs /app/apps/web/.next/static ./apps/web/
 # --chown so the non-root nextjs user can read them regardless of the
 # permissions the files had on the build host
 COPY --from=builder --chown=nextjs:nodejs /app/apps/web/public ./apps/web/public
+
+# Changelog write-ups, read from disk at request time. next.config.ts also lists
+# them in outputFileTracingIncludes for non-Docker deployments; copying them here
+# makes the image independent of whether that trace resolved.
+COPY --from=builder --chown=nextjs:nodejs /app/apps/web/content ./apps/web/content
 
 # Copy SQL migrations so the app can set up an empty database at startup
 # (setupDatabase in packages/db runs them programmatically — drizzle-kit is

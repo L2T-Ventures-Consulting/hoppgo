@@ -8,8 +8,14 @@ import { revalidateLogic, useStore } from '@tanstack/react-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Check, MapPin, Truck, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { usePostHog } from 'posthog-js/react';
 
 import { StepContent, toastManager } from '@louez/ui';
+
+import {
+  checkoutAnalyticsBaseProperties,
+  productAnalyticsEvents,
+} from '@/lib/product-analytics/analytics-events';
 
 import { useAppForm } from '@/hooks/form/form';
 import { useStorefrontUrl } from '@/hooks/use-storefront-url';
@@ -122,6 +128,7 @@ export function CheckoutForm({
   const tErrors = useTranslations('errors');
   const currency = useStoreCurrency();
   const { getUrl } = useStorefrontUrl(storeSlug);
+  const posthog = usePostHog();
   const { trackEvent } = useAnalytics();
   const {
     items,
@@ -289,6 +296,7 @@ export function CheckoutForm({
     currentStep,
     stepDirection,
     steps,
+    currentStepIndex,
     goToNextStep,
     goToPreviousStep,
     goToStep,
@@ -319,22 +327,67 @@ export function CheckoutForm({
             ),
           );
 
-          return fieldsToValidate.every(
+          const failedFields = fieldsToValidate.filter(
             (fieldName) =>
-              (form.getFieldMeta(fieldName)?.errors?.length ?? 0) === 0,
+              (form.getFieldMeta(fieldName)?.errors?.length ?? 0) > 0,
           );
+
+          if (failedFields.length > 0) {
+            posthog.capture(
+              productAnalyticsEvents.checkoutStepValidationFailed,
+              {
+                ...checkoutAnalyticsBaseProperties,
+                store_id: storeId,
+                step,
+                failed_fields: failedFields,
+              },
+            );
+            return false;
+          }
+
+          return true;
         }
 
         if (step === 'confirm') {
           await form.validateField('acceptCgv', 'submit');
-          return (form.getFieldMeta('acceptCgv')?.errors?.length ?? 0) === 0;
+          const isValid =
+            (form.getFieldMeta('acceptCgv')?.errors?.length ?? 0) === 0;
+
+          if (!isValid) {
+            posthog.capture(
+              productAnalyticsEvents.checkoutStepValidationFailed,
+              {
+                ...checkoutAnalyticsBaseProperties,
+                store_id: storeId,
+                step,
+                failed_fields: ['acceptCgv'],
+              },
+            );
+          }
+
+          return isValid;
         }
 
         return true;
       },
-      [form, requireCustomerAddress],
+      [form, posthog, requireCustomerAddress, storeId],
     ),
   });
+
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    posthog.capture(productAnalyticsEvents.checkoutStepViewed, {
+      ...checkoutAnalyticsBaseProperties,
+      store_id: storeId,
+      step: currentStep,
+      step_index: currentStepIndex,
+      steps_total: steps.length,
+      direction: stepDirection,
+    });
+    // Only re-fire when the visible step actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, posthog, storeId]);
 
   const tulipQuoteCustomer = useMemo(() => {
     const customerType: 'business' | 'individual' =
@@ -556,6 +609,19 @@ export function CheckoutForm({
         },
       });
 
+      // Captured client-side so the PostHog funnel keeps the browser's
+      // distinct_id; the server-side checkout_reservation_created event is
+      // attributed to the customer id and would break the funnel chain.
+      posthog.capture(productAnalyticsEvents.checkoutCompleted, {
+        ...checkoutAnalyticsBaseProperties,
+        store_id: storeId,
+        reservation_id: result.reservationId,
+        reservation_mode: reservationMode,
+        item_count: items.length,
+        subtotal_amount_cents: Math.round(subtotal * 100),
+        total_amount_cents: Math.round(totalWithEstimatedInsurance * 100),
+      });
+
       clearCart();
 
       if (reservationMode === 'payment' && result.paymentUrl) {
@@ -575,6 +641,13 @@ export function CheckoutForm({
       router.push(getUrl(`/confirmation/${result.reservationId}`));
     },
     onError: (error) => {
+      posthog.capture(productAnalyticsEvents.checkoutSubmitFailed, {
+        ...checkoutAnalyticsBaseProperties,
+        store_id: storeId,
+        error_code:
+          error instanceof CheckoutSubmitError ? error.message : 'unknown',
+      });
+
       if (error instanceof CheckoutSubmitError) {
         if (error.message === 'emptyCart') {
           toastManager.add({ title: t('emptyCart'), type: 'error' });

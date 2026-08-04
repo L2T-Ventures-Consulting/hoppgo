@@ -41,6 +41,7 @@ import {
 } from '@louez/ui'
 import { TooltipProvider } from '@louez/ui'
 import { Alert, AlertDescription } from '@louez/ui'
+import { DashboardBreadcrumbLabel } from '@/components/dashboard/dashboard-breadcrumbs-context'
 import { ReservationDatePickerControl } from '@/components/form/form-reservation-date-picker'
 import { cn, formatCurrency, getCurrencySymbol, minutesToPriceDuration } from '@louez/utils'
 import { calculateDuration } from '@/lib/utils/duration'
@@ -259,6 +260,7 @@ export function EditReservationForm({
   const router = useRouter()
   const queryClient = useQueryClient()
   const t = useTranslations('dashboard.reservations')
+  const tBreadcrumbs = useTranslations('dashboard.breadcrumbs')
   const tForm = useTranslations('dashboard.reservations.manualForm')
   const tCommon = useTranslations('common')
   const tErrors = useTranslations('errors')
@@ -1043,6 +1045,11 @@ export function EditReservationForm({
 
   return (
     <TooltipProvider>
+      <DashboardBreadcrumbLabel
+        pathname={`/dashboard/reservations/${reservation.id}`}
+        label={`#${reservation.number}`}
+      />
+      <DashboardBreadcrumbLabel label={tBreadcrumbs('reservationsEdit')} />
       <div className="-mx-4 -my-6 sm:-mx-6 lg:-mx-8 min-h-screen bg-muted/30">
         {/* Header */}
         <div className="sticky top-0 z-10 bg-background border-b">
@@ -1054,8 +1061,10 @@ export function EditReservationForm({
                 </Button>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 min-w-0">
-                    <h1 className="text-base sm:text-lg font-semibold truncate">{t('edit.title')}</h1>
-                    <Badge variant="outline" className="font-mono shrink-0">
+                    <h1 className="text-base sm:text-lg font-semibold truncate">
+                      {t('edit.title')}
+                    </h1>
+                    <Badge variant="expired" className="font-mono shrink-0">
                       #{reservation.number}
                     </Badge>
                   </div>
@@ -1168,6 +1177,11 @@ export function EditReservationForm({
                         maxTime="23:59"
                         timeStep={30}
                         timezone={timezone}
+                        range={{
+                          role: 'start',
+                          otherValue: endDate,
+                          onOtherChange: handleEndDateChange,
+                        }}
                       />
                     </div>
                     <div className="space-y-2">
@@ -1180,20 +1194,18 @@ export function EditReservationForm({
                         maxTime="23:59"
                         timeStep={30}
                         referenceDate={startDate}
-                        disabledDates={(date) => {
-                          if (!startDate) return false
-
-                          const startDay = new Date(startDate)
-                          startDay.setHours(0, 0, 0, 0)
-                          return date < startDay
-                        }}
                         timezone={timezone}
+                        range={{
+                          role: 'end',
+                          otherValue: startDate,
+                          onOtherChange: setStartDate,
+                        }}
                       />
                     </div>
                   </div>
                   {newDuration > 0 && (
                     <div className="mt-4 flex items-center gap-2">
-                      <Badge variant="secondary" className="font-mono">
+                      <Badge variant="expired" className="font-mono">
                         {newDuration} {getDurationUnit('day')}
                       </Badge>
                       {newDuration !== originalDuration && (

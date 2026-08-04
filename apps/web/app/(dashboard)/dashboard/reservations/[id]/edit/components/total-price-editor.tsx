@@ -25,19 +25,19 @@ export function TotalPriceEditor({
   onChange,
 }: TotalPriceEditorProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [editStartValue, setEditStartValue] = useState(value);
 
   if (isEditing) {
     return (
       <div className="relative flex w-32 justify-end">
         <InputPrice
           value={value}
-          onChange={onChange}
+          onValueCommitted={(next) => {
+            onChange(next);
+            setIsEditing(false);
+          }}
           suffix={currencySymbol}
           ariaLabel={ariaLabel}
           autoFocus
-          revertValue={editStartValue}
-          onCommit={() => setIsEditing(false)}
           onCancel={() => setIsEditing(false)}
           className={cn(isManual && "border-amber-300 bg-amber-50 dark:bg-amber-950/20")}
         />
@@ -60,10 +60,7 @@ export function TotalPriceEditor({
                 variant="ghost"
                 size="icon"
                 className="text-muted-foreground h-7 w-7 shrink-0"
-                onClick={() => {
-                  setEditStartValue(value);
-                  setIsEditing(true);
-                }}
+                onClick={() => setIsEditing(true)}
               />
             }
           >

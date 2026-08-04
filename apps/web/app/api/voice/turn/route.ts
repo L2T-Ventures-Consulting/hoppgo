@@ -25,9 +25,6 @@ import { areAiCreditsEnabled } from '@/lib/plans'
 // [SE-05]. Streams the assistant reply as Server-Sent Events so the worker can
 // relay it to the provider's TTS token-by-token.
 
-// Streaming must not be statically optimized or buffered by the host.
-export const dynamic = 'force-dynamic'
-
 const MAX_BODY_BYTES = 16 * 1024
 
 const turnSchema = z.object({

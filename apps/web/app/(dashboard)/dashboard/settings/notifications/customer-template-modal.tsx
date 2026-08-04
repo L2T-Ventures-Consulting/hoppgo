@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
-import { Mail, Smartphone, RotateCcw } from 'lucide-react'
+import { MailIcon, MobileIcon } from '@louez/ui/icons'
+import { RotateCcw } from 'lucide-react'
 import {
   Dialog,
   DialogPopup,
@@ -312,7 +313,7 @@ export function CustomerTemplateModal({
             {/* Email Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Mail className="h-4 w-4" />
+                <MailIcon className="h-4 w-4" />
                 {t('emailSection')}
               </div>
 
@@ -323,7 +324,7 @@ export function CustomerTemplateModal({
                   <div className="flex items-center gap-2">
                     {isSubjectCustomized ? (
                       <>
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="submitted" className="text-[10px] px-1.5 py-0">
                           {t('customized')}
                         </Badge>
                         <Tooltip>
@@ -341,7 +342,7 @@ export function CustomerTemplateModal({
                         </Tooltip>
                       </>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground">
+                      <Badge variant="submitted" className="text-[10px] px-1.5 py-0">
                         {t('default')}
                       </Badge>
                     )}
@@ -363,7 +364,7 @@ export function CustomerTemplateModal({
                   <Label className="text-xs">{t('additionalMessage')}</Label>
                   {isEmailMessageCustomized && (
                     <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                      <Badge variant="expired" className="text-[10px] px-1.5 py-0">
                         {t('customized')}
                       </Badge>
                       <Tooltip>
@@ -398,7 +399,7 @@ export function CustomerTemplateModal({
             {/* SMS Section */}
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium">
-                <Smartphone className="h-4 w-4" />
+                <MobileIcon className="h-4 w-4" />
                 {t('smsSection')}
               </div>
 
@@ -408,7 +409,7 @@ export function CustomerTemplateModal({
                   <div className="flex items-center gap-2">
                     {isSmsCustomized ? (
                       <>
-                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        <Badge variant="submitted" className="text-[10px] px-1.5 py-0">
                           {t('customized')}
                         </Badge>
                         <Tooltip>
@@ -426,7 +427,7 @@ export function CustomerTemplateModal({
                         </Tooltip>
                       </>
                     ) : (
-                      <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground">
+                      <Badge variant="expired" className="text-[10px] px-1.5 py-0">
                         {t('default')}
                       </Badge>
                     )}

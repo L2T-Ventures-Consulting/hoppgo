@@ -1,18 +1,11 @@
-import { auth } from '@/lib/auth'
-import { db } from '@louez/db'
-import { getCurrentStore } from '@/lib/store-context'
-import { reservations } from '@louez/db'
-import { eq, and, gte, lte, desc } from 'drizzle-orm'
-import {
-  getStoreMetrics,
-  determineStoreState,
-  getTimeOfDay,
-} from '@/lib/dashboard/metrics'
-import {
-  getIntendedReservationMode,
-  isStripeChargeable,
-} from '@/lib/reservation-mode'
-import type { OnlinePaymentsStep } from '@/components/dashboard/home'
+import { auth } from "@/lib/auth";
+import { db } from "@louez/db";
+import { getCurrentStore } from "@/lib/store-context";
+import { reservations } from "@louez/db";
+import { eq, and, gte, lte, desc } from "drizzle-orm";
+import { getStoreMetrics, determineStoreState, getTimeOfDay } from "@/lib/dashboard/metrics";
+import { getIntendedReservationMode, isStripeChargeable } from "@/lib/reservation-mode";
+import type { OnlinePaymentsStep } from "@/components/dashboard/home";
 import {
   DashboardAlert,
   SetupChecklist,
@@ -21,26 +14,30 @@ import {
   TodayActivity,
   PendingRequests,
   QuickActions,
+  ReservationsCalendarPrefetch,
   StorefrontWidget,
-  GradientMesh,
-} from '@/components/dashboard/home'
+} from "@/components/dashboard/home";
+
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 // =============================================================================
 // Data Fetching Functions
 // =============================================================================
 
 async function getTodaysDeparturesList(storeId: string) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   return db.query.reservations.findMany({
     where: and(
       eq(reservations.storeId, storeId),
-      eq(reservations.status, 'confirmed'),
+      eq(reservations.status, "confirmed"),
       gte(reservations.startDate, today),
-      lte(reservations.startDate, tomorrow)
+      lte(reservations.startDate, tomorrow),
     ),
     with: {
       customer: true,
@@ -52,21 +49,21 @@ async function getTodaysDeparturesList(storeId: string) {
     },
     orderBy: [reservations.startDate],
     limit: 5,
-  })
+  });
 }
 
 async function getTodaysReturnsList(storeId: string) {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
 
   return db.query.reservations.findMany({
     where: and(
       eq(reservations.storeId, storeId),
-      eq(reservations.status, 'ongoing'),
+      eq(reservations.status, "ongoing"),
       gte(reservations.endDate, today),
-      lte(reservations.endDate, tomorrow)
+      lte(reservations.endDate, tomorrow),
     ),
     with: {
       customer: true,
@@ -78,15 +75,12 @@ async function getTodaysReturnsList(storeId: string) {
     },
     orderBy: [reservations.endDate],
     limit: 5,
-  })
+  });
 }
 
 async function getPendingReservationsList(storeId: string) {
   return db.query.reservations.findMany({
-    where: and(
-      eq(reservations.storeId, storeId),
-      eq(reservations.status, 'pending')
-    ),
+    where: and(eq(reservations.storeId, storeId), eq(reservations.status, "pending")),
     with: {
       customer: true,
       items: {
@@ -97,14 +91,14 @@ async function getPendingReservationsList(storeId: string) {
     },
     orderBy: [desc(reservations.createdAt)],
     limit: 5,
-  })
+  });
 }
 
 interface DashboardContentProps {
-  storeId: string
-  storeSlug: string
-  firstName: string
-  onlinePaymentsStep: OnlinePaymentsStep
+  storeId: string;
+  storeSlug: string;
+  firstName: string;
+  onlinePaymentsStep: OnlinePaymentsStep;
 }
 
 async function DashboardContent({
@@ -119,57 +113,53 @@ async function DashboardContent({
     getTodaysDeparturesList(storeId),
     getTodaysReturnsList(storeId),
     getPendingReservationsList(storeId),
-  ])
+  ]);
 
-  const storeState = determineStoreState(metrics)
-  const timeOfDay = getTimeOfDay()
+  const storeState = determineStoreState(metrics);
+  const timeOfDay = getTimeOfDay();
 
   return (
-    <>
-      {/* Animated gradient mesh background (fixed to viewport) */}
-      <GradientMesh />
+    <div className="space-y-4 sm:space-y-6">
+      {storeState !== "virgin" && storeState !== "building" && <ReservationsCalendarPrefetch />}
 
-      {/* Dashboard content */}
-      <div className="relative z-10 space-y-6">
-        {/* Adaptive Header */}
-        <AdaptiveHeader
-          firstName={firstName}
-          timeOfDay={timeOfDay}
-          storeState={storeState}
+      {/* Adaptive Header */}
+      <AdaptiveHeader
+        firstName={firstName}
+        timeOfDay={timeOfDay}
+        storeState={storeState}
+        metrics={metrics}
+      />
+
+      {/* Priority Alert for pending requests */}
+      <DashboardAlert pendingCount={metrics.pendingReservations} />
+
+      {/* Setup Checklist for new stores (floating widget) */}
+      {(storeState === "virgin" || storeState === "building") && (
+        <SetupChecklist
           metrics={metrics}
+          storeSlug={storeSlug}
+          onlinePaymentsStep={onlinePaymentsStep}
         />
+      )}
 
-        {/* Priority Alert for pending requests */}
-        <DashboardAlert pendingCount={metrics.pendingReservations} />
+      {/* Adaptive Stats */}
+      <AdaptiveStats metrics={metrics} storeState={storeState} />
 
-        {/* Setup Checklist for new stores */}
-        {(storeState === 'virgin' || storeState === 'building') && (
-          <SetupChecklist
-            metrics={metrics}
-            storeSlug={storeSlug}
-            onlinePaymentsStep={onlinePaymentsStep}
-          />
-        )}
+      {/* Today's Activity - Only show for active stores */}
+      {storeState !== "virgin" && storeState !== "building" && (
+        <TodayActivity departures={departures} returns={returns} />
+      )}
 
-        {/* Adaptive Stats */}
-        <AdaptiveStats metrics={metrics} storeState={storeState} />
+      {/* Pending Requests Table - Only if there are pending requests */}
+      {pending.length > 0 && <PendingRequests pending={pending} />}
 
-        {/* Today's Activity - Only show for active stores */}
-        {storeState !== 'virgin' && storeState !== 'building' && (
-          <TodayActivity departures={departures} returns={returns} />
-        )}
-
-        {/* Pending Requests Table - Only if there are pending requests */}
-        {pending.length > 0 && <PendingRequests pending={pending} />}
-
-        {/* Bottom Section: Quick Actions + Storefront */}
-        <div className="grid gap-4 md:grid-cols-2">
-          <QuickActions storeState={storeState} />
-          <StorefrontWidget storeSlug={storeSlug} />
-        </div>
+      {/* Bottom Section: Quick Actions + Storefront */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <QuickActions storeState={storeState} />
+        <StorefrontWidget storeSlug={storeSlug} />
       </div>
-    </>
-  )
+    </div>
+  );
 }
 
 // =============================================================================
@@ -177,21 +167,21 @@ async function DashboardContent({
 // =============================================================================
 
 export default async function DashboardHomePage() {
-  const store = await getCurrentStore()
-  if (!store) return null
+  const store = await getCurrentStore();
+  if (!store) return null;
 
-  const session = await auth()
-  const firstName = session?.user?.name?.split(' ')[0] || ''
+  const session = await auth();
+  const firstName = session?.user?.name?.split(" ")[0] || "";
 
   // Stores that want online payments get a checklist step tracking the
   // Stripe KYC left pending during onboarding (payment mode silently degrades
   // to request mode until Stripe is chargeable — see lib/reservation-mode.ts).
   const onlinePaymentsStep: OnlinePaymentsStep =
-    getIntendedReservationMode(store) === 'payment'
+    getIntendedReservationMode(store) === "payment"
       ? isStripeChargeable(store)
-        ? 'done'
-        : 'todo'
-      : 'hidden'
+        ? "done"
+        : "todo"
+      : "hidden";
 
   return (
     <DashboardContent
@@ -200,5 +190,5 @@ export default async function DashboardHomePage() {
       firstName={firstName}
       onlinePaymentsStep={onlinePaymentsStep}
     />
-  )
+  );
 }

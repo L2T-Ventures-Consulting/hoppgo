@@ -21,7 +21,7 @@ import {
   reservations,
 } from './schema';
 
-const BLOCKING_RESERVATION_STATUSES = [
+export const BLOCKING_RESERVATION_STATUSES = [
   'pending',
   'confirmed',
   'ongoing',
@@ -39,7 +39,9 @@ function applyTurnoverBuffer(date: Date, minutes: number, direction: -1 | 1) {
 export function getBlockingReservationStatuses(
   pendingBlocksAvailability: boolean,
 ): BlockingReservationStatus[] {
-  return pendingBlocksAvailability ? [...BLOCKING_RESERVATION_STATUSES] : ['confirmed', 'ongoing'];
+  return pendingBlocksAvailability
+    ? [...BLOCKING_RESERVATION_STATUSES]
+    : ['confirmed', 'ongoing'];
 }
 
 export function buildReservationOverlapPredicate(params: {
@@ -73,7 +75,10 @@ export function buildReservationOverlapPredicate(params: {
 export function buildUnitInDowntimeAtPredicate(now: Date) {
   return and(
     lte(productUnitDowntimes.startsAt, now),
-    or(isNull(productUnitDowntimes.endsAt), gt(productUnitDowntimes.endsAt, now)),
+    or(
+      isNull(productUnitDowntimes.endsAt),
+      gt(productUnitDowntimes.endsAt, now),
+    ),
   );
 }
 
@@ -144,7 +149,10 @@ export async function findBusyUnitIds(
       reservationItems,
       eq(reservationItemUnits.reservationItemId, reservationItems.id),
     )
-    .innerJoin(reservations, eq(reservationItems.reservationId, reservations.id))
+    .innerJoin(
+      reservations,
+      eq(reservationItems.reservationId, reservations.id),
+    )
     .where(and(...conditions));
 
   const busyUnitIds = new Map<string, BusyUnitReason>();

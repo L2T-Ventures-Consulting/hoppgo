@@ -5,9 +5,6 @@ import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { getClientIp } from '@/lib/request'
 
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
-
 // Validation schemas
 const pageViewSchema = z.object({
   type: z.literal('page_view'),

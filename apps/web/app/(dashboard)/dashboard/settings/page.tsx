@@ -1,28 +1,26 @@
-import { getTranslations } from 'next-intl/server'
-import { redirect } from 'next/navigation'
+import { getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
 
-import { getCurrentStore } from '@/lib/store-context'
-import { StoreSettingsForm } from './store-settings-form'
+import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
+import { getCurrentStore } from "@/lib/store-context";
+import { StoreSettingsForm } from "./store-settings-form";
+
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export default async function SettingsPage() {
-  const store = await getCurrentStore()
+  const store = await getCurrentStore();
 
   if (!store) {
-    redirect('/onboarding')
+    redirect("/onboarding");
   }
 
-  const t = await getTranslations('dashboard.settings')
+  const t = await getTranslations("dashboard.settings");
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-4xl space-y-4 sm:space-y-6">
-      <p className="text-sm sm:text-base text-muted-foreground">
-        {t('storeSettings.description')}
-      </p>
-
-      <StoreSettingsForm
-        store={store}
-        stripeChargesEnabled={store.stripeChargesEnabled ?? false}
-      />
-    </div>
-  )
+    <SettingsPageShell title={t("store")} description={t("storeSettings.description")}>
+      <StoreSettingsForm store={store} stripeChargesEnabled={store.stripeChargesEnabled ?? false} />
+    </SettingsPageShell>
+  );
 }

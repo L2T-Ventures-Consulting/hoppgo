@@ -1,6 +1,5 @@
 'use client';
 
-import { Link2, Puzzle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -10,6 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@louez/ui';
+import { LinkIcon, PuzzleIcon } from '@louez/ui/icons';
 
 import { AccessoriesSelector } from '@/components/dashboard/accessories-selector';
 import { getFieldError } from '@/hooks/form/form-context';
@@ -35,7 +35,7 @@ export function ProductFormSectionAccessories({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Link2 className="h-5 w-5" />
+          <LinkIcon className="h-5 w-5 shrink-0" />
           {t('accessories')}
         </CardTitle>
         <CardDescription>{t('accessoriesDescription')}</CardDescription>
@@ -63,11 +63,9 @@ export function ProductFormSectionAccessories({
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="bg-muted mb-3 rounded-full p-3">
-              <Puzzle className="text-muted-foreground h-6 w-6" />
+              <PuzzleIcon className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="text-sm font-medium">
-              {t('noAccessoriesAvailable')}
-            </p>
+            <p className="text-sm font-medium">{t('noAccessoriesAvailable')}</p>
             <p className="text-muted-foreground mt-1 max-w-[260px] text-sm">
               {t('noAccessoriesHint')}
             </p>

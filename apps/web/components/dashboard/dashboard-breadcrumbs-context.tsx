@@ -67,15 +67,24 @@ export const useDashboardBreadcrumbs = () => {
   return context;
 };
 
-export const DashboardBreadcrumbLabel = ({ label }: { label: string }) => {
-  const pathname = usePathname();
+interface DashboardBreadcrumbLabelProps {
+  label: string;
+  pathname?: string;
+}
+
+export const DashboardBreadcrumbLabel = ({
+  label,
+  pathname,
+}: DashboardBreadcrumbLabelProps) => {
+  const currentPathname = usePathname();
   const { clearLabel, setLabel } = useDashboardBreadcrumbs();
+  const labelPathname = pathname ?? currentPathname;
 
   useEffect(() => {
-    setLabel(pathname, label);
+    setLabel(labelPathname, label);
 
-    return () => clearLabel(pathname);
-  }, [clearLabel, label, pathname, setLabel]);
+    return () => clearLabel(labelPathname);
+  }, [clearLabel, label, labelPathname, setLabel]);
 
   return null;
 };

@@ -171,7 +171,7 @@ export async function createCustomerPortalSession(storeId: string) {
 
   const session = await stripe.billingPortal.sessions.create({
     customer: subscription.stripeCustomerId,
-    return_url: `${env.NEXT_PUBLIC_APP_URL}/dashboard/subscription`,
+    return_url: `${env.NEXT_PUBLIC_APP_URL}/dashboard/settings/subscription`,
   })
 
   return {
@@ -193,9 +193,7 @@ export async function hasStripeCustomer(storeId: string): Promise<boolean> {
  * Used to warn pay-as-you-go stores that their month-end invoice will be sent for
  * manual payment until a card is added.
  */
-export async function storeHasDefaultPaymentMethod(
-  storeId: string,
-): Promise<boolean> {
+export async function storeHasDefaultPaymentMethod(storeId: string): Promise<boolean> {
   const subscription = await db.query.subscriptions.findFirst({
     where: eq(subscriptions.storeId, storeId),
     columns: { stripeCustomerId: true },
@@ -203,14 +201,9 @@ export async function storeHasDefaultPaymentMethod(
   if (!subscription?.stripeCustomerId) return false
 
   try {
-    const customer = await stripe.customers.retrieve(
-      subscription.stripeCustomerId,
-    )
+    const customer = await stripe.customers.retrieve(subscription.stripeCustomerId)
     if (customer.deleted) return false
-    return Boolean(
-      customer.invoice_settings?.default_payment_method ||
-        customer.default_source,
-    )
+    return Boolean(customer.invoice_settings?.default_payment_method || customer.default_source)
   } catch (error) {
     console.error('Failed to check default payment method:', error)
     return false
@@ -253,9 +246,7 @@ export async function reactivateSubscription(storeId: string) {
   }
 
   // Reactivate and clear any pending switch-to-PAYG flag (merge-safe metadata write).
-  const current = await stripe.subscriptions.retrieve(
-    subscription.stripeSubscriptionId,
-  )
+  const current = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId)
   const metadata = { ...current.metadata }
   delete metadata.pendingBillingMode
   await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
@@ -285,18 +276,14 @@ export type SwitchToPayAsYouGoResult =
  * - On a paid plan: schedules cancellation at period end and tags the Stripe
  *   subscription so the deletion webhook flips the mode then — no double billing.
  */
-export async function switchToPayAsYouGo(
-  storeId: string,
-): Promise<SwitchToPayAsYouGoResult> {
+export async function switchToPayAsYouGo(storeId: string): Promise<SwitchToPayAsYouGoResult> {
   const subscription = await db.query.subscriptions.findFirst({
     where: eq(subscriptions.storeId, storeId),
   })
 
   // Active paid subscription → defer to period end.
   if (subscription?.stripeSubscriptionId) {
-    const current = await stripe.subscriptions.retrieve(
-      subscription.stripeSubscriptionId,
-    )
+    const current = await stripe.subscriptions.retrieve(subscription.stripeSubscriptionId)
     await stripe.subscriptions.update(subscription.stripeSubscriptionId, {
       cancel_at_period_end: true,
       metadata: { ...current.metadata, pendingBillingMode: 'pay_as_you_go' },
@@ -354,7 +341,7 @@ export async function getSubscriptionWithPlan(storeId: string) {
     try {
       const stripeSubscription = await stripe.subscriptions.retrieve(
         subscription.stripeSubscriptionId,
-        { expand: ['items.data'] }
+        { expand: ['items.data'] },
       )
       pendingBillingMode = stripeSubscription.metadata?.pendingBillingMode || null
       const firstItem = stripeSubscription.items.data[0]

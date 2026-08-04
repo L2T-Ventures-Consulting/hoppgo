@@ -1,15 +1,20 @@
-import { z } from 'zod'
+import { z } from "zod";
 
-import { NOTIFICATION_EVENT_TYPES } from '@louez/types'
+import {
+  CUSTOMER_NOTIFICATION_EVENT_TYPES,
+  NOTIFICATION_EVENT_TYPES,
+  type CustomerNotificationEventType,
+  type NotificationEventType,
+} from "@louez/types";
 
-import { isPossiblePhoneNumberInput } from './phone'
+import { isPossiblePhoneNumberInput } from "./phone";
 
 export const notificationChannelConfigSchema = z.object({
   email: z.boolean(),
   sms: z.boolean(),
   discord: z.boolean(),
   push: z.boolean(),
-})
+});
 
 export const notificationSettingsSchema = z.object({
   reservation_new: notificationChannelConfigSchema,
@@ -29,45 +34,96 @@ export const notificationSettingsSchema = z.object({
       // Keep in sync with the NotificationSettings['reminderSettings'] type and
       // updateAdminReminderSettings — omitting these would silently strip the
       // admin delivery mode / digest hour if this schema is ever used to parse.
-      mode: z.enum(['per_reservation', 'daily_digest']).optional(),
+      mode: z.enum(["per_reservation", "daily_digest"]).optional(),
       digestHour: z.number().int().min(0).max(23).optional(),
     })
     .optional(),
-})
+});
 
-export type NotificationSettingsInput = z.infer<typeof notificationSettingsSchema>
+export type NotificationSettingsInput = z.infer<typeof notificationSettingsSchema>;
 
 export const discordWebhookSchema = z.object({
   webhookUrl: z
     .string()
-    .url('Invalid URL format')
+    .url("Invalid URL format")
     .regex(
       /^https:\/\/discord\.com\/api\/webhooks\/\d+\/[\w-]+$/,
-      'Invalid Discord webhook URL format'
+      "Invalid Discord webhook URL format",
     )
     .nullable(),
-})
+});
 
-export type DiscordWebhookInput = z.infer<typeof discordWebhookSchema>
+export type DiscordWebhookInput = z.infer<typeof discordWebhookSchema>;
 
 export const ownerPhoneSchema = z.object({
   phone: z
     .string()
     .refine((value) => isPossiblePhoneNumberInput(value), {
-      message: 'Invalid phone number format',
+      message: "Invalid phone number format",
     })
     .nullable(),
-})
+});
 
-export type OwnerPhoneInput = z.infer<typeof ownerPhoneSchema>
+export type OwnerPhoneInput = z.infer<typeof ownerPhoneSchema>;
+
+const notificationEventTypeSchema = z.custom<NotificationEventType>((value) =>
+  NOTIFICATION_EVENT_TYPES.some((eventType) => eventType === value),
+);
+
+const customerNotificationEventTypeSchema = z.custom<CustomerNotificationEventType>((value) =>
+  CUSTOMER_NOTIFICATION_EVENT_TYPES.some((eventType) => eventType === value),
+);
 
 export const updateSinglePreferenceSchema = z.object({
-  eventType: z.enum(NOTIFICATION_EVENT_TYPES as [string, ...string[]]),
-  channel: z.enum(['email', 'sms', 'discord', 'push']),
+  eventType: notificationEventTypeSchema,
+  channel: z.enum(["email", "sms", "discord", "push"]),
   enabled: z.boolean(),
-})
+});
 
-export type UpdateSinglePreferenceInput = z.infer<typeof updateSinglePreferenceSchema>
+export type UpdateSinglePreferenceInput = z.infer<typeof updateSinglePreferenceSchema>;
+
+export const updateCustomerPreferenceInputSchema = z.object({
+  eventType: customerNotificationEventTypeSchema,
+  channel: z.enum(["email", "sms"]),
+  enabled: z.boolean(),
+});
+
+export type UpdateCustomerPreferenceInput = z.infer<typeof updateCustomerPreferenceInputSchema>;
+
+export const customerNotificationTemplateSchema = z.object({
+  subject: z.string().optional(),
+  emailMessage: z.string().optional(),
+  smsMessage: z.string().optional(),
+});
+
+export const getCustomerTemplateInputSchema = z.object({
+  eventType: customerNotificationEventTypeSchema,
+});
+
+export type GetCustomerTemplateInput = z.infer<typeof getCustomerTemplateInputSchema>;
+
+export const updateCustomerTemplateInputSchema = z.object({
+  eventType: customerNotificationEventTypeSchema,
+  template: customerNotificationTemplateSchema,
+});
+
+export type UpdateCustomerTemplateInput = z.infer<typeof updateCustomerTemplateInputSchema>;
+
+export const updateReminderSettingsInputSchema = z.object({
+  pickupReminderHours: z.number().int().min(1).max(168),
+  returnReminderHours: z.number().int().min(1).max(168),
+});
+
+export type UpdateReminderSettingsInput = z.infer<typeof updateReminderSettingsInputSchema>;
+
+export const updateAdminReminderSettingsInputSchema = updateReminderSettingsInputSchema.extend({
+  mode: z.enum(["per_reservation", "daily_digest"]).optional(),
+  digestHour: z.number().int().min(0).max(23).optional(),
+});
+
+export type UpdateAdminReminderSettingsInput = z.infer<
+  typeof updateAdminReminderSettingsInputSchema
+>;
 
 // ===== Web Push subscriptions =====
 
@@ -75,40 +131,36 @@ export type UpdateSinglePreferenceInput = z.infer<typeof updateSinglePreferenceS
 // crafted subscription can't turn the server-side web-push POST into an SSRF
 // (same hardening pattern as the Discord webhook URL above).
 const ALLOWED_PUSH_ENDPOINT_HOSTS = [
-  '.googleapis.com', // FCM — Chrome, Edge, Brave, Opera, Samsung Internet
-  '.push.apple.com', // Apple — Safari, iOS/iPadOS, macOS
-  '.push.services.mozilla.com', // Firefox
-  '.notify.windows.com', // WNS — legacy Edge
-]
+  ".googleapis.com", // FCM — Chrome, Edge, Brave, Opera, Samsung Internet
+  ".push.apple.com", // Apple — Safari, iOS/iPadOS, macOS
+  ".push.services.mozilla.com", // Firefox
+  ".notify.windows.com", // WNS — legacy Edge
+];
 
 function isAllowedPushEndpoint(value: string): boolean {
   try {
-    const url = new URL(value)
-    if (url.protocol !== 'https:') return false
-    const host = url.hostname.toLowerCase()
-    return ALLOWED_PUSH_ENDPOINT_HOSTS.some((suffix) => host.endsWith(suffix))
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    const host = url.hostname.toLowerCase();
+    return ALLOWED_PUSH_ENDPOINT_HOSTS.some((suffix) => host.endsWith(suffix));
   } catch {
-    return false
+    return false;
   }
 }
 
 export const pushSubscriptionSchema = z.object({
-  endpoint: z
-    .string()
-    .url()
-    .max(2048)
-    .refine(isAllowedPushEndpoint, 'Unsupported push endpoint'),
+  endpoint: z.string().url().max(2048).refine(isAllowedPushEndpoint, "Unsupported push endpoint"),
   keys: z.object({
     p256dh: z.string().min(1).max(255),
     auth: z.string().min(1).max(255),
   }),
   userAgent: z.string().max(512).optional(),
-})
+});
 
-export type PushSubscriptionInput = z.infer<typeof pushSubscriptionSchema>
+export type PushSubscriptionInput = z.infer<typeof pushSubscriptionSchema>;
 
 export const unsubscribePushSchema = z.object({
   endpoint: z.string().url(),
-})
+});
 
-export type UnsubscribePushInput = z.infer<typeof unsubscribePushSchema>
+export type UnsubscribePushInput = z.infer<typeof unsubscribePushSchema>;

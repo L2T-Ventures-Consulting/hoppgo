@@ -1,7 +1,20 @@
 export const productAnalyticsEvents = {
   productCreated: 'product_created',
   dashboardReservationCreated: 'dashboard_reservation_created',
+  dashboardReservationCreationStarted: 'dashboard_reservation_creation_started',
+  dashboardReservationStepValidationFailed:
+    'dashboard_reservation_step_validation_failed',
+  dashboardReservationCapacityBlocked: 'dashboard_reservation_capacity_blocked',
+  dashboardReservationOverbookingConfirmed:
+    'dashboard_reservation_overbooking_confirmed',
+  dashboardReservationCreationFailed: 'dashboard_reservation_creation_failed',
+  keyboardShortcutTriggered: 'keyboard_shortcut_triggered',
+  keyboardShortcutSettingsUpdated: 'keyboard_shortcut_settings_updated',
   checkoutReservationCreated: 'checkout_reservation_created',
+  checkoutStepViewed: 'checkout_step_viewed',
+  checkoutStepValidationFailed: 'checkout_step_validation_failed',
+  checkoutSubmitFailed: 'checkout_submit_failed',
+  checkoutCompleted: 'checkout_completed',
   checkoutPaymentStarted: 'checkout_payment_started',
   checkoutPaymentCompleted: 'checkout_payment_completed',
   quoteAccepted: 'quote_accepted',
@@ -31,4 +44,22 @@ export const onboardingAnalyticsBaseProperties = {
   ...productAnalyticsBaseProperties,
   feature: 'onboarding',
   surface: 'dashboard',
+} as const;
+
+export const dashboardReservationAnalyticsBaseProperties = {
+  ...productAnalyticsBaseProperties,
+  feature: 'reservation_creation',
+  surface: 'dashboard',
+} as const;
+
+export const keyboardShortcutAnalyticsBaseProperties = {
+  ...productAnalyticsBaseProperties,
+  feature: 'keyboard_shortcuts',
+  surface: 'dashboard',
+} as const;
+
+export const checkoutAnalyticsBaseProperties = {
+  ...productAnalyticsBaseProperties,
+  feature: 'checkout',
+  surface: 'storefront',
 } as const;

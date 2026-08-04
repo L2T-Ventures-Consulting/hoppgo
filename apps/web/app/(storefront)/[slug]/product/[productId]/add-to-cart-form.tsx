@@ -55,6 +55,7 @@ import {
 } from '@/components/storefront/rental-date-picker';
 
 import { orpc } from '@/lib/orpc/react';
+import { pickActiveVariantAttributes } from '@/lib/util.variant-visibility';
 import { getMinStartDate } from '@/lib/utils/duration';
 import {
   formatDurationFromMinutes,
@@ -539,7 +540,10 @@ export function AddToCartForm({
             productPricingMode: pricingMode,
             seasonalPricings:
               seasonalPricings.length > 0 ? seasonalPricings : undefined,
-            selectedAttributes: allocation.combination.selectedAttributes,
+            selectedAttributes: pickActiveVariantAttributes(
+              bookingAttributeAxes,
+              allocation.combination.selectedAttributes,
+            ),
           },
           storeSlug,
         );
@@ -768,10 +772,7 @@ export function AddToCartForm({
               <span className="flex items-center gap-2">
                 {t('tieredPricing.discountApplied')}
                 {discountPercent && (
-                  <Badge
-                    variant="secondary"
-                    className="bg-green-100 text-xs text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                  >
+                  <Badge variant="success" className="text-xs">
                     -{Math.floor(discountPercent)}%
                   </Badge>
                 )}

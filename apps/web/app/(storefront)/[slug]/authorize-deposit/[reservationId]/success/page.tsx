@@ -19,6 +19,8 @@ interface SuccessPageProps {
   params: Promise<{ slug: string; reservationId: string }>
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: SuccessPageProps): Promise<Metadata> {

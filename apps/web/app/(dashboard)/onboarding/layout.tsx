@@ -7,6 +7,10 @@ import { auth } from "@/lib/auth";
 import { OnboardingShell } from "./_components/onboarding-shell";
 import { getOnboardingSteps } from "./_lib/steps";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
   // The (dashboard) layout above already redirects unauthenticated users.
   const session = await auth();

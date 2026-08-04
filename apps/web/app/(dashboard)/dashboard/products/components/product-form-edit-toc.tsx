@@ -2,21 +2,13 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-import {
-  FileText,
-  ImageIcon,
-  Link2,
-  Package,
-  Receipt,
-  Shield,
-} from 'lucide-react';
+import { Database, Link2, Package, Receipt, Shield } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@louez/utils';
 
 const SECTION_IDS = [
-  'section-photos',
-  'section-information',
+  'section-product',
   'section-pricing',
   'section-stock',
   'section-accessories',
@@ -33,14 +25,9 @@ export function ProductFormEditToc() {
 
   const sections: { id: SectionId; label: string; icon: React.ReactNode }[] = [
     {
-      id: 'section-photos',
-      label: t('photos'),
-      icon: <ImageIcon className="h-3.5 w-3.5" />,
-    },
-    {
-      id: 'section-information',
-      label: t('information'),
-      icon: <FileText className="h-3.5 w-3.5" />,
+      id: 'section-product',
+      label: t('productSection'),
+      icon: <Package className="h-3.5 w-3.5" />,
     },
     {
       id: 'section-pricing',
@@ -50,7 +37,7 @@ export function ProductFormEditToc() {
     {
       id: 'section-stock',
       label: t('stock'),
-      icon: <Package className="h-3.5 w-3.5" />,
+      icon: <Database className="h-3.5 w-3.5" />,
     },
     {
       id: 'section-accessories',
@@ -155,8 +142,11 @@ export function ProductFormEditToc() {
   };
 
   return (
-    <nav className="hidden w-48 shrink-0 xl:block" aria-label="Form navigation">
-      <div className="sticky top-4">
+    <nav
+      className="sticky top-20 hidden w-48 shrink-0 self-start xl:block"
+      aria-label="Form navigation"
+    >
+      <div>
         <ul className="border-border relative space-y-0.5 border-l">
           {sections
             .filter((section) => availableIds.includes(section.id))

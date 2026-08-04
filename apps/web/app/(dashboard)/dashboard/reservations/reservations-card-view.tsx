@@ -1,26 +1,30 @@
-'use client'
-
-import { formatStoreDateRange } from '@/lib/utils/store-date'
-import { getCurrencySymbol } from '@louez/utils'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+"use client";
 
 import {
-  AlertCircle,
+  CreditCardSolidIcon,
+  FailedSolidIcon,
+  PendingSolidIcon,
+  ProductSolidIcon,
+  ReviewSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from "@louez/ui/icons";
+import { formatStoreDateRange } from "@/lib/utils/store-date";
+import { cn, getCurrencySymbol } from "@louez/utils";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+
+import {
   ArrowDownRight,
   ArrowUpRight,
-  Ban,
   Calendar,
   CheckCircle,
   ChevronRight,
-  Clock,
-  CreditCard,
   Loader2,
-  Package,
   User,
   XCircle,
-  FileText,
-} from 'lucide-react'
+} from "lucide-react";
 
 import {
   Badge,
@@ -31,69 +35,71 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '@louez/ui'
+} from "@louez/ui";
 
-import type { Reservation, ReservationStatus } from './reservations-types'
-import { STATUS_CONFIG, getPaymentStatus, PAYMENT_STATUS_CLASSES } from './reservations-utils'
+import type { Reservation, ReservationStatus } from "./reservations-types";
+import { PAYMENT_STATUS_VARIANTS, STATUS_CONFIG, getPaymentStatus } from "./reservations-utils";
 
-const STATUS_ICON_MAP: Record<ReservationStatus, typeof Clock> = {
-  pending: Clock,
-  confirmed: CheckCircle,
-  ongoing: Package,
-  completed: CheckCircle,
-  cancelled: Ban,
-  rejected: XCircle,
-  quote: FileText,
-  declined: XCircle,
-}
+const STATUS_ICON_MAP: Record<ReservationStatus, typeof PendingSolidIcon> = {
+  pending: PendingSolidIcon,
+  confirmed: SuccessSolidIcon,
+  ongoing: ProductSolidIcon,
+  completed: SuccessSolidIcon,
+  cancelled: FailedSolidIcon,
+  rejected: XCircleSolidIcon,
+  quote: SubmittedSolidIcon,
+  declined: FailedSolidIcon,
+};
 
 interface ReservationsCardViewProps {
-  reservations: Reservation[]
-  currency?: string
-  timezone?: string
-  loadingAction: string | null
+  reservations: Reservation[];
+  currency?: string;
+  timezone?: string;
+  loadingAction: string | null;
   handleStatusChange: (
     e: React.MouseEvent,
     reservation: Reservation,
-    newStatus: ReservationStatus
-  ) => Promise<void>
-  openRejectDialog: (e: React.MouseEvent, reservation: Reservation) => void
+    newStatus: ReservationStatus,
+  ) => Promise<void>;
+  openRejectDialog: (e: React.MouseEvent, reservation: Reservation) => void;
 }
 
 export function ReservationsCardView({
   reservations,
-  currency = 'EUR',
+  currency = "EUR",
   timezone,
   loadingAction,
   handleStatusChange,
   openRejectDialog,
 }: ReservationsCardViewProps) {
-  const t = useTranslations('dashboard.reservations')
-  const currencySymbol = getCurrencySymbol(currency)
+  const t = useTranslations("dashboard.reservations");
+  const currencySymbol = getCurrencySymbol(currency);
 
   return (
     <TooltipProvider>
       <div className="space-y-3">
         {reservations.map((reservation) => {
-          const status = (reservation.status ?? 'pending') as ReservationStatus
-          const statusConfig = STATUS_CONFIG[status]
-          const StatusIcon = STATUS_ICON_MAP[status]
-          const isPending = status === 'pending'
-          const isConfirmed = status === 'confirmed'
-          const isOngoing = status === 'ongoing'
+          const status = (reservation.status ?? "pending") as ReservationStatus;
+          const statusConfig = STATUS_CONFIG[status];
+          const StatusIcon = STATUS_ICON_MAP[status];
+          const isPending = status === "pending";
+          const isConfirmed = status === "confirmed";
+          const isOngoing = status === "ongoing";
           const itemsText =
             reservation.items.length === 1
               ? reservation.items[0].productSnapshot.name
-              : t('itemsCount', { count: reservation.items.length })
+              : t("itemsCount", { count: reservation.items.length });
 
-          const isLoading = loadingAction?.startsWith(reservation.id)
+          const isLoading = loadingAction?.startsWith(reservation.id);
 
-          const paymentInfo = getPaymentStatus(reservation)
-          const showPaymentStatus = !['cancelled', 'rejected', 'declined', 'quote'].includes(status)
+          const paymentInfo = getPaymentStatus(reservation);
+          const showPaymentStatus = !["cancelled", "rejected", "declined", "quote"].includes(
+            status,
+          );
 
           const hasPendingOnlinePayment = reservation.payments.some(
-            (p) => p.method === 'stripe' && p.status === 'pending' && p.type === 'rental'
-          )
+            (p) => p.method === "stripe" && p.status === "pending" && p.type === "rental",
+          );
 
           return (
             <Link
@@ -101,12 +107,14 @@ export function ReservationsCardView({
               href={`/dashboard/reservations/${reservation.id}`}
               className="block group"
             >
-              <Card className={`
-                transition-all duration-200
-                hover:shadow-md hover:border-primary/20
-                border-l-4 ${statusConfig.borderClass}
-                ${isPending ? 'ring-1 ring-amber-200 dark:ring-amber-800/50' : ''}
-              `}>
+              <Card
+                className={cn(
+                  "transition-all duration-200 hover:border-primary/20 border-l-4",
+                  " hover:bg-muted/50",
+                  statusConfig.borderClass,
+                  isPending && "ring-1 ring-amber-200 dark:ring-amber-800/50",
+                )}
+              >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-4">
                     {/* Left: Main Info */}
@@ -117,8 +125,8 @@ export function ReservationsCardView({
                           #{reservation.number}
                         </span>
                         <Badge
-                          variant="secondary"
-                          className={`gap-1.5 ${statusConfig.bgClass} ${statusConfig.className} border-0 ${isPending ? 'animate-pulse' : ''}`}
+                          variant={statusConfig.badgeVariant}
+                          className={`gap-1.5 ${isPending ? "animate-pulse" : ""}`}
                         >
                           <StatusIcon className="h-4 w-4" />
                           {t(`status.${status}`)}
@@ -126,23 +134,30 @@ export function ReservationsCardView({
                         {/* Payment Status Badge */}
                         {showPaymentStatus && (
                           <Tooltip>
-                            <TooltipTrigger render={<Badge
-                                variant="secondary"
-                                className={`gap-1 text-xs ${PAYMENT_STATUS_CLASSES[paymentInfo.status]}`}
-                              />}>
-                                {paymentInfo.status === 'paid' ? (
-                                  <CheckCircle className="h-3 w-3" />
-                                ) : (
-                                  <AlertCircle className="h-3 w-3" />
-                                )}
-                                {t(`paymentStatus.${paymentInfo.status}`)}
+                            <TooltipTrigger
+                              render={
+                                <Badge
+                                  variant={PAYMENT_STATUS_VARIANTS[paymentInfo.status]}
+                                  className="gap-1 text-xs"
+                                />
+                              }
+                            >
+                              {paymentInfo.status === "paid" ? (
+                                <SuccessSolidIcon className="h-3 w-3" />
+                              ) : (
+                                <ReviewSolidIcon className="h-3 w-3" />
+                              )}
+                              {t(`paymentStatus.${paymentInfo.status}`)}
                             </TooltipTrigger>
                             <TooltipContent>
                               <div className="text-xs">
-                                <p>{paymentInfo.totalPaid.toFixed(2)} {currencySymbol} / {paymentInfo.totalDue.toFixed(2)} {currencySymbol}</p>
-                                {paymentInfo.status !== 'paid' && (
+                                <p>
+                                  {paymentInfo.totalPaid.toFixed(2)} {currencySymbol} /{" "}
+                                  {paymentInfo.totalDue.toFixed(2)} {currencySymbol}
+                                </p>
+                                {paymentInfo.status !== "paid" && (
                                   <p className="text-red-400">
-                                    {t('payment.unpaidWarning', {
+                                    {t("payment.unpaidWarning", {
                                       formattedAmount: `${(paymentInfo.totalDue - paymentInfo.totalPaid).toFixed(2)} ${currencySymbol}`,
                                     })}
                                   </p>
@@ -159,9 +174,7 @@ export function ReservationsCardView({
                           <User className="h-3.5 w-3.5 text-muted-foreground" />
                           {reservation.customer.firstName} {reservation.customer.lastName}
                         </span>
-                        <span className="text-muted-foreground truncate">
-                          {itemsText}
-                        </span>
+                        <span className="text-muted-foreground truncate">{itemsText}</span>
                       </div>
 
                       {/* Dates */}
@@ -184,32 +197,40 @@ export function ReservationsCardView({
                       {isPending && !hasPendingOnlinePayment && (
                         <div className="flex items-center gap-1.5">
                           <Tooltip>
-                            <TooltipTrigger render={<Button
-                                variant="default"
-                                className="h-8 gap-1.5"
-                                onClick={(e) => handleStatusChange(e, reservation, 'confirmed')}
-                                disabled={isLoading}
-                              />}>
-                                {loadingAction === `${reservation.id}-confirmed` ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <CheckCircle className="h-3.5 w-3.5" />
-                                )}
-                                <span className="hidden sm:inline">{t('actions.accept')}</span>
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  variant="default"
+                                  className="h-8 gap-1.5"
+                                  onClick={(e) => handleStatusChange(e, reservation, "confirmed")}
+                                  disabled={isLoading}
+                                />
+                              }
+                            >
+                              {loadingAction === `${reservation.id}-confirmed` ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <CheckCircle className="h-3.5 w-3.5" />
+                              )}
+                              <span className="hidden sm:inline">{t("actions.accept")}</span>
                             </TooltipTrigger>
-                            <TooltipContent>{t('actions.accept')}</TooltipContent>
+                            <TooltipContent>{t("actions.accept")}</TooltipContent>
                           </Tooltip>
                           <Tooltip>
-                            <TooltipTrigger render={<Button
-                                variant="destructive"
-                                className="h-8 gap-1.5"
-                                onClick={(e) => openRejectDialog(e, reservation)}
-                                disabled={isLoading}
-                              />}>
-                                <XCircle className="h-3.5 w-3.5" />
-                                <span className="hidden sm:inline">{t('actions.reject')}</span>
+                            <TooltipTrigger
+                              render={
+                                <Button
+                                  variant="destructive"
+                                  className="h-8 gap-1.5"
+                                  onClick={(e) => openRejectDialog(e, reservation)}
+                                  disabled={isLoading}
+                                />
+                              }
+                            >
+                              <XCircle className="h-3.5 w-3.5" />
+                              <span className="hidden sm:inline">{t("actions.reject")}</span>
                             </TooltipTrigger>
-                            <TooltipContent>{t('actions.reject')}</TooltipContent>
+                            <TooltipContent>{t("actions.reject")}</TooltipContent>
                           </Tooltip>
                         </div>
                       )}
@@ -217,12 +238,9 @@ export function ReservationsCardView({
                       {/* Pending online payment indicator */}
                       {isPending && hasPendingOnlinePayment && (
                         <div className="flex items-center gap-1.5">
-                          <Badge
-                            variant="secondary"
-                            className="gap-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 animate-pulse"
-                          >
-                            <CreditCard className="h-3.5 w-3.5" />
-                            {t('paymentInProgress')}
+                          <Badge variant="progress" className="gap-1.5 animate-pulse">
+                            <CreditCardSolidIcon className="h-3.5 w-3.5" />
+                            {t("paymentInProgress")}
                           </Badge>
                         </div>
                       )}
@@ -230,40 +248,48 @@ export function ReservationsCardView({
                       {/* Quick Actions for Confirmed */}
                       {isConfirmed && (
                         <Tooltip>
-                          <TooltipTrigger render={<Button
-                              variant="outline"
-                              className="h-8 gap-1.5"
-                              onClick={(e) => handleStatusChange(e, reservation, 'ongoing')}
-                              disabled={isLoading}
-                            />}>
-                              {loadingAction === `${reservation.id}-ongoing` ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <ArrowUpRight className="h-3.5 w-3.5" />
-                              )}
-                              <span className="hidden sm:inline">{t('actions.markPickedUp')}</span>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                className="h-8 gap-1.5"
+                                onClick={(e) => handleStatusChange(e, reservation, "ongoing")}
+                                disabled={isLoading}
+                              />
+                            }
+                          >
+                            {loadingAction === `${reservation.id}-ongoing` ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <ArrowUpRight className="h-3.5 w-3.5" />
+                            )}
+                            <span className="hidden sm:inline">{t("actions.markPickedUp")}</span>
                           </TooltipTrigger>
-                          <TooltipContent>{t('actions.markPickedUp')}</TooltipContent>
+                          <TooltipContent>{t("actions.markPickedUp")}</TooltipContent>
                         </Tooltip>
                       )}
 
                       {/* Quick Actions for Ongoing */}
                       {isOngoing && (
                         <Tooltip>
-                          <TooltipTrigger render={<Button
-                              variant="outline"
-                              className="h-8 gap-1.5"
-                              onClick={(e) => handleStatusChange(e, reservation, 'completed')}
-                              disabled={isLoading}
-                            />}>
-                              {loadingAction === `${reservation.id}-completed` ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <ArrowDownRight className="h-3.5 w-3.5" />
-                              )}
-                              <span className="hidden sm:inline">{t('actions.markReturned')}</span>
+                          <TooltipTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                className="h-8 gap-1.5"
+                                onClick={(e) => handleStatusChange(e, reservation, "completed")}
+                                disabled={isLoading}
+                              />
+                            }
+                          >
+                            {loadingAction === `${reservation.id}-completed` ? (
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                              <ArrowDownRight className="h-3.5 w-3.5" />
+                            )}
+                            <span className="hidden sm:inline">{t("actions.markReturned")}</span>
                           </TooltipTrigger>
-                          <TooltipContent>{t('actions.markReturned')}</TooltipContent>
+                          <TooltipContent>{t("actions.markReturned")}</TooltipContent>
                         </Tooltip>
                       )}
 
@@ -273,9 +299,9 @@ export function ReservationsCardView({
                 </CardContent>
               </Card>
             </Link>
-          )
+          );
         })}
       </div>
     </TooltipProvider>
-  )
+  );
 }

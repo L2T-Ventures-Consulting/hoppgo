@@ -1,9 +1,15 @@
 'use client'
 
+import {
+  ClockSolidIcon,
+  RepeatSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from '@louez/ui/icons'
 import { useTranslations, useLocale } from 'next-intl'
 import { format, type Locale } from 'date-fns'
 import { fr, enUS, de, es, it, nl, pl, pt } from 'date-fns/locale'
-import { CheckCircle2, Clock, XCircle, RefreshCw, History } from 'lucide-react'
+import { History } from 'lucide-react'
 import { formatStoreDate } from '@/lib/utils/store-date'
 import { useStoreTimezone } from '@/contexts/store-context'
 
@@ -50,28 +56,28 @@ export function TopupHistory({ transactions }: TopupHistoryProps) {
       case 'completed':
         return (
           <Badge variant="success">
-            <CheckCircle2 className="mr-1 h-3 w-3" />
+            <SuccessSolidIcon className="mr-1 h-3 w-3" />
             {t('status.completed')}
           </Badge>
         )
       case 'pending':
         return (
-          <Badge variant="secondary">
-            <Clock className="mr-1 h-3 w-3" />
+          <Badge variant="pending">
+            <ClockSolidIcon className="mr-1 h-3 w-3" />
             {t('status.pending')}
           </Badge>
         )
       case 'failed':
         return (
-          <Badge variant="error">
-            <XCircle className="mr-1 h-3 w-3" />
+          <Badge variant="failed">
+            <XCircleSolidIcon className="mr-1 h-3 w-3" />
             {t('status.failed')}
           </Badge>
         )
       case 'refunded':
         return (
-          <Badge variant="outline">
-            <RefreshCw className="mr-1 h-3 w-3" />
+          <Badge variant="expired">
+            <RepeatSolidIcon className="mr-1 h-3 w-3" />
             {t('status.refunded')}
           </Badge>
         )

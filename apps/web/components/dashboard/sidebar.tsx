@@ -5,7 +5,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import Gleap from "gleap";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
 
 import { authClient } from "@louez/auth/client";
 import {
@@ -23,6 +24,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
@@ -33,32 +35,35 @@ import {
   Sidebar as UISidebar,
 } from "@louez/ui";
 import {
-  AnalyticsIcon,
-  BotIcon,
-  CalendarDaysIcon,
-  CalendarIcon,
-  CreditCardIcon,
+  AccentSparklesIcon,
+  AdminShieldIcon,
   CrownIcon,
-  ExternalLinkIcon,
-  GiftIcon,
-  HomeIcon,
-  LifeBuoyIcon,
-  LogOutIcon,
-  PackageIcon,
-  SettingsIcon,
-  ShieldIcon,
-  SparklesIcon,
-  UsersIcon,
-  WarehouseIcon,
+  LogoutIcon,
+  OpenInNewIcon,
 } from "@louez/ui/icons";
+import {
+  AiAssistantGlassIcon,
+  AiCreditsGlassIcon,
+  AnalyticsGlassIcon,
+  CustomersGlassIcon,
+  HelpGlassIcon,
+  HomeGlassIcon,
+  ProductGlassIcon,
+  ReservationsGlassIcon,
+  SettingsGlassIcon,
+  TeamGlassIcon,
+} from "@louez/ui/icons/glass";
 
 // import { ReferralSidebarWidget } from '@/components/dashboard/referral-sidebar-widget';
 import { UserAvatar } from "@/components/dashboard/shared/user-avatar";
+import { SidebarLink } from "@/components/dashboard/sidebar-link";
 import { StoreSwitcher } from "@/components/dashboard/store-switcher";
 import { ThemeMenuSub } from "@/components/dashboard/theme-toggle";
+import { WhatsNewSidebarItem } from "@/components/dashboard/whats-new-sidebar-item";
 import { LanguageMenuSub } from "@/components/ui/language-switcher";
 
 import { useStorefrontUrl } from "@/hooks/use-storefront-url";
+import { aiCreditsQueries } from "@/lib/queries/ai-credits.queries";
 import { cn } from "@/lib/utils";
 
 interface StoreWithRole {
@@ -78,51 +83,78 @@ interface DashboardSidebarProps {
   userImage?: string | null;
   planSlug?: string;
   isPlatformAdmin?: boolean;
+  /**
+   * null = paid AI credits disabled for this deployment: no wallet entry.
+   * `credits` null = unlimited allowance (no count worth showing).
+   */
+  aiCredits?: { low: boolean; credits: number | null } | null;
 }
 
 const mainNavigation = [
-  { key: "home", href: "/dashboard", icon: HomeIcon },
-  { key: "calendar", href: "/dashboard/calendar", icon: CalendarDaysIcon },
-  { key: "reservations", href: "/dashboard/reservations", icon: CalendarIcon },
-  { key: "customers", href: "/dashboard/customers", icon: UsersIcon },
-  { key: "aiAssistant", href: "/dashboard/ai-assistant", icon: BotIcon },
+  { key: "home", href: "/dashboard", icon: HomeGlassIcon },
+  { key: "reservations", href: "/dashboard/reservations", icon: ReservationsGlassIcon },
+  { key: "customers", href: "/dashboard/customers", icon: CustomersGlassIcon },
+  { key: "aiAssistant", href: "/dashboard/ai-assistant", icon: AiAssistantGlassIcon },
 ];
 
+const aiCreditsNavigationItem = {
+  key: "aiCredits",
+  href: "/dashboard/ai-credits",
+  icon: AiCreditsGlassIcon,
+};
+
 const catalogNavigation = [
-  { key: "products", href: "/dashboard/products", icon: PackageIcon },
-  { key: "inventory", href: "/dashboard/inventory", icon: WarehouseIcon },
+  { key: "products", href: "/dashboard/products", icon: ProductGlassIcon },
 ];
 
 const analyticsNavigation = [
-  { key: "analytics", href: "/dashboard/analytics", icon: AnalyticsIcon },
+  { key: "analytics", href: "/dashboard/analytics", icon: AnalyticsGlassIcon },
 ];
 
 const managementNavigation = [
-  { key: "team", href: "/dashboard/team", icon: UsersIcon },
-  { key: "referrals", href: "/dashboard/referrals", icon: GiftIcon },
-  {
-    key: "subscription",
-    href: "/dashboard/subscription",
-    icon: CreditCardIcon,
-  },
-  { key: "settings", href: "/dashboard/settings", icon: SettingsIcon },
+  { key: "team", href: "/dashboard/team", icon: TeamGlassIcon },
+  { key: "settings", href: "/dashboard/settings", icon: SettingsGlassIcon },
 ];
-
-const navigationSections = [
-  { items: mainNavigation },
-  { labelKey: "catalog", items: catalogNavigation },
-  { labelKey: "analytics", items: analyticsNavigation },
-  { labelKey: "manage", items: managementNavigation },
-] satisfies {
-  labelKey?: string;
-  items: typeof mainNavigation;
-}[];
 
 interface NavigationItem {
   key: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  /** Draws the discreet warning marker (currently: AI credits running out). */
+  alert?: boolean;
+  /** Numeric badge on the entry (currently: the AI credit balance). */
+  badgeCount?: number;
 }
+
+interface NavigationSection {
+  labelKey?: string;
+  items: NavigationItem[];
+}
+
+/**
+ * The AI wallet only exists when the operator sells credits, so the manage group
+ * is assembled per render rather than declared once.
+ */
+const buildNavigationSections = (
+  aiCredits: { low: boolean; credits: number | null } | null,
+): NavigationSection[] => [
+  { items: mainNavigation },
+  { labelKey: "catalog", items: catalogNavigation },
+  { labelKey: "analytics", items: analyticsNavigation },
+  {
+    labelKey: "manage",
+    items: aiCredits
+      ? [
+          ...managementNavigation,
+          {
+            ...aiCreditsNavigationItem,
+            alert: aiCredits.low,
+            badgeCount: aiCredits.credits ?? undefined,
+          },
+        ]
+      : managementNavigation,
+  },
+];
 
 const isNavigationItemActive = (pathname: string, href: string) => {
   if (href === "/dashboard") {
@@ -134,19 +166,54 @@ const isNavigationItemActive = (pathname: string, href: string) => {
 
 const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: string }) => {
   const t = useTranslations("dashboard.navigation");
+  const tSidebar = useTranslations("dashboard.sidebar");
+  const format = useFormatter();
   const active = isNavigationItemActive(pathname, item.href);
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
-        render={<Link href={item.href} />}
+        render={<SidebarLink href={item.href} />}
         isActive={active}
         tooltip={t(item.key)}
-        className="text-sm [&_svg]:size-4"
       >
-        <item.icon className="" />
+        <item.icon />
         <span>{t(item.key)}</span>
       </SidebarMenuButton>
+      {item.badgeCount != null ? (
+        /* The vertical offset has to be restated under the same
+           `peer-data-[size]` variant as the default it replaces, otherwise the
+           more specific default wins and the badge rides high on these `h-10`
+           buttons. */
+        <SidebarMenuBadge
+          className={cn(
+            "rounded-full font-semibold peer-data-[size=default]/menu-button:top-2.5",
+            item.alert
+              ? "bg-badge-warning-background text-badge-warning-foreground peer-hover/menu-button:text-badge-warning-foreground peer-data-active/menu-button:text-badge-warning-foreground"
+              : "bg-sidebar-accent",
+          )}
+        >
+          {format.number(Math.floor(item.badgeCount), {
+            maximumFractionDigits: 0,
+            useGrouping: false,
+          })}
+          {item.alert && <span className="sr-only">{tSidebar("aiCreditsLow")}</span>}
+        </SidebarMenuBadge>
+      ) : (
+        item.alert && (
+          <SidebarMenuBadge className="bg-badge-warning-foreground peer-data-[size=default]/menu-button:top-4 size-2 min-w-0 rounded-full p-0">
+            <span className="sr-only">{tSidebar("aiCreditsLow")}</span>
+          </SidebarMenuBadge>
+        )
+      )}
+      {item.alert && (
+        /* Collapsed sidebar: the badge is hidden by its own styles, so the
+           icon carries a bare dot instead. */
+        <span
+          aria-hidden
+          className="bg-badge-warning-foreground ring-sidebar absolute top-1 right-1.5 hidden size-2.5 rounded-full ring-2 group-data-[collapsible=icon]:block"
+        />
+      )}
     </SidebarMenuItem>
   );
 };
@@ -189,11 +256,12 @@ const StoreHeader = ({
 }) => {
   const t = useTranslations("dashboard.sidebar");
   const { getAbsoluteUrl } = useStorefrontUrl(storeSlug ?? "");
+
   return (
-    <SidebarHeader className="border-sidebar-border gap-3 border-b px-0">
-      <div className="flex min-w-0 items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[state=expanded]:pl-4 max-md:pl-4">
+    <SidebarHeader className="border-sidebar-border gap-3 border-b px-0 max-md:px-2">
+      <div className="flex min-w-0 items-center justify-between gap-2 group-data-[collapsible=icon]:flex-col group-data-[state=expanded]:pl-4 max-md:pl-2">
         <div className="flex items-center gap-2">
-          <Link href="/dashboard" className="flex min-w-0 items-center gap-2">
+          <SidebarLink href="/dashboard" className="flex min-w-0 items-center gap-2">
             <Logo className="h-5 w-auto shrink-0 group-data-[collapsible=icon]:hidden" />
             <Image
               src={"/favicon.svg"}
@@ -202,7 +270,7 @@ const StoreHeader = ({
               alt="Logo"
               className="hidden size-8 shrink-0 group-data-[collapsible=icon]:block"
             />
-          </Link>
+          </SidebarLink>
           <PlanBadge planSlug={planSlug} />
         </div>
 
@@ -210,21 +278,21 @@ const StoreHeader = ({
           <Tooltip>
             <TooltipTrigger
               render={
-                <Link
+                <SidebarLink
                   href={getAbsoluteUrl()}
                   target="_blank"
                   className="text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground flex size-8 shrink-0 items-center justify-center rounded-md transition-colors group-data-[collapsible=icon]:hidden"
                 />
               }
             >
-              <ExternalLinkIcon className="h-4 w-4" />
+              <OpenInNewIcon className="h-4 w-4" />
               <span className="sr-only">{t("viewStore")}</span>
             </TooltipTrigger>
             <TooltipContent side="right">{t("viewStore")}</TooltipContent>
           </Tooltip>
         )}
       </div>
-      <div className="mx-auto w-fit group-data-[state=expanded]:w-full">
+      <div className="mx-auto w-fit group-data-[state=expanded]:w-full max-md:w-full">
         <StoreSwitcher stores={stores} currentStoreId={currentStoreId} />
       </div>
     </SidebarHeader>
@@ -251,7 +319,7 @@ const UserMenu = ({
         render={
           <Button
             variant="ghost"
-            className="hover:bg-sidebar-accent min-w-0 *:w-full h-12 w-full justify-start gap-3 px-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:px-0"
+            className="hover:bg-background aria-expanded:bg-background aria-expanded:shadow-[0_0_1px_0px_var(--color-border)] min-w-0 *:w-full h-12 w-full justify-start gap-3 px-2 group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:px-0"
           />
         }
       >
@@ -263,14 +331,14 @@ const UserMenu = ({
       <DropdownMenuContent align="start" className="w-56">
         <ThemeMenuSub />
         <LanguageMenuSub />
-        <DropdownMenuItem render={<Link href="/dashboard/account" />}>
+        <DropdownMenuItem render={<SidebarLink href="/dashboard/account" />}>
           {t("title")}
         </DropdownMenuItem>
         {isPlatformAdmin && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem render={<Link href="/admin" />}>
-              <ShieldIcon className="mr-2 h-4 w-4" />
+            <DropdownMenuItem render={<SidebarLink href="/admin" />}>
+              <AdminShieldIcon className="mr-2 h-4 w-4" />
               {t("administration")}
             </DropdownMenuItem>
           </>
@@ -288,7 +356,7 @@ const UserMenu = ({
           }
           className="text-destructive cursor-pointer"
         >
-          <LogOutIcon className="mr-2 h-4 w-4" />
+          <LogoutIcon className="mr-2 h-4 w-4" />
           {tAuth("logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -296,23 +364,17 @@ const UserMenu = ({
   );
 };
 
+/** Opens the Gleap widget — a button, not a route, but it reads as a nav row. */
 const HelpButton = () => {
   const t = useTranslations("dashboard.sidebar");
 
   return (
-    <Button
-      variant="ghost"
-      className="hover:bg-sidebar-accent h-auto w-full justify-start gap-3 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
-      onClick={() => Gleap.open()}
-    >
-      <LifeBuoyIcon className="text-sidebar-foreground/70 h-4 w-4 shrink-0" />
-      <span className="min-w-0 group-data-[collapsible=icon]:hidden">
-        <span className="block text-sm leading-none font-medium">{t("help")}</span>
-        {/* <span className="text-muted-foreground mt-1 block truncate text-xs">
-          {t('feedback')}
-        </span> */}
-      </span>
-    </Button>
+    <SidebarMenuItem>
+      <SidebarMenuButton onClick={() => Gleap.open()} tooltip={t("help")}>
+        <HelpGlassIcon />
+        <span>{t("help")}</span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
   );
 };
 
@@ -325,8 +387,19 @@ export const DashboardSidebar = ({
   userImage,
   planSlug,
   isPlatformAdmin,
+  aiCredits = null,
 }: DashboardSidebarProps) => {
   const pathname = usePathname();
+  const balanceQuery = useQuery({
+    ...aiCreditsQueries.balance(),
+    enabled: aiCredits !== null,
+  });
+  const liveAiCredits = balanceQuery.data
+    ? balanceQuery.data.enabled
+      ? { low: balanceQuery.data.low, credits: balanceQuery.data.totalCredits }
+      : null
+    : aiCredits;
+  const navigationSections = buildNavigationSections(liveAiCredits);
 
   return (
     <TooltipProvider>
@@ -337,9 +410,10 @@ export const DashboardSidebar = ({
           storeSlug={storeSlug}
           planSlug={planSlug}
         />
-        <SidebarContent>
+
+        <SidebarContent className="max-md:px-2 ">
           {navigationSections.map((section, index) => (
-            <div key={section.labelKey || "main"}>
+            <div key={section.labelKey || "main"} className="w-full">
               {index > 0 && <SidebarSeparator />}
               <DashboardNavSection
                 items={section.items}
@@ -350,9 +424,10 @@ export const DashboardSidebar = ({
           ))}
         </SidebarContent>
         <SidebarFooter className="border-sidebar-border border-t">
-          <div>
+          <SidebarMenu>
+            <WhatsNewSidebarItem />
             <HelpButton />
-          </div>
+          </SidebarMenu>
           {/* <ReferralSidebarWidget /> */}
           <UserMenu
             userId={userId}
@@ -374,7 +449,7 @@ function PlanBadge({ planSlug }: { planSlug?: string }) {
     pro: {
       label: "Pro",
       className: "bg-primary/10 text-primary hover:bg-primary/20",
-      icon: <SparklesIcon className="h-3 w-3" />,
+      icon: <AccentSparklesIcon className="h-3 w-3" />,
     },
     ultra: {
       label: "Ultra",
@@ -390,7 +465,7 @@ function PlanBadge({ planSlug }: { planSlug?: string }) {
 
   return (
     <Link
-      href="/dashboard/subscription"
+      href="/dashboard/settings/subscription"
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium transition-colors group-data-[collapsible=icon]:hidden",
         config.className,

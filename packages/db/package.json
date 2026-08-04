@@ -27,7 +27,7 @@
     "@louez/types": "workspace:*",
     "@t3-oss/env-core": "^0.13.10",
     "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.45.1",
+    "drizzle-orm": "^0.45.2",
     "mysql2": "^3.16.0",
     "nanoid": "^5.1.6",
     "zod": "^4.3.5"

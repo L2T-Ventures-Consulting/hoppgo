@@ -36,7 +36,8 @@ const STRIPE_TRANSLATIONS: Record<
   },
   nl: {
     productName: 'AI-tegoed — {credits} credits',
-    productDescription: 'Opwaardering van {credits} credits voor de AI-adviseur',
+    productDescription:
+      'Opwaardering van {credits} credits voor de AI-adviseur',
   },
   pl: {
     productName: 'Kredyty AI — {credits} kredytów',
@@ -127,6 +128,9 @@ export async function updateAiCreditsAutoTopup(config: {
     priceCents: pack?.priceCents ?? 0,
   })
 
+  // Both surfaces render the auto-top-up config (the assistant page and the
+  // dedicated credits page), so both have to be refreshed.
   revalidatePath('/dashboard/ai-assistant')
+  revalidatePath('/dashboard/ai-credits')
   return { success: true }
 }

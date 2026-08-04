@@ -1,16 +1,16 @@
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { Suspense } from "react";
 
-export default async function InvitationLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const messages = await getMessages();
+import { InvitationLayoutContent } from "./invitation-layout-content";
 
+// Invitation state is token- and request-dependent.
+export const instant = false;
+
+const InvitationLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <NextIntlClientProvider messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <Suspense fallback={null}>
+      <InvitationLayoutContent>{children}</InvitationLayoutContent>
+    </Suspense>
   );
-}
+};
+
+export default InvitationLayout;

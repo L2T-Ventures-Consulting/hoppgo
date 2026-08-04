@@ -1,6 +1,12 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import { orpc } from '@/lib/orpc/react'
+import { productsQueries } from '@/lib/queries/products.queries'
+
+/** Invalidates every filter combination of the dashboard products list. */
+export async function invalidateProductsList(queryClient: QueryClient) {
+  await queryClient.invalidateQueries({ queryKey: productsQueries.listKey() })
+}
 
 export async function invalidateReservationDetail(
   queryClient: QueryClient,

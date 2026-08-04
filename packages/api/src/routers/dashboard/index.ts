@@ -1,15 +1,19 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { dashboardProcedure } from '../../procedures';
-import { dashboardAiAdvisorRouter } from './ai-advisor';
-import { dashboardApiKeysRouter } from './api-keys';
-import { dashboardCustomersRouter } from './customers';
-import { dashboardIntegrationsRouter } from './integrations';
-import { dashboardNotificationsRouter } from './notifications';
-import { dashboardOnboardingRouter } from './onboarding';
-import { dashboardReferralRouter } from './referral';
-import { dashboardReservationsRouter } from './reservations';
-import { dashboardSettingsRouter } from './settings';
+import { dashboardProcedure } from "../../procedures";
+import { dashboardAiAdvisorRouter } from "./ai-advisor";
+import { dashboardApiKeysRouter } from "./api-keys";
+import { dashboardCategoriesRouter } from "./categories";
+import { dashboardCustomersRouter } from "./customers";
+import { dashboardIntegrationsRouter } from "./integrations";
+import { dashboardNotificationsRouter } from "./notifications";
+import { dashboardOnboardingRouter } from "./onboarding";
+import { dashboardProductsRouter } from "./products";
+import { dashboardReferralRouter } from "./referral";
+import { dashboardReservationsRouter } from "./reservations";
+import { dashboardSearchRouter } from "./search";
+import { dashboardSettingsRouter } from "./settings";
+import { dashboardVariantsRouter } from "./variants";
 
 /**
  * Example dashboard procedure for testing the setup
@@ -35,11 +39,15 @@ export const dashboardRouter = {
   ping,
   aiAdvisor: dashboardAiAdvisorRouter,
   apiKeys: dashboardApiKeysRouter,
+  categories: dashboardCategoriesRouter,
   customers: dashboardCustomersRouter,
   integrations: dashboardIntegrationsRouter,
   settings: dashboardSettingsRouter,
   reservations: dashboardReservationsRouter,
+  search: dashboardSearchRouter,
   onboarding: dashboardOnboardingRouter,
+  products: dashboardProductsRouter,
   notifications: dashboardNotificationsRouter,
   referral: dashboardReferralRouter,
+  variants: dashboardVariantsRouter,
 };

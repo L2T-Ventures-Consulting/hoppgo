@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { db, effectiveProductQuantitySql } from '@louez/db'
-import { stores, products, categories, productPricingTiers } from '@louez/db'
+import { stores, products, categories, productCategories, productPricingTiers } from '@louez/db'
 import { eq, and, desc, asc, inArray } from 'drizzle-orm'
 import { notFound } from 'next/navigation'
 import { Calendar, ArrowRight } from 'lucide-react'
@@ -21,6 +21,8 @@ import {
 import type { StoreSettings, StoreTheme } from '@louez/types'
 import { getMinRentalMinutes } from '@/lib/utils/rental-duration'
 import { PageTracker } from '@/components/storefront/page-tracker'
+import { filterActiveVariantAxes } from '@/lib/util.variant-visibility'
+import { getStoreVariantActivity } from '@/lib/util.variant-visibility.server'
 
 interface CatalogPageProps {
   params: Promise<{ slug: string }>
@@ -30,6 +32,8 @@ interface CatalogPageProps {
     product?: string
   }>
 }
+
+export const instant = false;
 
 export async function generateMetadata({
   params,
@@ -80,14 +84,11 @@ export async function generateMetadata({
       title,
       description,
       path: categoryId ? `/catalog?category=${categoryId}` : '/catalog',
-    }
+    },
   )
 }
 
-export default async function CatalogPage({
-  params,
-  searchParams,
-}: CatalogPageProps) {
+export default async function CatalogPage({ params, searchParams }: CatalogPageProps) {
   const { slug } = await params
   const { category: categoryId, search, product: initialProductId } = await searchParams
   const t = await getTranslations('storefront.catalog')
@@ -101,6 +102,8 @@ export default async function CatalogPage({
     notFound()
   }
 
+  const variantActivity = await getStoreVariantActivity(store.id)
+
   // Fetch categories separately
   const storeCategories = await db.query.categories.findMany({
     where: eq(categories.storeId, store.id),
@@ -108,12 +111,17 @@ export default async function CatalogPage({
   })
 
   // Build conditions for products query
-  const conditions = [
-    eq(products.storeId, store.id),
-    eq(products.status, 'active'),
-  ]
+  const conditions = [eq(products.storeId, store.id), eq(products.status, 'active')]
   if (categoryId) {
-    conditions.push(eq(products.categoryId, categoryId))
+    conditions.push(
+      inArray(
+        products.id,
+        db
+          .select({ id: productCategories.productId })
+          .from(productCategories)
+          .where(eq(productCategories.categoryId, categoryId)),
+      ),
+    )
   }
 
   // Step 1: Get product IDs (lightweight query with ORDER BY)
@@ -133,9 +141,12 @@ export default async function CatalogPage({
     price: string | null
     displayOrder: number | null
   }
-  let productsList: (typeof products.$inferSelect & { category: typeof categories.$inferSelect | null; pricingTiers?: PricingTier[] })[] = []
+  let productsList: (typeof products.$inferSelect & {
+    category: typeof categories.$inferSelect | null
+    pricingTiers?: PricingTier[]
+  })[] = []
   if (productIds.length > 0) {
-    const productIdsArray = productIds.map(p => p.id)
+    const productIdsArray = productIds.map((p) => p.id)
 
     // Fetch products with categories
     const productResults = await db
@@ -194,7 +205,7 @@ export default async function CatalogPage({
     }
 
     // Create a map for O(1) lookup and preserve order
-    const productMap = new Map(productResults.map(p => [p.id, p]))
+    const productMap = new Map(productResults.map((p) => [p.id, p]))
 
     productsList = productIds
       .map(({ id }) => productMap.get(id))
@@ -208,6 +219,7 @@ export default async function CatalogPage({
         // Advisor-only context — intentionally not selected nor sent to the storefront
         aiContext: null,
         images: row.images,
+        imageHistory: [],
         price: row.price,
         deposit: row.deposit,
         basePeriodMinutes: row.basePeriodMinutes,
@@ -221,19 +233,23 @@ export default async function CatalogPage({
         taxSettings: row.taxSettings,
         enforceStrictTiers: row.enforceStrictTiers,
         trackUnits: row.trackUnits,
-        bookingAttributeAxes: row.bookingAttributeAxes,
-        category: row.categoryId && row.categoryName
-          ? {
-              id: row.categoryId,
-              storeId: row.categoryStoreId!,
-              name: row.categoryName,
-              description: row.categoryDescription,
-              imageUrl: row.categoryImageUrl,
-              order: row.categoryOrder!,
-              createdAt: row.categoryCreatedAt!,
-              updatedAt: row.categoryUpdatedAt!,
-            }
-          : null,
+        bookingAttributeAxes: filterActiveVariantAxes(
+          row.bookingAttributeAxes ?? [],
+          variantActivity,
+        ),
+        category:
+          row.categoryId && row.categoryName
+            ? {
+                id: row.categoryId,
+                storeId: row.categoryStoreId!,
+                name: row.categoryName,
+                description: row.categoryDescription,
+                imageUrl: row.categoryImageUrl,
+                order: row.categoryOrder!,
+                createdAt: row.categoryCreatedAt!,
+                updatedAt: row.categoryUpdatedAt!,
+              }
+            : null,
         pricingTiers: pricingTiersByProductId.get(row.id) || [],
       }))
   }
@@ -243,7 +259,7 @@ export default async function CatalogPage({
     ? productsList.filter(
         (p) =>
           p.name.toLowerCase().includes(search.toLowerCase()) ||
-          p.description?.toLowerCase().includes(search.toLowerCase())
+          p.description?.toLowerCase().includes(search.toLowerCase()),
       )
     : productsList
 
@@ -304,87 +320,87 @@ export default async function CatalogPage({
 
       <div className="min-h-screen">
         {/* Header Section */}
-      <section className="bg-muted/30 border-b">
-        <div className="container mx-auto px-4 py-6 md:py-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="shrink-0">
-              <h1 className="text-2xl md:text-3xl font-bold">
-                {activeCategory ? activeCategory.name : t('title')}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {t('productCount', { count: filteredProducts.length })}
-              </p>
+        <section className="bg-muted/30 border-b">
+          <div className="container mx-auto px-4 py-6 md:py-8">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="shrink-0">
+                <h1 className="text-2xl md:text-3xl font-bold">
+                  {activeCategory ? activeCategory.name : t('title')}
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  {t('productCount', { count: filteredProducts.length })}
+                </p>
+              </div>
+
+              {/* Date picker */}
+              <CatalogDatePicker
+                storeSlug={slug}
+                pricingMode={pricingMode}
+                businessHours={businessHours}
+                advanceNotice={advanceNotice}
+                minRentalMinutes={minRentalMinutes}
+                timezone={timezone}
+              />
             </div>
 
-            {/* Date picker */}
-            <CatalogDatePicker
-              storeSlug={slug}
-            pricingMode={pricingMode}
-            businessHours={businessHours}
-            advanceNotice={advanceNotice}
-            minRentalMinutes={minRentalMinutes}
-            timezone={timezone}
-          />
-          </div>
-
-          {/* Category Pills */}
-          {storeCategories.length > 0 && (
-            <div className="flex items-center gap-2 mt-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
-              <Link
-                href="/catalog"
-                className={`shrink-0 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                  !categoryId
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-background border hover:bg-muted text-foreground'
-                }`}
-              >
-                {t('allProducts')}
-              </Link>
-              {storeCategories.map((cat) => (
+            {/* Category Pills */}
+            {storeCategories.length > 0 && (
+              <div className="flex items-center gap-2 mt-6 overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
                 <Link
-                  key={cat.id}
-                  href={`/catalog?category=${cat.id}`}
+                  href="/catalog"
                   className={`shrink-0 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                    categoryId === cat.id
+                    !categoryId
                       ? 'bg-primary text-primary-foreground'
                       : 'bg-background border hover:bg-muted text-foreground'
                   }`}
                 >
-                  {cat.name}
+                  {t('allProducts')}
                 </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+                {storeCategories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/catalog?category=${cat.id}`}
+                    className={`shrink-0 px-4 py-2 text-sm font-medium rounded-full transition-colors ${
+                      categoryId === cat.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-background border hover:bg-muted text-foreground'
+                    }`}
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
 
-      {/* Products Grid Section */}
-      <section className="container mx-auto px-4 py-8 md:py-10">
-        {/* Products Grid */}
-        {filteredProducts.length > 0 ? (
-          <ProductGridWithPreview
-            products={filteredProducts}
-            storeSlug={slug}
-            businessHours={businessHours}
-            advanceNotice={advanceNotice}
-            minRentalMinutes={minRentalMinutes}
-            timezone={timezone}
-            initialProductId={initialProductId}
-          />
-        ) : (
-          <Card className="py-16">
-            <CardContent className="text-center">
-              <Calendar className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground mb-4">
-                {search ? t('noProductsFor', { search }) : t('noProducts')}
-              </p>
-              <Button variant="outline" render={<Link href="/#date-picker" />}>
+        {/* Products Grid Section */}
+        <section className="container mx-auto px-4 py-8 md:py-10">
+          {/* Products Grid */}
+          {filteredProducts.length > 0 ? (
+            <ProductGridWithPreview
+              products={filteredProducts}
+              storeSlug={slug}
+              businessHours={businessHours}
+              advanceNotice={advanceNotice}
+              minRentalMinutes={minRentalMinutes}
+              timezone={timezone}
+              initialProductId={initialProductId}
+            />
+          ) : (
+            <Card className="py-16">
+              <CardContent className="text-center">
+                <Calendar className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
+                <p className="text-muted-foreground mb-4">
+                  {search ? t('noProductsFor', { search }) : t('noProducts')}
+                </p>
+                <Button variant="outline" render={<Link href="/#date-picker" />}>
                   {t('backToHome')}
                   <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </section>
       </div>
     </>

@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@louez/ui';
+import { CogIcon } from '@louez/ui/icons';
 
 interface TulipConfigurationSectionProps {
   disabled: boolean;
@@ -59,7 +60,10 @@ export function TulipConfigurationSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('title')}</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          <CogIcon className="h-5 w-5 shrink-0" />
+          {t('title')}
+        </CardTitle>
         <CardDescription>{t('description')}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">

@@ -20,10 +20,7 @@ import {
 } from '@louez/ui'
 
 import { switchToPayAsYouGo } from './actions'
-import {
-  PayAsYouGoPricing,
-  type PricingBand,
-} from './pay-as-you-go-pricing'
+import { PayAsYouGoPricing, type PricingBand } from './pay-as-you-go-pricing'
 
 interface PayAsYouGoPreviewProps {
   flatRateCents: number | null
@@ -52,7 +49,7 @@ export function PayAsYouGoPreview({
         setError(true)
         return
       }
-      router.push('/dashboard/subscription')
+      router.push('/dashboard/settings/subscription')
       router.refresh()
     })
   }
@@ -60,7 +57,7 @@ export function PayAsYouGoPreview({
   return (
     <div className="space-y-6">
       <Link
-        href="/dashboard/subscription"
+        href="/dashboard/settings/subscription"
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
         <ChevronRight className="h-4 w-4 rotate-180" />
@@ -75,11 +72,7 @@ export function PayAsYouGoPreview({
         <p className="text-muted-foreground">{t('previewDescription')}</p>
       </div>
 
-      <PayAsYouGoPricing
-        flatRateCents={flatRateCents}
-        bands={bands}
-        currency={currency}
-      />
+      <PayAsYouGoPricing flatRateCents={flatRateCents} bands={bands} currency={currency} />
 
       <Card>
         <CardHeader>

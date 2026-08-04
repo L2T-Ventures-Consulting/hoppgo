@@ -5,8 +5,6 @@ import { z } from "zod";
 import { getImageFilesRouter } from "@/lib/uploads/image-files-router";
 import { IMAGE_UPLOAD_KINDS } from "@/lib/uploads/image-upload";
 
-export const runtime = "nodejs";
-
 interface RouteContext {
   params: Promise<{ kind: string }>;
 }

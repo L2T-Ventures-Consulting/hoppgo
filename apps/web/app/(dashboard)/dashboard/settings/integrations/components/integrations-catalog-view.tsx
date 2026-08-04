@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef } from "react";
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertCircle, ArrowRight, Braces, Code, Terminal } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ArrowRightIcon, CodeIcon, TerminalIcon, WarningIcon } from "@louez/ui/icons";
+import { useTranslations } from "next-intl";
 
-import { Alert, AlertDescription, Badge, Card, Skeleton } from '@louez/ui';
+import { Alert, AlertDescription, Badge, Card, Skeleton } from "@louez/ui";
 
-import type { IntegrationCatalogItem } from '@/lib/integrations/registry/types';
-import { orpc } from '@/lib/orpc/react';
+import type { IntegrationCatalogItem } from "@/lib/integrations/registry/types";
+import { orpc } from "@/lib/orpc/react";
 
 type BuiltInItem = {
   id: string;
@@ -22,46 +22,43 @@ type BuiltInItem = {
   descriptionKey: string;
   badge?: {
     labelKey: string;
-    variant: 'default' | 'secondary' | 'outline';
+    variant: "progress" | "expired";
   };
 };
 
 const LOUEZ_ITEMS: BuiltInItem[] = [
   {
-    id: 'widget',
-    href: '/dashboard/settings/integrations/widget',
-    icon: Code,
-    nameKey: 'dashboard.settings.integrationsHub.builtIn.widget.name',
-    descriptionKey:
-      'dashboard.settings.integrationsHub.builtIn.widget.description',
+    id: "widget",
+    href: "/dashboard/settings/integrations/widget",
+    icon: CodeIcon,
+    nameKey: "dashboard.settings.integrationsHub.builtIn.widget.name",
+    descriptionKey: "dashboard.settings.integrationsHub.builtIn.widget.description",
     badge: {
-      labelKey: 'dashboard.settings.integrationsHub.recommended',
-      variant: 'default',
+      labelKey: "dashboard.settings.integrationsHub.recommended",
+      variant: "progress",
     },
   },
   {
-    id: 'mcp',
-    href: '/dashboard/settings/integrations/mcp',
-    icon: Terminal,
-    nameKey: 'dashboard.settings.integrationsHub.builtIn.mcp.name',
-    descriptionKey:
-      'dashboard.settings.integrationsHub.builtIn.mcp.description',
+    id: "mcp",
+    href: "/dashboard/settings/integrations/mcp",
+    icon: TerminalIcon,
+    nameKey: "dashboard.settings.integrationsHub.builtIn.mcp.name",
+    descriptionKey: "dashboard.settings.integrationsHub.builtIn.mcp.description",
   },
   {
-    id: 'api',
-    href: '/dashboard/settings/integrations/api',
-    icon: Braces,
-    nameKey: 'dashboard.settings.integrationsHub.builtIn.api.name',
-    descriptionKey:
-      'dashboard.settings.integrationsHub.builtIn.api.description',
+    id: "api",
+    href: "/dashboard/settings/integrations/api",
+    icon: CodeIcon,
+    nameKey: "dashboard.settings.integrationsHub.builtIn.api.name",
+    descriptionKey: "dashboard.settings.integrationsHub.builtIn.api.description",
     badge: {
-      labelKey: 'dashboard.settings.integrationsHub.comingSoon',
-      variant: 'secondary',
+      labelKey: "dashboard.settings.integrationsHub.comingSoon",
+      variant: "expired",
     },
   },
 ];
 
-const TULIP_INTEGRATION_ID = 'tulip';
+const TULIP_INTEGRATION_ID = "tulip";
 
 function IntegrationItemCard({
   href,
@@ -79,17 +76,12 @@ function IntegrationItemCard({
   description: string;
   badge?: {
     label: string;
-    variant: 'default' | 'secondary' | 'outline' | 'success';
+    variant: "progress" | "expired" | "success";
   };
   onPrefetch?: () => void;
 }) {
   return (
-    <Link
-      href={href}
-      onFocus={onPrefetch}
-      onMouseEnter={onPrefetch}
-      onTouchStart={onPrefetch}
-    >
+    <Link href={href} onFocus={onPrefetch} onMouseEnter={onPrefetch} onTouchStart={onPrefetch}>
       <Card className="group hover:border-primary/40 hover:bg-muted/30 h-full px-5 py-4 transition">
         <div className="flex items-start gap-4">
           {Icon ? (
@@ -98,30 +90,21 @@ function IntegrationItemCard({
             </div>
           ) : logo ? (
             <div className="bg-background h-11 w-11 shrink-0 overflow-hidden rounded-xl border p-1.5">
-              <img
-                src={logo}
-                alt={name}
-                className="h-full w-full object-contain"
-              />
+              <img src={logo} alt={name} className="h-full w-full object-contain" />
             </div>
           ) : null}
           <div className="min-w-0 flex-1 py-0.5">
             <div className="flex items-center gap-2">
               <span className="font-medium">{name}</span>
               {badge && (
-                <Badge
-                  variant={badge.variant}
-                  className="px-1.5 py-0 text-[10px]"
-                >
+                <Badge variant={badge.variant} className="px-1.5 py-0 text-[10px]">
                   {badge.label}
                 </Badge>
               )}
             </div>
-            <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">
-              {description}
-            </p>
+            <p className="text-muted-foreground mt-1 line-clamp-2 text-sm">{description}</p>
           </div>
-          <ArrowRight className="text-muted-foreground mt-1 h-4 w-4 shrink-0 opacity-0 transition group-hover:opacity-100" />
+          <ArrowRightIcon className="text-muted-foreground mt-1 h-4 w-4 shrink-0 opacity-0 transition group-hover:opacity-100" />
         </div>
       </Card>
     </Link>
@@ -184,30 +167,22 @@ export function IntegrationsCatalogView() {
   );
 
   const catalogLoadError =
-    catalogQuery.isError ||
-    (catalogQuery.data ? 'error' in catalogQuery.data : false);
+    catalogQuery.isError || (catalogQuery.data ? "error" in catalogQuery.data : false);
 
   const integrations: IntegrationCatalogItem[] =
-    catalogQuery.data && !('error' in catalogQuery.data)
+    catalogQuery.data && !("error" in catalogQuery.data)
       ? (catalogQuery.data.integrations as unknown as IntegrationCatalogItem[])
       : [];
 
-  const insuranceIntegrations = integrations.filter(
-    (i) => i.category === 'insurance',
-  );
-  const calendarIntegrations = integrations.filter(
-    (i) => i.category === 'calendar',
-  );
+  const insuranceIntegrations = integrations.filter((i) => i.category === "insurance");
+  const calendarIntegrations = integrations.filter((i) => i.category === "calendar");
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-6 sm:space-y-8">
       {/* Built-in by Louez.io */}
       <section className="space-y-3">
         <h3 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-          {resolveMessage(
-            'dashboard.settings.integrationsHub.sections.byLouez',
-            'By Louez.io',
-          )}
+          {resolveMessage("dashboard.settings.integrationsHub.sections.byLouez", "By Louez.io")}
         </h3>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {LOUEZ_ITEMS.map((item) => (
@@ -216,12 +191,12 @@ export function IntegrationsCatalogView() {
               href={item.href}
               icon={item.icon}
               name={resolveMessage(item.nameKey, item.id)}
-              description={resolveMessage(item.descriptionKey, '')}
+              description={resolveMessage(item.descriptionKey, "")}
               onPrefetch={() => prefetchRoute(item.href)}
               badge={
                 item.badge
                   ? {
-                      label: resolveMessage(item.badge.labelKey, ''),
+                      label: resolveMessage(item.badge.labelKey, ""),
                       variant: item.badge.variant,
                     }
                   : undefined
@@ -233,11 +208,11 @@ export function IntegrationsCatalogView() {
 
       {catalogLoadError && (
         <Alert variant="error">
-          <AlertCircle className="h-4 w-4" />
+          <WarningIcon className="h-4 w-4" />
           <AlertDescription>
             {resolveMessage(
-              'dashboard.settings.integrationsHub.loadError',
-              'Unable to load integrations.',
+              "dashboard.settings.integrationsHub.loadError",
+              "Unable to load integrations.",
             )}
           </AlertDescription>
         </Alert>
@@ -247,10 +222,7 @@ export function IntegrationsCatalogView() {
       {!catalogLoadError && (
         <section className="space-y-3">
           <h3 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-            {resolveMessage(
-              'dashboard.settings.integrationsHub.sections.calendar',
-              'Calendar',
-            )}
+            {resolveMessage("dashboard.settings.integrationsHub.sections.calendar", "Calendar")}
           </h3>
           {catalogQuery.isLoading ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -265,16 +237,16 @@ export function IntegrationsCatalogView() {
                   href={`/dashboard/settings/integrations/${item.id}`}
                   logo={item.logoPath}
                   name={resolveMessage(item.nameKey, item.id)}
-                  description={resolveMessage(item.descriptionKey, '')}
+                  description={resolveMessage(item.descriptionKey, "")}
                   onPrefetch={() => prefetchIntegration(item.id)}
                   badge={
                     item.connected
                       ? {
                           label: resolveMessage(
-                            'dashboard.settings.integrationsHub.statusLabels.connected',
-                            'Connected',
+                            "dashboard.settings.integrationsHub.statusLabels.connected",
+                            "Connected",
                           ),
-                          variant: 'success',
+                          variant: "success",
                         }
                       : undefined
                   }
@@ -283,8 +255,8 @@ export function IntegrationsCatalogView() {
               {!catalogQuery.isLoading && calendarIntegrations.length === 0 && (
                 <p className="text-muted-foreground text-sm">
                   {resolveMessage(
-                    'dashboard.settings.integrationsHub.noIntegrations',
-                    'No integrations available yet.',
+                    "dashboard.settings.integrationsHub.noIntegrations",
+                    "No integrations available yet.",
                   )}
                 </p>
               )}
@@ -297,10 +269,7 @@ export function IntegrationsCatalogView() {
       {!catalogLoadError && (
         <section className="space-y-3">
           <h3 className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
-            {resolveMessage(
-              'dashboard.settings.integrationsHub.sections.insurance',
-              'Insurance',
-            )}
+            {resolveMessage("dashboard.settings.integrationsHub.sections.insurance", "Insurance")}
           </h3>
           {catalogQuery.isLoading ? (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -314,30 +283,29 @@ export function IntegrationsCatalogView() {
                   href={`/dashboard/settings/integrations/${item.id}`}
                   logo={item.logoPath}
                   name={resolveMessage(item.nameKey, item.id)}
-                  description={resolveMessage(item.descriptionKey, '')}
+                  description={resolveMessage(item.descriptionKey, "")}
                   onPrefetch={() => prefetchIntegration(item.id)}
                   badge={
                     item.enabled
                       ? {
                           label: resolveMessage(
-                            'dashboard.settings.integrationsHub.statusLabels.enabled',
-                            'Enabled',
+                            "dashboard.settings.integrationsHub.statusLabels.enabled",
+                            "Enabled",
                           ),
-                          variant: 'success',
+                          variant: "success",
                         }
                       : undefined
                   }
                 />
               ))}
-              {!catalogQuery.isLoading &&
-                insuranceIntegrations.length === 0 && (
-                  <p className="text-muted-foreground text-sm">
-                    {resolveMessage(
-                      'dashboard.settings.integrationsHub.noIntegrations',
-                      'No integrations available yet.',
-                    )}
-                  </p>
-                )}
+              {!catalogQuery.isLoading && insuranceIntegrations.length === 0 && (
+                <p className="text-muted-foreground text-sm">
+                  {resolveMessage(
+                    "dashboard.settings.integrationsHub.noIntegrations",
+                    "No integrations available yet.",
+                  )}
+                </p>
+              )}
             </div>
           )}
         </section>

@@ -4,6 +4,8 @@
     "description": "Eenvoudig en modern materiaalverhuurplatform"
   },
   "common": {
+    "duration": "Duur",
+    "price": "Prijs",
     "save": "Opslaan",
     "unsavedChanges": "Niet-opgeslagen wijzigingen",
     "cancel": "Annuleren",
@@ -23,6 +25,9 @@
     "success": "Gelukt",
     "confirm": "Bevestigen",
     "close": "Sluiten",
+    "play": "Afspelen",
+    "pause": "Pauze",
+    "seek": "Zoeken",
     "yes": "Ja",
     "no": "Nee",
     "view": "Bekijken",
@@ -116,12 +121,16 @@
       "select": "Selecteren",
       "naturalPlaceholder": "bijv. morgen om 14:00 of 12 mei om 13:00",
       "time": "Tijd",
+      "startTime": "Start",
+      "endTime": "Einde",
       "confirm": "Bevestigen"
     },
     "customerSearch": {
       "placeholder": "Zoek een klant...",
       "noResults": "Geen klant gevonden",
-      "selectCustomer": "Selecteer een klant"
+      "selectCustomer": "Selecteer een klant",
+      "createCustomer": "Klant aanmaken",
+      "createNamed": "“{query}” aanmaken"
     }
   },
   "auth": {
@@ -229,7 +238,14 @@
         "subtitle": "Je winkel adviseert, antwoordt en reserveert — automatisch",
         "credits": "{count} credits",
         "creditsUnlimited": "Onbeperkte credits",
-        "recharge": "Opwaarderen"
+        "recharge": "Opwaarderen",
+        "manageCredits": "Beheren"
+      },
+      "tabs": {
+        "label": "Onderdelen van de AI-assistent",
+        "advisor": "Online adviseur",
+        "voice": "Spraakagent",
+        "conversations": "Gesprekken"
       },
       "hero": {
         "eyebrow": "AI-assistent",
@@ -318,7 +334,20 @@
       "newReservation": "Nieuwe reservering",
       "reservationLimitReached": "Limiet bereikt",
       "help": "Hulp",
-      "feedback": "Hulp en feedback"
+      "feedback": "Hulp en feedback",
+      "aiCreditsLow": "Tegoed raakt op"
+    },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Opdrachtpalet openen",
+        "aiAssistant": "AI-assistent openen",
+        "sidebar": "Zijbalk tonen of verbergen",
+        "search": "Zoeken activeren",
+        "createReservation": "Reservering maken",
+        "goToReservations": "Naar reserveringen gaan",
+        "goToCalendar": "Naar kalender gaan",
+        "save": "Actief formulier opslaan"
+      }
     },
     "storeSwitcher": {
       "selectStore": "Selecteer een winkel",
@@ -568,7 +597,8 @@
       "subscription": "Abonnement",
       "settings": "Instellingen",
       "store": "Mijn winkel",
-      "multiStore": "Multi-winkel"
+      "multiStore": "Multi-winkel",
+      "aiCredits": "AI-tegoed"
     },
     "home": {
       "viewAll": "Alles bekijken",
@@ -758,16 +788,6 @@
         "archived": "Gearchiveerd"
       },
       "form": {
-        "steps": {
-          "photos": "Foto's",
-          "photosDescription": "Productafbeeldingen",
-          "info": "Informatie",
-          "infoDescription": "Naam en beschrijving",
-          "pricing": "Prijzen",
-          "pricingDescription": "Prijs en tarieven",
-          "preview": "Publiceren",
-          "previewDescription": "Controleren en publiceren"
-        },
         "photos": "Foto's",
         "photosDescription": "Voeg tot 5 foto's van uw product toe",
         "addImage": "Toevoegen",
@@ -779,6 +799,22 @@
         "uploading": "Uploaden...",
         "imageUploadError": "Upload mislukt",
         "recropImage": "Opnieuw bijsnijden",
+        "openImageViewer": "Foto bekijken",
+        "imageHistoryAction": "Geschiedenis bekijken",
+        "imageHistoryTitle": "Fotogeschiedenis",
+        "imageHistoryDescription": "Bekijk elke versie van deze foto en kies welke je wilt gebruiken. Eerdere versies blijven bewaard.",
+        "imageHistoryOriginal": "Originele foto",
+        "imageHistoryCropped": "Na bijsnijden",
+        "imageHistoryAiEnhanced": "Na AI-verbetering",
+        "imageHistoryBackgroundRemoved": "Na achtergrond verwijderen",
+        "imageHistoryCurrent": "In gebruik",
+        "imageHistoryInitialVersion": "Eerste versie",
+        "imageHistoryUseVersion": "Deze versie gebruiken",
+        "imageHistoryDeleteVersion": "Deze versie verwijderen",
+        "imageHistoryDeleteTitle": "Deze versie verwijderen?",
+        "imageHistoryDeleteDescription": "Deze versie wordt uit de geschiedenis verwijderd. De andere versies blijven beschikbaar.",
+        "imageHistoryDeleteCancel": "Annuleren",
+        "imageHistoryDeleteConfirm": "Verwijderen",
         "cropUnsupportedFormat": "Dit afbeeldingsformaat kan niet opnieuw worden bijgesneden",
         "cropDialogTitle": "Pas je foto's aan",
         "cropDialogDescription": "Gebruik een 4:3 uitsnede voor een consistente weergave in de storefront",
@@ -797,6 +833,129 @@
         "cropPreviewTitle": "Voorbeeld",
         "cropPreviewDescription": "Zo zal je foto eruitzien in de winkel",
         "cropUploadSelected": "Selectie uploaden",
+        "aiEnhanceAction": "Verbeteren met AI",
+        "removeBackgroundAction": "Achtergrond verwijderen",
+        "aiEnhanceLoading": "Verwerken…",
+        "aiEnhanceReadyBadge": "Te beoordelen",
+        "aiEnhanceQueuedBadge": "In wachtrij",
+        "aiEnhancedBadge": "Verbeterd met AI",
+        "backgroundRemovedBadge": "Achtergrond verwijderd",
+        "aiEnhanceErrorAlreadyProcessed": "Deze foto is al verwerkt",
+        "aiEnhanceBatchAction": "Foto's uniform maken",
+        "aiEnhanceBatchHint": "Snijdt uw producten uit en centreert ze in een 4:3-kader",
+        "aiEnhanceBatchProgress": "Foto {current} van {total}…",
+        "aiEnhanceDialogTitle": "Voor / Na",
+        "removeBackgroundDialogTitle": "Achtergrond verwijderd",
+        "aiEnhanceDialogDescription": "Vergelijk het resultaat voordat u uw foto vervangt.",
+        "aiEnhanceRemaining": "{count, plural, one {# foto te beoordelen} other {# foto's te beoordelen}}",
+        "aiEnhanceBefore": "Voor",
+        "aiEnhanceAfter": "Na",
+        "aiEnhanceAccept": "Deze versie gebruiken",
+        "aiEnhanceReject": "Origineel behouden",
+        "aiEnhanceTransparencyHint": "Transparante achtergrond, product gecentreerd in een 4:3-kader",
+        "aiEnhanceTransparencyHintPreserve": "Transparante achtergrond, oorspronkelijke kadrering behouden in 4:3",
+        "aiEnhanceBackgroundCheckerboard": "Dambord",
+        "aiEnhanceBackgroundWhite": "Wit",
+        "aiEnhanceError": "Verbeteren van de foto is mislukt",
+        "aiEnhanceErrorCredits": "Uw AI-credits zijn op. Vul ze aan om uw foto's te blijven verbeteren.",
+        "aiEnhanceErrorDisabled": "AI-verbetering is momenteel niet beschikbaar.",
+        "removeBackgroundErrorDisabled": "Achtergrond verwijderen is momenteel niet beschikbaar.",
+        "aiEnhanceErrorInvalidImage": "Deze afbeelding kan niet worden verbeterd",
+        "aiEnhanceErrorEmptyImage": "Er is geen product gedetecteerd op deze foto",
+        "aiEnhanceErrorProvider": "De verbeterservice is tijdelijk niet beschikbaar. Probeer het over enkele ogenblikken opnieuw.",
+        "removeBackgroundErrorProvider": "De service voor achtergrondverwijdering is tijdelijk niet beschikbaar. Probeer het over enkele ogenblikken opnieuw.",
+        "aiEnhanceOriginalMissing": "De originele foto staat niet meer in het formulier",
+        "aiEnhanceSavedToHistory": "De AI-versie is in de geschiedenis bewaard",
+        "aiEnhanceCropAction": "Verbeteren met AI",
+        "aiEnhancePromoTitle": "Verbeter uw foto's met AI",
+        "aiEnhancePromoDescription": "Scherpe, consistente winkelbeelden met één klik.",
+        "aiEnhancePromoBenefitBackground": "De achtergrond wordt verwijderd en vervangen door transparantie",
+        "aiEnhancePromoBenefitFraming": "Uw product staat perfect gecentreerd in een 4:3-kader",
+        "aiEnhancePromoBenefitConsistency": "Een uniforme uitstraling in uw hele winkel",
+        "aiEnhancePromoNote": "Voor deze functie moet AI in uw account zijn geactiveerd.",
+        "aiEnhancePromoCta": "AI activeren",
+        "aiEnhancePromoClose": "Later",
+        "video": "Video",
+        "aiCreditsPerImage": "{count, plural, one {# credit} other {# credits}} / foto",
+        "aiCreditsBgRemoval": "Alleen achtergrond verwijderen: {count, plural, one {# credit} other {# credits}}",
+        "aiCreditsBgRemovalFree": "Achtergrond verwijderen inbegrepen",
+        "aiCreditsBalance": "Saldo: {count, plural, one {# credit} other {# credits}}",
+        "aiCreditsBalanceUnlimited": "Onbeperkte credits",
+        "aiCreditsBatchEstimate": "Ongeveer {credits, plural, one {# credit} other {# credits}} voor {images, plural, one {# foto} other {# foto's}}",
+        "aiCreditsLearnMore": "Meer informatie",
+        "aiCreditsLearnMoreTitle": "Foto's die verkopen",
+        "aiCreditsLearnMoreValue": "De AI snijdt je product uit, maakt de achtergrond uniform en kadreert opnieuw: professionele beelden die klanten vertrouwen geven en je conversie verhogen.",
+        "aiCreditsLearnMoreCost": "Elke verbeterde foto kost {count, plural, one {# credit} other {# credits}}, eerst van je maandelijkse credits en daarna van je prepaidsaldo.",
+        "aiCreditsLearnMoreLink": "Mijn AI-credits bekijken",
+        "aiCreditsExhaustedTitle": "Niet genoeg AI-credits",
+        "aiCreditsExhaustedDescription": "Fotoverbetering staat op pauze: je saldo dekt geen foto meer. Laad credits op om verder te gaan.",
+        "aiCreditsRecharge": "Opwaarderen",
+        "aiChoiceTitle": "Wat doen we met deze foto?",
+        "aiChoiceDescription": "Kies het resultaat — je kunt het altijd nog aanpassen.",
+        "aiChoiceEnhanceDescription": "Professionele look: strakke achtergrond, product uitgesneden en gecentreerd",
+        "aiChoiceRemoveBackgroundDescription": "Behoudt je foto en vervangt alleen de achtergrond",
+        "aiChoiceCrop": "Zelf bijsnijden",
+        "aiChoiceCropDescription": "Stel de 4:3-uitsnede handmatig in",
+        "aiChoiceUseAsIs": "Ongewijzigd gebruiken",
+        "aiChoiceBatchEnhance": "{count, plural, one {# foto verbeteren} other {Alle # foto's verbeteren}}",
+        "cropBackToChoice": "Terug naar de opties",
+        "aiCreditsChip": "{count, plural, one {# credit} other {# credits}}",
+        "aiCreditsChipIncluded": "Inbegrepen",
+        "aiCreditsTooltipTitle": "AI-verbetering",
+        "aiCreditsTooltipWhat": "Je product wordt uitgesneden, de achtergrond uniform gemaakt en het beeld op 4:3 gezet — een studioresultaat.",
+        "aiCreditsTooltipCost": "{count, plural, one {# credit} other {# credits}} per foto",
+        "aiCreditsTooltipBgTitle": "Achtergrond verwijderen",
+        "aiCreditsTooltipBgWhat": "Je foto blijft precies zoals hij is: alleen de achtergrond verdwijnt.",
+        "aiCreditsTooltipFree": "Inbegrepen in je abonnement",
+        "aiProcessingTitle": "Je foto wordt verbeterd",
+        "aiProcessingTitleBackground": "Achtergrond wordt verwijderd",
+        "aiProcessingDescription": "Je hoeft niet te wachten: het werk gaat door als je dit sluit.",
+        "aiProcessingContinueBackground": "Op de achtergrond doorgaan",
+        "aiProcessingFailedTitle": "De verwerking is niet afgerond",
+        "aiProcessingFailedDescription": "Je foto's zijn gewoon toegevoegd. Je kunt de verwerking altijd opnieuw starten.",
+        "aiProcessingRetry": "Opnieuw proberen",
+        "aiProcessingClose": "Sluiten",
+        "aiStepPrepareLabel": "Voorbereiding",
+        "aiStepPrepareMessage1": "We analyseren je foto…",
+        "aiStepPrepareMessage2": "We zoeken het product in het beeld.",
+        "aiStepPrepareMessage3": "Licht en kleuren worden gemeten.",
+        "aiStepEnhanceLabel": "AI-verbetering",
+        "aiStepEnhanceMessage1": "De AI werkt aan licht en scherpte.",
+        "aiStepEnhanceMessage2": "Kleuren worden afgestemd op een natuurgetrouw resultaat.",
+        "aiStepEnhanceMessage3": "Dit is de langste stap — het wachten waard.",
+        "aiStepEnhanceMessage4": "Je beeld komt steeds dichter bij een studiofoto.",
+        "aiStepCutoutLabel": "Uitsnijden",
+        "aiStepCutoutMessage1": "Product en achtergrond worden gescheiden.",
+        "aiStepCutoutMessage2": "De randen worden pixel voor pixel bijgewerkt.",
+        "aiStepCutoutMessage3": "Een strakke achtergrond zet je product op de voorgrond.",
+        "aiStepFinishLabel": "Afwerking",
+        "aiStepFinishMessage1": "4:3-uitsnede en centrering van het product.",
+        "aiStepFinishMessage2": "Laatste aanpassingen voordat we het resultaat tonen.",
+        "aiStepFinishMessage3": "Nog heel even…",
+        "aiEnhanceLearnMoreTitle": "Foto's waar je van wilt huren",
+        "aiEnhanceLearnMoreDescription": "De AI maakt van een snelle telefoonfoto een catalogusbeeld.",
+        "aiEnhanceLearnMoreBenefit1": "Een professionele uitstraling zonder studio of apparatuur: je product komt scherp en goed belicht naar voren.",
+        "aiEnhanceLearnMoreBenefit2": "Een uniforme catalogus: al je advertenties delen dezelfde kadrering en dezelfde achtergrond.",
+        "aiEnhanceLearnMoreBenefit3": "Verzorgde beelden wekken vertrouwen, en klanten boeken makkelijker.",
+        "aiEnhanceLearnMoreGalleryTitle": "Voorbeelden uit andere winkels",
+        "aiEnhanceLearnMoreHeroAlt": "Voorbeeld van een door AI verbeterde foto",
+        "aiEnhanceLearnMoreExampleAlt": "Voorbeeld {index}: foto voor en na de verbetering",
+        "removeBackgroundLearnMoreTitle": "Een achtergrond die opzij gaat voor je product",
+        "removeBackgroundLearnMoreDescription": "We laten je foto precies zoals hij is en halen alleen de achtergrond weg.",
+        "removeBackgroundLearnMoreBenefit1": "De achtergrond van je etalage neemt het over: het product past overal, zonder witte rand.",
+        "removeBackgroundLearnMoreBenefit2": "Geen garage of woonkamer meer op de achtergrond die de aandacht van het product afleidt.",
+        "removeBackgroundLearnMoreBenefit3": "Ideaal als je foto al goed is en alleen de omgeving tegenvalt.",
+        "removeBackgroundLearnMoreThemeTitle": "Past bij zowel het lichte als het donkere thema",
+        "removeBackgroundLearnMoreThemeDescription": "Het uitgesneden product ligt op de achtergrond van je etalage en blijft er goed uitzien, welk thema je bezoeker ook kiest.",
+        "removeBackgroundLearnMoreThemeLight": "Licht thema",
+        "removeBackgroundLearnMoreThemeDark": "Donker thema",
+        "removeBackgroundLearnMoreAlt": "Voorbeeld van een uitgesneden product",
+        "removeImage": "Foto verwijderen",
+        "aiActionWithCost": "{action} — {cost}",
+        "aiEnhanceCancelled": "Generatie geannuleerd",
+        "aiCancelGeneration": "Generatie annuleren",
+        "aiCancelledTitle": "Generatie geannuleerd",
+        "aiCancelledDescription": "Er zijn geen credits afgeschreven. Je foto's zijn gewoon toegevoegd — start de verwerking wanneer je wilt opnieuw.",
         "information": "Informatie",
         "name": "Productnaam",
         "namePlaceholder": "Bijv. Mountainbike XC 500",
@@ -892,7 +1051,9 @@
             "strictLine": "Vaste stappen",
             "progressiveLine": "Progressief",
             "savings": "Klantbesparing",
-            "basePricing": "Basistarieven"
+            "basePricing": "Basistarieven",
+            "title": "Prijssimulatie",
+            "subtitle": "Totale prijs per huurperiode"
           }
         },
         "unitTracking": {
@@ -932,7 +1093,7 @@
           "bookingAttributesEmpty": "Geen boekingskenmerken geconfigureerd. Alle gevolgde eenheden delen de standaardcombinatie.",
           "bookingAttributeValuePlaceholder": "{label} waarde",
           "combinationKey": "Combinatie",
-          "missingAttributesWarning": "{count, plural, one {# actieve eenheid mist ten minste één kenmerkwaarde} other {# actieve eenheden missen ten minste één kenmerkwaarde}}",
+          "missingAttributesWarning": "{count, plural, one {# eenheid mist variantwaarden} other {# eenheden missen variantwaarden}}",
           "manageAttributes": "Kenmerken beheren",
           "manageAttributesDescription": "Met kenmerken kunnen klanten specifieke eigenschappen kiezen bij het boeken (bijv. maat, kleur). Elke eenheid wordt getagd met kenmerkwaarden en het systeem wijst automatisch een passende eenheid toe bij het afrekenen.",
           "manageAttributesExample": "Voorbeeld: voor een kajakhuurverhuur voegt u \"Maat\" (S, M, L) en \"Kleur\" (Rood, Blauw) toe. Een klant die een Medium Rode kajak boekt, krijgt een passende beschikbare eenheid toegewezen.",
@@ -948,7 +1109,89 @@
           "purchaseDetails": "Aankoopgegevens",
           "unitDetails": "Details",
           "existingUnitDetailsHint": "Aankoopdetails, notities en levenscyclus worden beheerd vanuit de inventaris.",
-          "openInventoryDetails": "Inventaris openen"
+          "openInventoryDetails": "Inventaris openen",
+          "benefitIdentify": "Geef elk exemplaar een serienummer of referentie",
+          "benefitAvailability": "Volg de beschikbaarheid en verhuur van elk exemplaar",
+          "benefitInventory": "Registreer aankoopprijs en -datum voor je inventaris",
+          "modeQuantity": "Eenvoudige hoeveelheid",
+          "modeQuantityDescription": "Geef gewoon aan hoeveel exemplaren beschikbaar zijn voor verhuur.",
+          "modeUnits": "Per eenheid volgen",
+          "modeUnitsDescription": "Elk exemplaar krijgt een eigen kenmerk.",
+          "variantsTitle": "Varianten",
+          "variantsHelp": "Maximaal 3 varianten (maat, kleur…). Elke eenheid draagt haar waarde en de klant kiest bij het boeken.",
+          "variantsEmptyHint": "Maak je per maat een apart product aan? Voeg liever een variant \"Maat\" toe: elke eenheid draagt de hare en de klant kiest bij het boeken.",
+          "variantPlaceholder": "bijv. Maat",
+          "addVariant": "Variant toevoegen",
+          "variantsMaxReached": "Maximaal 3 varianten",
+          "defaultBadge": "Standaard",
+          "advancedBadge": "Geavanceerd",
+          "learnMore": "Meer informatie",
+          "addRefPlaceholder": "Typ een referentie en druk op Enter",
+          "generateSeries": "Reeks genereren",
+          "changeMode": "Modus wijzigen",
+          "createVariantValue": "\"{value}\" aanmaken ({axis})",
+          "chooseColor": "Kies een kleur",
+          "colorPickerDescription": "Pas de kleur aan of voer een hexadecimale waarde in.",
+          "colorHue": "Tint",
+          "hexColor": "Hexkleur",
+          "presetSuggestions": "Suggesties",
+          "valuesCount": "{count, plural, one {# waarde} other {# waarden}}",
+          "presets": {
+            "size": {
+              "label": "Maat"
+            },
+            "shoeSize": {
+              "label": "Schoenmaat"
+            },
+            "color": {
+              "label": "Kleur",
+              "values": {
+                "black": "Zwart",
+                "white": "Wit",
+                "gray": "Grijs",
+                "red": "Rood",
+                "orange": "Oranje",
+                "yellow": "Geel",
+                "green": "Groen",
+                "blue": "Blauw",
+                "purple": "Paars",
+                "pink": "Roze",
+                "brown": "Bruin",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Materiaal",
+              "values": {
+                "cotton": "Katoen",
+                "leather": "Leer",
+                "wood": "Hout",
+                "metal": "Metaal",
+                "plastic": "Plastic",
+                "aluminum": "Aluminium",
+                "carbon": "Carbon"
+              }
+            }
+          },
+          "manageVariants": "Varianten beheren",
+          "managerTitle": "Varianten",
+          "managerDescription": "Definities gedeeld door al je producten (maat, kleur…).",
+          "activeVariantsCount": "{active} van {total} actief",
+          "variantActive": "Actief",
+          "variantInactive": "Inactief",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Nieuwe variant",
+          "newVariantDescription": "Maak een variant die je producten delen (bijv. Maat).",
+          "editVariant": "Variant hernoemen",
+          "editVariantDescription": "De naam wordt bijgewerkt in de gedeelde catalogus.",
+          "editValue": "Waarde bewerken",
+          "editValueDescription": "Het label wordt bijgewerkt in de gedeelde catalogus.",
+          "deleteVariantTitle": "Variant verwijderen?",
+          "deleteVariantDescription": "\"{name}\" en de bijbehorende waarden worden uit de catalogus verwijderd. Producten die de variant gebruiken behouden hun huidige waarden.",
+          "addValuePlaceholder": "Nieuwe waarde…",
+          "noVariants": "Geen varianten",
+          "variantsCount": "{count, plural, one {# variant} other {# varianten}}",
+          "unitImages": "Foto's van de eenheid"
         },
         "previewTitle": "Voorbeeld",
         "previewDescription": "Zo verschijnt uw product in de catalogus",
@@ -956,8 +1199,6 @@
         "noName": "Geen naam",
         "units": "eenhe(i)d(en)",
         "recommended": "Aanbevolen",
-        "previous": "Vorige",
-        "next": "Volgende",
         "videoUrl": "YouTube video",
         "videoUrlPlaceholder": "https://www.youtube.com/watch?v=...",
         "videoUrlHelp": "Optioneel - Voeg een presentatievideo voor uw product toe",
@@ -1077,12 +1318,35 @@
         },
         "aiContext": "Context voor de AI-adviseur",
         "aiContextPlaceholder": "Bijv. rijbewijs B vereist, niet geschikt voor kinderen onder de 12 jaar, vraag altijd naar de datum van het evenement en de groepsgrootte…",
-        "aiContextHint": "Extra informatie die alleen de AI-adviseur ziet — hij gebruikt deze om klanten te adviseren en vereisten te controleren. Wordt nooit in uw winkel getoond."
+        "aiContextHint": "Extra informatie die alleen de AI-adviseur ziet — hij gebruikt deze om klanten te adviseren en vereisten te controleren. Wordt nooit in uw winkel getoond.",
+        "createAndDuplicate": "Aanmaken en dupliceren",
+        "productCreatedCopyReady": "De vooraf ingevulde kopie kan worden bewerkt.",
+        "copySuffix": "(kopie)",
+        "productSection": "Product",
+        "productSectionDescription": "Naam, foto's en beschrijving van je product",
+        "addVideo": "Een YouTube-video toevoegen",
+        "categories": "Categorieën",
+        "categorySearchPlaceholder": "Zoeken of aanmaken…",
+        "categoryCreateOption": "'{name}' aanmaken",
+        "categoryNoResults": "Geen categorie gevonden",
+        "manageCategories": "Categorieën beheren",
+        "summary": {
+          "checklistTitle": "Voortgang",
+          "required": "Verplicht"
+        },
+        "videoTileLabel": "Video",
+        "videoInvalid": "Ongeldige YouTube-link",
+        "editVideo": "Video bewerken",
+        "removeVideo": "Video verwijderen"
       },
       "deleteConfirm": {
         "title": "Dit product verwijderen?",
         "description": "Deze actie is onomkeerbaar. Het product wordt permanent verwijderd."
-      }
+      },
+      "categoriesSelected": "{count} categorieën",
+      "filterByCategory": "Filteren op categorie",
+      "searchCategories": "Zoek een categorie...",
+      "noCategoriesFound": "Geen categorie gevonden"
     },
     "inventory": {
       "title": "Inventaris",
@@ -1507,11 +1771,7 @@
       "manualForm": {
         "title": "Nieuwe handmatige reservering",
         "selectCustomer": "Selecteer een klant",
-        "newCustomer": "Nieuwe klant",
-        "newCustomerDescription": "Maak een nieuwe klant aan voor deze reservering",
         "newCustomerBadge": "Nieuwe klant",
-        "existingCustomer": "Bestaande klant",
-        "existingCustomerDescription": "Selecteer een klant uit uw database",
         "selectProducts": "Selecteer producten",
         "selectPeriod": "Selecteer periode",
         "addProduct": "Product toevoegen",
@@ -1519,15 +1779,6 @@
         "sendConfirmationEmail": "Bevestiging naar klant verzenden",
         "customer": "Klant",
         "customerStepDescription": "Selecteer een bestaande klant of maak een nieuwe aan",
-        "chooseCustomer": "Kies een klant",
-        "email": "E-mail",
-        "emailPlaceholder": "klant@email.nl",
-        "firstName": "Voornaam",
-        "firstNamePlaceholder": "Jan",
-        "lastName": "Achternaam",
-        "lastNamePlaceholder": "Jansen",
-        "phone": "Telefoon (optioneel)",
-        "phonePlaceholder": "06 12 34 56 78",
         "period": "Periode",
         "periodStepDescription": "Stel de begin- en einddatum van de verhuur in",
         "startDate": "Startdatum",
@@ -1540,7 +1791,7 @@
         "noProductsFound": "Geen producten gevonden",
         "noProductsFoundHint": "Geen producten komen overeen met \"{search}\".",
         "noProducts": "Geen producten geselecteerd",
-        "noProductsHint": "Gebruik het menu hierboven om producten toe te voegen",
+        "noProductsHint": "Voeg een product toe aan deze reservering om te beginnen",
         "perHour": "u",
         "perDay": "d",
         "available": "beschikbaar",
@@ -1567,11 +1818,15 @@
           "shortfall": "Gevraagd: {requested} · Beschikbaar: {available}",
           "createAnyway": "Toch aanmaken"
         },
+        "addUnavailable": {
+          "title": "Product niet beschikbaar",
+          "description": "“{name}” is niet meer beschikbaar in de geselecteerde periode. Toevoegen kan overboeking veroorzaken.",
+          "confirm": "Toch toevoegen"
+        },
         "reservationCreated": "Reservering aangemaakt",
         "selectDatesError": "Selecteer data",
         "addProductError": "Voeg minimaal één product toe",
         "selectCustomerError": "Selecteer een klant",
-        "fillCustomerInfoError": "Vul de klantgegevens in",
         "confirmTitle": "Samenvatting",
         "confirmDescription": "Controleer de informatie voordat u de reservering aanmaakt",
         "steps": {
@@ -1661,7 +1916,11 @@
           "apply": "Toepassen",
           "modified": "Prijs gewijzigd",
           "priceUpdated": "Prijs bijgewerkt",
-          "priceReset": "Prijs hersteld"
+          "priceReset": "Prijs hersteld",
+          "modeUnit": "Stukprijs",
+          "modeTotal": "Totaalprijs",
+          "modePercent": "Korting %",
+          "resultingUnitPrice": "Resulterende stukprijs"
         },
         "warnings": {
           "advanceNotice": "Startdatum is vóór de vooraanmeldingsperiode",
@@ -1701,6 +1960,11 @@
           "optionalLabel": "Dekking inschakelen voor deze reservering",
           "insurableProduct": "Verzekerbaar",
           "assuredProduct": "Verzekerd"
+        },
+        "globalDiscount": {
+          "label": "Korting",
+          "add": "Korting toevoegen",
+          "remove": "Korting verwijderen"
         }
       },
       "quoteCard": {
@@ -1721,8 +1985,6 @@
       },
       "awaitingResponse": "Wacht op reactie",
       "itemsCount": "{count, plural, one {# artikel} other {# artikelen}}",
-      "viewTable": "Tabelweergave",
-      "viewCards": "Kaartweergave",
       "pagination": {
         "showing": "Toont {start} tot {end} van {total}",
         "perPage": "Per pagina",
@@ -2084,6 +2346,12 @@
         "viewConversation": "Gesprek bekijken",
         "sheetTitle": "Gesprek met de adviseur",
         "sheetDescription": "Chat tussen de klant en de AI-adviseur voor deze reservering."
+      },
+      "views": {
+        "label": "Weergavemodus",
+        "list": "Lijst",
+        "calendar": "Kalender",
+        "planning": "Planning"
       }
     },
     "customers": {
@@ -2192,6 +2460,10 @@
         "CA": "Canada",
         "US": "Verenigde Staten",
         "GB": "Verenigd Koninkrijk"
+      },
+      "quickCreate": {
+        "title": "Nieuwe klant",
+        "description": "De klant wordt aangemaakt en automatisch geselecteerd."
       }
     },
     "calendar": {
@@ -2265,39 +2537,49 @@
         "reservationsCount": "{count, plural, one {# reservering} other {# reserveringen}}"
       },
       "timeline": {
-        "products": "Producten",
-        "quantity": "{count, plural, one {# eenheid} other {# eenheden}}",
-        "available": "Beschikbaar",
-        "noProducts": "Geen producten om weer te geven"
+        "previous": "Vorige periode",
+        "next": "Volgende periode",
+        "statusFilter": "Filteren op status",
+        "operationFilter": "Filteren op handeling van vandaag",
+        "allOperations": "Alle handelingen",
+        "todaysDepartures": "Vertrekken vandaag",
+        "todaysReturns": "Retours vandaag",
+        "showAll": "Alles tonen",
+        "retry": "Opnieuw proberen",
+        "dragHint": "Tip: klik en sleep over een leeg bereik om een vooraf ingevulde reservering te maken.",
+        "searchProductsPlaceholder": "Zoeken in {count} producten...",
+        "noProductsFound": "Geen producten gevonden",
+        "productsSelected": "{count} producten"
       },
       "export": {
-        "button": "Kalender exporteren",
-        "title": "Exporteren naar kalender",
-        "description": "Synchroniseer uw reserveringen met uw favoriete kalender door de link hieronder te kopieren.",
-        "urlLabel": "ICS-kalenderlink",
+        "button": "Agenda synchroniseren",
+        "title": "Agenda synchroniseren",
+        "description": "Voeg je reserveringen toe aan de agenda die je al gebruikt.",
         "loading": "Laden...",
-        "instructions": {
-          "title": "Hoe voeg ik deze kalender toe?",
-          "google": {
-            "step1": "Open Google Agenda",
-            "step2": "Klik op het + naast \"Andere agenda's\" en dan op \"Via URL\"",
-            "step3": "Plak de link en klik op \"Agenda toevoegen\"",
-            "openLink": "Google Agenda openen",
-            "freshnessNote": "Louez publiceert wijzigingen onmiddellijk en vraagt clients om elke 5 minuten te vernieuwen. Google kan toch zijn eigen synchronisatievertraging toepassen."
-          },
-          "apple": {
-            "step1": "Open de Agenda-app op Mac of iPhone",
-            "step2": "Archief > Nieuw agenda-abonnement (Mac) of Voeg account toe > Overige > Agenda-abonnement toevoegen (iOS)",
-            "step3": "Plak de link en bevestig"
-          },
-          "outlook": {
-            "step1": "Open Outlook Agenda",
-            "step2": "Klik op \"Agenda toevoegen\" en dan op \"Abonneren vanaf web\"",
-            "step3": "Plak de link en geef de kalender een naam"
-          }
+        "done": "Klaar",
+        "cancel": "Annuleren",
+        "google": {
+          "title": "Google Agenda",
+          "recommended": "Aanbevolen",
+          "connected": "Verbonden",
+          "connect": "Verbinden",
+          "manage": "Beheren",
+          "help": "Automatische synchronisatie: kleuren, privézichtbaarheid, beschikbaarheid en automatische nieuwe pogingen. De betrouwbaarste optie."
         },
-        "regenerate": "Link opnieuw genereren",
-        "regenerateHint": "Het opnieuw genereren van de link maakt eerder gedeelde links ongeldig."
+        "subscribe": {
+          "title": "Abonneren met een link",
+          "help": "Alleen-lezen abonnement. Louez publiceert wijzigingen direct, maar elke agenda-app bepaalt zelf hoe vaak die vernieuwt.",
+          "apple": "Apple Agenda",
+          "outlook": "Outlook",
+          "google": "Google Agenda",
+          "copy": "Link kopiëren",
+          "copied": "Gekopieerd"
+        },
+        "regenerate": {
+          "action": "Link opnieuw genereren",
+          "confirmTitle": "Link opnieuw genereren?",
+          "hint": "Eerder gedeelde links werken niet meer en elke geabonneerde agenda moet opnieuw worden toegevoegd."
+        }
       }
     },
     "statistics": {
@@ -3961,7 +4243,18 @@
         "deleteAccountWarning": "Deze actie is onomkeerbaar. Al uw gegevens worden verwijderd.",
         "signOut": "Uitloggen",
         "comingSoon": "Binnenkort",
-        "administration": "Beheer"
+        "administration": "Beheer",
+        "keyboardShortcuts": {
+          "title": "Sneltoetsen",
+          "description": "Pas de sneltoetsen van je werkruimte aan.",
+          "recording": "Druk op de toetsen…",
+          "recordingSequence": "Voer de reeks in en druk daarna op Enter…",
+          "sequenceTooShort": "Een reeks moet uit minstens twee sneltoetsen bestaan.",
+          "hint": "Selecteer een sneltoets. Druk voor een reeks de toetsen op volgorde in en daarna op Enter.",
+          "saved": "Sneltoetsen opgeslagen",
+          "conflict": "Deze sneltoets wordt al gebruikt voor ‘{action}’.",
+          "resetAction": "‘{action}’ herstellen"
+        }
       },
       "admin": {
         "title": "Platformbeheer",
@@ -4330,9 +4623,13 @@
           "unlinkConfirmBody": "Het nummer {number} wordt ontkoppeld van je spraakagent. Je behoudt het nummer bij je provider.",
           "searching": "Beschikbare nummers zoeken…",
           "searchHint": "Kies een land en zoek een beschikbaar nummer om te voorzien.",
-          "areaCodePlaceholder": "bijv. 20",
+          "areaCodePlaceholder": "bijv. 415",
           "manualSetup": "Een bestaand nummer koppelen",
-          "copy": "Kopiëren"
+          "copy": "Kopiëren",
+          "areaCodeHint": "Filtert nummers op regionaal netnummer (bijv. 415 voor San Francisco).",
+          "contains": "Gewenste cijfers (optioneel)",
+          "containsPlaceholder": "bijv. 06",
+          "containsHint": "Toont alleen nummers die deze cijferreeks bevatten."
         },
         "notConfigured": {
           "title": "Telefonie niet geconfigureerd",
@@ -4367,6 +4664,21 @@
         },
         "voicePreview": "Beluisteren",
         "voiceRecommended": "Aanbevolen"
+      },
+      "settingsNavigation": {
+        "label": "Instellingennavigatie",
+        "mobileLabel": "Kies een instellingenpagina",
+        "search": {
+          "label": "Instellingen doorzoeken",
+          "placeholder": "Instellingen zoeken…",
+          "noResults": "Geen instellingen komen overeen met je zoekopdracht."
+        },
+        "groups": {
+          "store": "Winkel",
+          "rental": "Verhuur",
+          "communication": "Communicatie",
+          "accountData": "Account en gegevens"
+        }
       }
     },
     "commandPalette": {
@@ -4436,6 +4748,7 @@
       "sms": "SMS",
       "subscription": "Abonnement",
       "account": "Account",
+      "whatsNew": "Nieuw",
       "settings": "Instellingen",
       "settingsAdmin": "Administratie",
       "settingsApi": "API",
@@ -4451,7 +4764,9 @@
       "settingsPayments": "Betalingen",
       "settingsPromoCodes": "Promocodes",
       "settingsReviewBooster": "Reviewbooster",
-      "settingsTaxes": "Belastingen"
+      "settingsTaxes": "Belastingen",
+      "productsEdit": "Bewerken",
+      "reservationsEdit": "Bewerken"
     },
     "notificationsCenter": {
       "title": "Meldingen",
@@ -4460,6 +4775,69 @@
       "emptyTitle": "Niets te controleren",
       "emptyDescription": "Nieuwe aanvragen verschijnen hier.",
       "viewAllPending": "Alle openstaande aanvragen bekijken"
+    },
+    "whatsNew": {
+      "title": "Wat is er nieuw",
+      "description": "De nieuwste verbeteringen van Louez",
+      "pageDescription": "Alles wat we in Louez hebben uitgebracht, het nieuwste eerst — en waarom we het hebben gebouwd.",
+      "newLabel": "Nieuw",
+      "newFeatureLabel": "Nieuwe functie",
+      "unread": "Ongelezen",
+      "markAsRead": "Markeren als gelezen",
+      "markAllAsRead": "Alles markeren als gelezen",
+      "watchDemo": "Bekijk de demo van {title}",
+      "tryIt": "Uitproberen",
+      "viewAll": "Alle updates bekijken",
+      "backToList": "Alle updates",
+      "emptyTitle": "Hier is nog niets",
+      "empty": "Nog geen nieuws.",
+      "filterEmpty": "Nog niets in deze categorie.",
+      "filters": {
+        "all": "Alles"
+      },
+      "categories": {
+        "feature": "Nieuw",
+        "improvement": "Verbeterd",
+        "fix": "Opgelost"
+      },
+      "announcements": {
+        "product-image-ai": {
+          "title": "Uw productfoto's krijgen een studiobehandeling",
+          "description": "Bij het uploaden snijdt de AI uw product uit, maakt de achtergrond schoon en centreert het — of verwijdert alleen de achtergrond als u uw kadrering wilt houden. En elke versie blijft bewaard in de geschiedenis van de foto: vergelijk, verander van gedachten, ga terug naar het origineel."
+        },
+        "sidebar-simplified": {
+          "title": "Een korter menu, pagina's waar u ze verwacht",
+          "description": "De agenda gaat naar de reserveringen, de voorraad naar de productpagina, abonnement en doorverwijzingen naar de instellingen: vier items minder in het menu, en niets kwijt."
+        },
+        "product-variants": {
+          "title": "Varianten, eenvoudig gehouden",
+          "description": "De kenmerken die u met de hand intypte zijn nu echte varianten, gedeeld door uw hele winkel. Maat en Kleur staan klaar zodra u het volgen per exemplaar aanzet, Schoenmaat en Materiaal voegt u met één klik toe — en u hebt geen productpagina per maat meer nodig."
+        },
+        "product-detail-hub": {
+          "title": "Elk product heeft nu een eigen pagina",
+          "description": "Een product openen betekende zijn formulier openen. Nu heeft het een echte pagina: wat het opbrengt, hoe vaak het uitgaat, hoe de voorraad ervoor staat, wie het reserveerde en wat er met elk exemplaar is gebeurd."
+        },
+        "reservations-unified-views": {
+          "title": "Uw reserveringen openen op de agenda",
+          "description": "De pagina Reserveringen opent nu op de agenda. Die scrolt doorlopend, van week tot week zonder van pagina te wisselen, en één beweging met de muis toont de volledige reservering. Lijst en planning per product blijven één klik verwijderd."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Twee secties, en uw product staat online",
+          "description": "De wizard in vier stappen maakt plaats voor één pagina. Accessoires en verzekering worden bij het aanmaken niet meer gevraagd — die voegt u later toe als u ze nodig hebt. Rechts: een voorbeeld van de pagina en de lijst van wat nog ontbreekt."
+        },
+        "keyboard-shortcuts": {
+          "title": "Voor wie het toetsenbord niet loslaat",
+          "description": "Acht dagelijkse handelingen gaan via het toetsenbord, en elk daarvan kunt u in uw account opnieuw instellen — ook de reeksen van twee toetsen. Werkt u de hele dag in Louez, dan is dit voor u. Zo niet, dan blijft alles gewoon met de muis werken."
+        },
+        "navigation-refresh": {
+          "title": "⌘K brengt u overal",
+          "description": "Het opdrachtenpalet opent elke pagina, elke instelling, elk product, elke klant en elke reservering. In de instellingen brengt een zoekveld u naar precies de juiste instelling en markeert die. En het kruimelpad vertelt altijd waar u bent."
+        },
+        "reservation-creation-simplified": {
+          "title": "Eén reservering, één pagina",
+          "description": "Geen stappen meer om door te lopen: klant, periode, producten en levering passen op één pagina, met het overzicht altijd ernaast. En alles waarvoor u de reservering daarna opnieuw moest openen — een korting, een afgesproken prijs, de waarborg, een passant — regelt u nu meteen."
+        }
+      }
     },
     "aiCredits": {
       "title": "AI-tegoed",
@@ -4518,6 +4896,61 @@
         "errors": {
           "generic": "Er ging iets mis. Probeer het opnieuw."
         }
+      },
+      "page": {
+        "title": "AI-tegoed",
+        "subtitle": "Het tegoed achter alle AI-functies van je winkel",
+        "totalTitle": "Totaalsaldo",
+        "totalUnlimitedHint": "Je abonnement kent geen gebruikslimiet",
+        "monthlyTitle": "Inbegrepen deze maand",
+        "monthlyUsedHint": "{used} van {included} gebruikt",
+        "monthlyUnlimitedHint": "Onbeperkt met je abonnement",
+        "monthlyNoneHint": "Je abonnement bevat geen tegoed",
+        "prepaidTitle": "Vooruitbetaald tegoed",
+        "prepaidHint": "Verloopt nooit",
+        "pitchTitle": "Wat je tegoed mogelijk maakt",
+        "pitchDescription": "Eén tegoed voor alle AI-functies van je winkel.",
+        "perkAdvisorTitle": "Een adviseur die nooit slaapt",
+        "perkAdvisorDescription": "Klanten stellen vragen over je aanbod en krijgen meteen antwoord, ook 's nachts.",
+        "perkVoiceTitle": "Een agent die opneemt",
+        "perkVoiceDescription": "Gemiste oproepen worden concrete aanvragen, met een eigen nummer als je dat wilt.",
+        "perkImagesTitle": "Strakke productfoto's",
+        "perkImagesDescription": "Verwijder de achtergrond en verbeter je foto's met één klik, direct vanaf het product.",
+        "pitchSecondaryCta": "Ontdek de AI-assistent",
+        "pitchFootnote": "Je betaalt alleen wat je verbruikt en tegoed verloopt niet.",
+        "recapTitle": "Je tegoed deze maand",
+        "recapDescription": "Wat je tegoed sinds het begin van de maand voor je winkel heeft gedaan.",
+        "recapConversations": "Gesprekken",
+        "recapCalls": "Beantwoorde oproepen",
+        "recapImages": "Verbeterde afbeeldingen",
+        "recapCredits": "Verbruikt tegoed",
+        "recapCallTime": "Samen {minutes} min beltijd.",
+        "historyTitle": "Geschiedenis",
+        "historyDescription": "Alles wat je hebt verbruikt en gekocht.",
+        "tabUsage": "Verbruik",
+        "tabPurchases": "Aankopen",
+        "usageEmpty": "Nog niets verbruikt",
+        "usageEmptyDescription": "Zodra de AI voor je aan de slag gaat, verschijnt hier elke afboeking.",
+        "purchasesEmpty": "Nog geen aankopen",
+        "purchasesEmptyDescription": "Je opwaarderingen en gratis tegoed komen hier te staan.",
+        "usageConversation": "Adviesgesprek",
+        "usageVoiceCall": "Telefoongesprek",
+        "usageCallDuration": "{minutes} min in rekening gebracht",
+        "usageNumberRental": "Huur van het nummer",
+        "usageImageEnhancement": "Afbeelding verbeteren",
+        "columnDate": "Datum",
+        "columnDetail": "Details",
+        "columnCredits": "Tegoed",
+        "columnAmount": "Bedrag",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Voltooid",
+          "pending": "In behandeling",
+          "failed": "Mislukt"
+        },
+        "pagination": "Pagina {page} van {totalPages}",
+        "previousPage": "Vorige pagina",
+        "nextPage": "Volgende pagina"
       }
     }
   },
@@ -5549,6 +5982,10 @@
     "noCategories": "Geen categorieën",
     "noCategoriesDescription": "Maak uw eerste categorie aan om uw producten te organiseren",
     "emptyDescription": "Categorieën helpen u uw producten te organiseren en maken het makkelijker voor klanten om te bladeren.",
+    "searchPlaceholder": "Categorieën zoeken…",
+    "noSearchResults": "Geen categorie komt overeen met uw zoekopdracht.",
+    "totalCount": "{count, plural, =0 {Geen categorieën} one {# categorie} other {# categorieën}}",
+    "actionsFor": "Acties voor {name}",
     "newCategoryDescription": "Maak een nieuwe categorie aan om uw producten te organiseren",
     "editCategoryDescription": "Bewerk de categorienaam",
     "namePlaceholder": "Categorienaam",
@@ -5563,7 +6000,9 @@
       "title": "Deze categorie verwijderen?",
       "description": "Deze actie is onomkeerbaar. Producten in deze categorie worden niet verwijderd.",
       "descriptionWithName": "Deze actie is onomkeerbaar. De categorie \"{name}\" wordt verwijderd.",
-      "productsWarning": "{count, plural, one {Het product in deze categorie wordt verplaatst naar \"Zonder categorie\".} other {De # producten in deze categorie worden verplaatst naar \"Zonder categorie\".}}"
+      "productsWarning": "{count, plural, one {Deze categorie wordt verwijderd van # product.} other {Deze categorie wordt verwijderd van # producten.}}",
+      "reassignLabel": "Producten opnieuw toewijzen aan",
+      "keepExisting": "Andere categorieën behouden"
     }
   },
   "emails": {

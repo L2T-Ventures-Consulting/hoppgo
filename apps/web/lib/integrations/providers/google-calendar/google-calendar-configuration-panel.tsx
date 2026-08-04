@@ -153,11 +153,7 @@ export const GoogleCalendarConfigurationPanel = () => {
                 {calendarState.accountEmail || 'Compte Google connecte'}
               </CardDescription>
             </div>
-            <Badge
-              variant={
-                calendarState.status === 'active' ? 'success' : 'secondary'
-              }
-            >
+            <Badge variant={calendarState.status === 'active' ? 'success' : 'expired'}>
               {calendarState.status}
             </Badge>
           </div>

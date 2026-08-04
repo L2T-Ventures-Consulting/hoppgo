@@ -7,9 +7,6 @@ import { db, CORE_TABLES } from '@louez/db'
 // EasyPanel and Kubernetes. Takes no input and only reports a generic
 // healthy/unhealthy status — no data, no schema details, no error internals.
 
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs'
-
 // The schema can't disappear once verified — only re-check connectivity after
 let schemaVerified = false
 

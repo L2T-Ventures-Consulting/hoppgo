@@ -39,16 +39,14 @@ export {
   getEffectiveProductQuantities,
 } from './product-quantity'
 export {
+  BLOCKING_RESERVATION_STATUSES,
   buildReservationOverlapPredicate,
   buildUnitInDowntimeAtPredicate,
   buildUnitRentableDuringPredicate,
   findBusyUnitIds,
   getBlockingReservationStatuses,
 } from './unit-availability'
-export type {
-  BlockingReservationStatus,
-  BusyUnitReason,
-} from './unit-availability'
+export type { BlockingReservationStatus, BusyUnitReason } from './unit-availability'
 
 // Database setup utilities
 export { setupDatabase, CORE_TABLES } from './setup'

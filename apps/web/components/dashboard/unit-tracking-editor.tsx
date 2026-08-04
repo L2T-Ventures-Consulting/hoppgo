@@ -1,28 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import Link from 'next/link';
+import Link from "next/link";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
+  CalendarCheck,
   ChevronDown,
-  Lightbulb,
-  Package,
+  ChevronRight,
+  ImagePlus,
+  Loader2,
   Plus,
+  Receipt,
   Settings2,
-  Sparkles,
+  Tag,
   Trash2,
-} from 'lucide-react';
-import { useTranslations } from 'next-intl';
+  X,
+} from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { Button } from '@louez/ui';
-import { Input } from '@louez/ui';
-import { Label } from '@louez/ui';
-import { Switch } from '@louez/ui';
-import { Badge } from '@louez/ui';
-import { Textarea } from '@louez/ui';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@louez/ui';
+import { Button, InputPrice, Separator } from "@louez/ui";
+import { Input } from "@louez/ui";
+import { InputQuantity } from "@louez/ui";
+import { Label } from "@louez/ui";
+import { Badge } from "@louez/ui";
+import { Textarea } from "@louez/ui";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@louez/ui";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -31,27 +36,32 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@louez/ui';
+} from "@louez/ui";
 import {
-  Dialog,
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogPanel,
-  DialogPopup,
-  DialogTitle,
-  DialogTrigger,
-} from '@louez/ui';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@louez/ui';
-import { cn, normalizeAxisKey, toDatePickerValue } from '@louez/utils';
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxCollection,
+  ComboboxGroup,
+  ComboboxGroupLabel,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxPopup,
+  ComboboxValue,
+} from "@louez/ui";
+import { Popover, PopoverContent, PopoverTrigger } from "@louez/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@louez/ui";
+import { toastManager } from "@louez/ui";
+import { cn, getCurrencySymbol, normalizeAxisKey, toDatePickerValue } from "@louez/utils";
 
-import { DatePicker } from '@/components/ui/date-time-picker';
+import { VariantManagerDrawer } from "@/components/dashboard/variant-manager";
+import { ReservationDatePickerControl } from "@/components/form/form-reservation-date-picker";
+import { useImageUpload } from "@/hooks/use-image-upload";
+import { orpc } from "@/lib/orpc/react";
+import { IMAGE_UPLOAD_MIME_TYPES } from "@/lib/uploads/image-upload";
+import { filterActiveVariantAxes } from "@/lib/util.variant-visibility";
+import { resolveVariantPresets } from "@/lib/variant-presets";
 
 interface ProductUnitInput {
   id?: string;
@@ -59,9 +69,12 @@ interface ProductUnitInput {
   notes?: string;
   purchasePrice?: string | null;
   purchasedAt?: string | Date | null;
+  images?: string[];
   attributes?: Record<string, string>;
   hasActiveAssignment?: boolean;
 }
+
+const MAX_UNIT_IMAGES = 4;
 
 interface BookingAttributeAxisInput {
   key: string;
@@ -69,232 +82,346 @@ interface BookingAttributeAxisInput {
   position: number;
 }
 
-function AttributeValueCombobox({
-  value,
-  onChange,
-  suggestions,
-  placeholder,
-  disabled,
-  hasError,
-  createHint,
-}: {
+export interface VariantCatalogValue {
+  id: string;
+  label: string;
+  colorHex: string | null;
+  position: number;
+}
+
+export interface VariantCatalogDefinition {
+  id: string;
+  key: string;
+  label: string;
+  kind: "size" | "color" | "custom";
+  isActive: boolean;
+  position: number;
+  values: VariantCatalogValue[];
+}
+
+interface EnsureDefinitionInput {
+  key?: string;
+  label: string;
+  kind: "size" | "color" | "custom";
+  isActive?: boolean;
+  values: Array<{ label: string; colorHex?: string }>;
+}
+
+/**
+ * Unified registry the row combobox selects from: active store definitions,
+ * active-by-default presets not yet persisted, and active legacy product axes.
+ * `colorIndex` gives each variant a stable color.
+ */
+interface VariantRegistryEntry {
+  key: string;
+  label: string;
+  kind: "size" | "color" | "custom";
+  colorIndex: number;
+  /** Absent for presets not yet adopted and legacy axes. */
+  definitionId?: string;
+  values: Array<{ label: string; colorHex: string | null }>;
+}
+
+// One color per variant axis — chips on unit rows, dots in the axes list and popup.
+const AXIS_CHIP_CLASSES = [
+  "bg-blue-500/10 text-blue-700 dark:bg-blue-500/15 dark:text-blue-300",
+  "bg-amber-500/10 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+  "bg-violet-500/10 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300",
+];
+
+const AXIS_BADGE_VARIANTS = ["progress", "pending", "submitted"] as const;
+
+interface VariantItemData {
   value: string;
-  onChange: (value: string) => void;
-  suggestions: string[];
-  placeholder: string;
-  disabled: boolean;
-  hasError: boolean;
-  createHint: (value: string) => string;
-}) {
-  const [localValue, setLocalValue] = useState(value);
-  const [open, setOpen] = useState(false);
+  label: string;
+  axisKey: string;
+  axisLabel: string;
+  axisIndex: number;
+  colorHex: string | null;
+  kind?: "create";
+}
 
-  // Sync from parent when value changes externally
-  useEffect(() => {
-    setLocalValue(value);
-  }, [value]);
+interface VariantGroupData {
+  value: string;
+  label: string;
+  colorIndex: number;
+  items: VariantItemData[];
+}
 
-  const filtered = useMemo(() => {
-    if (!localValue.trim()) return suggestions;
-    const lower = localValue.toLowerCase();
-    return suggestions.filter((s) => s.toLowerCase().includes(lower));
-  }, [suggestions, localValue]);
+const getVariantSearchRank = (label: string, query: string) => {
+  if (!query) return 0;
 
-  const trimmed = localValue.trim();
-  const isNewValue =
-    trimmed.length > 0 &&
-    !suggestions.some((s) => s.toLowerCase() === trimmed.toLowerCase());
+  const normalizedLabel = normalizeAxisKey(label);
+  const normalizedQuery = normalizeAxisKey(query);
+  if (normalizedLabel === normalizedQuery) return 0;
+  if (normalizedLabel.startsWith(normalizedQuery)) return 1;
+  if (normalizedLabel.includes(normalizedQuery)) return 2;
+  return 3;
+};
 
+/** Real color swatch — only shown for values of a color-kind variant. */
+function ColorSwatch({ colorHex }: { colorHex: string }) {
   return (
-    <div className="relative">
-      <Input
-        value={localValue}
-        onChange={(e) => setLocalValue(e.target.value)}
-        onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setTimeout(() => setOpen(false), 150);
-          if (localValue !== value) onChange(localValue);
-        }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            onChange(localValue);
-            setOpen(false);
-            e.currentTarget.blur();
-          }
-        }}
-        placeholder={placeholder}
-        disabled={disabled}
-        className={cn(
-          hasError && !localValue.trim() && 'border-destructive/60',
-        )}
-      />
-      {open && (filtered.length > 0 || isNewValue) && (
-        <div className="bg-popover absolute z-50 mt-1 max-h-[200px] w-full overflow-y-auto rounded-lg border p-1 shadow-lg">
-          {filtered.map((s) => (
-            <button
-              key={s}
-              type="button"
-              className={cn(
-                'hover:bg-accent hover:text-accent-foreground w-full cursor-default rounded-sm px-2 py-1.5 text-left text-sm outline-none',
-                s === localValue && 'bg-accent/50 font-medium',
-              )}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                setLocalValue(s);
-                onChange(s);
-                setOpen(false);
-              }}
-            >
-              {s}
-            </button>
-          ))}
-          {isNewValue && (
-            <p className="text-muted-foreground px-2 py-1.5 text-xs">
-              {createHint(trimmed)}
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+    <span
+      className="h-2 w-2 shrink-0 rounded-full ring-1 ring-black/15 ring-inset"
+      style={{ backgroundColor: colorHex }}
+    />
   );
 }
 
-function BookingAttributesDialog({
-  axes,
-  onAddAxis,
-  onRemoveAxis,
+/**
+ * Categories-style multi combobox for a unit's variant values: one chip per
+ * axis (colored by axis), typing suggests known values and offers per-axis
+ * creation. Selecting a second value for an axis replaces the previous one.
+ */
+function UnitVariantsCombobox({
+  registry,
+  attributes,
+  existingValuesByAxis,
   disabled,
+  hasError,
+  onApply,
+  onPersistValue,
+  createLabel,
+  manageLabel,
+  onManage,
 }: {
-  axes: BookingAttributeAxisInput[];
-  onAddAxis: (label: string) => void;
-  onRemoveAxis: (key: string) => void;
+  registry: VariantRegistryEntry[];
+  attributes: Record<string, string> | undefined;
+  existingValuesByAxis: Record<string, string[]>;
   disabled: boolean;
+  hasError: boolean;
+  onApply: (patch: Record<string, string>) => void;
+  onPersistValue?: (axisKey: string, label: string) => void;
+  createLabel: (value: string, axis: string) => string;
+  manageLabel: string;
+  onManage: () => void;
 }) {
-  const t = useTranslations('dashboard.products.form.unitTracking');
-  const [newAxisLabel, setNewAxisLabel] = useState('');
+  const [query, setQuery] = useState("");
 
-  const handleAdd = () => {
-    const label = newAxisLabel.trim();
-    if (!label) return;
-    onAddAxis(label);
-    setNewAxisLabel('');
+  // Popup items grouped by variant, one section per registry entry.
+  const groups = useMemo<VariantGroupData[]>(() => {
+    const result: VariantGroupData[] = [];
+    const trimmed = query.trim();
+
+    for (const entry of registry) {
+      const seen = new Set<string>();
+      const groupItems: VariantItemData[] = [];
+      // Catalog/preset values first (shared across products), then ad-hoc
+      // values already used by this product's units.
+      for (const value of entry.values) {
+        if (seen.has(value.label.toLowerCase())) continue;
+        seen.add(value.label.toLowerCase());
+        groupItems.push({
+          value: `${entry.key}::${value.label}`,
+          label: value.label,
+          axisKey: entry.key,
+          axisLabel: entry.label,
+          axisIndex: entry.colorIndex,
+          colorHex: value.colorHex,
+        });
+      }
+      for (const value of existingValuesByAxis[entry.key] || []) {
+        if (seen.has(value.toLowerCase())) continue;
+        seen.add(value.toLowerCase());
+        groupItems.push({
+          value: `${entry.key}::${value}`,
+          label: value,
+          axisKey: entry.key,
+          axisLabel: entry.label,
+          axisIndex: entry.colorIndex,
+          colorHex: null,
+        });
+      }
+      if (trimmed && !seen.has(trimmed.toLowerCase())) {
+        groupItems.push({
+          value: `create::${entry.key}`,
+          label: trimmed,
+          axisKey: entry.key,
+          axisLabel: entry.label,
+          axisIndex: entry.colorIndex,
+          colorHex: null,
+          kind: "create",
+        });
+      }
+      if (trimmed) {
+        groupItems.sort((left, right) => {
+          if (left.kind === "create") return 1;
+          if (right.kind === "create") return -1;
+          return (
+            getVariantSearchRank(left.label, trimmed) - getVariantSearchRank(right.label, trimmed)
+          );
+        });
+      }
+      if (groupItems.length > 0) {
+        result.push({
+          value: entry.key,
+          label: entry.label,
+          colorIndex: entry.colorIndex,
+          items: groupItems,
+        });
+      }
+    }
+    if (trimmed) {
+      result.sort((left, right) => {
+        const bestRank = (group: VariantGroupData) =>
+          Math.min(
+            ...group.items
+              .filter((item) => item.kind !== "create")
+              .map((item) => getVariantSearchRank(item.label, trimmed))
+              .filter((rank) => rank < 3),
+            4,
+          );
+        return bestRank(left) - bestRank(right);
+      });
+    }
+    return result;
+  }, [registry, existingValuesByAxis, query]);
+
+  const items = useMemo(() => groups.flatMap((group) => group.items), [groups]);
+
+  // Case-insensitive lookup: a unit may hold "m" while the catalog lists "M".
+  const itemsByValue = useMemo(
+    () =>
+      new Map(
+        items
+          .filter((item) => !item.kind)
+          .map((item) => [`${item.axisKey}::${item.label.toLowerCase()}`, item]),
+      ),
+    [items],
+  );
+
+  const selectedItems = registry.flatMap((entry) => {
+    const value = attributes?.[entry.key]?.trim();
+    if (!value) return [];
+    const item = itemsByValue.get(`${entry.key}::${value.toLowerCase()}`);
+    return item ? [item] : [];
+  });
+
+  const handleChange = (next: VariantItemData[] | null) => {
+    const nextItems = next ?? [];
+    const regular = nextItems.filter((item) => !item.kind);
+    const creates = nextItems.filter((item) => item.kind === "create");
+    const patch: Record<string, string> = {};
+
+    for (const entry of registry) {
+      const current = attributes?.[entry.key]?.trim() || "";
+      const chosen = regular.filter((item) => item.axisKey === entry.key).map((item) => item.label);
+      let nextValue = current;
+      if (chosen.length === 0) nextValue = "";
+      else if (chosen.length === 1) nextValue = chosen[0];
+      else nextValue = chosen.find((v) => v !== current) ?? chosen[chosen.length - 1];
+      const created = creates.find((item) => item.axisKey === entry.key);
+      if (created) {
+        nextValue = created.label;
+        // New value: also persist it into the store's shared catalog.
+        onPersistValue?.(entry.key, created.label);
+      }
+      if (nextValue !== current) patch[entry.key] = nextValue;
+    }
+
+    if (Object.keys(patch).length > 0) onApply(patch);
+    if (creates.length > 0) setQuery("");
   };
 
   return (
-    <Dialog>
-      <DialogTrigger
-        render={
+    <Combobox
+      items={groups}
+      multiple
+      autoHighlight
+      value={selectedItems}
+      onValueChange={handleChange}
+    >
+      <ComboboxChips showTrigger scrollFade className={cn(hasError && "border-destructive/60")}>
+        <ComboboxValue>
+          {(value: VariantItemData[]) => (
+            <>
+              {value.map((item) => (
+                <ComboboxChip
+                  key={item.value}
+                  className={cn(
+                    "flex h-full items-center gap-1.5 rounded-[calc(var(--radius-md)-1px)] ps-2 text-sm font-medium outline-none sm:text-xs/(--text-xs--line-height) [&_svg:not([class*='size-'])]:size-4 sm:[&_svg:not([class*='size-'])]:size-3.5",
+                    AXIS_CHIP_CLASSES[item.axisIndex % AXIS_CHIP_CLASSES.length],
+                  )}
+                  aria-label={`${item.axisLabel} : ${item.label}`}
+                >
+                  {item.colorHex && <ColorSwatch colorHex={item.colorHex} />}
+                  {item.label}
+                </ComboboxChip>
+              ))}
+              <ComboboxChipsInput
+                className="w-16"
+                placeholder={
+                  value.length === 0
+                    ? registry
+                        .slice(0, 3)
+                        .map((entry) => entry.label)
+                        .join(", ")
+                    : undefined
+                }
+                disabled={disabled}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") e.preventDefault();
+                }}
+              />
+            </>
+          )}
+        </ComboboxValue>
+      </ComboboxChips>
+      <ComboboxPopup>
+        <ComboboxList>
+          {(group: VariantGroupData) => (
+            <ComboboxGroup key={group.value} items={group.items}>
+              <ComboboxGroupLabel>
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-medium",
+                    AXIS_CHIP_CLASSES[group.colorIndex % AXIS_CHIP_CLASSES.length],
+                  )}
+                >
+                  {group.label}
+                </span>
+              </ComboboxGroupLabel>
+              <ComboboxCollection>
+                {(item: VariantItemData) =>
+                  item.kind === "create" ? (
+                    <ComboboxItem key={item.value} value={item}>
+                      <span className="text-primary flex items-center gap-1.5 font-medium">
+                        <Plus className="h-3.5 w-3.5" />
+                        {createLabel(item.label, item.axisLabel)}
+                      </span>
+                    </ComboboxItem>
+                  ) : (
+                    <ComboboxItem key={item.value} value={item}>
+                      <span className="flex w-full min-w-0 items-center gap-2">
+                        {item.colorHex && <ColorSwatch colorHex={item.colorHex} />}
+                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      </span>
+                    </ComboboxItem>
+                  )
+                }
+              </ComboboxCollection>
+            </ComboboxGroup>
+          )}
+        </ComboboxList>
+        <div className="border-t p-1">
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="sm"
-            disabled={disabled}
-          />
-        }
-      >
-        <Settings2 className="h-4 w-4" />
-        {t('manageAttributes')}
-        {axes.length > 0 && (
-          <Badge variant="secondary" className="ml-1">
-            {axes.length}/3
-          </Badge>
-        )}
-      </DialogTrigger>
-      <DialogPopup className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>{t('bookingAttributesTitle')}</DialogTitle>
-          <DialogDescription>
-            {t('manageAttributesDescription')}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogPanel>
-          <div className="space-y-4">
-            <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-3 dark:border-blue-900 dark:bg-blue-950/30">
-              <div className="flex gap-2">
-                <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" />
-                <div className="space-y-1">
-                  <p className="text-xs text-blue-800 dark:text-blue-300">
-                    {t('manageAttributesExample')}
-                  </p>
-                  <p className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                    {t('manageAttributesMax')}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Input
-                value={newAxisLabel}
-                onChange={(e) => setNewAxisLabel(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAdd();
-                  }
-                }}
-                placeholder={t('bookingAttributePlaceholder')}
-                disabled={disabled || axes.length >= 3}
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleAdd}
-                disabled={disabled || !newAxisLabel.trim() || axes.length >= 3}
-              >
-                <Plus className="h-3.5 w-3.5" />
-                {t('addAttribute')}
-              </Button>
-            </div>
-
-            {axes.length > 0 ? (
-              <div className="space-y-2">
-                {axes.map((axis) => (
-                  <div
-                    key={axis.key}
-                    className="flex items-center justify-between rounded-lg border px-3 py-2"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="bg-muted flex h-5 w-5 items-center justify-center rounded-md text-xs font-medium">
-                        {axis.position + 1}
-                      </span>
-                      <span className="text-sm font-medium">{axis.label}</span>
-                      <span className="text-muted-foreground font-mono text-xs">
-                        {axis.key}
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive h-7 w-7"
-                      onClick={() => onRemoveAxis(axis.key)}
-                      disabled={disabled}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="rounded-lg border border-dashed p-4 text-center">
-                <p className="text-muted-foreground text-sm">
-                  {t('bookingAttributesEmpty')}
-                </p>
-              </div>
-            )}
-          </div>
-        </DialogPanel>
-        <DialogFooter variant="bare">
-          <DialogClose render={<Button variant="outline" />}>
-            {t('confirm')}
-          </DialogClose>
-        </DialogFooter>
-      </DialogPopup>
-    </Dialog>
+            className="text-muted-foreground hover:text-foreground w-full justify-between"
+            onClick={onManage}
+          >
+            <span className="flex items-center gap-1.5">
+              <Settings2 className="size-4" />
+              {manageLabel}
+            </span>
+            <ChevronRight className="size-4" />
+          </Button>
+        </div>
+      </ComboboxPopup>
+    </Combobox>
   );
 }
 
@@ -304,12 +431,16 @@ function UnitRow({
   unitCount,
   bookingAttributeAxes,
   existingValuesByAxis,
+  variantRegistry,
   isDuplicate,
   isEmpty,
   disabled,
   productId,
+  currency,
   onUpdate,
-  onUpdateAttribute,
+  onUpdateAttributes,
+  onPersistVariantValue,
+  onManageVariants,
   onRemove,
   onTouch,
   onApplyPurchaseToAll,
@@ -319,61 +450,104 @@ function UnitRow({
   unitCount: number;
   bookingAttributeAxes: BookingAttributeAxisInput[];
   existingValuesByAxis: Record<string, string[]>;
+  variantRegistry: VariantRegistryEntry[];
   isDuplicate: boolean;
   isEmpty: boolean;
   disabled: boolean;
   productId?: string;
+  currency: string;
   onUpdate: (index: number, patch: Partial<ProductUnitInput>) => void;
-  onUpdateAttribute: (index: number, axisKey: string, value: string) => void;
+  onUpdateAttributes: (index: number, patch: Record<string, string>) => void;
+  onPersistVariantValue: (axisKey: string, label: string) => void;
+  onManageVariants: () => void;
   onRemove: (index: number) => void;
   onTouch: (index: number) => void;
   onApplyPurchaseToAll: (index: number) => void;
 }) {
-  const t = useTranslations('dashboard.products.form.unitTracking');
-  const tReservationForm = useTranslations('dashboard.reservations.manualForm');
+  const t = useTranslations("dashboard.products.form.unitTracking");
+  const tCommon = useTranslations("common");
+  const tReservationForm = useTranslations("dashboard.reservations.manualForm");
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const hasAxes = bookingAttributeAxes.length > 0;
+  const { uploadImage, deleteImage, isUploading } = useImageUpload("product");
+
+  const handleImageFiles = async (fileList: FileList | null) => {
+    if (!fileList || fileList.length === 0) return;
+    const currentImages = unit.images ?? [];
+    const files = Array.from(fileList).slice(0, MAX_UNIT_IMAGES - currentImages.length);
+    const uploadedUrls: string[] = [];
+    for (const file of files) {
+      try {
+        const uploaded = await uploadImage(file);
+        uploadedUrls.push(uploaded.url);
+      } catch {
+        toastManager.add({ title: tCommon("error"), type: "error" });
+      }
+    }
+    if (uploadedUrls.length > 0) {
+      onUpdate(index, { images: [...currentImages, ...uploadedUrls] });
+    }
+  };
+
+  const handleRemoveImage = (url: string) => {
+    onUpdate(index, {
+      images: (unit.images ?? []).filter((image) => image !== url),
+    });
+    // New-unit images were uploaded in this session — safe to clean up storage.
+    void deleteImage(url).catch(() => {});
+  };
+
+  const missingVariantValue = bookingAttributeAxes.some(
+    (axis) => !unit.attributes?.[axis.key]?.trim(),
+  );
   const isExistingUnit = Boolean(unit.id);
   const hasActiveAssignment = unit.hasActiveAssignment ?? false;
   const hasPurchase =
-    !!(typeof unit.purchasePrice === 'string' && unit.purchasePrice.trim()) ||
-    !!unit.purchasedAt;
+    !!(typeof unit.purchasePrice === "string" && unit.purchasePrice.trim()) || !!unit.purchasedAt;
   const canApplyToAll = !isExistingUnit && unitCount > 1 && hasPurchase;
-  const inventoryHref = productId
-    ? `/dashboard/inventory?productId=${productId}`
-    : '/dashboard/inventory';
+  const inventoryHref = productId ? `/dashboard/products/${productId}` : null;
 
   return (
     <div
       className={cn(
-        'rounded-lg border transition-colors',
-        isDuplicate && 'border-destructive bg-destructive/5',
+        // "rounded-lg border transition-colors",
+        "border-b last:border-b-0",
+        isDuplicate && "border-destructive bg-destructive/5",
       )}
     >
       <Collapsible open={detailsOpen} onOpenChange={setDetailsOpen}>
         <div className="px-3 py-2">
           {/* Line 1: dot + identifier + indicators + expand + delete */}
           <div className="flex items-center gap-2">
-            <span
+            {/* <span
               className={cn(
-                'h-2 w-2 shrink-0 rounded-full',
-                hasActiveAssignment ? 'bg-amber-500' : 'bg-green-500',
+                "h-2 w-2 shrink-0 rounded-full",
+                hasActiveAssignment ? "bg-amber-500" : "bg-green-500",
               )}
-            />
+            /> */}
             <Input
-              placeholder={t('identifierPlaceholder')}
+              placeholder={t("identifierPlaceholder")}
               value={unit.identifier}
               onChange={(e) => onUpdate(index, { identifier: e.target.value })}
               onBlur={() => onTouch(index)}
-              className={cn(
-                'h-8 flex-1',
-                (isDuplicate || isEmpty) && 'border-destructive',
-              )}
+              className={cn(" flex-1", (isDuplicate || isEmpty) && "border-destructive")}
               disabled={disabled}
             />
-            {hasActiveAssignment && (
-              <Badge variant="outline">{t('assignedUnit')}</Badge>
-            )}
+            {/* Variant values: one combobox, colored chip per axis (desktop) */}
+            <div className="hidden min-w-0 flex-1 sm:block">
+              <UnitVariantsCombobox
+                registry={variantRegistry}
+                attributes={unit.attributes}
+                existingValuesByAxis={existingValuesByAxis}
+                disabled={disabled}
+                hasError={missingVariantValue}
+                onApply={(patch) => onUpdateAttributes(index, patch)}
+                onPersistValue={onPersistVariantValue}
+                createLabel={(value, axis) => t("createVariantValue", { value, axis })}
+                manageLabel={t("manageVariants")}
+                onManage={onManageVariants}
+              />
+            </div>
+            {hasActiveAssignment && <Badge variant="expired">{t("assignedUnit")}</Badge>}
             <CollapsibleTrigger
               render={
                 <Button
@@ -382,14 +556,14 @@ function UnitRow({
                   size="icon"
                   className="text-muted-foreground h-8 w-8 shrink-0"
                   disabled={disabled}
-                  aria-label={t('unitDetails')}
+                  aria-label={t("unitDetails")}
                 />
               }
             >
               <ChevronDown
                 className={cn(
-                  'h-4 w-4 transition-transform duration-200 ease-out',
-                  detailsOpen && 'rotate-180',
+                  "h-4 w-4 transition-transform duration-200 ease-out",
+                  detailsOpen && "rotate-180",
                 )}
               />
             </CollapsibleTrigger>
@@ -410,74 +584,52 @@ function UnitRow({
                   <Trash2 className="h-4 w-4" />
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>
-                    {hasActiveAssignment
-                      ? t('deleteWarning')
-                      : t('deleteConfirm')}
-                  </p>
+                  <p>{hasActiveAssignment ? t("deleteWarning") : t("deleteConfirm")}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
 
-          {isEmpty && (
-            <p className="text-destructive mt-1.5 text-xs">
-              {t('identifierRequired')}
-            </p>
-          )}
+          {isEmpty && <p className="text-destructive mt-1.5 text-xs">{t("identifierRequired")}</p>}
 
-          {/* Line 2: attribute values (only when axes exist — required data) */}
-          {hasAxes && (
-            <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {bookingAttributeAxes.map((axis) => {
-                const suggestions = existingValuesByAxis[axis.key] || [];
-                const currentValue = unit.attributes?.[axis.key] || '';
-                const hasError = !currentValue.trim();
-
-                return (
-                  <div key={axis.key} className="space-y-1">
-                    <Label className="text-muted-foreground text-xs">
-                      {axis.label}
-                    </Label>
-                    <AttributeValueCombobox
-                      value={currentValue}
-                      onChange={(val) =>
-                        onUpdateAttribute(index, axis.key, val)
-                      }
-                      suggestions={suggestions}
-                      placeholder={t('bookingAttributeValuePlaceholder', {
-                        label: axis.label,
-                      })}
-                      disabled={disabled}
-                      hasError={hasError}
-                      createHint={(v) => t('pressEnterToCreate', { value: v })}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          )}
+          {/* Variant values, mobile fallback (inline combobox is hidden < sm) */}
+          <div className="mt-2 sm:hidden">
+            <UnitVariantsCombobox
+              registry={variantRegistry}
+              attributes={unit.attributes}
+              existingValuesByAxis={existingValuesByAxis}
+              disabled={disabled}
+              hasError={missingVariantValue}
+              onApply={(patch) => onUpdateAttributes(index, patch)}
+              onPersistValue={onPersistVariantValue}
+              createLabel={(value, axis) => t("createVariantValue", { value, axis })}
+              manageLabel={t("manageVariants")}
+              onManage={onManageVariants}
+            />
+          </div>
         </div>
 
         {/* Expanded details: product form only edits details for new units. */}
-        <CollapsibleContent>
-          <div className="space-y-3 border-t px-3 pt-3 pb-3">
+        <CollapsibleContent className="p-1 pt-0">
+          <div className="space-y-0 rounded-lg bg-sidebar px-3 pt-3 pb-3">
             {isExistingUnit ? (
               <p className="text-muted-foreground text-sm">
-                {t('existingUnitDetailsHint')}{' '}
-                <Link
-                  href={inventoryHref}
-                  className="text-primary font-medium underline-offset-4 hover:underline"
-                >
-                  {t('openInventoryDetails')}
-                </Link>
+                {t("existingUnitDetailsHint")}{" "}
+                {inventoryHref && (
+                  <Link
+                    href={inventoryHref}
+                    className="text-primary font-medium underline-offset-4 hover:underline"
+                  >
+                    {t("openInventoryDetails")}
+                  </Link>
+                )}
               </p>
             ) : (
               <>
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground text-xs font-medium">
-                      {t('purchaseDetails')}
+                      {t("purchaseDetails")}
                     </span>
                     {canApplyToAll && (
                       <Button
@@ -488,46 +640,92 @@ function UnitRow({
                         onClick={() => onApplyPurchaseToAll(index)}
                         disabled={disabled}
                       >
-                        {t('applyPurchaseToAll')}
+                        {t("applyPurchaseToAll")}
                       </Button>
                     )}
                   </div>
-                  <div className="mt-1.5 grid gap-2 sm:grid-cols-2">
-                    <Input
-                      inputMode="decimal"
-                      placeholder={t('purchasePricePlaceholder')}
-                      aria-label={t('purchasePrice')}
+                  <div className="mt-1.5 grid items-start gap-1 sm:grid-cols-2">
+                    <InputPrice
                       value={
-                        typeof unit.purchasePrice === 'string'
-                          ? unit.purchasePrice
-                          : ''
+                        typeof unit.purchasePrice === "string"
+                          ? parseFloat(unit.purchasePrice.replace(",", ".")) || 0
+                          : 0
                       }
-                      onChange={(e) =>
-                        onUpdate(index, { purchasePrice: e.target.value })
-                      }
-                      disabled={disabled}
-                    />
-                    <DatePicker
-                      date={toDatePickerValue(unit.purchasedAt)}
-                      setDate={(date) =>
+                      onValueCommitted={(price) =>
                         onUpdate(index, {
-                          purchasedAt: date ?? null,
+                          purchasePrice: price > 0 ? String(price) : "",
                         })
                       }
+                      suffix={getCurrencySymbol(currency)}
+                      ariaLabel={t("purchasePrice")}
                       disabled={disabled}
-                      placeholder={tReservationForm('pickDate')}
                     />
+                    <ReservationDatePickerControl
+                      value={toDatePickerValue(unit.purchasedAt)}
+                      onChange={(date) => onUpdate(index, { purchasedAt: date ?? null })}
+                      showTime={false}
+                      disabled={disabled}
+                      placeholder={tReservationForm("pickDate")}
+                    />
+                  </div>
+                </div>{" "}
+                <div>
+                  <span className="text-muted-foreground text-xs font-medium">
+                    {t("unitImages")}
+                  </span>
+                  <div className="mt-1.5 flex flex-wrap gap-2">
+                    {(unit.images ?? []).map((url) => (
+                      <div
+                        key={url}
+                        className="group/image relative size-16 overflow-hidden rounded-md border"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt="" className="h-full w-full object-cover" />
+                        <button
+                          type="button"
+                          className="bg-background/80 hover:text-destructive absolute top-0.5 right-0.5 rounded-sm p-0.5 opacity-0 transition-opacity group-hover/image:opacity-100"
+                          onClick={() => handleRemoveImage(url)}
+                          disabled={disabled}
+                          aria-label={tCommon("delete")}
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                    {(unit.images?.length ?? 0) < MAX_UNIT_IMAGES && (
+                      <label
+                        className={cn(
+                          "border-muted-foreground/25 text-muted-foreground hover:border-muted-foreground/40 hover:text-foreground flex size-16 cursor-pointer items-center justify-center rounded-md border border-dashed transition-colors",
+                          (disabled || isUploading) && "pointer-events-none opacity-50",
+                        )}
+                      >
+                        {isUploading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <ImagePlus className="h-4 w-4" />
+                        )}
+                        <input
+                          type="file"
+                          accept={IMAGE_UPLOAD_MIME_TYPES.join(",")}
+                          multiple
+                          className="sr-only"
+                          onChange={(e) => {
+                            void handleImageFiles(e.target.files);
+                            e.target.value = "";
+                          }}
+                          disabled={disabled || isUploading}
+                        />
+                      </label>
+                    )}
                   </div>
                 </div>
                 <div>
-                  <span className="text-muted-foreground text-xs font-medium">
-                    {t('notes')}
-                  </span>
+                  <span className="text-muted-foreground text-xs font-medium">{t("notes")}</span>
                   <Textarea
-                    placeholder={t('notesPlaceholder')}
-                    value={unit.notes || ''}
+                    placeholder={t("notesPlaceholder")}
+                    value={unit.notes || ""}
                     onChange={(e) => onUpdate(index, { notes: e.target.value })}
-                    className="mt-1.5 min-h-[60px] text-sm"
+                    className="mt-1.5 min-h-15 text-sm"
                     disabled={disabled}
                   />
                 </div>
@@ -549,22 +747,56 @@ interface UnitTrackingEditorProps {
   onChange: (units: ProductUnitInput[]) => void;
   quantity: string;
   onQuantityChange: (value: string) => void;
+  modeChosen: boolean;
+  onModeChosenChange: (value: boolean) => void;
+  currency: string;
   defaultPrefix?: string;
   disabled?: boolean;
   showValidationErrors?: boolean;
   productId?: string;
 }
 
+/**
+ * Compact mode recap shown next to the "Stock" card title once a mode is
+ * chosen — replaces the old full-width recap row inside the editor body.
+ */
+export function StockModeIndicator({
+  modeChosen,
+  trackUnits,
+  onBack: _onBack,
+  disabled: _disabled = false,
+}: {
+  modeChosen: boolean;
+  trackUnits: boolean;
+  onBack: () => void;
+  disabled?: boolean;
+}) {
+  const t = useTranslations("dashboard.products.form.unitTracking");
+  if (!modeChosen) return null;
+  return (
+    <span className="flex items-center gap-1">
+      <Badge variant={trackUnits ? "success" : "expired"} className="">
+        {t(trackUnits ? "advancedBadge" : "defaultBadge")}
+      </Badge>
+      {/* <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="text-muted-foreground hover:text-foreground h-7 px-2 text-xs"
+        onClick={onBack}
+        disabled={disabled}
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        {t("changeMode")}
+      </Button> */}
+    </span>
+  );
+}
+
 const MAX_GENERATED_UNITS = 100;
 
-function getNextSequenceNumber(
-  units: ProductUnitInput[],
-  prefix: string,
-): number {
-  const pattern = new RegExp(
-    `^${prefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}0*(\\d+)$`,
-    'i',
-  );
+function getNextSequenceNumber(units: ProductUnitInput[], prefix: string): number {
+  const pattern = new RegExp(`^${prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}0*(\\d+)$`, "i");
   let max = 0;
   for (const unit of units) {
     const match = unit.identifier.trim().match(pattern);
@@ -585,16 +817,161 @@ export function UnitTrackingEditor({
   onChange,
   quantity,
   onQuantityChange,
-  defaultPrefix = '',
+  modeChosen,
+  onModeChosenChange,
+  currency,
+  defaultPrefix = "",
   disabled = false,
   showValidationErrors = false,
   productId,
 }: UnitTrackingEditorProps) {
-  const t = useTranslations('dashboard.products.form.unitTracking');
+  const t = useTranslations("dashboard.products.form.unitTracking");
+  const tCommon = useTranslations("common");
   const [showDisableConfirm, setShowDisableConfirm] = useState(false);
-  const [genPrefix, setGenPrefix] = useState('');
-  const [genCount, setGenCount] = useState('5');
+  const [genPrefix, setGenPrefix] = useState("");
+  const [genCount, setGenCount] = useState("5");
   const [touchedUnits, setTouchedUnits] = useState<Set<number>>(new Set());
+  const [newRef, setNewRef] = useState("");
+  const [generatorOpen, setGeneratorOpen] = useState(false);
+
+  // Store-level shared variant catalog
+  const queryClient = useQueryClient();
+  const variantCatalogQuery = useQuery(orpc.dashboard.variants.list.queryOptions());
+  const variantCatalog: VariantCatalogDefinition[] = variantCatalogQuery.data ?? [];
+  const ensureDefinitionMutation = useMutation(
+    orpc.dashboard.variants.ensureDefinition.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.dashboard.variants.key(),
+        });
+      },
+    }),
+  );
+  const createValueMutation = useMutation(
+    orpc.dashboard.variants.createValue.mutationOptions({
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: orpc.dashboard.variants.key(),
+        });
+      },
+    }),
+  );
+
+  const [variantManagerOpen, setVariantManagerOpen] = useState(false);
+
+  // System presets resolved with the current locale's labels
+  const resolvedPresets = useMemo(() => resolveVariantPresets((key) => String(t.raw(key))), [t]);
+  const activeBookingAttributeAxes = useMemo(
+    () => filterActiveVariantAxes(bookingAttributeAxes, variantCatalog, resolvedPresets),
+    [bookingAttributeAxes, resolvedPresets, variantCatalog],
+  );
+
+  // Everything selectable in the row combobox: active definitions, default
+  // presets without a saved preference, and legacy product axes.
+  const variantRegistry = useMemo<VariantRegistryEntry[]>(() => {
+    const matchesIdentity = (
+      left: { key: string; label?: string; aliases?: readonly string[] },
+      right: { key: string; label?: string },
+    ) => {
+      const leftAliases = new Set(
+        [left.key, left.label, ...(left.aliases ?? [])]
+          .filter((value): value is string => Boolean(value))
+          .map(normalizeAxisKey),
+      );
+      return (
+        leftAliases.has(normalizeAxisKey(right.key)) ||
+        (right.label ? leftAliases.has(normalizeAxisKey(right.label)) : false)
+      );
+    };
+    const findDefinition = (identity: { key: string; label?: string }) =>
+      variantCatalog.find((definition) => matchesIdentity(definition, identity));
+    const entries: VariantRegistryEntry[] = variantCatalog
+      .filter((definition) => definition.isActive)
+      .map((definition) => ({
+        key: definition.key,
+        label: definition.label,
+        kind: definition.kind,
+        colorIndex: 0,
+        definitionId: definition.id,
+        values: definition.values.map((value) => ({
+          label: value.label,
+          colorHex: value.colorHex,
+        })),
+      }));
+    const hasRegistryEntry = (identity: {
+      key: string;
+      label?: string;
+      aliases?: readonly string[];
+    }) =>
+      entries.some((entry) => matchesIdentity(identity, entry) || matchesIdentity(entry, identity));
+    for (const preset of resolvedPresets) {
+      const matchingDefinition = findDefinition(preset);
+      if (matchingDefinition || !preset.defaultActive || hasRegistryEntry(preset)) continue;
+      entries.push({
+        key: preset.key,
+        label: preset.label,
+        kind: preset.kind,
+        colorIndex: 0,
+        values: preset.values,
+      });
+    }
+    for (const axis of activeBookingAttributeAxes) {
+      if (hasRegistryEntry(axis)) continue;
+      const definition = findDefinition(axis);
+      entries.push({
+        key: axis.key,
+        label: definition?.label ?? axis.label,
+        kind: definition?.kind ?? "custom",
+        colorIndex: 0,
+        definitionId: definition?.id,
+        values:
+          definition?.values.map((value) => ({
+            label: value.label,
+            colorHex: value.colorHex,
+          })) ?? [],
+      });
+    }
+    entries.forEach((entry, index) => {
+      entry.colorIndex = index;
+    });
+    return entries;
+  }, [activeBookingAttributeAxes, resolvedPresets, variantCatalog]);
+
+  const registryByKey = useMemo(
+    () => new Map(variantRegistry.map((entry) => [entry.key, entry])),
+    [variantRegistry],
+  );
+
+  const ensureVariantDefinition = async (input: EnsureDefinitionInput) => {
+    try {
+      return await ensureDefinitionMutation.mutateAsync(input);
+    } catch {
+      toastManager.add({ title: tCommon("error"), type: "error" });
+      return null;
+    }
+  };
+
+  const adoptRegistryEntry = (entry: VariantRegistryEntry) =>
+    ensureVariantDefinition({
+      key: entry.key,
+      label: entry.label,
+      kind: entry.kind,
+      values: entry.values.map((value) => ({
+        label: value.label,
+        colorHex: value.colorHex ?? undefined,
+      })),
+    });
+
+  const persistVariantValue = async (axisKey: string, label: string) => {
+    const entry = registryByKey.get(axisKey);
+    if (!entry) return;
+    if (entry.values.some((value) => value.label.toLowerCase() === label.toLowerCase())) return;
+    let definitionId = entry.definitionId;
+    if (!definitionId) {
+      definitionId = (await adoptRegistryEntry(entry))?.id;
+    }
+    if (definitionId) createValueMutation.mutate({ definitionId, label });
+  };
 
   const effectivePrefix = genPrefix || defaultPrefix;
 
@@ -615,7 +992,7 @@ export function UnitTrackingEditor({
 
   const existingValuesByAxis = useMemo(() => {
     const map: Record<string, string[]> = {};
-    for (const axis of bookingAttributeAxes) {
+    for (const axis of activeBookingAttributeAxes) {
       const uniqueValues = new Set<string>();
       for (const unit of units) {
         const val = unit.attributes?.[axis.key]?.trim();
@@ -624,16 +1001,14 @@ export function UnitTrackingEditor({
       map[axis.key] = Array.from(uniqueValues).sort();
     }
     return map;
-  }, [bookingAttributeAxes, units]);
+  }, [activeBookingAttributeAxes, units]);
 
   const missingAttributeCount = useMemo(() => {
-    if (bookingAttributeAxes.length === 0) return 0;
+    if (activeBookingAttributeAxes.length === 0) return 0;
     return units.filter((unit) => {
-      return bookingAttributeAxes.some(
-        (axis) => !unit.attributes?.[axis.key]?.trim(),
-      );
+      return activeBookingAttributeAxes.some((axis) => !unit.attributes?.[axis.key]?.trim());
     }).length;
-  }, [bookingAttributeAxes, units]);
+  }, [activeBookingAttributeAxes, units]);
 
   const generationPreview = useMemo(() => {
     const count = Math.min(parseInt(genCount, 10) || 0, MAX_GENERATED_UNITS);
@@ -641,9 +1016,9 @@ export function UnitTrackingEditor({
     const from = getNextSequenceNumber(units, effectivePrefix.trim());
     const to = from + count - 1;
     const padLength = Math.max(2, String(to).length);
-    const first = `${effectivePrefix.trim()}${String(from).padStart(padLength, '0')}`;
+    const first = `${effectivePrefix.trim()}${String(from).padStart(padLength, "0")}`;
     if (count === 1) return first;
-    const last = `${effectivePrefix.trim()}${String(to).padStart(padLength, '0')}`;
+    const last = `${effectivePrefix.trim()}${String(to).padStart(padLength, "0")}`;
     return `${first} … ${last}`;
   }, [effectivePrefix, genCount, units]);
 
@@ -659,6 +1034,7 @@ export function UnitTrackingEditor({
       const qty = parseInt(quantity, 10);
       if (!isNaN(qty) && qty > 0) {
         setGenCount(String(Math.min(qty, MAX_GENERATED_UNITS)));
+        if (qty > 1) setGeneratorOpen(true);
       }
     }
   };
@@ -668,19 +1044,33 @@ export function UnitTrackingEditor({
     onBookingAttributeAxesChange([]);
     onChange([]);
     setShowDisableConfirm(false);
+    onModeChosenChange(true);
   };
 
-  const addUnit = () => {
+  // Step-1 card click: pick a mode and advance to step 2. Leaving tracking
+  // with registered units goes through the confirm dialog first.
+  const chooseMode = (track: boolean) => {
+    handleToggle(track);
+    if (!track && units.length > 0) return;
+    onModeChosenChange(true);
+  };
+
+  // Single-field flow: type a reference, press Enter, it's added.
+  const commitNewRef = () => {
+    const identifier = newRef.trim();
+    if (!identifier) return;
     onChange([
       ...units,
       {
-        identifier: '',
-        notes: '',
-        purchasePrice: '',
+        identifier,
+        notes: "",
+        purchasePrice: "",
         purchasedAt: null,
+        images: [],
         attributes: {},
       },
     ]);
+    setNewRef("");
   };
 
   const removeUnit = (index: number) => {
@@ -693,18 +1083,13 @@ export function UnitTrackingEditor({
     onChange(newUnits);
   };
 
-  const updateUnitAttribute = (
-    index: number,
-    axisKey: string,
-    value: string,
-  ) => {
+  const updateUnitAttributes = (index: number, patch: Record<string, string>) => {
     const newUnits = [...units];
-    const currentAttributes = newUnits[index].attributes || {};
     newUnits[index] = {
       ...newUnits[index],
       attributes: {
-        ...currentAttributes,
-        [axisKey]: value,
+        ...newUnits[index].attributes,
+        ...patch,
       },
     };
     onChange(newUnits);
@@ -726,18 +1111,36 @@ export function UnitTrackingEditor({
     );
   };
 
-  const addBookingAxis = (label: string) => {
-    const trimmed = label.trim();
-    if (!trimmed) return;
-    const key = normalizeAxisKey(trimmed);
-    if (!key) return;
-    if (bookingAttributeAxes.some((axis) => axis.key === key)) return;
-    if (bookingAttributeAxes.length >= 3) return;
+  /**
+   * Applies a variant patch coming from a row combobox. Selecting a value of
+   * a variant not yet on the product implicitly adds the axis (adopting the
+   * preset into the catalog when needed), capped at 3 axes.
+   */
+  const applyVariantPatch = (index: number, patch: Record<string, string>) => {
+    const nextPatch: Record<string, string> = {};
+    let axes = bookingAttributeAxes;
 
-    onBookingAttributeAxesChange([
-      ...bookingAttributeAxes,
-      { key, label: trimmed, position: bookingAttributeAxes.length },
-    ]);
+    for (const [key, value] of Object.entries(patch)) {
+      const onProduct = axes.some((axis) => axis.key === key);
+      if (!onProduct) {
+        if (!value) continue;
+        if (axes.length >= 3) {
+          toastManager.add({ title: t("variantsMaxReached"), type: "error" });
+          continue;
+        }
+        const entry = registryByKey.get(key);
+        if (!entry) continue;
+        if (!entry.definitionId) {
+          // Preset: adopt it into the shared catalog (idempotent).
+          void adoptRegistryEntry(entry);
+        }
+        axes = [...axes, { key, label: entry.label, position: axes.length }];
+      }
+      nextPatch[key] = value;
+    }
+
+    if (axes !== bookingAttributeAxes) onBookingAttributeAxesChange(axes);
+    if (Object.keys(nextPatch).length > 0) updateUnitAttributes(index, nextPatch);
   };
 
   const removeBookingAxis = (key: string) => {
@@ -767,17 +1170,14 @@ export function UnitTrackingEditor({
 
     const newUnits: ProductUnitInput[] = [];
     for (let i = from; i <= to; i++) {
-      const identifier = `${prefix}${String(i).padStart(padLength, '0')}`;
-      if (
-        !units.some(
-          (u) => u.identifier.toLowerCase() === identifier.toLowerCase(),
-        )
-      ) {
+      const identifier = `${prefix}${String(i).padStart(padLength, "0")}`;
+      if (!units.some((u) => u.identifier.toLowerCase() === identifier.toLowerCase())) {
         newUnits.push({
           identifier,
-          notes: '',
-          purchasePrice: '',
+          notes: "",
+          purchasePrice: "",
           purchasedAt: null,
+          images: [],
           attributes: {},
         });
       }
@@ -789,131 +1189,127 @@ export function UnitTrackingEditor({
   };
 
   return (
-    <div className="space-y-4">
-      {/* Quantity field (only shown when tracking is disabled) */}
-      {!trackUnits && (
-        <div className="grid gap-2">
-          <Label htmlFor="quantity">{t('quantityLabel')}</Label>
-          <Input
-            id="quantity"
-            type="number"
-            min="1"
-            className="w-32"
-            value={quantity}
-            onChange={(e) => onQuantityChange(e.target.value)}
+    <div className="space-y-2">
+      {/* Step 1 — pick a mode. Two plain rectangles, education in the popover. */}
+      {!modeChosen && (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => chooseMode(false)}
             disabled={disabled}
+            aria-invalid={showValidationErrors || undefined}
+            className={cn(
+              "bg-background hover:border-primary/48 hover:bg-accent/50 rounded-lg border p-4 text-left transition-colors disabled:pointer-events-none disabled:opacity-50",
+              showValidationErrors &&
+                "border-destructive/32 bg-destructive/4 hover:border-destructive/48 hover:bg-destructive/8",
+            )}
+          >
+            <p className="text-sm font-semibold">{t("modeQuantity")}</p>
+            <p className="text-muted-foreground mt-1 text-xs">{t("modeQuantityDescription")}</p>
+          </button>
+          <div
+            className={cn(
+              "bg-background hover:border-primary/48 hover:bg-accent/50 relative rounded-lg border p-4 transition-colors",
+              showValidationErrors &&
+                "border-destructive/32 bg-destructive/4 hover:border-destructive/48 hover:bg-destructive/8",
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => chooseMode(true)}
+              disabled={disabled}
+              aria-label={t("modeUnits")}
+              aria-invalid={showValidationErrors || undefined}
+              className="absolute inset-0 rounded-lg disabled:pointer-events-none"
+            />
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-semibold">{t("modeUnits")}</p>
+              <Badge variant="expired">{t("advancedBadge")}</Badge>
+            </div>
+            <p className="text-muted-foreground mt-1 text-xs">{t("modeUnitsDescription")}</p>
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <button
+                    type="button"
+                    className="text-muted-foreground hover:text-foreground relative z-10 mt-2 text-xs underline underline-offset-2"
+                  />
+                }
+              >
+                {t("learnMore")}
+              </PopoverTrigger>
+              <PopoverContent className="w-80">
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">{t("modeUnits")}</p>
+                  <p className="text-muted-foreground text-sm">{t("toggleDescription")}</p>
+                  <ul className="text-muted-foreground space-y-1.5 text-sm">
+                    <li className="flex items-start gap-2">
+                      <Tag className="mt-0.5 h-4 w-4 shrink-0" />
+                      {t("benefitIdentify")}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CalendarCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                      {t("benefitAvailability")}
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Receipt className="mt-0.5 h-4 w-4 shrink-0" />
+                      {t("benefitInventory")}
+                    </li>
+                  </ul>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+      )}
+
+      {/* Quantity field (simple mode) */}
+      {modeChosen && !trackUnits && (
+        <div className="grid gap-2">
+          <Label>{t("quantityLabel")}</Label>
+          <InputQuantity
+            value={parseInt(quantity, 10) || 1}
+            onChange={(next) => onQuantityChange(String(next))}
+            min={1}
+            disabled={disabled}
+            ariaLabel={t("quantityLabel")}
           />
         </div>
       )}
 
-      {/* Toggle */}
-      <div className="flex items-center justify-between rounded-lg border p-4">
-        <div className="space-y-0.5">
-          <Label
-            htmlFor="unit-tracking-toggle"
-            className="text-base font-medium"
-          >
-            {t('toggle')}
-          </Label>
-          <p className="text-muted-foreground text-sm">
-            {t('toggleDescription')}
-          </p>
-        </div>
-        <Switch
-          id="unit-tracking-toggle"
-          checked={trackUnits}
-          onCheckedChange={handleToggle}
-          disabled={disabled}
-        />
-      </div>
-
-      {trackUnits && (
+      {modeChosen && trackUnits && (
         <>
-          {/* Generator — the primary way to declare units */}
-          <div className="bg-muted/40 rounded-lg border p-3">
-            <div className="flex flex-wrap items-end gap-2">
-              <div className="min-w-[120px] flex-1 space-y-1">
-                <Label className="text-muted-foreground text-xs">
-                  {t('bulkPrefix')}
-                </Label>
-                <Input
-                  placeholder={defaultPrefix || t('bulkPrefixPlaceholder')}
-                  value={genPrefix}
-                  onChange={(e) => setGenPrefix(e.target.value)}
-                  disabled={disabled}
-                  className="h-8"
-                />
-              </div>
-              <div className="w-24 space-y-1">
-                <Label className="text-muted-foreground text-xs">
-                  {t('generatorCount')}
-                </Label>
-                <Input
-                  type="number"
-                  min="1"
-                  max={MAX_GENERATED_UNITS}
-                  value={genCount}
-                  onChange={(e) => setGenCount(e.target.value)}
-                  disabled={disabled}
-                  className="h-8"
-                />
-              </div>
+          {/* Units header: title + count, variant tools on the right */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Label>{t("title")}</Label>
+            <Badge variant="expired" className="border">
+              {trackedUnitsCount}
+            </Badge>
+            <div className="ml-auto flex items-center gap-2">
               <Button
                 type="button"
-                size="sm"
-                onClick={handleGenerate}
-                disabled={disabled || !effectivePrefix.trim()}
-              >
-                <Sparkles className="h-3.5 w-3.5" />
-                {t('bulkGenerate')}
-              </Button>
-            </div>
-            <p className="text-muted-foreground mt-2 text-xs">
-              {generationPreview
-                ? `${t('bulkPreview')} : ${generationPreview}`
-                : t('generatorHint')}
-            </p>
-          </div>
-
-          {/* Header: count + actions */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Package className="text-muted-foreground h-4 w-4" />
-              <span className="font-medium">{t('title')}</span>
-              <Badge variant="outline">
-                {t('trackedUnits', { count: trackedUnitsCount })}
-              </Badge>
-            </div>
-            <div className="flex items-center gap-2">
-              <BookingAttributesDialog
-                axes={bookingAttributeAxes}
-                onAddAxis={addBookingAxis}
-                onRemoveAxis={removeBookingAxis}
-                disabled={disabled}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={addUnit}
+                variant="tertiary"
+                onClick={() => setVariantManagerOpen(true)}
                 disabled={disabled}
               >
-                <Plus className="h-4 w-4" />
-                {t('addUnit')}
+                <Settings2 data-slot="icon" />
+                {t("manageVariants")}
               </Button>
             </div>
           </div>
 
-          {/* Attribute axes summary (read-only badges) */}
-          {bookingAttributeAxes.length > 0 && (
+          {/* Declared variants, colored to match the chips on unit rows */}
+          {activeBookingAttributeAxes.length > 0 && (
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-muted-foreground text-xs">
-                {t('bookingAttributesTitle')}:
-              </span>
-              {bookingAttributeAxes.map((axis) => (
+              <span className="text-muted-foreground text-xs">{t("variantsTitle")} :</span>
+              {activeBookingAttributeAxes.map((axis) => (
                 <Badge
                   key={axis.key}
-                  variant="secondary"
+                  variant={
+                    AXIS_BADGE_VARIANTS[
+                      (registryByKey.get(axis.key)?.colorIndex ?? 0) % AXIS_BADGE_VARIANTS.length
+                    ]
+                  }
                   className="gap-1 pr-1"
                 >
                   {axis.label}
@@ -922,6 +1318,7 @@ export function UnitTrackingEditor({
                     className="rounded-sm px-0.5 hover:bg-black/10 dark:hover:bg-white/10"
                     onClick={() => removeBookingAxis(axis.key)}
                     disabled={disabled}
+                    aria-label={`${t("variantsTitle")} — ${axis.label} ×`}
                   >
                     &times;
                   </button>
@@ -930,25 +1327,17 @@ export function UnitTrackingEditor({
             </div>
           )}
 
-          {/* Unit rows or empty hint */}
+          {/* Unit rows */}
           {units.length === 0 ? (
-            <div className="rounded-lg border border-dashed p-6 text-center">
-              <p className="text-sm font-medium">{t('noUnitsRegistered')}</p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                {t('noUnitsHint')}
-              </p>
-            </div>
+            <p className="text-muted-foreground text-sm">{/* {t("noUnitsHint")} */}</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1 bg-background shadow-[0_0_0_1px_var(--color-border)] rounded-lg">
               {units.map((unit, index) => {
                 const isDuplicate =
                   unit.identifier.trim() &&
-                  duplicateIdentifiers.has(
-                    unit.identifier.trim().toLowerCase(),
-                  );
+                  duplicateIdentifiers.has(unit.identifier.trim().toLowerCase());
                 const isEmpty =
-                  (touchedUnits.has(index) || showValidationErrors) &&
-                  !unit.identifier.trim();
+                  (touchedUnits.has(index) || showValidationErrors) && !unit.identifier.trim();
 
                 return (
                   <UnitRow
@@ -956,18 +1345,20 @@ export function UnitTrackingEditor({
                     unit={unit}
                     index={index}
                     unitCount={units.length}
-                    bookingAttributeAxes={bookingAttributeAxes}
+                    bookingAttributeAxes={activeBookingAttributeAxes}
                     existingValuesByAxis={existingValuesByAxis}
+                    variantRegistry={variantRegistry}
                     isDuplicate={!!isDuplicate}
                     isEmpty={isEmpty}
                     disabled={disabled}
                     productId={productId}
+                    currency={currency}
                     onUpdate={updateUnit}
-                    onUpdateAttribute={updateUnitAttribute}
+                    onUpdateAttributes={applyVariantPatch}
+                    onPersistVariantValue={persistVariantValue}
+                    onManageVariants={() => setVariantManagerOpen(true)}
                     onRemove={removeUnit}
-                    onTouch={(i) =>
-                      setTouchedUnits((prev) => new Set(prev).add(i))
-                    }
+                    onTouch={(i) => setTouchedUnits((prev) => new Set(prev).add(i))}
                     onApplyPurchaseToAll={applyPurchaseToAll}
                   />
                 );
@@ -975,11 +1366,88 @@ export function UnitTrackingEditor({
             </div>
           )}
 
+          <Separator className="my-2" />
+
+          {/* Add refs one by one (primary) or generate a series (secondary, collapsed) */}
+          <Collapsible open={generatorOpen} onOpenChange={setGeneratorOpen} className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center flex-1">
+                <Input
+                  value={newRef}
+                  onChange={(e) => setNewRef(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      commitNewRef();
+                    }
+                  }}
+                  placeholder={t("addRefPlaceholder")}
+                  disabled={disabled}
+                  className="h-9 min-w-44 flex-1 rounded-r-none"
+                />
+                <Button
+                  className="rounded-l-none border-l-0 "
+                  variant="outline"
+                  onClick={commitNewRef}
+                  disabled={disabled || !newRef.trim()}
+                >
+                  <Plus data-slot="icon" className="size-4" />
+                  {t("addUnit")}
+                </Button>
+              </div>
+              <Separator orientation="vertical" className="h-6" />
+              <CollapsibleTrigger render={<Button variant="outline" disabled={disabled} />}>
+                {t("generateSeries")}
+                <ChevronDown
+                  data-slot="icon"
+                  className={cn(
+                    "transition-transform duration-200 ease-out",
+                    generatorOpen && "rotate-180",
+                  )}
+                />
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent>
+              <div className="bg-muted/40 rounded-lg border p-3">
+                <div className="flex flex-wrap items-end gap-2">
+                  <div className="min-w-30 flex-1 ">
+                    <Label className="text-muted-foreground text-xs">{t("bulkPrefix")}</Label>
+                    <Input
+                      placeholder={defaultPrefix || t("bulkPrefixPlaceholder")}
+                      value={genPrefix}
+                      onChange={(e) => setGenPrefix(e.target.value)}
+                      disabled={disabled}
+                    />
+                  </div>
+                  <div className="">
+                    <Label className="text-muted-foreground text-xs">{t("generatorCount")}</Label>
+                    <InputQuantity
+                      value={parseInt(genCount, 10) || 1}
+                      onChange={(next) => setGenCount(String(next))}
+                      min={1}
+                      max={MAX_GENERATED_UNITS}
+                      disabled={disabled}
+                      ariaLabel={t("generatorCount")}
+                    />
+                  </div>
+                  <Button onClick={handleGenerate} disabled={disabled || !effectivePrefix.trim()}>
+                    {t("bulkGenerate")}
+                  </Button>
+                </div>
+                <p className="text-muted-foreground mt-2 text-xs">
+                  {generationPreview
+                    ? `${t("bulkPreview")} : ${generationPreview}`
+                    : t("generatorHint")}
+                </p>
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+
           {/* Warnings */}
           {duplicateIdentifiers.size > 0 && (
             <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md p-3 text-sm">
               <AlertCircle className="h-4 w-4 shrink-0" />
-              <span>{t('duplicateIdentifier')}</span>
+              <span>{t("duplicateIdentifier")}</span>
             </div>
           )}
 
@@ -987,7 +1455,7 @@ export function UnitTrackingEditor({
             <div className="bg-destructive/10 text-destructive flex items-center gap-2 rounded-md p-3 text-sm">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>
-                {t('missingAttributesWarning', {
+                {t("missingAttributesWarning", {
                   count: missingAttributeCount,
                 })}
               </span>
@@ -996,24 +1464,22 @@ export function UnitTrackingEditor({
         </>
       )}
 
+      {/* Shared variant catalog manager */}
+      <VariantManagerDrawer open={variantManagerOpen} onOpenChange={setVariantManagerOpen} />
+
       {/* Disable confirmation dialog */}
-      <AlertDialog
-        open={showDisableConfirm}
-        onOpenChange={setShowDisableConfirm}
-      >
+      <AlertDialog open={showDisableConfirm} onOpenChange={setShowDisableConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('disableConfirm')}</AlertDialogTitle>
+            <AlertDialogTitle>{t("disableConfirm")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('disableDescription', { count: trackedUnitsCount })}
+              {t("disableDescription", { count: trackedUnitsCount })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>
-              {t('cancel')}
-            </AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>{t("cancel")}</AlertDialogClose>
             <AlertDialogClose render={<Button />} onClick={confirmDisable}>
-              {t('confirm')}
+              {t("confirm")}
             </AlertDialogClose>
           </AlertDialogFooter>
         </AlertDialogContent>

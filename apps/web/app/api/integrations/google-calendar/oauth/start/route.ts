@@ -5,9 +5,7 @@ import { buildGoogleCalendarAuthorizationUrl } from '@/lib/integrations/provider
 import { createGoogleCalendarOAuthState } from '@/lib/integrations/providers/google-calendar/oauth-state';
 import { isPlatformAdmin } from '@/lib/platform-admin';
 import { getCurrentStore } from '@/lib/store-context';
-
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+import { createLoginUrl } from '@/lib/utils/util.url';
 
 export async function GET(request: Request) {
   const session = await auth();
@@ -17,7 +15,7 @@ export async function GET(request: Request) {
     '/dashboard/settings/integrations/google-calendar';
 
   if (!session?.user?.id || !store) {
-    redirect('/login');
+    redirect(createLoginUrl(returnTo));
   }
 
   const canManageIntegration =

@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { revalidateLogic, useStore } from '@tanstack/react-form'
-import { useMutation } from '@tanstack/react-query'
-import { useTranslations } from 'next-intl'
-import { z } from 'zod'
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { revalidateLogic, useStore } from "@tanstack/react-form";
+import { useMutation } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import { z } from "zod";
 import {
   ArrowRight,
   Clock3,
@@ -17,7 +17,7 @@ import {
   Voicemail,
   Wallet,
   Zap,
-} from 'lucide-react'
+} from "lucide-react";
 
 import {
   Alert,
@@ -40,35 +40,34 @@ import {
   SelectItem,
   Switch,
   toastManager,
-} from '@louez/ui'
+} from "@louez/ui";
 import {
   AI_PHONE_GREETING_MAX_LENGTH,
   AI_PHONE_LANGUAGES,
   defaultAiPhoneSettings,
-} from '@louez/validations'
-import type { AiPhoneSettings } from '@louez/types'
+} from "@louez/validations";
+import type { AiPhoneSettings } from "@louez/types";
 
-import { updateAiPhoneSettings } from './phone-actions'
-import { FeaturePresentation } from './feature-presentation'
-import { OPEN_TOPUP_EVENT } from './ai-assistant-header'
-import { VoiceNumberProvisioning } from './voice-number-provisioning'
-import { VoicePicker } from './voice-picker'
-import { FloatingSaveBar } from '@/components/dashboard/floating-save-bar'
-import { FormRadioCardGroup } from '@/components/form/form-radio-card-group'
-import { RootError } from '@/components/form/root-error'
-import { useAppForm } from '@/hooks/form/form'
-import { localeFlags, localeNames } from '@/i18n/config'
+import { updateAiPhoneSettings } from "./phone-actions";
+import { FeaturePresentation } from "./feature-presentation";
+import { OPEN_TOPUP_EVENT } from "./ai-assistant-header";
+import { VoiceNumberProvisioning } from "./voice-number-provisioning";
+import { VoicePicker } from "./voice-picker";
+import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
+import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
+import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
+import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
+import { RootError } from "@/components/form/root-error";
+import { useAppForm } from "@/hooks/form/form";
+import { localeFlags, localeNames } from "@/i18n/config";
 
 // Light client-side format check; the server does the authoritative E.164
 // validation (libphonenumber) so we don't ship that metadata to the browser.
-const E164_RE = /^\+[1-9]\d{6,15}$/
+const E164_RE = /^\+[1-9]\d{6,15}$/;
 
 const createAiPhoneSettingsSchema = (
   t: (key: string, params?: Record<string, string | number | Date>) => string,
-  tValidation: (
-    key: string,
-    params?: Record<string, string | number | Date>,
-  ) => string,
+  tValidation: (key: string, params?: Record<string, string | number | Date>) => string,
 ) =>
   z.object({
     enabled: z.boolean(),
@@ -76,32 +75,32 @@ const createAiPhoneSettingsSchema = (
     voice: z.string(),
     canTakeReservations: z.boolean(),
     recordCalls: z.boolean(),
-    answerMode: z.enum(['always', 'after_hours']),
+    answerMode: z.enum(["always", "after_hours"]),
     greeting: z
       .string()
       .max(
         AI_PHONE_GREETING_MAX_LENGTH,
-        tValidation('maxLength', { max: AI_PHONE_GREETING_MAX_LENGTH }),
+        tValidation("maxLength", { max: AI_PHONE_GREETING_MAX_LENGTH }),
       ),
     transferNumber: z
       .string()
-      .refine((value) => value === '' || E164_RE.test(value), t('phoneFormat')),
-  })
+      .refine((value) => value === "" || E164_RE.test(value), t("phoneFormat")),
+  });
 
 interface VoiceAgentFormProps {
-  store: { id: string; aiPhoneSettings: AiPhoneSettings | null }
-  hasFeatureAccess: boolean
-  phoneConfigured: boolean
-  boundNumber: string | null
-  isProvisioned: boolean
-  webhookUrl: string
-  defaultCountry: string
+  store: { id: string; aiPhoneSettings: AiPhoneSettings | null };
+  hasFeatureAccess: boolean;
+  phoneConfigured: boolean;
+  boundNumber: string | null;
+  isProvisioned: boolean;
+  webhookUrl: string;
+  defaultCountry: string;
   /** Monthly number rental in credits (null = free / not configured). */
-  numberRentalCredits: number | null
+  numberRentalCredits: number | null;
   /** Flat voice tariff in credits per minute (null = not configured). */
-  voiceCreditsPerMinute: number | null
+  voiceCreditsPerMinute: number | null;
   /** Whether the balance covers one rental cycle (drives the recharge nudge). */
-  hasRentalFunds: boolean
+  hasRentalFunds: boolean;
 }
 
 export const VoiceAgentForm = ({
@@ -116,19 +115,19 @@ export const VoiceAgentForm = ({
   voiceCreditsPerMinute,
   hasRentalFunds,
 }: VoiceAgentFormProps) => {
-  const router = useRouter()
-  const t = useTranslations('dashboard.settings.aiVoiceAgent')
-  const tAdvisor = useTranslations('dashboard.settings.aiAdvisor')
-  const tValidation = useTranslations('validation')
-  const tCommon = useTranslations('common')
+  const router = useRouter();
+  const t = useTranslations("dashboard.settings.aiVoiceAgent");
+  const tAdvisor = useTranslations("dashboard.settings.aiAdvisor");
+  const tValidation = useTranslations("validation");
+  const tCommon = useTranslations("common");
 
-  const schema = createAiPhoneSettingsSchema(t, tValidation)
-  const current = store.aiPhoneSettings || defaultAiPhoneSettings
+  const schema = createAiPhoneSettingsSchema(t, tValidation);
+  const current = store.aiPhoneSettings || defaultAiPhoneSettings;
 
-  const [rootError, setRootError] = useState<string | null>(null)
+  const [rootError, setRootError] = useState<string | null>(null);
   // Turning the agent off detaches the bound number — confirmed via a dialog.
-  const [confirmDisableOpen, setConfirmDisableOpen] = useState(false)
-  const updateMutation = useMutation({ mutationFn: updateAiPhoneSettings })
+  const [confirmDisableOpen, setConfirmDisableOpen] = useState(false);
+  const updateMutation = useMutation({ mutationFn: updateAiPhoneSettings });
 
   const form = useAppForm({
     defaultValues: {
@@ -136,41 +135,41 @@ export const VoiceAgentForm = ({
       // Persisted locale string coerced to the known set; the Zod schema below
       // and the server action re-validate it, so an unknown value can't slip in.
       language: current.language as (typeof AI_PHONE_LANGUAGES)[number],
-      voice: current.voice || '',
+      voice: current.voice || "",
       canTakeReservations: current.canTakeReservations,
       recordCalls: current.recordCalls ?? false,
       answerMode: current.answerMode,
-      greeting: current.greeting || '',
-      transferNumber: current.transferNumber || '',
+      greeting: current.greeting || "",
+      transferNumber: current.transferNumber || "",
     },
     validators: { onSubmit: schema },
     validationLogic: revalidateLogic({
-      mode: 'submit',
-      modeAfterSubmission: 'change',
+      mode: "submit",
+      modeAfterSubmission: "change",
     }),
     onSubmit: async ({ value }) => {
-      setRootError(null)
-      const result = await updateMutation.mutateAsync(value)
+      setRootError(null);
+      const result = await updateMutation.mutateAsync(value);
       if (result.error) {
-        setRootError(result.error)
-        return
+        setRootError(result.error);
+        return;
       }
-      if (result.warning === 'numberReleaseFailed') {
+      if (result.warning === "numberReleaseFailed") {
         // Saved, but the number could not be handed back: tell the owner it is
         // still attached (the daily job retries the cleanup).
-        toastManager.add({ title: t('numberReleaseFailed'), type: 'warning' })
+        toastManager.add({ title: t("numberReleaseFailed"), type: "warning" });
       }
-      toastManager.add({ title: t('saved'), type: 'success' })
-      form.options.defaultValues = value
-      form.reset()
-      router.refresh()
+      toastManager.add({ title: t("saved"), type: "success" });
+      form.options.defaultValues = value;
+      form.reset();
+      router.refresh();
     },
-  })
+  });
 
-  const isDirty = useStore(form.store, (s) => s.isDirty)
-  const isEnabled = useStore(form.store, (s) => s.values.enabled)
+  const isDirty = useStore(form.store, (s) => s.isDirty);
+  const isEnabled = useStore(form.store, (s) => s.values.enabled);
   // The voice preview is generated in the currently selected language.
-  const selectedLanguage = useStore(form.store, (s) => s.values.language)
+  const selectedLanguage = useStore(form.store, (s) => s.values.language);
 
   // Locked state for plans without access — reuses the advisor upgrade copy.
   if (!hasFeatureAccess) {
@@ -179,32 +178,29 @@ export const VoiceAgentForm = ({
         <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px] z-10 flex items-center justify-center">
           <div className="text-center p-6">
             <Lock className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-            <p className="font-medium">{tAdvisor('locked.featureLocked')}</p>
-            <Button
-              onClick={() => router.push('/dashboard/subscription')}
-              className="gap-2 mt-3"
-            >
+            <p className="font-medium">{tAdvisor("locked.featureLocked")}</p>
+            <Button onClick={() => router.push("/dashboard/subscription")} className="gap-2 mt-3">
               <Zap className="h-4 w-4" />
-              {tAdvisor('locked.upgrade')}
+              {tAdvisor("locked.upgrade")}
               <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Phone className="h-5 w-5" />
-            {t('enableSection')}
-          </CardTitle>
-          <CardDescription>{t('description')}</CardDescription>
+        <CardHeader className="flex flex-row items-center gap-3 p-4 pb-3 sm:p-5 sm:pb-3">
+          <DashboardIconTile icon={Phone} accent="success" />
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-base">{t("enableSection")}</CardTitle>
+            <CardDescription className="mt-0.5">{t("description")}</CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className="space-y-4 opacity-50 pointer-events-none">
-          <div className="flex items-center justify-between p-3 rounded-lg border">
-            <span className="text-sm">{t('enabled')}</span>
+        <CardContent className="pointer-events-none space-y-4 p-4 pt-0 opacity-50 sm:p-5 sm:pt-0">
+          <div className="flex items-center justify-between rounded-lg border p-3">
+            <span className="text-sm">{t("enabled")}</span>
             <Switch disabled />
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -215,20 +211,19 @@ export const VoiceAgentForm = ({
         {!phoneConfigured && (
           <Alert variant="warning">
             <TriangleAlert />
-            <AlertTitle>{t('notConfigured.title')}</AlertTitle>
-            <AlertDescription>{t('notConfigured.description')}</AlertDescription>
+            <AlertTitle>{t("notConfigured.title")}</AlertTitle>
+            <AlertDescription>{t("notConfigured.description")}</AlertDescription>
           </Alert>
         )}
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Phone className="h-5 w-5" />
-              {t('enableSection')}
-            </CardTitle>
-            <CardDescription>{t('enableSectionDescription')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <DashboardSectionCard
+          title={t("enableSection")}
+          description={t("enableSectionDescription")}
+          icon={Phone}
+          accent="success"
+          contentClassName="space-y-6"
+        >
+          <>
             {/* Enabled switch — turning OFF with a bound number asks for
                 confirmation, because saving then detaches the number. */}
             <form.Field name="enabled">
@@ -236,48 +231,41 @@ export const VoiceAgentForm = ({
                 <>
                   <div className="flex items-center justify-between gap-4 rounded-lg border p-3">
                     <div className="space-y-0.5">
-                      <p className="text-sm font-medium">{t('enabled')}</p>
-                      <p className="text-muted-foreground text-sm">
-                        {t('enabledDescription')}
-                      </p>
+                      <p className="text-sm font-medium">{t("enabled")}</p>
+                      <p className="text-muted-foreground text-sm">{t("enabledDescription")}</p>
                     </div>
                     <Switch
                       checked={field.state.value}
                       onCheckedChange={(next) => {
                         if (!next && boundNumber) {
-                          setConfirmDisableOpen(true)
-                          return
+                          setConfirmDisableOpen(true);
+                          return;
                         }
-                        field.handleChange(next)
+                        field.handleChange(next);
                       }}
                     />
                   </div>
 
-                  <AlertDialog
-                    open={confirmDisableOpen}
-                    onOpenChange={setConfirmDisableOpen}
-                  >
+                  <AlertDialog open={confirmDisableOpen} onOpenChange={setConfirmDisableOpen}>
                     <AlertDialogContent>
                       <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          {t('disableConfirm.title')}
-                        </AlertDialogTitle>
+                        <AlertDialogTitle>{t("disableConfirm.title")}</AlertDialogTitle>
                         <AlertDialogDescription>
-                          {t('disableConfirm.description', {
-                            number: boundNumber ?? '',
+                          {t("disableConfirm.description", {
+                            number: boundNumber ?? "",
                           })}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
-                        <AlertDialogClose>{tCommon('cancel')}</AlertDialogClose>
+                        <AlertDialogClose>{tCommon("cancel")}</AlertDialogClose>
                         <Button
                           variant="destructive"
                           onClick={() => {
-                            field.handleChange(false)
-                            setConfirmDisableOpen(false)
+                            field.handleChange(false);
+                            setConfirmDisableOpen(false);
                           }}
                         >
-                          {t('disableConfirm.confirm')}
+                          {t("disableConfirm.confirm")}
                         </Button>
                       </AlertDialogFooter>
                     </AlertDialogContent>
@@ -293,17 +281,17 @@ export const VoiceAgentForm = ({
                 variant="voice"
                 chips={[
                   ...(numberRentalCredits !== null
-                    ? [t('setup.rentalChip', { credits: numberRentalCredits })]
+                    ? [t("setup.rentalChip", { credits: numberRentalCredits })]
                     : []),
                   ...(voiceCreditsPerMinute !== null
                     ? [
-                        t('setup.perMinuteChip', {
+                        t("setup.perMinuteChip", {
                           credits: voiceCreditsPerMinute,
                         }),
                       ]
                     : []),
                 ]}
-                onActivate={() => form.setFieldValue('enabled', true)}
+                onActivate={() => form.setFieldValue("enabled", true)}
               />
             )}
 
@@ -315,36 +303,29 @@ export const VoiceAgentForm = ({
                   <span className="bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
                     1
                   </span>
-                  <span className="font-medium">{t('setup.step1')}</span>
+                  <span className="font-medium">{t("setup.step1")}</span>
                   <span className="text-muted-foreground/60 mx-1">—</span>
                   <span className="bg-muted text-muted-foreground flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold">
                     2
                   </span>
-                  <span className="text-muted-foreground">
-                    {t('setup.step2')}
-                  </span>
+                  <span className="text-muted-foreground">{t("setup.step2")}</span>
                 </div>
 
                 <div className="bg-muted/40 space-y-3 rounded-lg border p-4">
                   <div className="flex items-start gap-3">
-                    <div className="bg-primary/10 text-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                      <PhoneCall className="h-4 w-4" />
-                    </div>
+                    <DashboardIconTile icon={PhoneCall} accent="success" />
                     <div className="space-y-1">
-                      <p className="text-sm font-medium">{t('setup.title')}</p>
-                      <p className="text-muted-foreground text-sm">
-                        {t('setup.why')}
-                      </p>
+                      <p className="text-sm font-medium">{t("setup.title")}</p>
+                      <p className="text-muted-foreground text-sm">{t("setup.why")}</p>
                     </div>
                   </div>
 
-                  {(numberRentalCredits !== null ||
-                    voiceCreditsPerMinute !== null) && (
+                  {(numberRentalCredits !== null || voiceCreditsPerMinute !== null) && (
                     <div className="flex flex-wrap gap-2">
                       {numberRentalCredits !== null && (
                         <Badge variant="secondary" className="gap-1.5 tabular-nums">
                           <Wallet className="h-3 w-3" />
-                          {t('setup.rentalChip', {
+                          {t("setup.rentalChip", {
                             credits: numberRentalCredits,
                           })}
                         </Badge>
@@ -352,7 +333,7 @@ export const VoiceAgentForm = ({
                       {voiceCreditsPerMinute !== null && (
                         <Badge variant="secondary" className="gap-1.5 tabular-nums">
                           <Clock3 className="h-3 w-3" />
-                          {t('setup.perMinuteChip', {
+                          {t("setup.perMinuteChip", {
                             credits: voiceCreditsPerMinute,
                           })}
                         </Badge>
@@ -363,10 +344,10 @@ export const VoiceAgentForm = ({
                   {numberRentalCredits !== null && !hasRentalFunds && (
                     <Alert variant="warning">
                       <TriangleAlert />
-                      <AlertTitle>{t('setup.insufficientTitle')}</AlertTitle>
+                      <AlertTitle>{t("setup.insufficientTitle")}</AlertTitle>
                       <AlertDescription className="space-y-2">
                         <p>
-                          {t('setup.insufficientBody', {
+                          {t("setup.insufficientBody", {
                             credits: numberRentalCredits,
                           })}
                         </p>
@@ -374,12 +355,10 @@ export const VoiceAgentForm = ({
                           type="button"
                           size="sm"
                           className="gap-1.5 transition-transform duration-150 ease-out active:scale-[0.96]"
-                          onClick={() =>
-                            window.dispatchEvent(new Event(OPEN_TOPUP_EVENT))
-                          }
+                          onClick={() => window.dispatchEvent(new Event(OPEN_TOPUP_EVENT))}
                         >
                           <CreditCard className="h-3.5 w-3.5" />
-                          {t('setup.insufficientCta')}
+                          {t("setup.insufficientCta")}
                         </Button>
                       </AlertDescription>
                     </Alert>
@@ -394,9 +373,7 @@ export const VoiceAgentForm = ({
                   disabled={!phoneConfigured}
                 />
 
-                <p className="text-muted-foreground text-sm">
-                  {t('setup.step2Hint')}
-                </p>
+                <p className="text-muted-foreground text-sm">{t("setup.step2Hint")}</p>
               </div>
             )}
 
@@ -411,24 +388,23 @@ export const VoiceAgentForm = ({
                   disabled={!phoneConfigured}
                 />
 
-                {(numberRentalCredits !== null ||
-                  voiceCreditsPerMinute !== null) && (
+                {(numberRentalCredits !== null || voiceCreditsPerMinute !== null) && (
                   <div className="text-muted-foreground -mt-3 flex flex-wrap items-center gap-1.5 text-xs tabular-nums">
                     <Wallet className="h-3 w-3" />
                     {[
                       numberRentalCredits !== null
-                        ? t('setup.boundRental', {
+                        ? t("setup.boundRental", {
                             credits: numberRentalCredits,
                           })
                         : null,
                       voiceCreditsPerMinute !== null
-                        ? t('setup.perMinuteChip', {
+                        ? t("setup.perMinuteChip", {
                             credits: voiceCreditsPerMinute,
                           })
                         : null,
                     ]
                       .filter(Boolean)
-                      .join(' · ')}
+                      .join(" · ")}
                   </div>
                 )}
 
@@ -436,8 +412,8 @@ export const VoiceAgentForm = ({
                 <form.AppField name="language">
                   {(field) => (
                     <field.Select
-                      label={t('language')}
-                      description={t('languageDescription')}
+                      label={t("language")}
+                      description={t("languageDescription")}
                       items={AI_PHONE_LANGUAGES.map((code) => ({
                         value: code,
                         label: `${localeFlags[code]} ${localeNames[code]}`,
@@ -467,8 +443,8 @@ export const VoiceAgentForm = ({
                 <form.AppField name="canTakeReservations">
                   {(field) => (
                     <field.Switch
-                      label={t('canTakeReservations')}
-                      description={t('canTakeReservationsDescription')}
+                      label={t("canTakeReservations")}
+                      description={t("canTakeReservationsDescription")}
                     />
                   )}
                 </form.AppField>
@@ -479,19 +455,19 @@ export const VoiceAgentForm = ({
                     <FormRadioCardGroup
                       value={field.state.value}
                       onChange={(next) => field.handleChange(next)}
-                      label={t('answerMode')}
-                      helpText={t('answerModeDescription')}
+                      label={t("answerMode")}
+                      helpText={t("answerModeDescription")}
                       options={[
                         {
-                          value: 'always',
-                          label: t('answerModeAlways'),
-                          description: t('answerModeAlwaysDescription'),
+                          value: "always",
+                          label: t("answerModeAlways"),
+                          description: t("answerModeAlwaysDescription"),
                           icon: <PhoneCall className="h-4 w-4" />,
                         },
                         {
-                          value: 'after_hours',
-                          label: t('answerModeAfterHours'),
-                          description: t('answerModeAfterHoursDescription'),
+                          value: "after_hours",
+                          label: t("answerModeAfterHours"),
+                          description: t("answerModeAfterHoursDescription"),
                           icon: <Voicemail className="h-4 w-4" />,
                         },
                       ]}
@@ -505,8 +481,8 @@ export const VoiceAgentForm = ({
                 <form.AppField name="recordCalls">
                   {(field) => (
                     <field.Switch
-                      label={t('recordCalls')}
-                      description={t('recordCallsDescription')}
+                      label={t("recordCalls")}
+                      description={t("recordCallsDescription")}
                     />
                   )}
                 </form.AppField>
@@ -516,9 +492,9 @@ export const VoiceAgentForm = ({
                   <form.AppField name="greeting">
                     {(field) => (
                       <field.Input
-                        label={`${t('greeting')} (${tCommon('optional')})`}
-                        description={t('greetingDescription')}
-                        placeholder={t('greetingPlaceholder')}
+                        label={`${t("greeting")} (${tCommon("optional")})`}
+                        description={t("greetingDescription")}
+                        placeholder={t("greetingPlaceholder")}
                         maxLength={AI_PHONE_GREETING_MAX_LENGTH}
                       />
                     )}
@@ -527,8 +503,8 @@ export const VoiceAgentForm = ({
                   <form.AppField name="transferNumber">
                     {(field) => (
                       <field.Input
-                        label={`${t('transferNumber')} (${tCommon('optional')})`}
-                        description={t('transferNumberDescription')}
+                        label={`${t("transferNumber")} (${tCommon("optional")})`}
+                        description={t("transferNumberDescription")}
                         placeholder="+33123456789"
                       />
                     )}
@@ -536,8 +512,8 @@ export const VoiceAgentForm = ({
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
+          </>
+        </DashboardSectionCard>
 
         <FloatingSaveBar
           isDirty={isDirty}
@@ -546,5 +522,5 @@ export const VoiceAgentForm = ({
         />
       </form.Form>
     </form.AppForm>
-  )
-}
+  );
+};

@@ -18,6 +18,8 @@ interface ConfirmationPageProps {
   params: Promise<{ slug: string; reservationId: string }>
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: ConfirmationPageProps): Promise<Metadata> {
@@ -274,7 +276,7 @@ export default async function ConfirmationPage({ params }: ConfirmationPageProps
                     <Tag className="h-3.5 w-3.5" />
                     {t('discountLabel')}
                     {reservation.promoCodeSnapshot && (
-                      <Badge variant="secondary" className="text-xs bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">
+                      <Badge variant="success" className="text-xs">
                         {(reservation.promoCodeSnapshot as { code: string }).code}
                       </Badge>
                     )}

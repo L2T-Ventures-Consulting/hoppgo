@@ -49,6 +49,25 @@ export interface ProductTaxSettings {
   customRate?: number; // Taux personnalisé si false
 }
 
+export type ProductImageVersionKind =
+  | 'original'
+  | 'cropped'
+  | 'ai-enhanced'
+  | 'background-removed';
+
+export interface ProductImageVersion {
+  id: string;
+  url: string;
+  kind: ProductImageVersionKind;
+  createdAt?: string;
+}
+
+/** All non-destructive versions that belong to one logical product photo. */
+export interface ProductImageHistory {
+  id: string;
+  versions: ProductImageVersion[];
+}
+
 // ============================================================================
 // Product Booking Attributes (SKU tracking advanced mode)
 // ============================================================================

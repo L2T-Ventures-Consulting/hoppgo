@@ -28,8 +28,14 @@ COPY packages/mcp/package.json ./packages/mcp/
 COPY apps/web/package.json ./apps/web/
 COPY apps/voice-relay/package.json ./apps/voice-relay/
 
+# The first pnpm invocation also makes corepack download the pinned pnpm from
+# the npm registry — the stage's first network access — so both are retried:
+# build hosts occasionally fail DNS resolution transiently (EAI_AGAIN) and a
+# blind retry is all it takes.
 RUN corepack enable pnpm && \
-    pnpm install --frozen-lockfile
+    (pnpm install --frozen-lockfile || \
+     (sleep 10 && pnpm install --frozen-lockfile) || \
+     (sleep 30 && pnpm install --frozen-lockfile))
 
 FROM node:20-alpine AS builder
 
@@ -58,6 +64,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV SKIP_ENV_VALIDATION=${SKIP_ENV_VALIDATION}
 ENV DATABASE_URL=${DATABASE_URL}
+
+# Reuse the pnpm tarball corepack already fetched in `deps`. Each stage has its
+# own filesystem, so without this the builder downloads pnpm from the npm
+# registry a second time — a second chance for a build to die on a transient DNS
+# or registry failure, having nothing to do with the code being built.
+COPY --from=deps /root/.cache/node/corepack /root/.cache/node/corepack
 
 RUN corepack enable pnpm && pnpm turbo run build --filter=@louez/web --env-mode=loose
 

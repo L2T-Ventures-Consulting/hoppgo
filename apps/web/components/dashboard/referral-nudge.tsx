@@ -117,7 +117,7 @@ export const ReferralNudge = ({ className }: ReferralNudgeProps) => {
       </div>
       <div className="flex items-center gap-2 sm:shrink-0">
         <Link
-          href="/dashboard/referrals"
+          href="/dashboard/settings/referrals"
           onClick={() => {
             posthog.capture(referralAnalyticsEvents.nudgeClicked, {
               ...referralAnalyticsBaseProperties,

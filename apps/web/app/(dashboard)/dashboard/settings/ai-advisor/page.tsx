@@ -1,5 +1,9 @@
 import { redirect } from 'next/navigation'
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 /**
  * The AI assistant moved out of settings into its own page. Old links (emails,
  * bookmarks, the ?conversation= deep link) land here — forward them, query

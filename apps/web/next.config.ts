@@ -114,6 +114,9 @@ function buildCspDirectives() {
       // YouTube thumbnails
       "https://img.youtube.com",
       "https://i.ytimg.com",
+      // Seeded storefront hero placeholders (development only). Picsum
+      // redirects image responses to its Fastly delivery hostname.
+      ...(isDev ? ["https://picsum.photos", "https://fastly.picsum.photos"] : []),
       // AWS S3
       "https://*.s3.amazonaws.com",
       "https://*.amazonaws.com",
@@ -251,8 +254,15 @@ function buildSecurityHeaders() {
 }
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   // Enable standalone output for Docker deployment
   output: "standalone",
+  // The changelog reads its write-ups from content/whats-new/**/*.md at runtime.
+  // Tracing only follows imports, so the files must be listed explicitly or the
+  // standalone build ships without them.
+  outputFileTracingIncludes: {
+    "/dashboard/whats-new/[slug]": ["./content/whats-new/**/*.md"],
+  },
   // TypeScript 7 ships the native compiler without the legacy JS API surface
   // Next currently expects during next build. Keep TS validation as a separate
   // workspace gate through `pnpm type-check`.
@@ -313,6 +323,20 @@ const nextConfig: NextConfig = {
         // Embed (path-based routing): localhost:3000/slug/embed
         source: "/:slug/embed",
         headers: embedSecurityHeaders,
+      },
+    ];
+  },
+  async redirects() {
+    return [
+      {
+        source: "/dashboard/referrals",
+        destination: "/dashboard/settings/referrals",
+        permanent: false,
+      },
+      {
+        source: "/dashboard/subscription",
+        destination: "/dashboard/settings/subscription",
+        permanent: false,
       },
     ];
   },
@@ -421,6 +445,8 @@ const nextConfig: NextConfig = {
     "*.feat-inventory.louez.localify",
     "worktree-onboarding-redesign.louez.localify",
     "*.worktree-onboarding-redesign.louez.localify",
+    "agent-redesign-product-creation-flow.louez.localify",
+    "*.agent-redesign-product-creation-flow.louez.localify",
   ],
 };
 

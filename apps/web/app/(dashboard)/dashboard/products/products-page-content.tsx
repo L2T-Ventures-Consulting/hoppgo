@@ -2,12 +2,19 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Plus, FolderOpen, Lock, ArrowUpDown } from 'lucide-react'
 
 import { Button } from '@louez/ui'
+import { CategoryManagerDrawer } from '@/components/categories/category-manager-drawer'
+import { NewFeatureBadge } from '@/components/dashboard/new-feature-badge'
+import { useWhatsNew } from '@/hooks/use-whats-new'
+import { invalidateProductsList } from '@/lib/orpc/invalidation'
+import { categoriesQueries } from '@/lib/queries/categories.queries'
+import { productsQueries } from '@/lib/queries/products.queries'
 import { ProductsTable } from './products-table'
-import { ProductsFilters } from './products-filters'
+import { ProductsFilters, useProductsFilters } from './products-filters'
 import { ProductsOrderDialog } from './products-order-dialog'
 import {
   UpgradeModal,
@@ -15,59 +22,53 @@ import {
   BlurOverlay,
 } from '@/components/dashboard/upgrade-modal'
 import type { LimitStatus } from '@/lib/plan-limits'
+import type { ProductStatusFilter, ProductsList } from './types'
 
-interface Product {
-  id: string
-  name: string
-  images: string[] | null
-  price: string
-  deposit: string | null
-  quantity: number
-  status: 'draft' | 'active' | 'archived' | null
-  category: {
-    id: string
-    name: string
-  } | null
-}
-
-interface Category {
-  id: string
-  name: string
-  storeId: string
-  order: number | null
-}
-
-interface ProductCounts {
-  all: number
-  active: number
-  draft: number
-  archived: number
-}
+const EMPTY_COUNTS = { all: 0, active: 0, draft: 0, archived: 0 }
 
 interface ProductsPageContentProps {
-  products: Product[]
-  categories: Category[]
-  counts: ProductCounts
-  currentStatus?: string
-  currentCategory?: string
+  initialData: ProductsList
+  /** Filters the server rendered `initialData` with. */
+  initialFilters: {
+    status: ProductStatusFilter
+    categoryIds: string[]
+  }
   limits: LimitStatus
   planSlug: string
   currency?: string
 }
 
 export function ProductsPageContent({
-  products,
-  categories,
-  counts,
-  currentStatus,
-  currentCategory,
+  initialData,
+  initialFilters,
   limits,
   planSlug,
   currency,
 }: ProductsPageContentProps) {
   const t = useTranslations('dashboard.products')
+  const queryClient = useQueryClient()
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const [showOrderDialog, setShowOrderDialog] = useState(false)
+  const [categoryManagerOpen, setCategoryManagerOpen] = useState(false)
+  const { status, categoryIds, setCategoryIds } = useProductsFilters()
+  const { dismissFeature } = useWhatsNew()
+
+  // Filter changes are shallow, so the server props keep describing the
+  // filters of the first render — only seed the cache while they still match.
+  const matchesInitialFilters =
+    status === initialFilters.status &&
+    categoryIds.join(',') === initialFilters.categoryIds.join(',')
+
+  const productsQuery = useQuery({
+    ...productsQueries.list({ status, categoryIds }),
+    initialData: matchesInitialFilters ? initialData : undefined,
+    // Keep the previous list on screen while the new filter loads
+    placeholderData: (previousData) => previousData,
+  })
+  const categoriesQuery = useQuery(categoriesQueries.list())
+
+  const products = productsQuery.data?.products ?? []
+  const counts = productsQuery.data?.counts ?? EMPTY_COUNTS
 
   // Determine which products to show vs blur
   const displayLimit = limits.limit
@@ -83,11 +84,27 @@ export function ProductsPageContent({
     ? products.slice(displayLimit)
     : []
 
+  /**
+   * Deleting a category reassigns (or unlinks) its products, so the list and
+   * the filter selection both have to let go of it.
+   */
+  const handleCategoryDeleted = (categoryId: string) => {
+    if (categoryIds.includes(categoryId)) {
+      setCategoryIds(categoryIds.filter((id) => id !== categoryId))
+    }
+    void invalidateProductsList(queryClient)
+  }
+
   const handleAddProductClick = (e: React.MouseEvent) => {
     if (isAtLimit) {
       e.preventDefault()
       setShowUpgradeModal(true)
+      return
     }
+
+    // Opening the redesigned creation flow is the interaction the badge announces,
+    // so only a click that actually reaches it may burn the badge.
+    dismissFeature('product-creation-flow-redesign')
   }
 
   return (
@@ -104,14 +121,14 @@ export function ProductsPageContent({
             size="icon"
             className="sm:hidden"
             title={t('manageCategories')}
-            render={<Link href="/dashboard/categories" />}
+            onClick={() => setCategoryManagerOpen(true)}
           >
             <FolderOpen className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             className="hidden sm:inline-flex"
-            render={<Link href="/dashboard/categories" />}
+            onClick={() => setCategoryManagerOpen(true)}
           >
             <FolderOpen className="mr-2 h-4 w-4" />
             {t('manageCategories')}
@@ -139,10 +156,19 @@ export function ProductsPageContent({
               <Button
                 size="icon"
                 className="sm:hidden"
+                // The badge adds screen reader text, so the name has to be explicit.
+                aria-label={t('addProduct')}
                 title={t('addProduct')}
                 render={<Link href="/dashboard/products/new" onClick={handleAddProductClick} />}
               >
                 <Plus className="h-4 w-4" />
+                {/* Inset inside the primary fill: the default dot colour is the
+                    button's own background, so it needs the inverse token. */}
+                <NewFeatureBadge
+                  className="absolute top-1 right-1 bg-primary-foreground"
+                  featureId="product-creation-flow-redesign"
+                  mode="dot"
+                />
               </Button>
               <Button
                 className="hidden sm:inline-flex"
@@ -150,6 +176,10 @@ export function ProductsPageContent({
               >
                 <Plus className="mr-2 h-4 w-4" />
                 {t('addProduct')}
+                <NewFeatureBadge
+                  className="bg-primary-foreground text-primary"
+                  featureId="product-creation-flow-redesign"
+                />
               </Button>
             </>
           )}
@@ -171,10 +201,9 @@ export function ProductsPageContent({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <ProductsFilters
-            categories={categories}
+            categories={categoriesQuery.data ?? []}
             counts={counts}
-            currentStatus={currentStatus}
-            currentCategory={currentCategory}
+            isLoadingCategories={categoriesQuery.isPending}
           />
         </div>
         {products.length > 1 && (
@@ -201,7 +230,15 @@ export function ProductsPageContent({
       </div>
 
       {/* Products Table - Visible */}
-      <ProductsTable products={visibleProducts} currency={currency} />
+      <div
+        className={
+          productsQuery.isPlaceholderData || productsQuery.isFetching
+            ? 'opacity-60 transition-opacity'
+            : 'transition-opacity'
+        }
+      >
+        <ProductsTable products={visibleProducts} currency={currency} />
+      </div>
 
       {/* Blurred Products Section */}
       {blurredProducts.length > 0 && (
@@ -228,6 +265,13 @@ export function ProductsPageContent({
         currentCount={limits.current}
         limit={limits.limit || 5}
         currentPlan={planSlug}
+      />
+
+      {/* Category management — drawer only, there is no categories page */}
+      <CategoryManagerDrawer
+        open={categoryManagerOpen}
+        onOpenChange={setCategoryManagerOpen}
+        onCategoryDeleted={handleCategoryDeleted}
       />
 
       {/* Products Order Dialog */}

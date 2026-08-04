@@ -39,11 +39,11 @@ Caller ── phone ──▶ Twilio ConversationRelay ── WebSocket ──�
 
 ## Environment variables
 
-| Variable                     | Required | Default | Description                                                        |
-| ---------------------------- | -------- | ------- | ------------------------------------------------------------------ |
-| `PORT`                       | no       | `8080`  | Port for the HTTP health check and WebSocket upgrades.             |
-| `TURN_ENDPOINT_URL`          | yes      | —       | Absolute https URL of the app's SSE turn endpoint.                 |
-| `VOICE_RELAY_SIGNING_SECRET` | yes      | —       | HMAC secret shared with the app (handshake + turn signing).        |
+| Variable                     | Required | Default | Description                                                 |
+| ---------------------------- | -------- | ------- | ----------------------------------------------------------- |
+| `PORT`                       | no       | `8080`  | Port for the HTTP health check and WebSocket upgrades.      |
+| `TURN_ENDPOINT_URL`          | yes      | —       | Absolute https URL of the app's SSE turn endpoint.          |
+| `VOICE_RELAY_SIGNING_SECRET` | yes      | —       | HMAC secret shared with the app (handshake + turn signing). |
 
 The worker **fails fast at startup** if `TURN_ENDPOINT_URL` or
 `VOICE_RELAY_SIGNING_SECRET` is missing. See [`.env.example`](./.env.example).

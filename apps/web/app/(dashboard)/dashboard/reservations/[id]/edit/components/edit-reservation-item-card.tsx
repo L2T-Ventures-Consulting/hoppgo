@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { AlertTriangle, ChevronDown, ImageIcon, Lock, Trash2, Unlock } from "lucide-react";
+import { AlertTriangle, ChevronDown, Lock, Trash2, Unlock } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import type { PricingMode } from "@louez/types";
@@ -19,6 +19,8 @@ import {
   TooltipTrigger,
 } from "@louez/ui";
 import { cn } from "@louez/utils";
+
+import { ProductImage } from "@/components/product/product-image";
 
 import type { AvailabilityWarning, CalculatedEditableItem } from "../types";
 
@@ -72,28 +74,23 @@ export function EditReservationItemCard({
       id={item.productId ? `edit-item-product-${item.productId}` : undefined}
       className={cn(
         "bg-background shadow-border rounded-lg p-2 transition-[border-color,box-shadow] duration-300",
-        warning && "border-badge-warning-foreground",
+        warning && "border-badge-review-foreground",
       )}
     >
       <div className="flex items-center gap-3">
-        <div className="bg-muted relative aspect-4/3 w-12 shrink-0 overflow-hidden rounded-md shadow-[0_0_0_1px_rgba(0,0,0,0.1)]">
-          {item.product?.images && item.product.images.length > 0 ? (
-            // Product thumbnails already use direct URLs in this feature.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={item.product.images[0]} alt="" className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center">
-              <ImageIcon className="text-muted-foreground h-4 w-4" />
-            </div>
-          )}
-        </div>
+        <ProductImage
+          src={item.product?.images?.[0]}
+          alt=""
+          sizes="48px"
+          containerClassName="w-12 shrink-0 rounded-md"
+        />
         <div className="min-w-0 flex-1">
           <p title={item.productSnapshot.name} className="truncate font-medium">
             {item.productSnapshot.name}
           </p>
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5">
             {!item.product && (
-              <Badge variant="outline" className="shrink-0 text-[10px]">
+              <Badge variant="expired" className="shrink-0 text-[10px]">
                 {tForm("customItem.badge")}
               </Badge>
             )}
@@ -167,7 +164,7 @@ export function EditReservationItemCard({
         <div className="mt-2 flex items-center justify-between gap-2 text-sm">
           <span className="text-muted-foreground flex items-center gap-2 tabular-nums">
             {item.isManualPrice && item.product ? (
-              <Badge variant="warning" className="text-[10px]">
+              <Badge variant="pending" className="text-[10px]">
                 Manuel
               </Badge>
             ) : (
@@ -218,7 +215,9 @@ export function EditReservationItemCard({
               <div className="flex items-center gap-1">
                 <InputPrice
                   value={displayedUnitPrice}
-                  onChange={(price) => onPriceChange(item.id, price, item.displayPricingMode)}
+                  onValueCommitted={(price) =>
+                    onPriceChange(item.id, price, item.displayPricingMode)
+                  }
                   suffix={`${currencySymbol}/${unitLabel}`}
                   ariaLabel={`${t("edit.unitPrice")}, ${item.productSnapshot.name}`}
                   className={cn(
@@ -265,7 +264,7 @@ export function EditReservationItemCard({
               </p>
               <InputPrice
                 value={item.depositPerUnit}
-                onChange={(depositPerUnit) => onDepositChange(item.id, depositPerUnit)}
+                onValueCommitted={(depositPerUnit) => onDepositChange(item.id, depositPerUnit)}
                 suffix={currencySymbol}
                 ariaLabel={`${t("edit.deposit")}, ${item.productSnapshot.name}`}
               />

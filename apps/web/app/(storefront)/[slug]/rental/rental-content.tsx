@@ -396,7 +396,7 @@ export function RentalContent({
 
                 {/* Duration badge */}
                 <Badge
-                  variant="secondary"
+                  variant="expired"
                   className="w-fit px-2.5 py-1 text-xs sm:text-sm"
                   style={{
                     backgroundColor: `${primaryColor}15`,

@@ -65,11 +65,11 @@ interface InspectionViewProps {
   customerName: string
 }
 
-const conditionColors: Record<ConditionRating, string> = {
-  excellent: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-  good: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-  fair: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
-  damaged: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+const CONDITION_VARIANTS: Record<ConditionRating, 'success' | 'progress' | 'review' | 'failed'> = {
+  excellent: 'success',
+  good: 'progress',
+  fair: 'review',
+  damaged: 'failed',
 }
 
 const statusConfig: Record<InspectionStatus, { icon: typeof CheckCircle2; color: string }> = {
@@ -160,10 +160,7 @@ export function InspectionView({
                     </p>
                   </div>
                 </div>
-                <Badge
-                  variant={inspection.hasDamage ? 'error' : 'default'}
-                  className="ml-auto"
-                >
+                <Badge variant={inspection.hasDamage ? 'failed' : 'progress'} className="ml-auto">
                   {t(`status.${inspection.status}`)}
                 </Badge>
               </div>
@@ -234,7 +231,7 @@ export function InspectionView({
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between mb-3">
                     <span className="font-medium">{item.productName}</span>
-                    <Badge className={conditionColors[item.condition]}>
+                    <Badge variant={CONDITION_VARIANTS[item.condition]}>
                       {t(`conditions.${item.condition}`)}
                     </Badge>
                   </div>

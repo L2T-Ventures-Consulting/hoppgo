@@ -35,8 +35,8 @@ export async function createCheckoutSession({
       currency,
       trialDays: store.trialDays ?? 0,
       stripeCouponId: store.stripeCouponId ?? undefined,
-      successUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/subscription?success=true`,
-      cancelUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/subscription?canceled=true`,
+      successUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/settings/subscription?success=true`,
+      cancelUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/settings/subscription?canceled=true`,
     })
 
     return session
@@ -74,7 +74,7 @@ export async function cancelSubscription() {
   if (!store) throw new Error('Unauthorized')
 
   const result = await cancelSub(store.id)
-  revalidatePath('/dashboard/subscription')
+  revalidatePath('/dashboard/settings/subscription')
   return result
 }
 
@@ -89,7 +89,7 @@ export async function switchToPayAsYouGo() {
 
   try {
     const result = await switchToPayg(store.id)
-    revalidatePath('/dashboard/subscription')
+    revalidatePath('/dashboard/settings/subscription')
     return { success: true as const, ...result }
   } catch (error) {
     console.error('Error switching to pay-as-you-go:', error)
@@ -102,6 +102,6 @@ export async function reactivateSubscription() {
   if (!store) throw new Error('Unauthorized')
 
   const result = await reactivateSub(store.id)
-  revalidatePath('/dashboard/subscription')
+  revalidatePath('/dashboard/settings/subscription')
   return result
 }
