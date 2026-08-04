@@ -451,6 +451,31 @@ const sidebarMenuButtonVariants = cva(
     // --- Background and text colors for hover, active, and open states
     "hover:text-sidebar-accent-foreground active:bg-background active:text-sidebar-accent-foreground data-open:hover:bg-background data-open:hover:text-sidebar-accent-foreground data-active:bg-background data-active:shadow-[0_0_0_1px_var(--color-border)] data-active:text-sidebar-accent-foreground",
 
+    // --- Hover light
+    // The nav icons are glass (multi-layer SVGs that ignore `currentColor`), so
+    // the hover recolour above is a no-op on them and the row would answer the
+    // pointer with nothing. The feedback is a light instead: a soft glow
+    // anchored on the icon and a hairline ring, i.e. the row lighting up like
+    // the card an active row already is. `isolate` + `-z-10` keep the layer
+    // behind the label but inside the button, so an active row's opaque
+    // background hides it on its own — no extra state to unwind.
+    "relative isolate",
+    // 200ms, the pace of a hover: long enough to read as a fade, short enough
+    // to stay under the pointer. The quint-out only shapes the tail.
+    "before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:rounded-[inherit] before:opacity-0 before:transition-opacity before:duration-200 before:ease-[cubic-bezier(0.22,1,0.36,1)] before:content-['']",
+    "before:bg-[radial-gradient(60%_150%_at_1.15rem_50%,var(--sidebar-hover-light),transparent_72%)] before:shadow-[inset_0_0_0_1px_var(--sidebar-hover-ring)]",
+    "hover:before:opacity-100 focus-visible:before:opacity-100",
+    // The light sidebar has no room above white, so there the row reads as lit
+    // by lifting instead: a shadow the flat sidebar doesn't have. Kept off the
+    // active row, whose own `box-shadow` border would lose to it.
+    "transition-shadow duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] not-data-active:hover:shadow-[0_2px_6px_-2px_var(--sidebar-hover-shadow)]",
+    // `scale-*` sets the `scale` property, not `transform` — leaving it out of
+    // the transition list is what made the icon jump to full size instantly
+    // while its glow faded. It also gets a gentler curve than the light: a
+    // quint-out front-loads the travel, which a fading glow absorbs but a
+    // moving object cannot.
+    "[&_svg]:transition-[scale,filter] [&_svg]:duration-200 [&_svg]:ease-[cubic-bezier(0.33,1,0.68,1)] hover:[&_svg]:drop-shadow-[0_2px_5px_var(--sidebar-hover-glow)] motion-safe:hover:[&_svg]:scale-106",
+
     // --- Layout and spacing
     "flex w-full items-center gap-1.5 overflow-hidden rounded-lg p-2 text-left text-sm",
 
