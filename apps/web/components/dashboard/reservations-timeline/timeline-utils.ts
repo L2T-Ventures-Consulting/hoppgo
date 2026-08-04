@@ -124,10 +124,12 @@ export interface TimelineLane {
   label: string;
 }
 
-interface DayInterval {
+export interface TimelineDayRange {
   startIndex: number;
   endIndex: number;
 }
+
+type DayInterval = TimelineDayRange;
 
 function toDayInterval(start: Date, end: Date, windowStart: Date): DayInterval {
   return {
@@ -136,8 +138,60 @@ function toDayInterval(start: Date, end: Date, windowStart: Date): DayInterval {
   };
 }
 
-function intervalsOverlap(a: DayInterval, b: DayInterval): boolean {
+export function timelineRangesOverlap(a: TimelineDayRange, b: TimelineDayRange): boolean {
   return a.startIndex <= b.endIndex && a.endIndex >= b.startIndex;
+}
+
+export function findNearestTimelineItem<T extends TimelineDayRange>(
+  items: readonly T[],
+  visibleRange: TimelineDayRange,
+): { item: T; direction: "previous" | "next" } | null {
+  if (items.length === 0 || items.some((item) => timelineRangesOverlap(item, visibleRange))) {
+    return null;
+  }
+
+  const distanceFromVisibleRange = (item: TimelineDayRange) =>
+    item.endIndex < visibleRange.startIndex
+      ? visibleRange.startIndex - item.endIndex
+      : item.startIndex - visibleRange.endIndex;
+
+  let nearest = items[0];
+  let nearestDistance = distanceFromVisibleRange(nearest);
+
+  for (const item of items.slice(1)) {
+    const distance = distanceFromVisibleRange(item);
+    if (distance < nearestDistance) {
+      nearest = item;
+      nearestDistance = distance;
+    }
+  }
+
+  return {
+    item: nearest,
+    direction: nearest.endIndex < visibleRange.startIndex ? "previous" : "next",
+  };
+}
+
+/**
+ * Returns the side that needs one more loaded chunk before centering an item.
+ * Keeping a buffer around the destination prevents edge-triggered infinite
+ * loading from shifting the target during the navigation animation.
+ */
+export function getTimelineNavigationBufferDirection(params: {
+  item: TimelineDayRange;
+  dayWidth: number;
+  daysCount: number;
+  viewportWidth: number;
+  edgeThreshold: number;
+}): "previous" | "next" | null {
+  const { item, dayWidth, daysCount, viewportWidth, edgeThreshold } = params;
+  const itemCenter = (item.startIndex + item.endIndex) / 2;
+  const targetScrollLeft = itemCenter * dayWidth - viewportWidth / 2;
+  const maxScrollLeft = Math.max(0, daysCount * dayWidth - viewportWidth);
+
+  if (targetScrollLeft < edgeThreshold) return "previous";
+  if (maxScrollLeft - targetScrollLeft < edgeThreshold) return "next";
+  return null;
 }
 
 // =============================================================================
@@ -265,7 +319,7 @@ export function placeReservations(params: {
     // 2. Greedy placement on free lanes
     for (let laneIndex = 0; laneIndex < lanes.length && remaining > 0; laneIndex++) {
       if (usedLanes.has(laneIndex)) continue;
-      const isBusy = occupancy[laneIndex].some((busy) => intervalsOverlap(busy, interval));
+      const isBusy = occupancy[laneIndex].some((busy) => timelineRangesOverlap(busy, interval));
       if (isBusy) continue;
 
       occupancy[laneIndex].push(interval);
