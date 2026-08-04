@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { connection } from "next/server";
 import { z } from "zod";
 
 import { Badge, Card, CardDescription, CardHeader, CardPanel, CardTitle } from "@louez/ui";
@@ -161,6 +162,8 @@ function summarizeEconomics(runs: ImageProcessingDebugRun[]) {
 }
 
 const ImageProcessingDevPage = async ({ searchParams }: ImageProcessingDevPageProps) => {
+  await connection();
+
   if (!isImageProcessingDebugEnabled()) {
     notFound();
   }
