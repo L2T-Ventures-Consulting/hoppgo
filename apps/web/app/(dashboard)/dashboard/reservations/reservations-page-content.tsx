@@ -272,18 +272,30 @@ export function ReservationsPageContent({
       className={cn(
         isListView
           ? "space-y-6"
-          : "flex h-[calc(100dvh-6.5rem)] min-h-0 flex-col gap-3 md:gap-6 overflow-hidden",
+          : cn(
+              // Fills the dashboard content box exactly. The subtracted height
+              // mirrors the shell in app/(dashboard)/dashboard/layout.tsx:
+              //   mobile — 3.5rem header + 1.5rem wrapper (py-4 pb-2)
+              //   md+    — 3.5rem header + 3rem wrapper (py-6) + 1rem SidebarInset m-2
+              // svh, not dvh: the shell root is h-svh, so dvh would overflow it
+              // on mobile browsers whose URL bar collapses.
+              "flex h-[calc(100svh-5rem)] flex-col gap-3 overflow-hidden md:h-[calc(100svh-7.5rem)] md:gap-6",
+              activeView === "calendar" ? "min-h-[34rem]" : "min-h-0",
+            ),
       )}
     >
-      {/* Header */}
+      {/* Header — the title block is dropped on mobile, where the topbar
+          breadcrumb already names the page and vertical space is scarce. */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+        <div className="hidden sm:block">
           <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <ReservationsViewSwitcher view={activeView} onViewChange={handleViewChange} />
+          {/* Pushes the actions to the far edge once the title is gone */}
+          <div className="flex-1 sm:hidden" />
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger
@@ -301,9 +313,13 @@ export function ReservationsPageContent({
               <TooltipContent side="bottom">{tCalendar("export.button")}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
-          <Button render={<Link href="/dashboard/reservations/new?source=reservations_page" />}>
+          <Button
+            render={<Link href="/dashboard/reservations/new?source=reservations_page" />}
+            aria-label={t("createReservation")}
+            className="max-sm:size-9 max-sm:px-0"
+          >
             <Plus className="h-4 w-4" />
-            {t("createReservation")}
+            <span className="max-sm:hidden">{t("createReservation")}</span>
           </Button>
         </div>
       </div>

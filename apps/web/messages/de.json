@@ -2600,11 +2600,19 @@
         "createFirstReservation": "Erste Reservierung erstellen",
         "viewPreviousReservation": "Vorherige Reservierung anzeigen",
         "viewNextReservation": "Nächste Reservierung anzeigen",
+        "reservationAbove": "Reservierung weiter oben",
+        "reservationBelow": "Reservierung weiter unten",
         "resetFilters": "Filter zurücksetzen",
         "dragHint": "Tipp: Klicken und ziehen Sie über einen leeren Bereich, um eine vorausgefüllte Reservierung zu erstellen.",
         "searchProductsPlaceholder": "In {count} Produkten suchen...",
         "noProductsFound": "Keine Produkte gefunden",
-        "productsSelected": "{count} Produkte"
+        "productsSelected": "{count} Produkte",
+        "filters": "Filter",
+        "filtersDescription": "Grenze die im Kalender angezeigten Reservierungen ein.",
+        "applyFilters": "Übernehmen",
+        "sectionOperation": "Tagesvorgang",
+        "sectionStatus": "Status",
+        "sectionProducts": "Produkte"
       },
       "export": {
         "button": "Kalender synchronisieren",

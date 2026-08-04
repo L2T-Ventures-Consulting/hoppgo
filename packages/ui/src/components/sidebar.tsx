@@ -24,6 +24,8 @@ import { cn } from "@louez/utils";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
+const SIDEBAR_STORAGE_KEY = SIDEBAR_COOKIE_NAME;
+const SIDEBAR_COMPACT_MEDIA_QUERY = "(min-width: 768px) and (max-width: 1279px)";
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
@@ -63,22 +65,79 @@ function SidebarProvider({
 }) {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
+  const hasPersistedOpen = React.useRef(false);
 
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen);
   const open = openProp ?? _open;
+
+  React.useLayoutEffect(() => {
+    if (openProp !== undefined) {
+      return;
+    }
+
+    let persistedState: string | null = null;
+
+    try {
+      persistedState = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    } catch {
+      // Browser storage can be unavailable; the cookie remains a fallback.
+    }
+
+    if (persistedState !== "true" && persistedState !== "false") {
+      persistedState =
+        document.cookie
+          .split("; ")
+          .find((cookie) => cookie.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
+          ?.split("=")[1] ?? null;
+    }
+
+    const persistedOpen =
+      persistedState === "true" ? true : persistedState === "false" ? false : null;
+    hasPersistedOpen.current = persistedOpen !== null;
+
+    if (persistedOpen !== null) {
+      _setOpen(persistedOpen);
+
+      try {
+        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(persistedOpen));
+      } catch {
+        // The cookie already contains the preference.
+      }
+    }
+
+    const compactMediaQuery = window.matchMedia(SIDEBAR_COMPACT_MEDIA_QUERY);
+    const applyResponsiveDefault = () => {
+      if (!hasPersistedOpen.current) {
+        _setOpen(compactMediaQuery.matches ? false : defaultOpen);
+      }
+    };
+
+    applyResponsiveDefault();
+    compactMediaQuery.addEventListener("change", applyResponsiveDefault);
+
+    return () => compactMediaQuery.removeEventListener("change", applyResponsiveDefault);
+  }, [defaultOpen, openProp]);
+
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === "function" ? value(open) : value;
+      hasPersistedOpen.current = true;
+
       if (setOpenProp) {
         setOpenProp(openState);
       } else {
         _setOpen(openState);
       }
 
-      // This sets the cookie to keep the sidebar state.
-      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+      try {
+        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(openState));
+      } catch {
+        // The cookie below still persists the preference when storage is unavailable.
+      }
+
+      document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}; SameSite=Lax`;
     },
     [setOpenProp, open],
   );

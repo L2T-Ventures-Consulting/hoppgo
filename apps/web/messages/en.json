@@ -2713,11 +2713,19 @@
         "createFirstReservation": "Create your first reservation",
         "viewPreviousReservation": "View previous reservation",
         "viewNextReservation": "View next reservation",
+        "reservationAbove": "Reservation above",
+        "reservationBelow": "Reservation below",
         "resetFilters": "Reset filters",
         "dragHint": "Tip: click and drag on an empty range to create a prefilled reservation.",
         "searchProductsPlaceholder": "Search in {count} products...",
         "noProductsFound": "No products found",
-        "productsSelected": "{count} products"
+        "productsSelected": "{count} products",
+        "filters": "Filters",
+        "filtersDescription": "Narrow down the reservations shown on the calendar.",
+        "applyFilters": "Apply",
+        "sectionOperation": "Today's operation",
+        "sectionStatus": "Statuses",
+        "sectionProducts": "Products"
       },
       "export": {
         "button": "Sync calendar",

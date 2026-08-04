@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQueries } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { ChevronDown, ChevronUp, Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Alert, AlertDescription, Button } from "@louez/ui";
@@ -97,6 +97,11 @@ interface DragAnchor {
   dayIndex: number;
   clientX: number;
   clientY: number;
+}
+
+interface VerticalRange {
+  start: number;
+  end: number;
 }
 
 interface ReservationsCalendarViewProps {
@@ -319,6 +324,10 @@ export function ReservationsCalendarView({
     formatMonthLabel(anchorDateRef.current),
   );
   const [visibleDayRange, setVisibleDayRange] = useState({ startIndex: 0, endIndex: 0 });
+  const [visibleVerticalRange, setVisibleVerticalRange] = useState<VerticalRange>({
+    start: 0,
+    end: Number.POSITIVE_INFINITY,
+  });
 
   const hasReservationInVisiblePeriod = useMemo(
     () => placed.some((item) => timelineRangesOverlap(item, visibleDayRange)),
@@ -329,6 +338,33 @@ export function ReservationsCalendarView({
     () => findNearestTimelineItem(placed, visibleDayRange),
     [placed, visibleDayRange],
   );
+
+  const verticalReservationNavigation = useMemo(() => {
+    let above: (typeof placed)[number] | null = null;
+    let below: (typeof placed)[number] | null = null;
+    let hasVisibleReservation = false;
+
+    for (const item of placed) {
+      if (!timelineRangesOverlap(item, visibleDayRange)) continue;
+
+      const top = item.laneIndex * ROW_HEIGHT + (ROW_HEIGHT - BAR_HEIGHT) / 2;
+      const bottom = top + BAR_HEIGHT;
+
+      if (bottom <= visibleVerticalRange.start) {
+        if (above === null || item.laneIndex > above.laneIndex) {
+          above = item;
+        }
+      } else if (top >= visibleVerticalRange.end) {
+        if (below === null || item.laneIndex < below.laneIndex) {
+          below = item;
+        }
+      } else {
+        hasVisibleReservation = true;
+      }
+    }
+
+    return hasVisibleReservation ? { above: null, below: null } : { above, below };
+  }, [placed, visibleDayRange, visibleVerticalRange]);
 
   const showEmptyVisiblePeriod =
     hasCompletedInitialLoad && !hasError && !hasReservationInVisiblePeriod;
@@ -353,6 +389,13 @@ export function ReservationsCalendarView({
       previous.startIndex === leftmostIndex && previous.endIndex === rightmostIndex
         ? previous
         : { startIndex: leftmostIndex, endIndex: rightmostIndex },
+    );
+    const verticalStart = element.scrollTop;
+    const verticalEnd = verticalStart + Math.max(0, element.clientHeight - HEADER_HEIGHT);
+    setVisibleVerticalRange((previous) =>
+      previous.start === verticalStart && previous.end === verticalEnd
+        ? previous
+        : { start: verticalStart, end: verticalEnd },
     );
     setVisibleMonthLabel((previous) => (previous === label ? previous : label));
   };
@@ -389,6 +432,16 @@ export function ReservationsCalendarView({
     updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zoom]);
+
+  useEffect(() => {
+    const element = scrollerRef.current;
+    if (!element) return;
+
+    const resizeObserver = new ResizeObserver(() => updateVisibleViewport(element));
+    resizeObserver.observe(element);
+    return () => resizeObserver.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayWidth, daysCount, windowStart]);
 
   useEffect(() => {
     appendLockRef.current = false;
@@ -467,6 +520,21 @@ export function ReservationsCalendarView({
     scrollerRef.current?.scrollBy({
       left: dayCount * dayWidth,
       behavior: "smooth",
+    });
+  };
+
+  const scrollToReservationLane = (laneIndex: number) => {
+    const element = scrollerRef.current;
+    if (!element) return;
+
+    const viewportHeight = Math.max(0, element.clientHeight - HEADER_HEIGHT);
+    const reservationTop = laneIndex * ROW_HEIGHT + (ROW_HEIGHT - BAR_HEIGHT) / 2;
+    const target = reservationTop - Math.max(0, (viewportHeight - BAR_HEIGHT) / 2);
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    element.scrollTo({
+      top: Math.max(0, target),
+      behavior: reduceMotion ? "auto" : "smooth",
     });
   };
 
@@ -753,7 +821,7 @@ export function ReservationsCalendarView({
 
         {showInitialLoadingOverlay && (
           <div
-            className="bg-card/90 absolute inset-0 z-50 flex items-center justify-center rounded-lg backdrop-blur-xs"
+            className="bg-card/60 absolute inset-x-px top-17 bottom-px z-50 flex items-center justify-center rounded-b-lg backdrop-blur-xs"
             role="status"
             aria-live="polite"
           >
@@ -770,6 +838,41 @@ export function ReservationsCalendarView({
               </p>
             </div>
           </div>
+        )}
+
+        {!showInitialLoadingOverlay && !showEmptyVisiblePeriod && !hasError && (
+          <>
+            {verticalReservationNavigation.above && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-card/95 absolute top-19 left-1/2 z-40 -translate-x-1/2 shadow-md backdrop-blur-xs"
+                onClick={() => {
+                  const reservation = verticalReservationNavigation.above;
+                  if (!reservation) return;
+                  scrollToReservationLane(reservation.laneIndex);
+                }}
+              >
+                <ChevronUp />
+                {tTimeline("reservationAbove")}
+              </Button>
+            )}
+            {verticalReservationNavigation.below && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="bg-card/95 absolute bottom-2 left-1/2 z-40 -translate-x-1/2 shadow-md backdrop-blur-xs"
+                onClick={() => {
+                  const reservation = verticalReservationNavigation.below;
+                  if (!reservation) return;
+                  scrollToReservationLane(reservation.laneIndex);
+                }}
+              >
+                <ChevronDown />
+                {tTimeline("reservationBelow")}
+              </Button>
+            )}
+          </>
         )}
 
         {showEmptyVisiblePeriod && (

@@ -28,6 +28,9 @@ export const productAnalyticsEvents = {
   onboardingSourceSkipped: 'onboarding_source_skipped',
   onboardingErrorShown: 'onboarding_error_shown',
   acquisitionChannelReported: 'acquisition_channel_reported',
+  whatsNewListViewed: 'whats_new_list_viewed',
+  whatsNewAnnouncementViewed: 'whats_new_announcement_viewed',
+  whatsNewAnnouncementCompleted: 'whats_new_announcement_completed',
 } as const;
 
 export type ProductAnalyticsEvent =
@@ -55,6 +58,12 @@ export const dashboardReservationAnalyticsBaseProperties = {
 export const keyboardShortcutAnalyticsBaseProperties = {
   ...productAnalyticsBaseProperties,
   feature: 'keyboard_shortcuts',
+  surface: 'dashboard',
+} as const;
+
+export const whatsNewAnalyticsBaseProperties = {
+  ...productAnalyticsBaseProperties,
+  feature: 'whats_new',
   surface: 'dashboard',
 } as const;
 

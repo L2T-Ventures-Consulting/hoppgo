@@ -1,14 +1,19 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 
 import { CheckCheck, Sparkles } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { usePostHog } from "posthog-js/react";
 
 import { Button, Card, Separator } from "@louez/ui";
 
 import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 import { useWhatsNew } from "@/hooks/use-whats-new";
+import {
+  productAnalyticsEvents,
+  whatsNewAnalyticsBaseProperties,
+} from "@/lib/product-analytics/analytics-events";
 
 import {
   countWhatsNewByFilter,
@@ -21,7 +26,9 @@ import { WhatsNewFilters } from "./whats-new-filters";
 export const WhatsNewPageContent = () => {
   const t = useTranslations("dashboard.whatsNew");
   const format = useFormatter();
-  const { announcements, markAllSeen, unseenIds } = useWhatsNew();
+  const posthog = usePostHog();
+  const { announcements, markAllSeen, unseenCount, unseenIds } = useWhatsNew();
+  const hasTrackedView = useRef(false);
   // Starts on `all` so a `#<id>` deep link always resolves.
   const [filter, setFilter] = useState<WhatsNewFilter>("all");
   // Landing on the changelog does not mark anything read: an entry is read
@@ -39,6 +46,17 @@ export const WhatsNewPageContent = () => {
       ),
     [announcements, filter],
   );
+
+  useEffect(() => {
+    if (hasTrackedView.current) return;
+    hasTrackedView.current = true;
+
+    posthog.capture(productAnalyticsEvents.whatsNewListViewed, {
+      ...whatsNewAnalyticsBaseProperties,
+      announcement_count: announcements.length,
+      unseen_count: unseenCount,
+    });
+  }, [announcements.length, posthog, unseenCount]);
 
   // Which entries put their demo on the left. Only entries that actually carry
   // media are counted, and the tally runs across month sections: a text-only

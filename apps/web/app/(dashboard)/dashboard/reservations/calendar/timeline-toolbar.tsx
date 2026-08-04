@@ -10,6 +10,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   ListFilter,
+  LocateFixed,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { parseAsArrayOf, parseAsString, parseAsStringLiteral, useQueryStates } from "nuqs";
@@ -25,6 +26,15 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  Drawer,
+  DrawerClose,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+  DrawerTrigger,
   Label,
   Popover,
   PopoverContent,
@@ -66,9 +76,19 @@ const timelineFiltersStorageSchema = z.object({
 
 const TIMELINE_FILTERS_STORAGE_PREFIX = "reservations-timeline-filters:v1";
 
+/** True once the visible statuses differ from the noise-reducing default set. */
+function hasCustomStatusSelection(visibleStatuses: readonly string[]) {
+  return (
+    visibleStatuses.length !== DEFAULT_VISIBLE_STATUSES.length ||
+    DEFAULT_VISIBLE_STATUSES.some((status) => !visibleStatuses.includes(status))
+  );
+}
+
 export interface TimelineFilters {
   range: CalendarRange;
   hasActiveFilters: boolean;
+  /** Number of filter groups narrowed away from their default (0-3) */
+  activeFilterCount: number;
   /** Empty means "all products" */
   selectedProductIds: Set<string>;
   selectedProducts: Product[];
@@ -124,11 +144,13 @@ export function useTimelineFilters(products: Product[], storeId: string): Timeli
     [state.statuses],
   );
 
-  const hasCustomStatuses =
-    state.statuses.length !== DEFAULT_VISIBLE_STATUSES.length ||
-    DEFAULT_VISIBLE_STATUSES.some((status) => !state.statuses.includes(status));
+  const hasCustomStatuses = hasCustomStatusSelection(state.statuses);
   const hasActiveFilters =
     selectedProductIds.size > 0 || state.operation !== null || hasCustomStatuses;
+  const activeFilterCount =
+    (selectedProductIds.size > 0 ? 1 : 0) +
+    (state.operation !== null ? 1 : 0) +
+    (hasCustomStatuses ? 1 : 0);
 
   // URL values win so shared links stay deterministic. Missing filters are
   // restored from storage after hydration, scoped to the active store.
@@ -216,6 +238,7 @@ export function useTimelineFilters(products: Product[], storeId: string): Timeli
   return {
     range: state.range,
     hasActiveFilters,
+    activeFilterCount,
     selectedProductIds,
     selectedProducts,
     hiddenStatuses,
@@ -256,10 +279,12 @@ function ProductFilterCombobox({
   products,
   selectedProductIds,
   onChange,
+  triggerClassName,
 }: {
   products: Product[];
   selectedProductIds: Set<string>;
   onChange: (productIds: string[]) => void;
+  triggerClassName?: string;
 }) {
   const t = useTranslations("dashboard.calendar");
   const tTimeline = useTranslations("dashboard.calendar.timeline");
@@ -297,7 +322,10 @@ function ProductFilterCombobox({
             role="combobox"
             aria-expanded={open}
             aria-label={t("filterByProduct")}
-            className="group w-44 justify-between [&>span]:min-w-0 [&>span]:first:w-full "
+            className={cn(
+              "group w-44 justify-between [&>span]:min-w-0 [&>span]:first:w-full",
+              triggerClassName,
+            )}
           />
         }
       >
@@ -357,6 +385,216 @@ function ProductFilterCombobox({
 }
 
 // =============================================================================
+// Individual filter controls — shared between the desktop toolbar row and the
+// mobile filter drawer, so both always offer exactly the same choices.
+// =============================================================================
+
+function OperationSelect({
+  filters,
+  onToday,
+  className,
+}: {
+  filters: TimelineFilters;
+  onToday: () => void;
+  className?: string;
+}) {
+  const tTimeline = useTranslations("dashboard.calendar.timeline");
+
+  return (
+    <Select
+      value={filters.todayOperation ?? "all"}
+      onValueChange={(value: string | null) => {
+        if (value === null) return;
+        filters.setTodayOperation(value === "all" ? null : (value as TodayOperation));
+        if (value !== "all") onToday();
+      }}
+    >
+      <SelectTrigger className={cn("w-44", className)} aria-label={tTimeline("operationFilter")}>
+        <CalendarClock data-slot="icon" className="size-4 shrink-0" />
+        <SelectValue>
+          {filters.todayOperation
+            ? tTimeline(
+                filters.todayOperation === "departure" ? "todaysDepartures" : "todaysReturns",
+              )
+            : tTimeline("allOperations")}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="all" label={tTimeline("allOperations")}>
+          {tTimeline("allOperations")}
+        </SelectItem>
+        <SelectItem value="departure" label={tTimeline("todaysDepartures")}>
+          {tTimeline("todaysDepartures")}
+        </SelectItem>
+        <SelectItem value="return" label={tTimeline("todaysReturns")}>
+          {tTimeline("todaysReturns")}
+        </SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+
+/**
+ * Statuses shown, but only once the selection is non-default — the default set
+ * already hides the terminal statuses, and badging that made the toolbar read
+ * as "5 filters active" on a page nobody had touched.
+ */
+function visibleStatusBadgeCount(hiddenStatuses: Set<string>): number | null {
+  const visible = RESERVATION_STATUSES.filter((status) => !hiddenStatuses.has(status));
+  return hasCustomStatusSelection(visible) ? visible.length : null;
+}
+
+function StatusFilterList({ filters }: { filters: TimelineFilters }) {
+  const t = useTranslations("dashboard.calendar");
+  const tTimeline = useTranslations("dashboard.calendar.timeline");
+  const { hiddenStatuses } = filters;
+
+  return (
+    <div className="space-y-0.5">
+      {RESERVATION_STATUSES.map((status) => (
+        <Label
+          key={status}
+          className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm font-normal"
+        >
+          <Checkbox
+            checked={!hiddenStatuses.has(status)}
+            onCheckedChange={() => filters.toggleStatus(status)}
+          />
+          <span className={cn("h-2 w-2 shrink-0 rounded-full", getStatusDotClass(status))} />
+          <span className="flex-1">{t(`status.${status}`)}</span>
+        </Label>
+      ))}
+      {hiddenStatuses.size > 0 && (
+        <Button
+          variant="tertiary"
+          className="mt-1 w-full"
+          onClick={() => filters.setVisibleStatuses(new Set(RESERVATION_STATUSES))}
+        >
+          {tTimeline("showAll")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function RangeSelect({
+  range,
+  onRangeChange,
+  compact = false,
+}: {
+  range: CalendarRange;
+  onRangeChange: (range: CalendarRange) => void;
+  /** Mobile: drops the icon and the fixed width to keep the toolbar on one row */
+  compact?: boolean;
+}) {
+  const t = useTranslations("dashboard.calendar");
+
+  return (
+    <Select
+      value={range}
+      onValueChange={(value: string | null) => {
+        if (value !== null) onRangeChange(value as CalendarRange);
+      }}
+    >
+      <SelectTrigger className={compact ? "w-auto" : "w-36"} aria-label={t("viewMode.label")}>
+        {!compact && <CalendarIcon data-slot="icon" className="size-4 shrink-0" />}
+        <SelectValue>{t(`periods.${range}`)}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {CALENDAR_RANGES.map((period) => (
+          <SelectItem key={period} value={period} label={t(`periods.${period}`)}>
+            {t(`periods.${period}`)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+/** `null` hides the badge; `0` is a real value ("no status shown"). */
+function ActiveFilterBadge({ count }: { count: number | null }) {
+  if (count === null) return null;
+
+  return (
+    <span className="bg-primary text-primary-foreground absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold">
+      {count}
+    </span>
+  );
+}
+
+// =============================================================================
+// Mobile filter drawer — the four controls don't fit on a phone toolbar, and a
+// horizontal scroller hid half of them. One trigger, everything visible inside.
+// =============================================================================
+
+function TimelineFiltersDrawer({
+  products,
+  filters,
+  onToday,
+}: {
+  products: Product[];
+  filters: TimelineFilters;
+  onToday: () => void;
+}) {
+  const tTimeline = useTranslations("dashboard.calendar.timeline");
+  const [open, setOpen] = useState(false);
+
+  return (
+    <Drawer position="bottom" open={open} onOpenChange={setOpen}>
+      <DrawerTrigger
+        render={<Button variant="outline" size="icon" aria-label={tTimeline("filters")} />}
+      >
+        <ListFilter />
+        <ActiveFilterBadge count={filters.activeFilterCount || null} />
+      </DrawerTrigger>
+      <DrawerPopup>
+        <DrawerHeader>
+          <DrawerTitle>{tTimeline("filters")}</DrawerTitle>
+          <DrawerDescription>{tTimeline("filtersDescription")}</DrawerDescription>
+        </DrawerHeader>
+        <DrawerPanel className="space-y-5">
+          <section className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {tTimeline("sectionOperation")}
+            </p>
+            <OperationSelect filters={filters} onToday={onToday} className="w-full" />
+          </section>
+
+          <section className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {tTimeline("sectionProducts")}
+            </p>
+            <ProductFilterCombobox
+              products={products}
+              selectedProductIds={filters.selectedProductIds}
+              onChange={filters.setSelectedProductIds}
+              triggerClassName="w-full"
+            />
+          </section>
+
+          <section className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {tTimeline("sectionStatus")}
+            </p>
+            <StatusFilterList filters={filters} />
+          </section>
+        </DrawerPanel>
+        <DrawerFooter>
+          <Button
+            variant="outline"
+            disabled={filters.activeFilterCount === 0}
+            onClick={() => filters.resetFilters()}
+          >
+            {tTimeline("resetFilters")}
+          </Button>
+          <DrawerClose render={<Button />}>{tTimeline("applyFilters")}</DrawerClose>
+        </DrawerFooter>
+      </DrawerPopup>
+    </Drawer>
+  );
+}
+
+// =============================================================================
 // Toolbar
 // =============================================================================
 
@@ -386,11 +624,14 @@ export function TimelineToolbar({
   const t = useTranslations("dashboard.calendar");
   const tTimeline = useTranslations("dashboard.calendar.timeline");
 
-  const { hiddenStatuses, range } = filters;
+  const { range } = filters;
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <div className="flex items-center gap-1">
+    <div className="flex min-w-0 items-center gap-2 sm:flex-wrap">
+      {/* Date navigation: back / today / forward, so each arrow sits on the
+          side it moves towards. "Today" recenters the scroller, hence the
+          crosshair — a calendar glyph here would echo the view switcher. */}
+      <div className="flex shrink-0 items-center gap-1">
         <Button
           variant="outline"
           size="icon-sm"
@@ -399,114 +640,60 @@ export function TimelineToolbar({
         >
           <ChevronLeft />
         </Button>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className="sm:hidden"
+          aria-label={t("today")}
+          onClick={onToday}
+        >
+          <LocateFixed />
+        </Button>
+        <Button variant="outline" size="sm" className="max-sm:hidden" onClick={onToday}>
+          {t("today")}
+        </Button>
         <Button variant="outline" size="icon-sm" aria-label={tTimeline("next")} onClick={onNext}>
           <ChevronRight />
         </Button>
-        <Button variant="outline" size="sm" onClick={onToday}>
-          {t("today")}
-        </Button>
       </div>
 
-      <span className="text-sm font-medium first-letter:uppercase">{monthLabel}</span>
+      {/* The grid's own header already repeats the month on mobile */}
+      <span className="min-w-0 truncate text-sm font-medium first-letter:uppercase max-sm:hidden">
+        {monthLabel}
+      </span>
 
-      {isFetching && <Spinner className="text-muted-foreground size-3.5" />}
+      {isFetching && <Spinner className="text-muted-foreground size-3.5 shrink-0" />}
 
+      {/* Mobile: one drawer for every filter, with the range next to it */}
+      <div className="ms-auto flex shrink-0 items-center gap-1 sm:hidden">
+        <TimelineFiltersDrawer products={products} filters={filters} onToday={onToday} />
+        <RangeSelect range={range} onRangeChange={onRangeChange} compact />
+      </div>
+
+      {/* Desktop: the same controls laid out inline */}
       <ScrollArea
         orientation="horizontal"
         scrollFade
-        className="h-auto w-full min-w-0 basis-full sm:ml-auto sm:w-auto sm:max-w-full sm:basis-auto"
+        className="hidden h-auto max-w-full min-w-0 sm:ml-auto sm:block sm:w-auto"
       >
         <div className="flex w-max touch-pan-x items-center gap-1">
-          <Select
-            value={filters.todayOperation ?? "all"}
-            onValueChange={(value: string | null) => {
-              if (value === null) return;
-              filters.setTodayOperation(value === "all" ? null : (value as TodayOperation));
-              if (value !== "all") onToday();
-            }}
-          >
-            <SelectTrigger className="w-44" aria-label={tTimeline("operationFilter")}>
-              <CalendarClock data-slot="icon" className="size-4 shrink-0" />
-              <SelectValue>
-                {filters.todayOperation
-                  ? tTimeline(
-                      filters.todayOperation === "departure" ? "todaysDepartures" : "todaysReturns",
-                    )
-                  : tTimeline("allOperations")}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all" label={tTimeline("allOperations")}>
-                {tTimeline("allOperations")}
-              </SelectItem>
-              <SelectItem value="departure" label={tTimeline("todaysDepartures")}>
-                {tTimeline("todaysDepartures")}
-              </SelectItem>
-              <SelectItem value="return" label={tTimeline("todaysReturns")}>
-                {tTimeline("todaysReturns")}
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          <OperationSelect filters={filters} onToday={onToday} />
 
           <Popover>
             <PopoverTrigger
-              render={<Button variant="outline" aria-label={tTimeline("statusFilter")} />}
+              render={
+                <Button variant="outline" size="icon" aria-label={tTimeline("statusFilter")} />
+              }
             >
               <ListFilter />
-              {hiddenStatuses.size > 0 && (
-                <span className="bg-primary text-primary-foreground flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold">
-                  {RESERVATION_STATUSES.length - hiddenStatuses.size}
-                </span>
-              )}
+              <ActiveFilterBadge count={visibleStatusBadgeCount(filters.hiddenStatuses)} />
             </PopoverTrigger>
             <PopoverContent align="end" className="w-52">
-              <div className="space-y-0.5 ">
-                {RESERVATION_STATUSES.map((status) => (
-                  <Label
-                    key={status}
-                    className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm font-normal"
-                  >
-                    <Checkbox
-                      checked={!hiddenStatuses.has(status)}
-                      onCheckedChange={() => filters.toggleStatus(status)}
-                    />
-                    <span
-                      className={cn("h-2 w-2 shrink-0 rounded-full", getStatusDotClass(status))}
-                    />
-                    <span className="flex-1">{t(`status.${status}`)}</span>
-                  </Label>
-                ))}
-                {hiddenStatuses.size > 0 && (
-                  <Button
-                    variant="tertiary"
-                    className="mt-1 w-full"
-                    onClick={() => filters.setVisibleStatuses(new Set(RESERVATION_STATUSES))}
-                  >
-                    {tTimeline("showAll")}
-                  </Button>
-                )}
-              </div>
+              <StatusFilterList filters={filters} />
             </PopoverContent>
           </Popover>
 
-          <Select
-            value={range}
-            onValueChange={(value: string | null) => {
-              if (value !== null) onRangeChange(value as CalendarRange);
-            }}
-          >
-            <SelectTrigger className="w-36">
-              <CalendarIcon data-slot="icon" className=" size-4 shrink-0" />
-              <SelectValue>{t(`periods.${range}`)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {CALENDAR_RANGES.map((period) => (
-                <SelectItem key={period} value={period} label={t(`periods.${period}`)}>
-                  {t(`periods.${period}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <RangeSelect range={range} onRangeChange={onRangeChange} />
 
           <ProductFilterCombobox
             products={products}

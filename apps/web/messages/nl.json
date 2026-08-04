@@ -2561,11 +2561,19 @@
         "createFirstReservation": "Eerste reservering maken",
         "viewPreviousReservation": "Vorige reservering bekijken",
         "viewNextReservation": "Volgende reservering bekijken",
+        "reservationAbove": "Reservering hierboven",
+        "reservationBelow": "Reservering hieronder",
         "resetFilters": "Filters resetten",
         "dragHint": "Tip: klik en sleep over een leeg bereik om een vooraf ingevulde reservering te maken.",
         "searchProductsPlaceholder": "Zoeken in {count} producten...",
         "noProductsFound": "Geen producten gevonden",
-        "productsSelected": "{count} producten"
+        "productsSelected": "{count} producten",
+        "filters": "Filters",
+        "filtersDescription": "Beperk de reserveringen die op de kalender worden getoond.",
+        "applyFilters": "Toepassen",
+        "sectionOperation": "Bewerking van vandaag",
+        "sectionStatus": "Statussen",
+        "sectionProducts": "Producten"
       },
       "export": {
         "button": "Agenda synchroniseren",

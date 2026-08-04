@@ -2606,11 +2606,19 @@
         "createFirstReservation": "Crear tu primera reserva",
         "viewPreviousReservation": "Ver la reserva anterior",
         "viewNextReservation": "Ver la próxima reserva",
+        "reservationAbove": "Reserva más arriba",
+        "reservationBelow": "Reserva más abajo",
         "resetFilters": "Restablecer filtros",
         "dragHint": "Consejo: haz clic y arrastra sobre un rango vacío para crear una reserva prellenada.",
         "searchProductsPlaceholder": "Buscar en {count} productos...",
         "noProductsFound": "No se encontraron productos",
-        "productsSelected": "{count} productos"
+        "productsSelected": "{count} productos",
+        "filters": "Filtros",
+        "filtersDescription": "Acota las reservas que se muestran en el calendario.",
+        "applyFilters": "Aplicar",
+        "sectionOperation": "Operación del día",
+        "sectionStatus": "Estados",
+        "sectionProducts": "Productos"
       },
       "export": {
         "button": "Sincronizar el calendario",

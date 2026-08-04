@@ -2713,11 +2713,19 @@
         "createFirstReservation": "Créer votre première réservation",
         "viewPreviousReservation": "Voir la réservation précédente",
         "viewNextReservation": "Voir la prochaine réservation",
+        "reservationAbove": "Réservation au-dessus",
+        "reservationBelow": "Réservation en dessous",
         "resetFilters": "Réinitialiser les filtres",
         "dragHint": "Astuce : cliquez-glissez sur une plage vide pour créer une réservation pré-remplie.",
         "searchProductsPlaceholder": "Rechercher parmi {count} produits...",
         "noProductsFound": "Aucun produit trouvé",
-        "productsSelected": "{count} produits"
+        "productsSelected": "{count} produits",
+        "filters": "Filtres",
+        "filtersDescription": "Affinez les réservations affichées sur le calendrier.",
+        "applyFilters": "Appliquer",
+        "sectionOperation": "Opération du jour",
+        "sectionStatus": "Statuts",
+        "sectionProducts": "Produits"
       },
       "export": {
         "button": "Synchroniser le calendrier",

@@ -18,6 +18,7 @@ import {
 } from "@/lib/whats-new.constants";
 
 import { WhatsNewEntryMedia } from "../whats-new-entry-media";
+import { WhatsNewEntryAnalytics } from "../whats-new-entry-analytics";
 import { WhatsNewSeenMarker } from "../whats-new-seen-marker";
 
 // TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
@@ -125,6 +126,14 @@ export default async function WhatsNewEntryPage({ params }: WhatsNewEntryPagePro
             <ArrowRight className="size-4" />
           </Button>
         )}
+
+        <WhatsNewEntryAnalytics
+          announcementId={announcement.id}
+          category={announcement.category}
+          hasCta={announcement.href !== undefined}
+          hasMedia={announcement.media !== undefined}
+          releaseDate={announcement.date}
+        />
 
         <footer className="mt-10 border-t pt-6">
           <Button render={<Link href={WHATS_NEW_PAGE_PATH} />} size="sm" variant="outline">

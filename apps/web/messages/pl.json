@@ -2561,11 +2561,19 @@
         "createFirstReservation": "Utwórz pierwszą rezerwację",
         "viewPreviousReservation": "Zobacz poprzednią rezerwację",
         "viewNextReservation": "Zobacz następną rezerwację",
+        "reservationAbove": "Rezerwacja powyżej",
+        "reservationBelow": "Rezerwacja poniżej",
         "resetFilters": "Resetuj filtry",
         "dragHint": "Wskazówka: kliknij i przeciągnij po pustym zakresie, aby utworzyć wstępnie wypełnioną rezerwację.",
         "searchProductsPlaceholder": "Szukaj wsrod {count} produktow...",
         "noProductsFound": "Nie znaleziono produktow",
-        "productsSelected": "{count} produktow"
+        "productsSelected": "{count} produktow",
+        "filters": "Filtry",
+        "filtersDescription": "Zawęź rezerwacje wyświetlane w kalendarzu.",
+        "applyFilters": "Zastosuj",
+        "sectionOperation": "Operacja dnia",
+        "sectionStatus": "Statusy",
+        "sectionProducts": "Produkty"
       },
       "export": {
         "button": "Synchronizuj kalendarz",
