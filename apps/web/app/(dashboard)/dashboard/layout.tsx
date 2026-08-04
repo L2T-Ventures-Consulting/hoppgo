@@ -149,7 +149,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
                       data-dashboard-content
                       className="min-h-0 flex-1 overflow-x-clip overflow-y-auto overscroll-contain px-4 sm:px-6 lg:px-8"
                     >
-                      <div className="min-h-full py-4 md:py-6">{children}</div>
+                      <div className="min-h-full py-4 pb-2 md:py-6">{children}</div>
                     </div>
                   </SidebarInset>
                 </DashboardBreadcrumbsProvider>

@@ -434,11 +434,11 @@ export const DashboardSidebar = ({
           ))}
         </SidebarContent>
         <SidebarFooter className="border-sidebar-border border-t">
-          <div className="flex flex-col gap-2 group-data-[collapsible=icon]:hidden">
+          <SidebarMenu>
+            {/* Nudges sit in the same menu as the utilities they resemble —
+                they only differ by the attention dot they carry. */}
             <InstallPrompt />
             <PushPrimer />
-          </div>
-          <SidebarMenu>
             <WhatsNewSidebarItem />
             <HelpButton />
           </SidebarMenu>

@@ -283,7 +283,13 @@
         "step1Other": "Apri il menu, poi «Condividi»",
         "step2": "Scegli «Aggiungi a Home»",
         "step3": "Tocca «Aggiungi»"
-      }
+      },
+      "benefits": {
+        "home": "Icona sulla schermata Home",
+        "fullscreen": "Schermo intero, senza browser",
+        "push": "Notifiche di prenotazione"
+      },
+      "sidebarLabel": "Installa l'app"
     },
     "title": "Dashboard",
     "notifications": {
@@ -2550,6 +2556,9 @@
         "loadError": "Impossibile caricare le prenotazioni del calendario.",
         "emptyPeriodTitle": "Nessuna prenotazione in questo periodo",
         "emptyPeriodDescription": "Le prenotazioni caricate possono trovarsi prima o dopo le date visualizzate.",
+        "emptyStoreTitle": "Nessuna prenotazione ancora",
+        "emptyStoreDescription": "Crea la tua prima prenotazione per iniziare a pianificare la tua attività.",
+        "createFirstReservation": "Crea la tua prima prenotazione",
         "viewPreviousReservation": "Vedi la prenotazione precedente",
         "viewNextReservation": "Vedi la prossima prenotazione",
         "resetFilters": "Reimposta filtri",
@@ -3182,7 +3191,13 @@
           "iosNeedsInstall": "Su iPhone, aggiungi prima l'app alla schermata Home per attivare le notifiche.",
           "denied": "Le notifiche sono bloccate. Abilitale nelle impostazioni del browser.",
           "confirmTitle": "Notifiche attivate",
-          "confirmBody": "Riceverai un avviso per ogni nuova prenotazione."
+          "confirmBody": "Riceverai un avviso per ogni nuova prenotazione.",
+          "sidebarLabel": "Notifiche push",
+          "benefits": {
+            "instant": "Avviso appena arriva una prenotazione",
+            "closed": "Funziona anche ad app chiusa",
+            "device": "Solo su questo dispositivo"
+          }
         },
         "title": "Notifiche",
         "description": "Configura come ricevi le notifiche degli eventi del negozio",

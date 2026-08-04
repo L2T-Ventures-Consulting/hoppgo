@@ -7,7 +7,7 @@ import { getStoreLimits, getStorePlan } from "@/lib/plan-limits";
 import { getCurrentStore } from "@/lib/store-context";
 
 import { parseReservationView } from "./calendar/calendar-query";
-import { getCalendarProducts } from "./calendar/data";
+import { getCalendarProducts, getStoreHasReservations } from "./calendar/data";
 import { ReservationsPageContent } from "./reservations-page-content";
 
 // TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
@@ -147,10 +147,11 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
 
   // Fetch the shared catalog with the rest of the page data so switching to
   // calendar or planning never needs another page navigation.
-  const [limits, plan, calendarProducts, initialData] = await Promise.all([
+  const [limits, plan, calendarProducts, storeHasReservations, initialData] = await Promise.all([
     getStoreLimits(store.id),
     getStorePlan(store.id),
     getCalendarProducts(store.id),
+    getStoreHasReservations(store.id),
     initialDataPromise,
   ]);
 
@@ -162,6 +163,7 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
         currentPeriod={period}
         initialData={initialData}
         calendarData={{ products: calendarProducts }}
+        storeHasReservations={storeHasReservations}
         storeId={store.id}
         limits={limits.reservationsThisMonth}
         planSlug={plan.slug}

@@ -283,7 +283,13 @@
         "step1Other": "Abra o menu e toque em «Partilhar»",
         "step2": "Escolha «Adicionar ao ecrã principal»",
         "step3": "Toque em «Adicionar»"
-      }
+      },
+      "benefits": {
+        "home": "Ícone no ecrã principal",
+        "fullscreen": "Ecrã inteiro, sem barra do navegador",
+        "push": "Notificações de reservas"
+      },
+      "sidebarLabel": "Instalar a app"
     },
     "title": "Painel",
     "notifications": {
@@ -2550,6 +2556,9 @@
         "loadError": "Não foi possível carregar as reservas do calendário.",
         "emptyPeriodTitle": "Nenhuma reserva neste período",
         "emptyPeriodDescription": "As reservas carregadas podem estar antes ou depois das datas exibidas.",
+        "emptyStoreTitle": "Ainda não há reservas",
+        "emptyStoreDescription": "Crie a sua primeira reserva para começar a planejar a sua atividade.",
+        "createFirstReservation": "Criar a primeira reserva",
         "viewPreviousReservation": "Ver a reserva anterior",
         "viewNextReservation": "Ver a próxima reserva",
         "resetFilters": "Redefinir filtros",
@@ -3182,7 +3191,13 @@
           "iosNeedsInstall": "No iPhone, adicione primeiro a aplicação ao ecrã principal para ativar as notificações.",
           "denied": "As notificações estão bloqueadas. Permita-as nas definições do navegador.",
           "confirmTitle": "Notificações ativadas",
-          "confirmBody": "Será notificado de cada nova reserva."
+          "confirmBody": "Será notificado de cada nova reserva.",
+          "sidebarLabel": "Notificações push",
+          "benefits": {
+            "instant": "Alerta assim que chega uma reserva",
+            "closed": "Funciona com a aplicação fechada",
+            "device": "Apenas neste dispositivo"
+          }
         },
         "title": "Notificacoes",
         "description": "Configure como voce recebe notificacoes de eventos da loja",

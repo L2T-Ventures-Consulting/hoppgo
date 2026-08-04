@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent, UIEvent } from "react";
+import type {
+  PointerEvent as ReactPointerEvent,
+  UIEvent,
+  WheelEvent as ReactWheelEvent,
+} from "react";
 
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useQueries } from "@tanstack/react-query";
+import { Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Alert, AlertDescription, Button } from "@louez/ui";
@@ -96,6 +102,7 @@ interface DragAnchor {
 interface ReservationsCalendarViewProps {
   products: Product[];
   currency: string;
+  storeHasReservations: boolean;
   storeId: string;
 }
 
@@ -106,6 +113,7 @@ interface ReservationsCalendarViewProps {
 export function ReservationsCalendarView({
   products,
   currency,
+  storeHasReservations,
   storeId,
 }: ReservationsCalendarViewProps) {
   const tTimeline = useTranslations("dashboard.calendar.timeline");
@@ -462,6 +470,14 @@ export function ReservationsCalendarView({
     });
   };
 
+  const forwardEmptyStateWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
+    const element = scrollerRef.current;
+    if (!element) return;
+
+    event.preventDefault();
+    element.scrollBy({ left: event.deltaX, top: event.deltaY });
+  };
+
   const goToToday = () => {
     const element = scrollerRef.current;
     if (!element) return;
@@ -758,49 +774,75 @@ export function ReservationsCalendarView({
 
         {showEmptyVisiblePeriod && (
           <div className="bg-card/60 pointer-events-none absolute inset-x-0 top-17 bottom-0 z-20 flex items-center justify-center rounded-b-lg p-6 backdrop-blur-xs">
-            <div className="bg-card/95 pointer-events-auto flex w-full max-w-sm flex-col items-center rounded-xl border p-6 text-center shadow-lg">
+            <div
+              className="bg-card/95 pointer-events-none flex w-full max-w-sm flex-col items-center rounded-xl border p-6 text-center shadow-lg"
+              onWheel={forwardEmptyStateWheel}
+            >
               <ReservationsGlassIcon className="mb-3 size-10" aria-hidden />
-              <p className="text-sm font-semibold">{tTimeline("emptyPeriodTitle")}</p>
-              <p className="text-muted-foreground mt-1 text-xs">
-                {tTimeline("emptyPeriodDescription")}
+              <p className="text-sm font-semibold">
+                {tTimeline(storeHasReservations ? "emptyPeriodTitle" : "emptyStoreTitle")}
               </p>
-              {(filters.hasActiveFilters || nearestReservation) && (
-                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
-                  {filters.hasActiveFilters && (
-                    <Button variant="outline" size="sm" onClick={filters.resetFilters}>
-                      {tTimeline("resetFilters")}
-                    </Button>
-                  )}
-                  {nearestReservation && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      isPending={isFetching}
-                      onClick={() => {
-                        const element = scrollerRef.current;
-                        if (!element) return;
+              <p className="text-muted-foreground mt-1 text-xs">
+                {tTimeline(
+                  storeHasReservations ? "emptyPeriodDescription" : "emptyStoreDescription",
+                )}
+              </p>
+              {!storeHasReservations ? (
+                <Button
+                  render={<Link href="/dashboard/reservations/new?source=reservations_page" />}
+                  variant="outline"
+                  size="default"
+                  className="pointer-events-auto mt-4"
+                >
+                  <Plus />
+                  {tTimeline("createFirstReservation")}
+                </Button>
+              ) : (
+                (filters.hasActiveFilters || nearestReservation) && (
+                  <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                    {filters.hasActiveFilters && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="pointer-events-auto"
+                        onClick={filters.resetFilters}
+                      >
+                        {tTimeline("resetFilters")}
+                      </Button>
+                    )}
+                    {nearestReservation && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="pointer-events-auto"
+                        isPending={isFetching}
+                        onClick={() => {
+                          const element = scrollerRef.current;
+                          if (!element) return;
 
-                        const reservationCenter =
-                          (nearestReservation.item.startIndex + nearestReservation.item.endIndex) /
-                          2;
-                        const target = reservationCenter * dayWidth - element.clientWidth / 2;
-                        const reduceMotion = window.matchMedia(
-                          "(prefers-reduced-motion: reduce)",
-                        ).matches;
-                        element.scrollTo({
-                          left: Math.max(0, target),
-                          behavior: reduceMotion ? "auto" : "smooth",
-                        });
-                      }}
-                    >
-                      {tTimeline(
-                        nearestReservation.direction === "previous"
-                          ? "viewPreviousReservation"
-                          : "viewNextReservation",
-                      )}
-                    </Button>
-                  )}
-                </div>
+                          const reservationCenter =
+                            (nearestReservation.item.startIndex +
+                              nearestReservation.item.endIndex) /
+                            2;
+                          const target = reservationCenter * dayWidth - element.clientWidth / 2;
+                          const reduceMotion = window.matchMedia(
+                            "(prefers-reduced-motion: reduce)",
+                          ).matches;
+                          element.scrollTo({
+                            left: Math.max(0, target),
+                            behavior: reduceMotion ? "auto" : "smooth",
+                          });
+                        }}
+                      >
+                        {tTimeline(
+                          nearestReservation.direction === "previous"
+                            ? "viewPreviousReservation"
+                            : "viewNextReservation",
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                )
               )}
             </div>
           </div>

@@ -283,7 +283,13 @@
         "step1Other": "Otwórz menu, a następnie „Udostępnij”",
         "step2": "Wybierz „Do ekranu początkowego”",
         "step3": "Dotknij „Dodaj”"
-      }
+      },
+      "benefits": {
+        "home": "Ikona na ekranie głównym",
+        "fullscreen": "Pełny ekran, bez paska przeglądarki",
+        "push": "Powiadomienia o rezerwacjach"
+      },
+      "sidebarLabel": "Zainstaluj apkę"
     },
     "title": "Panel",
     "notifications": {
@@ -2550,6 +2556,9 @@
         "loadError": "Nie udało się wczytać rezerwacji w kalendarzu.",
         "emptyPeriodTitle": "Brak rezerwacji w tym okresie",
         "emptyPeriodDescription": "Wczytane rezerwacje mogą przypadać przed lub po wyświetlanych datach.",
+        "emptyStoreTitle": "Brak rezerwacji",
+        "emptyStoreDescription": "Utwórz pierwszą rezerwację, aby rozpocząć planowanie swojej działalności.",
+        "createFirstReservation": "Utwórz pierwszą rezerwację",
         "viewPreviousReservation": "Zobacz poprzednią rezerwację",
         "viewNextReservation": "Zobacz następną rezerwację",
         "resetFilters": "Resetuj filtry",
@@ -3182,7 +3191,13 @@
           "iosNeedsInstall": "Na iPhonie najpierw dodaj aplikację do ekranu głównego, aby włączyć powiadomienia.",
           "denied": "Powiadomienia są zablokowane. Zezwól na nie w ustawieniach przeglądarki.",
           "confirmTitle": "Powiadomienia włączone",
-          "confirmBody": "Otrzymasz powiadomienie o każdej nowej rezerwacji."
+          "confirmBody": "Otrzymasz powiadomienie o każdej nowej rezerwacji.",
+          "sidebarLabel": "Powiadomienia push",
+          "benefits": {
+            "instant": "Alert, gdy tylko pojawi się rezerwacja",
+            "closed": "Działa przy zamkniętej aplikacji",
+            "device": "Tylko na tym urządzeniu"
+          }
         },
         "title": "Powiadomienia",
         "description": "Skonfiguruj sposob otrzymywania powiadomien o wydarzeniach w sklepie",

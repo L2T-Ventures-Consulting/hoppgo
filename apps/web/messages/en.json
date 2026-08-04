@@ -283,7 +283,13 @@
         "step1Other": "Open the menu, then tap “Share”",
         "step2": "Choose “Add to Home Screen”",
         "step3": "Tap “Add”"
-      }
+      },
+      "benefits": {
+        "home": "Icon on your home screen",
+        "fullscreen": "Full screen, no browser bar",
+        "push": "Booking notifications"
+      },
+      "sidebarLabel": "Install the app"
     },
     "title": "Dashboard",
     "notifications": {
@@ -2702,6 +2708,9 @@
         "loadError": "Calendar reservations could not be loaded.",
         "emptyPeriodTitle": "No reservations in this period",
         "emptyPeriodDescription": "Loaded reservations may be before or after the dates currently displayed.",
+        "emptyStoreTitle": "No reservations yet",
+        "emptyStoreDescription": "Create your first reservation to start planning your activity.",
+        "createFirstReservation": "Create your first reservation",
         "viewPreviousReservation": "View previous reservation",
         "viewNextReservation": "View next reservation",
         "resetFilters": "Reset filters",
@@ -3582,7 +3591,13 @@
           "iosNeedsInstall": "On iPhone, add the app to your Home Screen first to enable notifications.",
           "denied": "Notifications are blocked. Allow them in your browser settings to enable.",
           "confirmTitle": "Notifications enabled",
-          "confirmBody": "You'll be notified of every new reservation."
+          "confirmBody": "You'll be notified of every new reservation.",
+          "sidebarLabel": "Push notifications",
+          "benefits": {
+            "instant": "Alerted the moment a booking arrives",
+            "closed": "Works with the app closed",
+            "device": "This device only"
+          }
         },
         "title": "Notifications",
         "description": "Configure how you receive store event notifications",

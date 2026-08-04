@@ -56,6 +56,7 @@ interface ReservationsPageContentProps {
   calendarData: {
     products: CalendarProduct[];
   };
+  storeHasReservations: boolean;
   storeId: string;
   limits: LimitStatus;
   planSlug: string;
@@ -69,6 +70,7 @@ export function ReservationsPageContent({
   currentPeriod,
   initialData,
   calendarData,
+  storeHasReservations,
   storeId,
   limits,
   planSlug,
@@ -332,6 +334,7 @@ export function ReservationsPageContent({
           <ReservationsCalendarView
             products={calendarData.products}
             currency={currency ?? "EUR"}
+            storeHasReservations={storeHasReservations}
             storeId={storeId}
           />
         </div>

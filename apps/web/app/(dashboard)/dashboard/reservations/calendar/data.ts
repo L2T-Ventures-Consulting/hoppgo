@@ -28,6 +28,17 @@ export function getReservationsForPeriod(storeId: string, startDate: Date, endDa
   });
 }
 
+/** Whether the store has ever created a reservation, regardless of date or status. */
+export async function getStoreHasReservations(storeId: string) {
+  const [reservation] = await db
+    .select({ id: reservations.id })
+    .from(reservations)
+    .where(eq(reservations.storeId, storeId))
+    .limit(1);
+
+  return reservation !== undefined;
+}
+
 /**
  * Active products with their effective quantity and — for unit-tracked
  * products — their active units, so the planning can render one row per unit.

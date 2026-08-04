@@ -283,7 +283,13 @@
         "step1Other": "Ouvrez le menu, puis « Partager »",
         "step2": "Choisissez « Sur l'écran d'accueil »",
         "step3": "Appuyez sur « Ajouter »"
-      }
+      },
+      "benefits": {
+        "home": "Icône sur l'écran d'accueil",
+        "fullscreen": "Plein écran, sans barre du navigateur",
+        "push": "Notifications de réservation"
+      },
+      "sidebarLabel": "Installer l'app"
     },
     "title": "Tableau de bord",
     "notifications": {
@@ -2702,6 +2708,9 @@
         "loadError": "Impossible de charger les réservations du calendrier.",
         "emptyPeriodTitle": "Aucune réservation sur cette période",
         "emptyPeriodDescription": "Les réservations chargées peuvent se trouver avant ou après les dates affichées.",
+        "emptyStoreTitle": "Aucune réservation",
+        "emptyStoreDescription": "Créez votre première réservation pour commencer à planifier votre activité.",
+        "createFirstReservation": "Créer votre première réservation",
         "viewPreviousReservation": "Voir la réservation précédente",
         "viewNextReservation": "Voir la prochaine réservation",
         "resetFilters": "Réinitialiser les filtres",
@@ -3582,7 +3591,13 @@
           "iosNeedsInstall": "Sur iPhone, ajoutez d'abord l'application à votre écran d'accueil pour activer les notifications.",
           "denied": "Les notifications sont bloquées. Autorisez-les dans les réglages de votre navigateur pour les activer.",
           "confirmTitle": "Notifications activées",
-          "confirmBody": "Vous serez prévenu de chaque nouvelle réservation."
+          "confirmBody": "Vous serez prévenu de chaque nouvelle réservation.",
+          "sidebarLabel": "Notifications push",
+          "benefits": {
+            "instant": "Alerte dès qu'une réservation arrive",
+            "closed": "Fonctionne application fermée",
+            "device": "Uniquement sur cet appareil"
+          }
         },
         "title": "Notifications",
         "description": "Configurez comment vous êtes notifié des événements de votre boutique",

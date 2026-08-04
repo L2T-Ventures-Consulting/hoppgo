@@ -283,7 +283,13 @@
         "step1Other": "Öffnen Sie das Menü und dann „Teilen“",
         "step2": "Wählen Sie „Zum Home-Bildschirm“",
         "step3": "Tippen Sie auf „Hinzufügen“"
-      }
+      },
+      "benefits": {
+        "home": "Symbol auf dem Startbildschirm",
+        "fullscreen": "Vollbild, ohne Browserleiste",
+        "push": "Buchungsbenachrichtigungen"
+      },
+      "sidebarLabel": "App installieren"
     },
     "title": "Dashboard",
     "notifications": {
@@ -2589,6 +2595,9 @@
         "loadError": "Die Kalenderreservierungen konnten nicht geladen werden.",
         "emptyPeriodTitle": "Keine Reservierungen in diesem Zeitraum",
         "emptyPeriodDescription": "Geladene Reservierungen können vor oder nach den angezeigten Daten liegen.",
+        "emptyStoreTitle": "Noch keine Reservierungen",
+        "emptyStoreDescription": "Erstellen Sie Ihre erste Reservierung, um mit der Planung zu beginnen.",
+        "createFirstReservation": "Erste Reservierung erstellen",
         "viewPreviousReservation": "Vorherige Reservierung anzeigen",
         "viewNextReservation": "Nächste Reservierung anzeigen",
         "resetFilters": "Filter zurücksetzen",
@@ -3182,7 +3191,13 @@
           "iosNeedsInstall": "Fügen Sie die App auf dem iPhone zuerst zum Home-Bildschirm hinzu, um Benachrichtigungen zu aktivieren.",
           "denied": "Benachrichtigungen sind blockiert. Erlauben Sie sie in den Browsereinstellungen.",
           "confirmTitle": "Benachrichtigungen aktiviert",
-          "confirmBody": "Sie werden über jede neue Reservierung informiert."
+          "confirmBody": "Sie werden über jede neue Reservierung informiert.",
+          "sidebarLabel": "Push-Nachrichten",
+          "benefits": {
+            "instant": "Hinweis, sobald eine Buchung eingeht",
+            "closed": "Funktioniert auch bei geschlossener App",
+            "device": "Nur auf diesem Gerät"
+          }
         },
         "title": "Benachrichtigungen",
         "description": "Konfigurieren Sie, wie Sie über Shop-Ereignisse benachrichtigt werden",

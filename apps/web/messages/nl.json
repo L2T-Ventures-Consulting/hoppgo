@@ -283,7 +283,13 @@
         "step1Other": "Open het menu en tik op 'Delen'",
         "step2": "Kies 'Zet op beginscherm'",
         "step3": "Tik op 'Voeg toe'"
-      }
+      },
+      "benefits": {
+        "home": "Pictogram op je beginscherm",
+        "fullscreen": "Volledig scherm, zonder browserbalk",
+        "push": "Reserveringsmeldingen"
+      },
+      "sidebarLabel": "App installeren"
     },
     "title": "Dashboard",
     "notifications": {
@@ -2550,6 +2556,9 @@
         "loadError": "De kalenderreserveringen konden niet worden geladen.",
         "emptyPeriodTitle": "Geen reserveringen in deze periode",
         "emptyPeriodDescription": "Geladen reserveringen kunnen vóór of na de weergegeven datums liggen.",
+        "emptyStoreTitle": "Nog geen reserveringen",
+        "emptyStoreDescription": "Maak je eerste reservering om je activiteiten te plannen.",
+        "createFirstReservation": "Eerste reservering maken",
         "viewPreviousReservation": "Vorige reservering bekijken",
         "viewNextReservation": "Volgende reservering bekijken",
         "resetFilters": "Filters resetten",
@@ -3182,7 +3191,13 @@
           "iosNeedsInstall": "Voeg de app op iPhone eerst toe aan je beginscherm om meldingen in te schakelen.",
           "denied": "Meldingen zijn geblokkeerd. Sta ze toe in je browserinstellingen.",
           "confirmTitle": "Meldingen ingeschakeld",
-          "confirmBody": "Je krijgt een melding bij elke nieuwe reservering."
+          "confirmBody": "Je krijgt een melding bij elke nieuwe reservering.",
+          "sidebarLabel": "Pushmeldingen",
+          "benefits": {
+            "instant": "Melding zodra er een reservering binnenkomt",
+            "closed": "Werkt ook als de app gesloten is",
+            "device": "Alleen op dit apparaat"
+          }
         },
         "title": "Meldingen",
         "description": "Configureer hoe u meldingen over winkelgebeurtenissen ontvangt",

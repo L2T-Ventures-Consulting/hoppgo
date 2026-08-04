@@ -10,6 +10,7 @@
 // keep the count auditable. Never copy the SVG sources into the repo; they are
 // consumed from Nucleo's official `nucleo-glass` npm package.
 export {
+  IconBell as NotificationsGlassIcon,
   IconBot as AiAssistantGlassIcon,
   IconBox as ProductGlassIcon,
   IconCalendar as ReservationsGlassIcon,
@@ -17,6 +18,7 @@ export {
   IconGear as SettingsGlassIcon,
   IconHelpChat as HelpGlassIcon,
   IconHouse as HomeGlassIcon,
+  IconPhone as InstallAppGlassIcon,
   IconSparkle2 as WhatsNewGlassIcon,
   IconTeam as TeamGlassIcon,
   IconUsers as CustomersGlassIcon,
