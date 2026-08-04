@@ -63,7 +63,7 @@ export interface ProductImageEnhanceCredits {
   isLoading: boolean;
   /** The balance cannot cover a single enhancement. */
   isExhausted: boolean;
-  /** Persistent inline alert (balance-derived or mid-batch 402). */
+  /** Persistent inline alert after prior usage or a mid-batch 402. */
   showExhaustedAlert: boolean;
   dismissExhaustedAlert: () => void;
   /** Images "enhance all" would actually process (already-AI ones excluded). */
@@ -87,8 +87,8 @@ export interface ProductImageEnhanceControls {
   credits: ProductImageEnhanceCredits;
   /** Balance check for a single image of that operation (true when unmetered). */
   canAffordOperation: (operation: ProductImageOperation) => boolean;
-  /** Raises the persistent "not enough credits" alert without a round-trip. */
-  raiseCreditsAlert: () => void;
+  /** Opens the educational top-up dialog without starting a doomed request. */
+  showCreditsDialog: () => void;
   enhanceImage: (imageUrl: string) => void;
   removeBackground: (imageUrl: string) => void;
   enhanceAllImages: () => void;
@@ -118,6 +118,8 @@ interface UseProductImageEnhanceParams {
     operation: ProductImageOperation,
   ) => boolean;
 }
+
+export type ProductImageEnhancePromoReason = "feature-unavailable" | "credits-required";
 
 interface ProductImageEnhanceResponse {
   key: string;
@@ -205,9 +207,10 @@ export function useProductImageEnhance({
   const [isRunning, setIsRunning] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [batchProgress, setBatchProgress] = useState<ProductImageEnhanceBatchProgress | null>(null);
-  // Teaser: when the feature is unavailable the controls still render and this
-  // informational dialog explains what activating the AI would unlock.
-  const [isEnhancePromoOpen, setIsEnhancePromoOpen] = useState(false);
+  // The same value-first pitch handles activation and an empty wallet, with a
+  // reason-specific CTA at the end.
+  const [enhancePromoReason, setEnhancePromoReason] =
+    useState<ProductImageEnhancePromoReason | null>(null);
   // Sticky trace of a server-side refusal: a toast alone disappears while the
   // merchant is still looking at a half-processed batch.
   const [hasCreditsError, setHasCreditsError] = useState(false);
@@ -222,6 +225,7 @@ export function useProductImageEnhance({
   const enhanceCredits = balance?.imageEnhanceCredits ?? 0;
   const bgRemovalCredits = balance?.imageBgRemovalCredits ?? 0;
   const totalCredits = creditsEnabled ? (balance?.totalCredits ?? null) : null;
+  const hasUsedCredits = balance?.hasUsedCredits === true;
 
   // `null` = unlimited allowance, and an unknown balance never blocks: the
   // server stays the single source of truth (402) in both cases.
@@ -250,9 +254,10 @@ export function useProductImageEnhance({
     void queryClient.invalidateQueries({ queryKey: aiCreditsQueries.balance().queryKey });
   }, [queryClient]);
 
-  // An insufficient balance keeps the alert up (the controls are blocked and
-  // need the explanation); a one-off server refusal can be dismissed.
-  const showCreditsAlert = creditsEnabled && (hasCreditsError || isExhausted);
+  // A zero balance is not an error for a newcomer. Only merchants who have
+  // actually spent credits, or whose request was refused server-side, see the
+  // persistent interruption state.
+  const showCreditsAlert = creditsEnabled && (hasCreditsError || (isExhausted && hasUsedCredits));
 
   const dismissExhaustedAlert = useCallback(() => {
     setHasCreditsError(false);
@@ -260,6 +265,18 @@ export function useProductImageEnhance({
 
   const raiseCreditsAlert = useCallback(() => {
     setHasCreditsError(true);
+  }, []);
+
+  const openEnhancePromo = useCallback(() => {
+    setEnhancePromoReason("feature-unavailable");
+  }, []);
+
+  const showCreditsDialog = useCallback(() => {
+    setEnhancePromoReason("credits-required");
+  }, []);
+
+  const closeEnhancePromo = useCallback(() => {
+    setEnhancePromoReason(null);
   }, []);
 
   // Enhanced objects that exist on the storage but are not (yet) referenced by
@@ -482,16 +499,20 @@ export function useProductImageEnhance({
             if (code === "unknown") {
               console.error("Product image enhance error:", error);
             }
-            toastManager.add({
-              title: getEnhanceErrorMessage(code),
-              type: "error",
-            });
-
             if (code === "credits_exhausted") {
-              // The toast fades; the batch stopped. Keep an inline alert with
-              // the recharge CTA until the merchant acts on it.
-              raiseCreditsAlert();
+              if (collected.length === 0 && !hasUsedCredits) {
+                showCreditsDialog();
+              } else {
+                // A previously active wallet, or a batch that really stopped
+                // mid-way, keeps the interruption visible beside the photos.
+                raiseCreditsAlert();
+              }
               refreshBalance();
+            } else {
+              toastManager.add({
+                title: getEnhanceErrorMessage(code),
+                type: "error",
+              });
             }
 
             if (FATAL_ENHANCE_ERROR_CODES.includes(code)) break;
@@ -514,7 +535,16 @@ export function useProductImageEnhance({
 
       return { produced: collected.length, cancelled: wasCancelled };
     },
-    [getEnhanceErrorMessage, productId, raiseCreditsAlert, refreshBalance, setImageStatus, t],
+    [
+      getEnhanceErrorMessage,
+      hasUsedCredits,
+      productId,
+      raiseCreditsAlert,
+      refreshBalance,
+      setImageStatus,
+      showCreditsDialog,
+      t,
+    ],
   );
 
   /**
@@ -529,14 +559,6 @@ export function useProductImageEnhance({
     abortControllerRef.current?.abort();
   }, []);
 
-  const openEnhancePromo = useCallback(() => {
-    setIsEnhancePromoOpen(true);
-  }, []);
-
-  const closeEnhancePromo = useCallback(() => {
-    setIsEnhancePromoOpen(false);
-  }, []);
-
   const enhanceImage = useCallback(
     (imageUrl: string) => {
       if (!canApplyProductImageOperation(imageUrl, "enhance")) return;
@@ -546,12 +568,12 @@ export function useProductImageEnhance({
       }
       // Spare the merchant a round-trip that can only come back as a 402.
       if (!canAfford(enhanceCredits)) {
-        raiseCreditsAlert();
+        showCreditsDialog();
         return;
       }
       void runImageQueue([{ imageUrl, operation: "enhance" }]);
     },
-    [canAfford, enabled, enhanceCredits, openEnhancePromo, raiseCreditsAlert, runImageQueue],
+    [canAfford, enabled, enhanceCredits, openEnhancePromo, runImageQueue, showCreditsDialog],
   );
 
   const removeBackground = useCallback(
@@ -565,12 +587,12 @@ export function useProductImageEnhance({
         return;
       }
       if (!canAfford(bgRemovalCredits)) {
-        raiseCreditsAlert();
+        showCreditsDialog();
         return;
       }
       void runImageQueue([{ imageUrl, operation: "remove-background" }]);
     },
-    [backgroundRemovalEnabled, bgRemovalCredits, canAfford, raiseCreditsAlert, runImageQueue, t],
+    [backgroundRemovalEnabled, bgRemovalCredits, canAfford, runImageQueue, showCreditsDialog, t],
   );
 
   // Batch entry point for callers that already hold a list of uploaded URLs
@@ -587,13 +609,13 @@ export function useProductImageEnhance({
 
       // A single unaffordable operation would stop the queue server-side anyway.
       if (runnable.some((target) => !canAffordOperation(target.operation))) {
-        raiseCreditsAlert();
+        showCreditsDialog();
         return { produced: 0, cancelled: false };
       }
 
       return runImageQueue(runnable);
     },
-    [backgroundRemovalEnabled, canAffordOperation, enabled, raiseCreditsAlert, runImageQueue],
+    [backgroundRemovalEnabled, canAffordOperation, enabled, runImageQueue, showCreditsDialog],
   );
 
   // Objects the route minted are already isolated and centered — re-running
@@ -609,7 +631,7 @@ export function useProductImageEnhance({
       return;
     }
     if (!canAfford(enhanceCredits)) {
-      raiseCreditsAlert();
+      showCreditsDialog();
       return;
     }
     void runImageQueue(
@@ -621,8 +643,8 @@ export function useProductImageEnhance({
     enabled,
     enhanceCredits,
     openEnhancePromo,
-    raiseCreditsAlert,
     runImageQueue,
+    showCreditsDialog,
   ]);
 
   const dismissReviewItem = useCallback(
@@ -713,7 +735,7 @@ export function useProductImageEnhance({
       batchProgress,
       credits,
       canAffordOperation,
-      raiseCreditsAlert,
+      showCreditsDialog,
       enhanceImage,
       removeBackground,
       enhanceAllImages,
@@ -731,8 +753,8 @@ export function useProductImageEnhance({
       isCancelling,
       isRunning,
       operationByImage,
-      raiseCreditsAlert,
       removeBackground,
+      showCreditsDialog,
       statusByImage,
     ],
   );
@@ -745,7 +767,8 @@ export function useProductImageEnhance({
     acceptEnhancedImage,
     rejectEnhancedImage,
     closeEnhanceReview,
-    isEnhancePromoOpen,
+    isEnhancePromoOpen: enhancePromoReason !== null,
+    enhancePromoReason,
     openEnhancePromo,
     closeEnhancePromo,
   };

@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getAiCreditsInfo, microToCredits } from "@/lib/ai/advisor/credits";
-import {
-  getImageBgRemovalCredits,
-  getImageEnhanceCredits,
-} from "@/lib/ai/pricing";
+import { getAiCreditsInfo, hasEverUsedAiCredits, microToCredits } from "@/lib/ai/advisor/credits";
+import { getImageBgRemovalCredits, getImageEnhanceCredits } from "@/lib/ai/pricing";
 import { auth } from "@/lib/auth";
 import { getStorePlan } from "@/lib/plan-limits";
 import { areAiCreditsEnabled } from "@/lib/plans";
@@ -21,6 +18,8 @@ export type AiCreditsBalanceResponse = {
   monthlyRemainingCredits: number | null;
   prepaidCredits: number;
   low: boolean;
+  /** Distinguishes a newcomer from a merchant who depleted a real balance. */
+  hasUsedCredits: boolean;
   /** Flat per-image tariffs (0 = free), so spend surfaces can price upfront. */
   imageEnhanceCredits: number;
   imageBgRemovalCredits: number;
@@ -51,6 +50,7 @@ export async function GET() {
       monthlyRemainingCredits: null,
       prepaidCredits: 0,
       low: false,
+      hasUsedCredits: false,
       imageEnhanceCredits: 0,
       imageBgRemovalCredits: 0,
     };
@@ -58,7 +58,10 @@ export async function GET() {
   }
 
   const plan = await getStorePlan(store.id);
-  const info = await getAiCreditsInfo(store.id, plan);
+  const [info, hasUsedCredits] = await Promise.all([
+    getAiCreditsInfo(store.id, plan),
+    hasEverUsedAiCredits(store.id),
+  ]);
 
   const totalCredits =
     info.monthlyRemainingMicro === null
@@ -69,15 +72,12 @@ export async function GET() {
     enabled: true,
     totalCredits,
     monthlyIncludedCredits:
-      info.monthlyIncludedMicro === null
-        ? null
-        : microToCredits(info.monthlyIncludedMicro),
+      info.monthlyIncludedMicro === null ? null : microToCredits(info.monthlyIncludedMicro),
     monthlyRemainingCredits:
-      info.monthlyRemainingMicro === null
-        ? null
-        : microToCredits(info.monthlyRemainingMicro),
+      info.monthlyRemainingMicro === null ? null : microToCredits(info.monthlyRemainingMicro),
     prepaidCredits: microToCredits(info.prepaidBalanceMicro),
     low: totalCredits !== null && totalCredits < LOW_CREDITS_THRESHOLD,
+    hasUsedCredits,
     imageEnhanceCredits: getImageEnhanceCredits(),
     imageBgRemovalCredits: getImageBgRemovalCredits(),
   };

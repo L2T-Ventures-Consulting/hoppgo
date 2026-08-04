@@ -11,6 +11,8 @@ interface AiCreditsOverviewProps {
   monthlyIncludedCredits: number | null;
   monthlyRemainingCredits: number | null;
   prepaidCredits: number;
+  /** A zero balance is informational until the merchant has used the wallet. */
+  isNewcomer: boolean;
   canTopup: boolean;
 }
 
@@ -24,13 +26,14 @@ export const AiCreditsOverview = async ({
   monthlyIncludedCredits,
   monthlyRemainingCredits,
   prepaidCredits,
+  isNewcomer,
   canTopup,
 }: AiCreditsOverviewProps) => {
   const t = await getTranslations("dashboard.aiCredits");
 
   const isUnlimited = monthlyRemainingCredits === null;
   const totalCredits = isUnlimited ? null : monthlyRemainingCredits + prepaidCredits;
-  const isLow = totalCredits !== null && totalCredits < LOW_BALANCE_CREDITS;
+  const isLow = !isNewcomer && totalCredits !== null && totalCredits < LOW_BALANCE_CREDITS;
   const monthlyUsed =
     monthlyIncludedCredits !== null && monthlyRemainingCredits !== null
       ? Math.max(0, monthlyIncludedCredits - monthlyRemainingCredits)

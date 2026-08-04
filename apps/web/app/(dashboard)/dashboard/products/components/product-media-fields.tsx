@@ -228,11 +228,7 @@ export function ProductMediaFields({
           size="sm"
           isPending={imageEnhance.isRunning}
           onClick={imageEnhance.enhanceAllImages}
-          disabled={
-            imageEnhance.isRunning ||
-            imageEnhance.credits.isExhausted ||
-            imageEnhance.credits.batchTargetCount === 0
-          }
+          disabled={imageEnhance.isRunning || imageEnhance.credits.batchTargetCount === 0}
           title={batchActionTitle}
         >
           <Sparkles data-slot="icon" />

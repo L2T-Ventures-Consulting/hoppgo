@@ -19,7 +19,7 @@ import { DashboardSaveShortcut } from "@/components/shared/dashboard-save-shortc
 import { KeyboardShortcutsProvider } from "@/components/shared/keyboard-shortcuts-provider";
 import { WhatsNewProvider } from "@/components/shared/whats-new-provider";
 
-import { getAiCreditsInfo, microToCredits } from "@/lib/ai/advisor/credits";
+import { getAiCreditsInfo, hasEverUsedAiCredits, microToCredits } from "@/lib/ai/advisor/credits";
 import { isAIChatConfigured } from "@/lib/ai/provider";
 import { auth } from "@/lib/auth";
 import { parseKeyboardShortcutOverrides } from "@/lib/keyboard-shortcuts";
@@ -45,14 +45,22 @@ const LOW_AI_CREDITS_THRESHOLD = 5;
  */
 const getSidebarAiCredits = async (
   storeId: string,
-): Promise<{ low: boolean; credits: number | null } | null> => {
+): Promise<{ low: boolean; credits: number | null; hasUsedCredits: boolean } | null> => {
   if (!areAiCreditsEnabled()) return null;
-  const info = await getAiCreditsInfo(storeId, await getStorePlan(storeId));
+  const [plan, hasUsedCredits] = await Promise.all([
+    getStorePlan(storeId),
+    hasEverUsedAiCredits(storeId),
+  ]);
+  const info = await getAiCreditsInfo(storeId, plan);
   const total =
     info.monthlyRemainingMicro === null
       ? null
       : microToCredits(info.monthlyRemainingMicro + info.prepaidBalanceMicro);
-  return { low: total !== null && total < LOW_AI_CREDITS_THRESHOLD, credits: total };
+  return {
+    low: total !== null && total < LOW_AI_CREDITS_THRESHOLD,
+    credits: total,
+    hasUsedCredits,
+  };
 };
 
 export default async function DashboardMainLayout({ children }: { children: React.ReactNode }) {

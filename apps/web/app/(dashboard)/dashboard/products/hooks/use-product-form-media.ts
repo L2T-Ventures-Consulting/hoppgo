@@ -579,6 +579,7 @@ export function useProductFormMedia({
     rejectEnhancedImage,
     closeEnhanceReview,
     isEnhancePromoOpen,
+    enhancePromoReason,
     openEnhancePromo,
     closeEnhancePromo,
   } = useProductImageEnhance({
@@ -926,9 +927,9 @@ export function useProductFormMedia({
       if (operation === "remove-background" && !imageBackgroundRemovalEnabled) return;
 
       // Guarded here rather than after the upload so the merchant stays on the
-      // choice step, with the credits alert right next to the action.
+      // choice step while the educational recharge dialog opens above it.
       if (!imageEnhance.canAffordOperation(operation)) {
-        imageEnhance.raiseCreditsAlert();
+        imageEnhance.showCreditsDialog();
         return;
       }
 
@@ -954,7 +955,7 @@ export function useProductFormMedia({
       return;
     }
     if (!imageEnhance.canAffordOperation("enhance")) {
-      imageEnhance.raiseCreditsAlert();
+      imageEnhance.showCreditsDialog();
       return;
     }
 
@@ -1075,6 +1076,7 @@ export function useProductFormMedia({
     rejectEnhancedImage,
     closeEnhanceReview,
     isEnhancePromoOpen,
+    enhancePromoReason,
     closeEnhancePromo,
   };
 }

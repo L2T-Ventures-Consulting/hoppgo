@@ -86,8 +86,9 @@ interface DashboardSidebarProps {
   /**
    * null = paid AI credits disabled for this deployment: no wallet entry.
    * `credits` null = unlimited allowance (no count worth showing).
+   * A zero count stays silent until the store has actually spent a credit.
    */
-  aiCredits?: { low: boolean; credits: number | null } | null;
+  aiCredits?: { low: boolean; credits: number | null; hasUsedCredits: boolean } | null;
 }
 
 const mainNavigation = [
@@ -136,7 +137,7 @@ interface NavigationSection {
  * is assembled per render rather than declared once.
  */
 const buildNavigationSections = (
-  aiCredits: { low: boolean; credits: number | null } | null,
+  aiCredits: { low: boolean; credits: number | null; hasUsedCredits: boolean } | null,
 ): NavigationSection[] => [
   { items: mainNavigation },
   { labelKey: "catalog", items: catalogNavigation },
@@ -148,8 +149,11 @@ const buildNavigationSections = (
           ...managementNavigation,
           {
             ...aiCreditsNavigationItem,
-            alert: aiCredits.low,
-            badgeCount: aiCredits.credits ?? undefined,
+            alert: aiCredits.hasUsedCredits && aiCredits.low,
+            badgeCount:
+              aiCredits.credits !== null && (aiCredits.credits > 0 || aiCredits.hasUsedCredits)
+                ? aiCredits.credits
+                : undefined,
           },
         ]
       : managementNavigation,
@@ -396,7 +400,11 @@ export const DashboardSidebar = ({
   });
   const liveAiCredits = balanceQuery.data
     ? balanceQuery.data.enabled
-      ? { low: balanceQuery.data.low, credits: balanceQuery.data.totalCredits }
+      ? {
+          low: balanceQuery.data.low,
+          credits: balanceQuery.data.totalCredits,
+          hasUsedCredits: balanceQuery.data.hasUsedCredits,
+        }
       : null
     : aiCredits;
   const navigationSections = buildNavigationSections(liveAiCredits);

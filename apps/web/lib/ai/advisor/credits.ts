@@ -364,6 +364,22 @@ export type AiCreditDebitHistory = {
   total: number
 }
 
+/** Whether this store has ever spent a billable AI credit. */
+export async function hasEverUsedAiCredits(storeId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: aiCreditDebits.id })
+    .from(aiCreditDebits)
+    .where(
+      and(
+        eq(aiCreditDebits.storeId, storeId),
+        gte(aiCreditDebits.debitedMicro, 1),
+      ),
+    )
+    .limit(1)
+
+  return row !== undefined
+}
+
 /**
  * Paginated consumption history (the `ai_credit_debits` ledger) for the
  * dashboard. Only exposes what was BILLED (credits, kind, call duration) —
