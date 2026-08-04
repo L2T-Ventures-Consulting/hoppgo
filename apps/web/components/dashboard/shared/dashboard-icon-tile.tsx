@@ -28,7 +28,10 @@ export const DashboardIconTile = ({
       className,
     )}
   >
-    <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0)_50%,rgba(255,255,255,1)_105%)]" />
+    {/* Fades the accent surface into the surrounding card so the tile reads as a
+        soft dome. Uses `--card` rather than a hard white: it is white in light
+        mode (the original value) and dark in dark mode, where a white rim glowed. */}
+    <span className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,var(--card)_105%)]" />
     <Icon className={cn("relative z-10", size === "sm" ? "size-4" : "size-4.5")} />
   </span>
 );
