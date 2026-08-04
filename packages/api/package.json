@@ -16,8 +16,8 @@
     "@louez/types": "workspace:*",
     "@louez/utils": "workspace:*",
     "@louez/validations": "workspace:*",
-    "@orpc/server": "^1.13.4",
-    "drizzle-orm": "^0.45.1",
+    "@orpc/server": "^1.13.6",
+    "drizzle-orm": "^0.45.2",
     "zod": "^4.3.5"
   },
   "devDependencies": {
