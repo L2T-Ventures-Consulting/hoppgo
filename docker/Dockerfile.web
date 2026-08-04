@@ -204,7 +204,8 @@ ENV MIGRATIONS_FOLDER=/app/migrations
 # exist owned by the runtime user so a named volume inherits its ownership.
 COPY --chown=nextjs:nodejs docker/entrypoint.sh ./docker/entrypoint.sh
 RUN chmod +x ./docker/entrypoint.sh && \
-    mkdir -p /app/data && chown nextjs:nodejs /app/data
+    mkdir -p /app/data /app/.evlog/logs && \
+    chown -R nextjs:nodejs /app/data /app/.evlog
 
 # Switch to non-root user
 USER nextjs
