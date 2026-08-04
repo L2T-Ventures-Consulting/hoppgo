@@ -194,7 +194,12 @@ function createEconomicsSnapshot(
     input.providerCostSource === "unavailable"
       ? null
       : round(input.providerCostMicroUsd / USD_MICRO);
-  const usdToEurRate = env.AI_IMAGE_USD_TO_EUR_RATE ?? null;
+  // Runtime env values can still be raw strings when an operator explicitly
+  // disables validation. Normalize again at this persisted-data boundary so a
+  // valid Docker value such as "0.92" cannot invalidate the whole manifest.
+  const rawUsdToEurRate = Number(env.AI_IMAGE_USD_TO_EUR_RATE);
+  const usdToEurRate =
+    Number.isFinite(rawUsdToEurRate) && rawUsdToEurRate > 0 ? rawUsdToEurRate : null;
   const providerCostEur =
     providerCostUsd !== null && usdToEurRate !== null
       ? round(providerCostUsd * usdToEurRate)

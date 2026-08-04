@@ -25,6 +25,13 @@ const runtimeAppDomain =
     }
   })();
 
+// Keep this lookup dynamic so Next.js does not bake the builder's
+// SKIP_ENV_VALIDATION=true into the standalone server bundle. The Docker build
+// may skip validation because runtime secrets are intentionally unavailable in
+// the builder stage; the final container must validate and coerce its own env.
+const readRuntimeEnv = (name: string): string | undefined => process.env[name];
+const skipEnvValidation = readRuntimeEnv("SKIP_ENV_VALIDATION") === "true";
+
 export const env = createEnv({
   extends: [dbEnv, validationsEnv, authEnv, emailEnv],
 
@@ -508,6 +515,6 @@ export const env = createEnv({
     NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN: process.env.NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN,
   },
 
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation: skipEnvValidation,
   emptyStringAsUndefined: true,
 });
