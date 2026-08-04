@@ -43,24 +43,43 @@ const isSupportedMimeType = (value: string): value is ProductImageMimeType =>
   supportedMimeTypes.some((mimeType) => mimeType === value);
 
 const readPublicFixture = async (publicPath: string) => {
-  if (!/^\/images\/ai-image-benchmark\/[a-z0-9-]+\.(?:jpe?g|png|webp)$/.test(publicPath)) {
-    throw new Error("invalid local benchmark fixture path");
-  }
-
-  const relativePath = publicPath.replace(/^\/+/, "");
-  const candidates = [
-    join(process.cwd(), "public", relativePath),
-    join(process.cwd(), "apps/web/public", relativePath),
-  ];
-  let lastError: unknown;
-  for (const candidate of candidates) {
-    try {
-      return await readFile(candidate);
-    } catch (error) {
-      lastError = error;
+  // Keep the allowlist explicit. Besides preventing path traversal, this keeps
+  // Next.js output tracing scoped to these two files instead of conservatively
+  // including the entire project for a dynamic filesystem glob.
+  switch (publicPath) {
+    case "/images/ai-image-benchmark/partybox-cropped.jpg": {
+      try {
+        return await readFile(
+          join(process.cwd(), "public/images/ai-image-benchmark/partybox-cropped.jpg"),
+        );
+      } catch (workspaceError) {
+        try {
+          return await readFile(
+            join(process.cwd(), "apps/web/public/images/ai-image-benchmark/partybox-cropped.jpg"),
+          );
+        } catch {
+          throw workspaceError;
+        }
+      }
     }
+    case "/images/ai-image-benchmark/partybox-detail.webp": {
+      try {
+        return await readFile(
+          join(process.cwd(), "public/images/ai-image-benchmark/partybox-detail.webp"),
+        );
+      } catch (workspaceError) {
+        try {
+          return await readFile(
+            join(process.cwd(), "apps/web/public/images/ai-image-benchmark/partybox-detail.webp"),
+          );
+        } catch {
+          throw workspaceError;
+        }
+      }
+    }
+    default:
+      throw new Error("invalid local benchmark fixture path");
   }
-  throw lastError instanceof Error ? lastError : new Error("local benchmark fixture unavailable");
 };
 
 const loadBenchmarkFixture = async (
