@@ -412,6 +412,7 @@ export function TimelineToolbar({
       {isFetching && <Spinner className="text-muted-foreground size-3.5" />}
 
       <ScrollArea
+        orientation="horizontal"
         scrollFade
         className="h-auto w-full min-w-0 basis-full sm:ml-auto sm:w-auto sm:max-w-full sm:basis-auto"
       >

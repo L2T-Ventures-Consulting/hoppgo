@@ -56,6 +56,8 @@ import {
 
 // import { ReferralSidebarWidget } from '@/components/dashboard/referral-sidebar-widget';
 import { UserAvatar } from "@/components/dashboard/shared/user-avatar";
+import { InstallPrompt } from "@/components/dashboard/install-prompt";
+import { PushPrimer } from "@/components/dashboard/push-primer";
 import { SidebarLink } from "@/components/dashboard/sidebar-link";
 import { StoreSwitcher } from "@/components/dashboard/store-switcher";
 import { ThemeMenuSub } from "@/components/dashboard/theme-toggle";
@@ -432,6 +434,10 @@ export const DashboardSidebar = ({
           ))}
         </SidebarContent>
         <SidebarFooter className="border-sidebar-border border-t">
+          <div className="flex flex-col gap-2 group-data-[collapsible=icon]:hidden">
+            <InstallPrompt />
+            <PushPrimer />
+          </div>
           <SidebarMenu>
             <WhatsNewSidebarItem />
             <HelpButton />

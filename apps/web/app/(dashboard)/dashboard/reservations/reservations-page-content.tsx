@@ -23,8 +23,6 @@ import { CalendarSyncIcon } from "@louez/ui/icons";
 import { cn } from "@louez/utils";
 
 import { BlurOverlay, LimitBanner, UpgradeModal } from "@/components/dashboard/upgrade-modal";
-import { PushPrimer } from "@/components/dashboard/push-primer";
-
 import { orpc } from "@/lib/orpc/react";
 import type { LimitStatus } from "@/lib/plan-limits";
 
@@ -275,9 +273,6 @@ export function ReservationsPageContent({
           : "flex h-[calc(100dvh-6.5rem)] min-h-0 flex-col gap-3 md:gap-6 overflow-hidden",
       )}
     >
-      {/* Contextual nudge to enable push (reservations are the value moment) */}
-      <PushPrimer />
-
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

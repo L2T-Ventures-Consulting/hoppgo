@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 
-import { InstallPrompt } from "@/components/dashboard/install-prompt";
 import { SwRegister } from "@/components/dashboard/sw-register";
 import { FromHelloProvider } from "@/components/fromhello-provider";
 import { GleapProvider } from "@/components/dashboard/gleap-provider";
@@ -112,7 +111,6 @@ export const DashboardLayoutContent = async ({ children }: { children: React.Rea
               }
             >
               <div className="bg-background min-h-screen">{children}</div>
-              <InstallPrompt />
               <SwRegister />
             </GleapProvider>
           </OpenReplayProvider>
