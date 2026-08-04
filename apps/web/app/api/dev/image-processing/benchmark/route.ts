@@ -29,7 +29,6 @@ import { auth } from "@/lib/auth";
 import { useLogger, withEvlog } from "@/lib/evlog";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 
-export const runtime = "nodejs";
 export const maxDuration = 360;
 
 const requestSchema = z.object({

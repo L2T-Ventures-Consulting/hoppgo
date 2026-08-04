@@ -21,7 +21,7 @@
   },
   "devDependencies": {
     "@louez/config": "workspace:*",
-    "next": "16.2.6",
+    "next": "16.3.0",
     "typescript": "catalog:"
   },
   "peerDependencies": {

@@ -22,6 +22,10 @@ import { createLoginUrl } from "@/lib/utils/util.url";
 import { ImageProcessingBenchmarkButton } from "./image-processing-benchmark-button";
 import { ImageProcessingStoreFilter } from "./image-processing-store-filter";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Traitement des images · Dev",
   robots: {

@@ -11,6 +11,10 @@ import { ReferralsList } from "@/app/(dashboard)/dashboard/referrals/referrals-l
 import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
 import { getCurrentStore } from "@/lib/store-context";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const SettingsReferralsPage = async () => {
   const store = await getCurrentStore();
   if (!store) {

@@ -32,6 +32,10 @@ import { parseWhatsNewProgress } from "@/lib/whats-new.progress";
 
 import { StoreProvider } from "@/contexts/store-context";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 /** Total balance under which the sidebar shows its low-credit marker. */
 const LOW_AI_CREDITS_THRESHOLD = 5;
 

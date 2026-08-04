@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 
-import { unstable_noStore as noStore } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
@@ -59,8 +58,9 @@ import { TopProductsTable } from "./top-products-table";
 import { TrendChart, type TrendDataPoint } from "./trend-chart";
 import { type Period, UnifiedPeriodFilter } from "./unified-period-filter";
 
-// Disable caching for this page - always fetch fresh analytics data
-export const dynamic = "force-dynamic";
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 interface AnalyticsPageProps {
   searchParams: Promise<{
@@ -751,9 +751,6 @@ async function TopProductsByRevenueSection({
 // ============================================
 
 export default async function AnalyticsPage({ searchParams }: AnalyticsPageProps) {
-  // Ensure fresh data on every request
-  noStore();
-
   const t = await getTranslations("dashboard.analytics");
   const tStats = await getTranslations("dashboard.statistics");
   const store = await getCurrentStore();

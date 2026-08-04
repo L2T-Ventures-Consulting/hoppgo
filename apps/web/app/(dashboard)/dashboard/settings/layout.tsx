@@ -3,6 +3,10 @@ import { getTranslations } from "next-intl/server";
 import { SettingsNav } from "@/components/dashboard/settings-nav";
 import { isCurrentUserPlatformAdmin } from "@/lib/platform-admin";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export default async function SettingsLayout({ children }: { children: React.ReactNode }) {
   const t = await getTranslations("dashboard.settings");
   const isPlatformAdmin = await isCurrentUserPlatformAdmin();

@@ -1,12 +1,10 @@
-import { NextResponse } from 'next/server'
+import { connection, NextResponse } from 'next/server'
 
 import { asc, eq } from 'drizzle-orm'
 
 import { db, stores } from '@louez/db'
 
 import { isStandaloneMode } from '@/lib/deployment'
-
-export const dynamic = 'force-dynamic'
 
 /**
  * Resolve the storefront slug of a standalone instance.
@@ -18,6 +16,8 @@ export const dynamic = 'force-dynamic'
  * instance store is not a meaningful concept.
  */
 export async function GET() {
+  await connection()
+
   if (!isStandaloneMode()) {
     return new NextResponse(null, { status: 404 })
   }

@@ -18,6 +18,8 @@ interface ConfirmationPageProps {
   params: Promise<{ slug: string; reservationId: string }>
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: ConfirmationPageProps): Promise<Metadata> {

@@ -65,6 +65,8 @@ function getSafeNumber(value: unknown): number | null {
   return null;
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: StorefrontPageProps): Promise<Metadata> {

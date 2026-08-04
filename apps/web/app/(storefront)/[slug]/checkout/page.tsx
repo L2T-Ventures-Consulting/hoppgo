@@ -21,6 +21,8 @@ interface CheckoutPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: CheckoutPageProps): Promise<Metadata> {

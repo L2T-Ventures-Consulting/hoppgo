@@ -7,9 +7,6 @@ import { isPlatformAdmin } from '@/lib/platform-admin';
 import { getCurrentStore } from '@/lib/store-context';
 import { createLoginUrl } from '@/lib/utils/util.url';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: Request) {
   const session = await auth();
   const store = await getCurrentStore();

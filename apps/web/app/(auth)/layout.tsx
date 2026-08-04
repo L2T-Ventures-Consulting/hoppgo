@@ -1,27 +1,16 @@
-import { NextIntlClientProvider } from 'next-intl'
-import { getMessages } from 'next-intl/server'
-import { redirect } from 'next/navigation'
-import { auth } from '@/lib/auth'
+import { Suspense } from "react";
 
-export default async function AuthLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const session = await auth()
+import { AuthLayoutContent } from "./auth-layout-content";
 
-  // Redirect to dashboard if already authenticated
-  if (session?.user) {
-    redirect('/dashboard')
-  }
+// Session and referral state must resolve before the auth flow can render.
+export const instant = false;
 
-  const messages = await getMessages()
-
+const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <NextIntlClientProvider messages={messages}>
-      <div className="dashboard min-h-screen bg-background">
-        {children}
-      </div>
-    </NextIntlClientProvider>
-  )
-}
+    <Suspense fallback={null}>
+      <AuthLayoutContent>{children}</AuthLayoutContent>
+    </Suspense>
+  );
+};
+
+export default AuthLayout;

@@ -161,4 +161,3 @@ async function handleCron(request: Request) {
 }
 
 export const GET = withEvlog(handleCron);
-export const dynamic = 'force-dynamic';

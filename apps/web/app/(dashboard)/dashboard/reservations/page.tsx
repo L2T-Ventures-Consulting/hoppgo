@@ -10,6 +10,10 @@ import { parseReservationView } from "./calendar/calendar-query";
 import { getCalendarProducts } from "./calendar/data";
 import { ReservationsPageContent } from "./reservations-page-content";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 function ReservationsTableSkeleton() {
   return (
     <div className="space-y-4">

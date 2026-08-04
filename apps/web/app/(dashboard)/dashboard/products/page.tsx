@@ -5,6 +5,10 @@ import { getStoreLimits, getStorePlan } from '@/lib/plan-limits'
 import { ProductsPageContent } from './products-page-content'
 import { PRODUCT_STATUS_FILTERS, type ProductStatusFilter } from './types'
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 function parseStatus(value: string | undefined): ProductStatusFilter {
   return PRODUCT_STATUS_FILTERS.includes(value as ProductStatusFilter)
     ? (value as ProductStatusFilter)

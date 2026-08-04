@@ -23,6 +23,10 @@ import { AiCreditsOverview } from "./ai-credits-overview";
 import { AiCreditsValue } from "./ai-credits-value";
 import { LOW_BALANCE_CREDITS } from "./credits-format";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const USAGE_PAGE_SIZE = 20;
 /** Enough purchase rows to both fill the tab and tell a newcomer from a customer. */
 const PURCHASE_HISTORY_LIMIT = 30;

@@ -40,6 +40,8 @@ interface RentalPageProps {
   }>;
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
   searchParams,

@@ -15,8 +15,6 @@ import { auth } from "@/lib/auth";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 import { getCurrentStore, hasPermission, verifyStoreAccess } from "@/lib/store-context";
 
-export const runtime = "nodejs";
-
 interface RouteContext {
   params: Promise<{ runId: string; stageId: string }>;
 }

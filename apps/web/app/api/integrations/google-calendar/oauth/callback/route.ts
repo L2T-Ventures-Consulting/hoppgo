@@ -23,9 +23,6 @@ import {
 import { parseGoogleCalendarOAuthState } from '@/lib/integrations/providers/google-calendar/oauth-state';
 import { verifyStoreAccess } from '@/lib/store-context';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');

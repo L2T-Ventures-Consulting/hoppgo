@@ -26,6 +26,10 @@ import { AiAssistantTabs } from "./ai-assistant-tabs";
 import { AdvisorConversationsSection } from "./conversations-section";
 import { VoiceAgentForm } from "./voice-agent-form";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 /**
  * The AI assistant's home: three tabs — the two faces it is configured for
  * (web advisor, voice agent) and the conversations they produce — with the

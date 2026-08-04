@@ -40,7 +40,6 @@ import { canApplyProductImageOperation } from "@/lib/uploads/image-upload";
 
 import { parseTrustedDemoProductImageUrl } from "./util.product-image-source";
 
-export const runtime = "nodejs";
 // GPT Image (up to 210s), rembg (up to 120s), storage and post-processing.
 export const maxDuration = 360;
 

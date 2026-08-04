@@ -254,6 +254,7 @@ function buildSecurityHeaders() {
 }
 
 const nextConfig: NextConfig = {
+  cacheComponents: true,
   // Enable standalone output for Docker deployment
   output: "standalone",
   // The changelog reads its write-ups from content/whats-new/**/*.md at runtime.
