@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from '@louez/ui'
 import { cn } from '@louez/utils'
+
+import { DashboardIconTile } from '@/components/dashboard/shared/dashboard-icon-tile'
 import { FloatingSaveBar } from '@/components/dashboard/floating-save-bar'
 import { GooglePlaceSearch } from './google-place-search'
 import { NotificationTemplateSheet } from '@/components/dashboard/notification-template-sheet'
@@ -363,9 +365,7 @@ export function ReviewBoosterForm({
               >
                 <div className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
-                      <MailIcon className="h-4 w-4" />
-                    </div>
+                    <DashboardIconTile icon={MailIcon} />
                     <div className="space-y-0.5">
                       <label className="text-sm font-medium leading-none cursor-pointer">
                         {t('autoEmail')}
@@ -434,9 +434,7 @@ export function ReviewBoosterForm({
               >
                 <div className="flex flex-row items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted">
-                      <MobileIcon className="h-4 w-4" />
-                    </div>
+                    <DashboardIconTile icon={MobileIcon} />
                     <div className="space-y-0.5">
                       <label className="text-sm font-medium leading-none cursor-pointer">
                         {t('autoSms')}

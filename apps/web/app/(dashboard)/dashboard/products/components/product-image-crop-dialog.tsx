@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ChangeEvent, ReactNode } from "react";
+import type { ChangeEvent, ComponentType, ReactNode } from "react";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
@@ -39,6 +39,7 @@ import {
 } from "@louez/ui";
 import { cn } from "@louez/utils";
 
+import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
 import { IMAGE_UPLOAD_MIME_TYPES } from "@/lib/uploads/image-upload";
 
 import type {
@@ -901,7 +902,7 @@ function ChoiceStepBody({
         <div className="grid auto-rows-fr gap-2 lg:h-full">
           <IntentOption
             tone="ai"
-            icon={<SparklesIcon className="size-4" />}
+            icon={SparklesIcon}
             title={t("aiEnhanceAction")}
             description={t("aiChoiceEnhanceDescription")}
             onClick={() => onStartAi("enhance")}
@@ -918,7 +919,7 @@ function ChoiceStepBody({
           {imageEnhance.backgroundRemovalEnabled && (
             <IntentOption
               tone="background"
-              icon={<EraserIcon className="size-4" />}
+              icon={EraserIcon}
               title={t("removeBackgroundAction")}
               description={t("aiChoiceRemoveBackgroundDescription")}
               onClick={() => onStartAi("remove-background")}
@@ -934,7 +935,7 @@ function ChoiceStepBody({
           )}
 
           <IntentOption
-            icon={<CropIcon className="size-4" />}
+            icon={CropIcon}
             title={t("aiChoiceCrop")}
             description={t("aiChoiceCropDescription")}
             onClick={onCrop}
@@ -961,7 +962,7 @@ const INTENT_TONES = {
 } as const;
 
 interface IntentOptionProps {
-  icon: ReactNode;
+  icon: ComponentType<{ className?: string }>;
   title: string;
   description: string;
   onClick: () => void;
@@ -1009,14 +1010,7 @@ function IntentOption({
         className="focus-visible:ring-ring absolute inset-0 cursor-pointer rounded-xl outline-none focus-visible:ring-2"
       />
 
-      <span
-        className={cn(
-          "flex size-9 shrink-0 items-center justify-center rounded-lg",
-          INTENT_TONES[tone],
-        )}
-      >
-        {icon}
-      </span>
+      <DashboardIconTile icon={icon} className={INTENT_TONES[tone]} />
 
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-medium">{title}</span>

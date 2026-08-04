@@ -15,7 +15,10 @@ import {
 } from '@louez/ui'
 import { Button } from '@louez/ui'
 import { cn } from '@louez/utils'
+
+import { DashboardIconTile } from '@/components/dashboard/shared/dashboard-icon-tile'
 import { SMS_TOPUP_PACKAGES } from '@/lib/plans'
+
 import { createTopupCheckout } from './actions'
 
 interface TopupModalProps {
@@ -74,9 +77,7 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
       <DialogPopup className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10">
-              <CreditCard className="h-5 w-5 text-primary" />
-            </div>
+            <DashboardIconTile icon={CreditCard} accent="primary" />
             {t('title')}
           </DialogTitle>
           <DialogDescription>
@@ -99,9 +100,12 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
                   <X className="h-3.5 w-3.5" />
                 </button>
                 <div className="flex items-start gap-3 pr-6">
-                  <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                  </div>
+                  <DashboardIconTile
+                    icon={Sparkles}
+                    accent="primary"
+                    size="sm"
+                    className="mt-0.5"
+                  />
                   <div className="flex-1 space-y-2">
                     <p className="text-sm font-medium text-primary">{t('upsell.didYouKnow')}</p>
                     <p className="text-xs leading-relaxed text-muted-foreground">

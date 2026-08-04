@@ -9,6 +9,8 @@ import { Button } from "@louez/ui";
 import { Radio, RadioGroup } from "@louez/ui";
 import { Label } from "@louez/ui";
 
+import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
+
 import { OnboardingStepHeader } from "../_components/step-header";
 import { useStripeStep } from "./use-stripe-step";
 
@@ -33,9 +35,7 @@ export function OnboardingStripeClientPage({ nextPath }: { nextPath: string }) {
                 >
                   <Label className="hover:bg-accent/30 has-data-checked:border-foreground/30 has-data-checked:bg-accent/50 flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors">
                     <Radio value="payment" className="hidden" />
-                    <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
-                      <CreditCard className="size-4" />
-                    </div>
+                    <DashboardIconTile icon={CreditCard} />
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-medium">{t("paymentMode")}</p>
@@ -48,9 +48,7 @@ export function OnboardingStripeClientPage({ nextPath }: { nextPath: string }) {
                   </Label>
                   <Label className="hover:bg-accent/30 has-data-checked:border-foreground/30 has-data-checked:bg-accent/50 flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors">
                     <Radio value="request" className="hidden" />
-                    <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
-                      <Inbox className="size-4" />
-                    </div>
+                    <DashboardIconTile icon={Inbox} />
                     <div className="space-y-1">
                       <p className="text-sm font-medium">{t("requestMode")}</p>
                       <p className="text-muted-foreground text-sm">{t("requestModeDescription")}</p>

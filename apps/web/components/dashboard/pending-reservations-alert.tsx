@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 
 import { cn } from '@louez/utils';
 
+import { DashboardIconTile } from '@/components/dashboard/shared/dashboard-icon-tile';
 import { useReservationPolling } from '@/contexts/reservation-polling-context';
 
 interface PendingReservationsAlertProps {
@@ -37,9 +38,7 @@ export function PendingReservationsAlert({
     >
       {/* Icon with pulse animation */}
       <div className="relative">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-orange-500 text-white">
-          <Clock className="h-4 w-4" />
-        </div>
+        <DashboardIconTile icon={Clock} accent="pending" className="bg-orange-500 text-white" />
         {/* Pulse indicator */}
         <span className="absolute -top-1 -right-1 flex h-4 w-4">
           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-orange-400 opacity-75" />

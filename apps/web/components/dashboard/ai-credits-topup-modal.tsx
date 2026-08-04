@@ -28,6 +28,7 @@ import {
 import { cn } from '@louez/utils'
 
 import { createAiCreditTopupCheckout } from '@/app/(dashboard)/dashboard/ai-assistant/credit-actions'
+import { DashboardIconTile } from '@/components/dashboard/shared/dashboard-icon-tile'
 import type { AiCreditPackage } from '@/lib/plans'
 
 type AiCreditsTopupModalProps = {
@@ -152,9 +153,7 @@ export function AiCreditsTopupModal({
       <DialogPopup className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2.5">
-            <div className="bg-primary/10 flex h-9 w-9 items-center justify-center rounded-lg">
-              <CreditCard className="text-primary h-5 w-5" />
-            </div>
+            <DashboardIconTile icon={CreditCard} accent="primary" />
             {t('title')}
           </DialogTitle>
           <DialogDescription>{t('description')}</DialogDescription>

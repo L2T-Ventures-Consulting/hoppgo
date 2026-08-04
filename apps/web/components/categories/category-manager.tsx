@@ -42,6 +42,7 @@ import {
   toastManager,
 } from '@louez/ui';
 
+import { DashboardIconTile } from '@/components/dashboard/shared/dashboard-icon-tile';
 import { orpc } from '@/lib/orpc/react';
 import { cn } from '@/lib/utils';
 
@@ -265,9 +266,7 @@ export const CategoryManager = ({
                 className="flex items-center justify-between gap-4 px-4 py-3"
               >
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
-                    <FolderOpen className="text-muted-foreground size-4" />
-                  </div>
+                  <DashboardIconTile icon={FolderOpen} />
                   <div className="min-w-0">
                     <p className="truncate font-medium">{category.name}</p>
                     <p className="text-muted-foreground text-sm">
