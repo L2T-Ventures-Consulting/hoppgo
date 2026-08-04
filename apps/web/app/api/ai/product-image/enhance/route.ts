@@ -19,7 +19,10 @@ import {
   isAiImageEnhanceEnabled,
   recordImageEnhanceDebit,
 } from "@/lib/ai/image/credits";
-import { persistImageProcessingDebugRun } from "@/lib/ai/image/debug-artifacts";
+import {
+  isImageProcessingDebugEnabled,
+  persistImageProcessingDebugRun,
+} from "@/lib/ai/image/debug-artifacts";
 import {
   type ProductImageMimeType,
   processProductImage,
@@ -299,8 +302,9 @@ const handlePost = async (request: Request) => {
     await maybeTriggerAutoTopup(store.id);
   }
 
+  const imageDebugEnabled = isImageProcessingDebugEnabled();
   try {
-    await persistImageProcessingDebugRun({
+    const imageDebugCaptured = await persistImageProcessingDebugRun({
       runId,
       storeId: store.id,
       operation,
@@ -320,10 +324,29 @@ const handlePost = async (request: Request) => {
           }
         : undefined,
     });
+    logger.set({
+      imageDebug: {
+        captured: imageDebugCaptured,
+        enabled: imageDebugEnabled,
+        runId,
+      },
+      imageProviderCost: {
+        microUsd: enhanceCost?.microUsd ?? null,
+        source: enhanceCost?.source ?? null,
+        usageCaptured: processed.imageUsage !== null,
+      },
+    });
   } catch (error) {
     // Diagnostics must never withhold a valid customer-facing result.
     logger.error(
       error instanceof Error ? error : new Error("Image processing debug persistence failed"),
+      {
+        imageDebug: {
+          captured: false,
+          enabled: imageDebugEnabled,
+          runId,
+        },
+      },
     );
   }
 

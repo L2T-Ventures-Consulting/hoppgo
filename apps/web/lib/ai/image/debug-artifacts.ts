@@ -265,8 +265,8 @@ async function readManifest(
  */
 export async function persistImageProcessingDebugRun(
   input: PersistImageProcessingDebugRunInput,
-): Promise<void> {
-  if (!isImageProcessingDebugEnabled()) return;
+): Promise<boolean> {
+  if (!isImageProcessingDebugEnabled()) return false;
   if (!isRunId(input.runId)) throw new Error("invalid image processing debug run id");
 
   const client = getStorageClient();
@@ -333,6 +333,7 @@ export async function persistImageProcessingDebugRun(
         CacheControl: "private, no-store",
       }),
     );
+    return true;
   } catch (error) {
     if (uploadedKeys.length > 0) {
       await client

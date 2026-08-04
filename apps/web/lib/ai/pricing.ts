@@ -199,10 +199,18 @@ export function imageEnhanceCost(usage: ImageTokenUsage | null = null): ImageEnh
       (usage.inputTextTokens * num(env.AI_IMAGE_TEXT_INPUT_USD_PER_MTOK)) / 1_000_000 +
       (usage.inputImageTokens * num(env.AI_IMAGE_INPUT_USD_PER_MTOK)) / 1_000_000 +
       (usage.outputTokens * num(env.AI_IMAGE_OUTPUT_USD_PER_MTOK)) / 1_000_000;
-    return {
-      microUsd: Math.round(usd * USD_MICRO),
-      source: "measured_usage",
-    };
+    const measuredMicroUsd = Math.round(usd * USD_MICRO);
+
+    // Some image responses expose the usage object while leaving every token
+    // counter at zero. Treat that as unavailable telemetry: otherwise its
+    // apparent measured cost of $0 would incorrectly bypass the configured
+    // per-image fallback.
+    if (measuredMicroUsd > 0) {
+      return {
+        microUsd: measuredMicroUsd,
+        source: "measured_usage",
+      };
+    }
   }
 
   const configuredUsd = num(env.AI_IMAGE_USD_PER_IMAGE);
