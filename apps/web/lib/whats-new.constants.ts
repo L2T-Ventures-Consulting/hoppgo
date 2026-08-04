@@ -115,6 +115,11 @@ export const WHATS_NEW_ANNOUNCEMENTS: WhatsNewAnnouncement[] = [
     descriptionKey: "announcements.product-image-ai.description",
     featureId: "product-image-ai",
     href: "/dashboard/products",
+    media: {
+      type: "video",
+      src: "/videos/whats-new/product-image-ai.mp4",
+      posterSrc: "/images/whats-new/product-image-ai.webp",
+    },
     icon: WandSparkles,
   },
   {

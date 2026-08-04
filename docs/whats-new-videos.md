@@ -27,7 +27,7 @@ Sans `media`, l'entrée s'affiche en texte seul — aucun placeholder, rien à c
 
 ## Avancement
 
-- [ ] `product-image-ai` — Vos photos produit passent au studio (~50 s, script section 1)
+- [x] `product-image-ai` — Vos photos produit passent au studio · 52 s · en ligne
 - [x] `sidebar-simplified` — Un menu plus court · 45 s · en ligne
 - [x] `navigation-refresh` — ⌘K vous emmène partout · 23 s · en ligne
 - [x] `product-variants` — Des variantes simples · 46 s · en ligne
