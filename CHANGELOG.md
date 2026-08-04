@@ -6,6 +6,37 @@ All notable changes to Louez are documented here.
 
 ---
 
+## [2.1.0] - August 4, 2026
+
+### 📦 Product Catalog & Inventory
+
+- 🧭 **Redesigned product workflow** — A clearer creation and editing flow with shared controls, sticky actions, and a consolidated product detail hub.
+- 🏷️ **Catalog variants and categories** — Reusable size, color, and custom variants plus multi-category product organization.
+- 🚲 **Per-unit inventory** — Improved unit distribution, images, capacity validation, and product-level reservation visibility.
+- 🖼️ **Non-destructive image editing** — Every uploaded, enhanced, and background-removed version stays available in product image history.
+- ✨ **AI product photography** — Optional AI enhancement and one-click background removal through an authenticated private worker.
+
+### 📅 Reservations & Dashboard
+
+- ⚡ **Faster manual reservations** — Streamlined dates, product selection, customer creation, discounts, and deposit overrides.
+- 🗓️ **Unified planning** — List, calendar, and timeline views share clearer labels, filters, prefetching, and availability context.
+- 🔎 **Richer command palette** — Search products, reservations, customers, and settings from the dashboard.
+- ⌨️ **Custom keyboard shortcuts** — Configure dashboard actions to match your workflow.
+- 📰 **What's New** — In-app release announcements with per-user read progress, images, and full-size video demos.
+- 🎨 **Dashboard refresh** — Consistent settings, breadcrumbs, navigation, analytics widgets, and Nucleo Glass sidebar icons.
+
+### 🐳 Self-Hosting, Security & Upgrades
+
+- ✂️ **Background-removal image** — Release tags now publish `synapsr/louez-background-removal` alongside the web image; the bundled Compose stack wires them together.
+- 🗃️ **Automatic schema upgrade** — Six additive migrations add variants, product categories, image history, keyboard shortcuts, and What's New progress. They run at application startup as before.
+- ⚡ **Next.js 16.3** — The web app now uses cache components and tighter production output tracing.
+- 🔒 **Dependency hardening** — Applicable critical and high production dependency advisories are patched.
+- 📄 **License clarity** — Louez is now described accurately as source-available under Apache 2.0 with Commons Clause; Nucleo, rembg, and DIS/IS-Net obligations are documented in `NOTICE`.
+
+> **Self-hosting note:** use the bundled Compose stack (or deploy both release images with the same tag) to enable local background removal. Existing databases migrate automatically on startup. Nucleo icons require a valid Nucleo license.
+
+---
+
 ## [2.0.0] - July 23, 2026
 
 ### 🤖 AI Assistant
@@ -551,6 +582,37 @@ _For upgrade instructions, see the [documentation](https://louez.io/docs)._
 > [🇬🇧 English](#changelog) | 🇫🇷 **Français**
 
 Toutes les évolutions notables de Louez sont documentées ici.
+
+---
+
+## [2.1.0] - 4 août 2026
+
+### 📦 Catalogue produit & inventaire
+
+- 🧭 **Parcours produit repensé** — Création et édition plus claires avec des contrôles partagés, des actions persistantes et une fiche produit consolidée.
+- 🏷️ **Variantes et catégories de catalogue** — Tailles, couleurs et variantes personnalisées réutilisables, avec classement d'un produit dans plusieurs catégories.
+- 🚲 **Inventaire par unité** — Distribution, images, validation de capacité et visibilité des réservations améliorées pour chaque unité.
+- 🖼️ **Édition d'image non destructive** — Chaque version importée, améliorée ou détourée reste disponible dans l'historique du produit.
+- ✨ **Photo produit par IA** — Amélioration IA optionnelle et détourage en un clic via un worker privé authentifié.
+
+### 📅 Réservations & tableau de bord
+
+- ⚡ **Réservations manuelles plus rapides** — Dates, sélection produit, création client, remises et cautions simplifiées.
+- 🗓️ **Planning unifié** — Listes, calendriers et timelines partagent des libellés, filtres, préchargements et informations de disponibilité plus clairs.
+- 🔎 **Palette de commandes enrichie** — Recherche des produits, réservations, clients et réglages depuis le tableau de bord.
+- ⌨️ **Raccourcis clavier personnalisables** — Configurez les actions du tableau de bord selon votre manière de travailler.
+- 📰 **Nouveautés** — Annonces intégrées avec progression de lecture par utilisateur, images et vidéos plein écran.
+- 🎨 **Interface harmonisée** — Réglages, fil d'Ariane, navigation, widgets analytics et icônes Nucleo Glass cohérents.
+
+### 🐳 Auto-hébergement, sécurité & mises à niveau
+
+- ✂️ **Image de détourage** — Les tags publient désormais `synapsr/louez-background-removal` avec l'image web ; la stack Compose fournie relie les deux services.
+- 🗃️ **Mise à niveau automatique du schéma** — Six migrations additives ajoutent variantes, catégories produit, historique d'images, raccourcis clavier et progression des nouveautés. Elles s'exécutent au démarrage comme auparavant.
+- ⚡ **Next.js 16.3** — L'application utilise les cache components et un tracing de production mieux borné.
+- 🔒 **Dépendances renforcées** — Les vulnérabilités de production critiques et élevées applicables sont corrigées.
+- 📄 **Licence clarifiée** — Louez est décrit comme source-available sous Apache 2.0 avec Commons Clause ; les obligations Nucleo, rembg et DIS/IS-Net figurent dans `NOTICE`.
+
+> **Note auto-hébergement :** utilisez la stack Compose fournie (ou déployez les deux images avec le même tag) pour activer le détourage local. Les bases existantes migrent automatiquement au démarrage. Les icônes Nucleo nécessitent une licence Nucleo valide.
 
 ---
 
