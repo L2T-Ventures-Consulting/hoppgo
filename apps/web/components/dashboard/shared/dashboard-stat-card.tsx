@@ -3,11 +3,11 @@ import type { ComponentType, ReactNode } from "react";
 import Link from "next/link";
 
 import { Badge, Card, CardPanel } from "@louez/ui";
-import { TrendingDownSolidIcon, TrendingUpSolidIcon } from "@louez/ui/icons";
 import { cn } from "@louez/utils";
 
 import type { DashboardAccent } from "./dashboard-accent";
 import { DashboardIconTile } from "./dashboard-icon-tile";
+import { DashboardTrendBadge } from "./dashboard-trend-badge";
 
 interface DashboardStatCardProps {
   title: string;
@@ -21,9 +21,6 @@ interface DashboardStatCardProps {
   trend?: number | null;
   href?: string;
 }
-
-/** Whole percentages stay whole; anything else keeps a single decimal. */
-const formatTrend = (trend: number) => (Number.isInteger(trend) ? `${trend}` : trend.toFixed(1));
 
 /** Uniform KPI tile of the dashboard. */
 export const DashboardStatCard = ({
@@ -54,16 +51,7 @@ export const DashboardStatCard = ({
               {value}
             </span>
             {badge && <Badge variant="pending">{badge}</Badge>}
-            {trend !== null && trend !== undefined && (
-              <Badge
-                variant={trend > 0 ? "success" : trend < 0 ? "failed" : "expired"}
-                className="gap-0.5"
-              >
-                {trend > 0 ? <TrendingUpSolidIcon /> : trend < 0 ? <TrendingDownSolidIcon /> : null}
-                {trend > 0 ? "+" : ""}
-                {formatTrend(trend)}%
-              </Badge>
-            )}
+            <DashboardTrendBadge trend={trend} />
           </div>
           {subtitle && <p className="text-muted-foreground truncate text-xs">{subtitle}</p>}
         </div>

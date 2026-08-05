@@ -5,7 +5,14 @@ import type { PointerEvent as ReactPointerEvent, UIEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
-import { CalendarIcon, ChevronLeft, ChevronRight, ListFilter, Wrench } from "lucide-react";
+import {
+  CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+  ListFilter,
+  LocateFixed,
+  Wrench,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { parseAsArrayOf, parseAsStringLiteral, useQueryStates } from "nuqs";
 
@@ -14,6 +21,15 @@ import {
   AlertDescription,
   Button,
   Checkbox,
+  Drawer,
+  DrawerClose,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+  DrawerTrigger,
   Label,
   Popover,
   PopoverContent,
@@ -25,6 +41,7 @@ import {
   SelectValue,
   Spinner,
 } from "@louez/ui";
+import { useIsMobile } from "@louez/ui/hooks/use-mobile";
 import { cn, formatDateShort } from "@louez/utils";
 
 import { EmptyState } from "@/components/ui/empty-state";
@@ -34,6 +51,8 @@ import {
   type ProductTimelineReservation,
   fetchProductReservationTimeline,
 } from "../../reservation-timeline-actions";
+import { TimelineDateJumpDrawer } from "@/app/(dashboard)/dashboard/reservations/calendar/timeline-date-jump-drawer";
+import { TimelineFilterBadge } from "@/components/dashboard/reservations-timeline/timeline-filter-badge";
 import {
   getStatusDotClass,
   getTimelineStatus,
@@ -50,6 +69,7 @@ import {
   placeDowntimes,
   placeReservations,
   stackReservations,
+  startOfDay,
 } from "@/components/dashboard/reservations-timeline/timeline-utils";
 
 // =============================================================================
@@ -64,6 +84,17 @@ const DAY_WIDTHS: Record<TimelineZoom, number> = {
   twoWeeks: 60,
   month: 38,
 };
+
+/** Narrower columns so a phone viewport still shows a useful span of days */
+const MOBILE_DAY_WIDTHS: Record<TimelineZoom, number> = {
+  week: 54,
+  twoWeeks: 38,
+  month: 26,
+};
+
+/** Left label column — unit identifiers need more room than slot numbers */
+const UNIT_COLUMN_WIDTHS = { tracked: 132, untracked: 84 };
+const MOBILE_UNIT_COLUMN_WIDTHS = { tracked: 92, untracked: 60 };
 
 /** Days scrolled per arrow click */
 const NAV_DAYS: Record<TimelineZoom, number> = {
@@ -121,6 +152,169 @@ const EXTEND_CHUNK_DAYS = 28;
 const EXTEND_THRESHOLD_PX = 320;
 /** Hard cap on the loaded window to keep the DOM bounded */
 const MAX_DAYS_COUNT = 560;
+
+// =============================================================================
+// Filter controls — shared between the desktop toolbar row and the mobile
+// filter drawer, so both always offer exactly the same choices.
+// =============================================================================
+
+/**
+ * Visible statuses, but only once the selection is non-default — the default
+ * set already hides the terminal statuses, and badging that made the toolbar
+ * read as "5 filters active" on a timeline nobody had touched.
+ */
+function visibleStatusBadgeCount(hiddenStatuses: Set<string>): number | null {
+  const visible = ALL_STATUSES.filter((status) => !hiddenStatuses.has(status));
+  const isCustom =
+    visible.length !== DEFAULT_VISIBLE_STATUSES.length ||
+    DEFAULT_VISIBLE_STATUSES.some((status) => !visible.includes(status));
+
+  return isCustom ? visible.length : null;
+}
+
+function StatusFilterList({
+  hiddenStatuses,
+  onToggleStatus,
+  onSetVisibleStatuses,
+}: {
+  hiddenStatuses: Set<string>;
+  onToggleStatus: (status: string) => void;
+  onSetVisibleStatuses: (visible: Set<string>) => void;
+}) {
+  const t = useTranslations("dashboard.products.detail.reservations.timeline");
+  const tCalendar = useTranslations("dashboard.calendar");
+
+  return (
+    <div className="space-y-0.5">
+      {ALL_STATUSES.map((status) => (
+        <Label
+          key={status}
+          className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm font-normal"
+        >
+          <Checkbox
+            checked={!hiddenStatuses.has(status)}
+            onCheckedChange={() => onToggleStatus(status)}
+          />
+          <span className={cn("h-2 w-2 shrink-0 rounded-full", getStatusDotClass(status))} />
+          <span className="flex-1">{tCalendar(`status.${status}`)}</span>
+        </Label>
+      ))}
+      {hiddenStatuses.size > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mt-1 w-full"
+          onClick={() => onSetVisibleStatuses(new Set(ALL_STATUSES))}
+        >
+          {t("showAll")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function ZoomSelect({
+  zoom,
+  onZoomChange,
+  className,
+  size,
+}: {
+  zoom: TimelineZoom;
+  onZoomChange: (value: string | null) => void;
+  className?: string;
+  size?: "sm";
+}) {
+  const tCalendar = useTranslations("dashboard.calendar");
+
+  return (
+    <Select value={zoom} onValueChange={onZoomChange}>
+      <SelectTrigger size={size} className={className} aria-label={tCalendar("viewMode.label")}>
+        <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />
+        <SelectValue>{tCalendar(`periods.${zoom}`)}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {TIMELINE_ZOOMS.map((period) => (
+          <SelectItem key={period} value={period} label={tCalendar(`periods.${period}`)}>
+            {tCalendar(`periods.${period}`)}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+/**
+ * Mobile filter drawer — the same trade as the planning timeline: a phone
+ * toolbar can't hold the controls next to the date navigation, so they move
+ * behind one trigger and the navigation keeps the visible slot.
+ */
+function TimelineFiltersDrawer({
+  hiddenStatuses,
+  zoom,
+  onToggleStatus,
+  onSetVisibleStatuses,
+  onZoomChange,
+}: {
+  hiddenStatuses: Set<string>;
+  zoom: TimelineZoom;
+  onToggleStatus: (status: string) => void;
+  onSetVisibleStatuses: (visible: Set<string>) => void;
+  onZoomChange: (value: string | null) => void;
+}) {
+  const tCalendar = useTranslations("dashboard.calendar");
+  const tTimeline = useTranslations("dashboard.calendar.timeline");
+  const [open, setOpen] = useState(false);
+  const badgeCount = visibleStatusBadgeCount(hiddenStatuses);
+
+  return (
+    <Drawer position="bottom" open={open} onOpenChange={setOpen}>
+      <DrawerTrigger
+        render={<Button variant="outline" size="icon" aria-label={tTimeline("filters")} />}
+      >
+        <ListFilter />
+        <TimelineFilterBadge count={badgeCount} />
+      </DrawerTrigger>
+      <DrawerPopup>
+        <DrawerHeader>
+          <DrawerTitle>{tTimeline("filters")}</DrawerTitle>
+          <DrawerDescription>{tTimeline("filtersDescription")}</DrawerDescription>
+        </DrawerHeader>
+        <DrawerPanel className="space-y-5">
+          <section className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {tCalendar("viewMode.label")}
+            </p>
+            <ZoomSelect zoom={zoom} onZoomChange={onZoomChange} className="w-full" />
+          </section>
+
+          <section className="space-y-2">
+            <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
+              {tTimeline("sectionStatus")}
+            </p>
+            <StatusFilterList
+              hiddenStatuses={hiddenStatuses}
+              onToggleStatus={onToggleStatus}
+              onSetVisibleStatuses={onSetVisibleStatuses}
+            />
+          </section>
+        </DrawerPanel>
+        <DrawerFooter>
+          <Button
+            variant="outline"
+            disabled={badgeCount === null}
+            onClick={() => {
+              onSetVisibleStatuses(new Set(DEFAULT_VISIBLE_STATUSES));
+              setOpen(false);
+            }}
+          >
+            {tTimeline("resetFilters")}
+          </Button>
+          <DrawerClose render={<Button />}>{tTimeline("applyFilters")}</DrawerClose>
+        </DrawerFooter>
+      </DrawerPopup>
+    </Drawer>
+  );
+}
 
 // =============================================================================
 // Component
@@ -184,7 +378,8 @@ export function ProductReservationsTimeline({
   );
 
   const zoom = urlState.resaZoom;
-  const dayWidth = DAY_WIDTHS[zoom];
+  const isMobile = useIsMobile();
+  const dayWidth = (isMobile ? MOBILE_DAY_WIDTHS : DAY_WIDTHS)[zoom];
 
   const hiddenStatuses = useMemo(
     () => new Set<string>(ALL_STATUSES.filter((status) => !urlState.resaStatus.includes(status))),
@@ -224,6 +419,9 @@ export function ProductReservationsTimeline({
   const appendLockRef = useRef(false);
   const zoomAnchorRef = useRef<number | null>(null);
   const didInitialScrollRef = useRef(false);
+  const centeredForMobileRef = useRef(false);
+  /** Date the viewport centers on when the window is (re)built */
+  const anchorDateRef = useRef(startOfDay(new Date()));
 
   // ---------------------------------------------------------------------------
   // Data
@@ -354,7 +552,9 @@ export function ProductReservationsTimeline({
   }, [trackUnits, units, quantity, isAggregated]);
 
   const totalUnits = trackUnits ? lanes.length : Math.max(1, quantity);
-  const unitColumnWidth = trackUnits ? 132 : 84;
+  const unitColumnWidth = (isMobile ? MOBILE_UNIT_COLUMN_WIDTHS : UNIT_COLUMN_WIDTHS)[
+    trackUnits ? "tracked" : "untracked"
+  ];
 
   const days = useMemo(
     () => Array.from({ length: daysCount }, (_, index) => addDays(windowStart, index)),
@@ -448,6 +648,7 @@ export function ProductReservationsTimeline({
   };
 
   const [visibleMonthLabel, setVisibleMonthLabel] = useState(() => formatMonthLabel(new Date()));
+  const [visibleDate, setVisibleDate] = useState(() => startOfDay(new Date()));
   const [leftmostVisibleDayIndex, setLeftmostVisibleDayIndex] = useState(0);
 
   // ---------------------------------------------------------------------------
@@ -461,24 +662,40 @@ export function ProductReservationsTimeline({
     );
     const centerOffset = element.scrollLeft + (element.clientWidth - unitColumnWidth) / 2;
     const index = Math.max(0, Math.min(daysCount - 1, Math.floor(centerOffset / dayWidth)));
-    const label = formatMonthLabel(addDays(windowStart, index));
+    const centeredDate = addDays(windowStart, index);
+    const label = formatMonthLabel(centeredDate);
     setLeftmostVisibleDayIndex((previous) =>
       previous === leftmostIndex ? previous : leftmostIndex,
+    );
+    setVisibleDate((previous) =>
+      previous.getTime() === centeredDate.getTime() ? previous : centeredDate,
     );
     setVisibleMonthLabel((previous) => (previous === label ? previous : label));
   };
 
-  // Center today on first mount
+  // Center the anchor date on mount, after a window reset (`goToDate` landing
+  // outside the loaded range), and when the day width swaps with the viewport —
+  // `useIsMobile` only resolves after hydration, so keeping the old scrollLeft
+  // would leave the timeline parked on an arbitrary date.
   useLayoutEffect(() => {
     const element = scrollerRef.current;
-    if (!element || didInitialScrollRef.current) return;
+    if (!element) return;
+
+    // The day width swaps once `useIsMobile` resolves — recenter rather than
+    // keep a scrollLeft that now points somewhere else.
+    if (centeredForMobileRef.current !== isMobile) {
+      centeredForMobileRef.current = isMobile;
+      didInitialScrollRef.current = false;
+    }
+    if (didInitialScrollRef.current) return;
     didInitialScrollRef.current = true;
 
-    const target = todayIndex * dayWidth - Math.max(0, (element.clientWidth - unitColumnWidth) / 3);
+    const anchorIndex = diffInDays(windowStart, anchorDateRef.current);
+    const target = anchorIndex * dayWidth - Math.max(0, (element.clientWidth - unitColumnWidth) / 3);
     element.scrollLeft = Math.max(0, target);
     updateVisibleViewport(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [windowStart, isMobile]);
 
   // Compensate scroll position after prepending days
   useLayoutEffect(() => {
@@ -546,12 +763,32 @@ export function ProductReservationsTimeline({
     });
   };
 
-  const goToToday = () => {
+  const goToDate = (date: Date) => {
     const element = scrollerRef.current;
-    if (!element) return;
-    const target = todayIndex * dayWidth - Math.max(0, (element.clientWidth - unitColumnWidth) / 3);
-    element.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+    const targetDate = startOfDay(date);
+    const targetIndex = diffInDays(windowStart, targetDate);
+    anchorDateRef.current = targetDate;
+
+    if (element && targetIndex >= 0 && targetIndex < daysCount) {
+      const target =
+        targetIndex * dayWidth - Math.max(0, (element.clientWidth - unitColumnWidth) / 3);
+      element.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+      return;
+    }
+
+    // The chosen date fell outside the loaded window — rebuild it around the
+    // target so the fetch effect covers the new range.
+    coverageRef.current = null;
+    setReservationsById(new Map());
+    setDowntimesById(new Map());
+    setHasLoadedOnce(false);
+    setIsFetching(true);
+    didInitialScrollRef.current = false;
+    setWindowStart(getMondayOf(addDays(targetDate, -INITIAL_PAST_DAYS)));
+    setDaysCount(INITIAL_DAYS_COUNT);
   };
+
+  const goToToday = () => goToDate(new Date());
 
   const handleZoomChange = (value: string | null) => {
     if (value === null) return;
@@ -663,12 +900,14 @@ export function ProductReservationsTimeline({
 
   return (
     <div className="space-y-2">
-      {/* Toolbar — compact, single row */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="flex items-center gap-1">
+      {/* Toolbar — one row on mobile: navigation stays visible, the controls
+          move into a drawer (same trade as the planning timeline) */}
+      <div className="flex min-w-0 items-center gap-2 sm:flex-wrap">
+        <div className="flex shrink-0 items-center gap-1">
           <Button
             variant="outline"
             size="icon-sm"
+            className="max-sm:size-9"
             aria-label={t("previous")}
             onClick={() => scrollByDays(-NAV_DAYS[zoom])}
           >
@@ -676,77 +915,72 @@ export function ProductReservationsTimeline({
           </Button>
           <Button
             variant="outline"
+            size="icon"
+            className="sm:hidden"
+            aria-label={tCalendar("today")}
+            onClick={goToToday}
+          >
+            <LocateFixed />
+          </Button>
+          <Button
+            variant="outline"
             size="icon-sm"
+            className="max-sm:size-9"
             aria-label={t("next")}
             onClick={() => scrollByDays(NAV_DAYS[zoom])}
           >
             <ChevronRight />
           </Button>
-          <Button variant="outline" size="sm" onClick={goToToday}>
+          <Button variant="outline" size="sm" className="max-sm:hidden" onClick={goToToday}>
             {tCalendar("today")}
           </Button>
         </div>
 
-        <span className="text-sm font-medium first-letter:uppercase">{visibleMonthLabel}</span>
+        {/* The grid's own header already repeats the month on mobile */}
+        <span className="min-w-0 truncate text-sm font-medium first-letter:uppercase max-sm:hidden">
+          {visibleMonthLabel}
+        </span>
 
-        {isFetching && hasLoadedOnce && <Spinner className="text-muted-foreground size-3.5" />}
+        {isFetching && hasLoadedOnce && (
+          <Spinner className="text-muted-foreground size-3.5 shrink-0" />
+        )}
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ms-auto flex shrink-0 items-center gap-1 sm:hidden">
+          <TimelineFiltersDrawer
+            hiddenStatuses={hiddenStatuses}
+            zoom={zoom}
+            onToggleStatus={toggleStatus}
+            onSetVisibleStatuses={setVisibleStatuses}
+            onZoomChange={handleZoomChange}
+          />
+          <TimelineDateJumpDrawer currentDate={visibleDate} onDateChange={goToDate} />
+        </div>
+
+        <div className="ms-auto hidden shrink-0 items-center gap-1 sm:flex">
           <Popover>
             <PopoverTrigger
               render={<Button variant="outline" size="sm" aria-label={t("statusFilter")} />}
             >
               <ListFilter />
-              {hiddenStatuses.size > 0 && (
-                <span className="bg-primary text-primary-foreground flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold">
-                  {ALL_STATUSES.length - hiddenStatuses.size}
-                </span>
-              )}
+              <TimelineFilterBadge count={visibleStatusBadgeCount(hiddenStatuses)} />
             </PopoverTrigger>
             <PopoverContent align="end" className="w-52">
-              <div className="space-y-0.5 p-1">
-                {ALL_STATUSES.map((status) => (
-                  <Label
-                    key={status}
-                    className="hover:bg-muted/60 flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm font-normal"
-                  >
-                    <Checkbox
-                      checked={!hiddenStatuses.has(status)}
-                      onCheckedChange={() => toggleStatus(status)}
-                    />
-                    <span
-                      className={cn("h-2 w-2 shrink-0 rounded-full", getStatusDotClass(status))}
-                    />
-                    <span className="flex-1">{tCalendar(`status.${status}`)}</span>
-                  </Label>
-                ))}
-                {hiddenStatuses.size > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="mt-1 w-full"
-                    onClick={() => setVisibleStatuses(new Set(ALL_STATUSES))}
-                  >
-                    {t("showAll")}
-                  </Button>
-                )}
+              <div className="p-1">
+                <StatusFilterList
+                  hiddenStatuses={hiddenStatuses}
+                  onToggleStatus={toggleStatus}
+                  onSetVisibleStatuses={setVisibleStatuses}
+                />
               </div>
             </PopoverContent>
           </Popover>
 
-          <Select value={zoom} onValueChange={handleZoomChange}>
-            <SelectTrigger size="sm" className="w-36">
-              <CalendarIcon className="mr-1.5 h-3.5 w-3.5 shrink-0" />
-              <SelectValue>{tCalendar(`periods.${zoom}`)}</SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {(["week", "twoWeeks", "month"] as const).map((period) => (
-                <SelectItem key={period} value={period} label={tCalendar(`periods.${period}`)}>
-                  {tCalendar(`periods.${period}`)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <ZoomSelect
+            zoom={zoom}
+            onZoomChange={handleZoomChange}
+            size="sm"
+            className="w-32 sm:w-36"
+          />
         </div>
       </div>
 
@@ -1023,7 +1257,8 @@ export function ProductReservationsTimeline({
         </div>
       </div>
 
-      <p className="text-muted-foreground text-xs">{t("dragHint")}</p>
+      {/* Drag-to-create is mouse-only, so the hint has no audience on a phone */}
+      <p className="text-muted-foreground text-xs max-sm:hidden">{t("dragHint")}</p>
     </div>
   );
 }

@@ -3,31 +3,31 @@ import { Card, CardContent, CardHeader } from '@louez/ui';
 
 export default function ProductDetailLoading() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 border-b pb-6">
-        <div className="flex items-start gap-3">
+      <div className="flex flex-col gap-3 border-b pb-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:pb-6">
+        <div className="flex min-w-0 items-start gap-2 sm:gap-3">
           <Skeleton className="h-9 w-9 rounded-md" />
-          <Skeleton className="h-14 w-14 rounded-lg" />
-          <div className="space-y-2">
-            <Skeleton className="h-7 w-48" />
+          <Skeleton className="size-11 rounded-lg sm:size-14" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-6 w-full max-w-48 sm:h-7" />
             <Skeleton className="h-5 w-24" />
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Skeleton className="h-9 w-24" />
-          <Skeleton className="h-9 w-9" />
+          <Skeleton className="h-9 flex-1 sm:w-24 sm:flex-none" />
+          <Skeleton className="h-9 w-9 shrink-0" />
         </div>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
         {/* Main column */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="min-w-0 space-y-4 sm:space-y-6 lg:col-span-2">
           {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
               <Card key={i}>
-                <CardContent className="space-y-2 p-4">
+                <CardContent className="space-y-2 p-3 sm:p-4">
                   <Skeleton className="h-4 w-20" />
                   <Skeleton className="h-7 w-16" />
                   <Skeleton className="h-3 w-24" />
@@ -69,7 +69,7 @@ export default function ProductDetailLoading() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
               <Skeleton className="h-5 w-28" />

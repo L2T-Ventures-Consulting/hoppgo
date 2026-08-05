@@ -11,6 +11,7 @@ import { DashboardBreadcrumbs } from "@/components/dashboard/dashboard-breadcrum
 import { DashboardBreadcrumbsProvider } from "@/components/dashboard/dashboard-breadcrumbs-context";
 import { DashboardHeaderActions } from "@/components/dashboard/dashboard-header-actions";
 import { DashboardSidebarTrigger } from "@/components/dashboard/dashboard-sidebar-trigger";
+import { DashboardThemeShortcut } from "@/components/dashboard/dashboard-theme-shortcut";
 import { ReservationPollingProvider } from "@/components/dashboard/reservation-polling-provider";
 import { SettingsSearchFocus } from "@/components/dashboard/settings-search-focus";
 import { DashboardSidebar } from "@/components/dashboard/sidebar";
@@ -110,6 +111,7 @@ export default async function DashboardMainLayout({ children }: { children: Reac
     >
       <WhatsNewProvider initialProgress={parseWhatsNewProgress(userPreferences?.whatsNewProgress)}>
         <DashboardSaveShortcut />
+        <DashboardThemeShortcut />
         <StoreProvider
           currency={settings.currency || "EUR"}
           storeSlug={store.slug}

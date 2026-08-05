@@ -397,7 +397,15 @@ export const DashboardCommandPalette = ({
             "analyses statistiques performance chiffre affaires revenus analytics statistics revenue",
           icon: AnalyticsIcon,
           kind: "navigate",
-          href: "/dashboard/analytics",
+          href: "/dashboard/analytics/sales",
+        },
+        {
+          value: "analytics-traffic",
+          label: t("navigation.analyticsTraffic"),
+          keywords: "trafic visiteurs vues conversions audience traffic visitors views conversions",
+          icon: AnalyticsIcon,
+          kind: "navigate",
+          href: "/dashboard/analytics/traffic",
         },
         {
           value: "settings",

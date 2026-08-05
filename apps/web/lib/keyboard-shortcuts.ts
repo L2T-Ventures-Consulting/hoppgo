@@ -27,6 +27,10 @@ export const keyboardShortcutDefinitions = {
     defaultBinding: "Mod+Shift+K",
     kind: "hotkey",
   },
+  toggleTheme: {
+    defaultBinding: "D",
+    kind: "hotkey",
+  },
   sidebar: {
     defaultBinding: "Mod+B",
     kind: "hotkey",
@@ -64,6 +68,7 @@ export type KeyboardShortcutSequenceId = Exclude<KeyboardShortcutId, HotkeyShort
 export const keyboardShortcutIds = [
   "commandPalette",
   "aiAssistant",
+  "toggleTheme",
   "sidebar",
   "search",
   "createReservation",
@@ -85,6 +90,7 @@ export const keyboardShortcutOverridesSchema = z
   .object({
     commandPalette: hotkeySchema.optional(),
     aiAssistant: hotkeySchema.optional(),
+    toggleTheme: hotkeySchema.optional(),
     sidebar: hotkeySchema.optional(),
     search: hotkeySchema.optional(),
     createReservation: hotkeySequenceSchema.optional(),
@@ -120,6 +126,7 @@ export const resolveKeyboardShortcuts = (
   commandPalette:
     overrides.commandPalette ?? keyboardShortcutDefinitions.commandPalette.defaultBinding,
   aiAssistant: overrides.aiAssistant ?? keyboardShortcutDefinitions.aiAssistant.defaultBinding,
+  toggleTheme: overrides.toggleTheme ?? keyboardShortcutDefinitions.toggleTheme.defaultBinding,
   sidebar: overrides.sidebar ?? keyboardShortcutDefinitions.sidebar.defaultBinding,
   search: overrides.search ?? keyboardShortcutDefinitions.search.defaultBinding,
   createReservation: [

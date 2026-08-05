@@ -42,33 +42,33 @@ export async function ProductQuickFacts({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">{t('createdAt')}</span>
-          <span>{formatDate(product.createdAt)}</span>
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="shrink-0 text-muted-foreground">{t('createdAt')}</span>
+          <span className="min-w-0 text-right">{formatDate(product.createdAt)}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">{t('updatedAt')}</span>
-          <span>{formatDate(product.updatedAt)}</span>
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="shrink-0 text-muted-foreground">{t('updatedAt')}</span>
+          <span className="min-w-0 text-right">{formatDate(product.updatedAt)}</span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">{t('deposit')}</span>
-          <span>
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="shrink-0 text-muted-foreground">{t('deposit')}</span>
+          <span className="min-w-0 text-right">
             {depositAmount > 0
               ? formatCurrency(depositAmount, currency)
               : t('noDeposit')}
           </span>
         </div>
-        <div className="flex items-center justify-between">
-          <span className="text-muted-foreground">{t('tax')}</span>
-          <span>{taxLabel}</span>
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="shrink-0 text-muted-foreground">{t('tax')}</span>
+          <span className="min-w-0 text-right">{taxLabel}</span>
         </div>
         {product.bookingAttributeAxes &&
           product.bookingAttributeAxes.length > 0 && (
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-3">
               <span className="shrink-0 text-muted-foreground">
                 {t('bookingAxes')}
               </span>
-              <span className="text-right">
+              <span className="min-w-0 text-right">
                 {product.bookingAttributeAxes
                   .map((axis) => axis.label)
                   .join(', ')}
