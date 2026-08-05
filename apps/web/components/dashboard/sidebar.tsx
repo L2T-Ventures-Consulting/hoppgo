@@ -254,37 +254,58 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
         />
       )}
       {item.items && (
-        /* The guide line is pulled under the centre of the parent icon (8px of
-           button padding + half a 20px icon) so the sub-entries hang off it,
-           and their labels land on the parent label's baseline column. */
-        <SidebarMenuSub className="mx-0 mt-0.5 ml-4.5 gap-1 py-1 pr-0 pl-2">
-          {item.items.map((subItem) => {
-            const subActive = isNavigationItemActive(pathname, subItem.href);
+        /* Sub-entries are noise until the section is yours: they show once you
+           are inside it, and on hover before that, so the section still
+           advertises what it holds. `0fr`/`1fr` on a grid row is what makes an
+           auto height animatable — the inner wrapper clips the overflow while
+           the row closes. The hover group is the whole menu item, so moving the
+           pointer down onto the revealed entries keeps them open. */
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[collapsible=icon]:hidden motion-reduce:transition-none",
+            active
+              ? "grid-rows-[1fr]"
+              : /* Tailwind gates `hover:` behind `@media (hover: hover)`, so on
+                   touch the reveal never fires — the mobile drawer keeps the
+                   entries open. It is a transient sheet you open to see the
+                   whole map, and two extra rows cost nothing there. */
+                "grid-rows-[0fr] group-focus-within/menu-item:grid-rows-[1fr] group-hover/menu-item:grid-rows-[1fr] in-data-[mobile=true]:grid-rows-[1fr]",
+          )}
+        >
+          <div className="overflow-hidden">
+            {/* The guide line is pulled under the centre of the parent icon (8px
+                of button padding + half a 20px icon) so the sub-entries hang off
+                it, and their labels land on the parent label's baseline column. */}
+            <SidebarMenuSub className="mx-0 mt-0.5 ml-4.5 gap-1 py-1 pr-0 pl-2">
+              {item.items.map((subItem) => {
+                const subActive = isNavigationItemActive(pathname, subItem.href);
 
-            return (
-              <SidebarMenuSubItem
-                key={subItem.href}
-                /* Lights the stretch of guide line next to the current page —
-                   the tree equivalent of the card, drawn on the line itself. */
-                className={cn(
-                  "before:bg-sidebar-primary before:absolute before:top-1 before:bottom-1 before:-left-2.25 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:duration-200 before:content-['']",
-                  subActive && "before:opacity-100",
-                )}
-              >
-                <SidebarMenuSubButton
-                  render={<SidebarLink href={subItem.href} />}
-                  isActive={subActive}
-                  /* A smaller copy of the top-level active row rather than the
-                     grey pill, which read heavier than the parent it sits
-                     under and inverted the hierarchy. */
-                  className="text-sidebar-foreground/70 hover:bg-sidebar-accent/70 data-active:bg-background data-active:text-sidebar-accent-foreground h-8 transition-colors data-[size=md]:text-[13px] data-active:font-medium data-active:shadow-[0_0_0_1px_var(--color-border)]"
-                >
-                  <span>{t(subItem.key)}</span>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            );
-          })}
-        </SidebarMenuSub>
+                return (
+                  <SidebarMenuSubItem
+                    key={subItem.href}
+                    /* Lights the stretch of guide line next to the current page
+                       — the tree equivalent of the card, drawn on the line. */
+                    className={cn(
+                      "before:bg-sidebar-primary before:absolute before:top-1 before:bottom-1 before:-left-2.25 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:duration-200 before:content-['']",
+                      subActive && "before:opacity-100",
+                    )}
+                  >
+                    <SidebarMenuSubButton
+                      render={<SidebarLink href={subItem.href} />}
+                      isActive={subActive}
+                      /* A smaller copy of the top-level active row rather than
+                         the grey pill, which read heavier than the parent it
+                         sits under and inverted the hierarchy. */
+                      className="text-sidebar-foreground/70 hover:bg-sidebar-accent/70 data-active:bg-background data-active:text-sidebar-accent-foreground h-8 transition-colors data-[size=md]:text-[13px] data-active:font-medium data-active:shadow-[0_0_0_1px_var(--color-border)]"
+                    >
+                      <span>{t(subItem.key)}</span>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                );
+              })}
+            </SidebarMenuSub>
+          </div>
+        </div>
       )}
     </SidebarMenuItem>
   );
