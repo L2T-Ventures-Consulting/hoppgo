@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import { RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -8,9 +8,7 @@ import { useTranslations } from "next-intl";
 import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
 import { cn } from "@louez/utils";
 
-export type Period = "7d" | "30d" | "90d" | "6m" | "12m";
-
-const PERIODS: Period[] = ["7d", "30d", "90d", "6m", "12m"];
+import { parsePeriod, type Period, PERIODS } from "./period";
 
 interface UnifiedPeriodFilterProps {
   className?: string;
@@ -19,15 +17,18 @@ interface UnifiedPeriodFilterProps {
 export const UnifiedPeriodFilter = ({ className }: UnifiedPeriodFilterProps) => {
   const t = useTranslations("dashboard.analytics");
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentPeriod = (searchParams.get("period") as Period) || "30d";
+  const currentPeriod = parsePeriod(searchParams.get("period") ?? undefined);
 
   const periods = PERIODS.map((value) => ({ value, label: t(`period.${value}`) }));
 
   const handlePeriodChange = (value: Period) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("period", value);
-    router.push(`/dashboard/analytics?${params.toString()}`);
+    // The filter lives in the shared layout, so it has to stay on whichever
+    // analytics sub-page is currently open.
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   return (

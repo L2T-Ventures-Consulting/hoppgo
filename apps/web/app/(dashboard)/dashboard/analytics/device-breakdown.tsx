@@ -37,7 +37,11 @@ interface DeviceBreakdownProps {
 
 export const DeviceBreakdown = ({ data, className }: DeviceBreakdownProps) => {
   const t = useTranslations("dashboard.analytics");
-  const total = data.mobile + data.tablet + data.desktop;
+  const deviceValues = (Object.keys(DEVICE_ACCENTS) as Array<keyof DeviceStats>).map((key) => ({
+    key,
+    value: Number(data[key]) || 0,
+  }));
+  const total = deviceValues.reduce((sum, device) => sum + device.value, 0);
 
   if (total === 0) {
     return (
@@ -45,12 +49,12 @@ export const DeviceBreakdown = ({ data, className }: DeviceBreakdownProps) => {
     );
   }
 
-  const devices = (Object.keys(DEVICE_ACCENTS) as Array<keyof DeviceStats>)
-    .map((key) => ({
+  const devices = deviceValues
+    .map(({ key, value }) => ({
       key,
       label: t(key),
-      value: data[key],
-      percentage: Math.round((data[key] / total) * 100),
+      value,
+      percentage: Math.round((value / total) * 100),
       icon: DEVICE_ICONS[key],
       accent: DEVICE_ACCENTS[key],
     }))

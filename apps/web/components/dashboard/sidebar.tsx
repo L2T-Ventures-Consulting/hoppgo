@@ -27,6 +27,9 @@ import {
   SidebarMenuBadge,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarSeparator,
   Tooltip,
   TooltipContent,
@@ -111,7 +114,18 @@ const catalogNavigation = [
 ];
 
 const analyticsNavigation = [
-  { key: "analytics", href: "/dashboard/analytics", icon: AnalyticsGlassIcon },
+  {
+    key: "analytics",
+    href: "/dashboard/analytics/sales",
+    icon: AnalyticsGlassIcon,
+    // The entry has no landing page of its own, so it lights up for the whole
+    // section rather than for its own href.
+    activeHref: "/dashboard/analytics",
+    items: [
+      { key: "analyticsSales", href: "/dashboard/analytics/sales" },
+      { key: "analyticsTraffic", href: "/dashboard/analytics/traffic" },
+    ],
+  },
 ];
 
 const managementNavigation = [
@@ -119,10 +133,19 @@ const managementNavigation = [
   { key: "settings", href: "/dashboard/settings", icon: SettingsGlassIcon },
 ];
 
+interface NavigationSubItem {
+  key: string;
+  href: string;
+}
+
 interface NavigationItem {
   key: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  /** Path the active state is derived from, when it is wider than `href`. */
+  activeHref?: string;
+  /** Sub-entries listed under the item (hidden while the sidebar is collapsed). */
+  items?: NavigationSubItem[];
   /** Draws the discreet warning marker (currently: AI credits running out). */
   alert?: boolean;
   /** Numeric badge on the entry (currently: the AI credit balance). */
@@ -143,7 +166,9 @@ const buildNavigationSections = (
 ): NavigationSection[] => [
   { items: mainNavigation },
   { labelKey: "catalog", items: catalogNavigation },
-  { labelKey: "analytics", items: analyticsNavigation },
+  // No label: the group would only ever read "Analyses / Analyses", the entry
+  // repeating the heading above it. The separator already opens the section.
+  { items: analyticsNavigation },
   {
     labelKey: "manage",
     items: aiCredits
@@ -174,14 +199,22 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
   const t = useTranslations("dashboard.navigation");
   const tSidebar = useTranslations("dashboard.sidebar");
   const format = useFormatter();
-  const active = isNavigationItemActive(pathname, item.href);
+  const active = isNavigationItemActive(pathname, item.activeHref ?? item.href);
+  // Inside a section, the current page is one of the sub-entries — so the
+  // parent drops the active card and keeps only the ink of an opened section.
+  // Two stacked "selected" rows otherwise fight over which one you are on.
+  // A section with no matching sub-entry keeps its card — otherwise nothing in
+  // the sidebar would answer "where am I".
+  const openSection =
+    active && (item.items?.some((sub) => isNavigationItemActive(pathname, sub.href)) ?? false);
 
   return (
     <SidebarMenuItem>
       <SidebarMenuButton
         render={<SidebarLink href={item.href} />}
-        isActive={active}
+        isActive={active && !openSection}
         tooltip={t(item.key)}
+        className={cn(openSection && "text-sidebar-accent-foreground")}
       >
         <item.icon />
         <span>{t(item.key)}</span>
@@ -219,6 +252,39 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
           aria-hidden
           className="bg-badge-warning-foreground ring-sidebar absolute top-1 right-1.5 hidden size-2.5 rounded-full ring-2 group-data-[collapsible=icon]:block"
         />
+      )}
+      {item.items && (
+        /* The guide line is pulled under the centre of the parent icon (8px of
+           button padding + half a 20px icon) so the sub-entries hang off it,
+           and their labels land on the parent label's baseline column. */
+        <SidebarMenuSub className="mx-0 mt-0.5 ml-4.5 gap-1 py-1 pr-0 pl-2">
+          {item.items.map((subItem) => {
+            const subActive = isNavigationItemActive(pathname, subItem.href);
+
+            return (
+              <SidebarMenuSubItem
+                key={subItem.href}
+                /* Lights the stretch of guide line next to the current page —
+                   the tree equivalent of the card, drawn on the line itself. */
+                className={cn(
+                  "before:bg-sidebar-primary before:absolute before:top-1 before:bottom-1 before:-left-2.25 before:w-0.5 before:rounded-full before:opacity-0 before:transition-opacity before:duration-200 before:content-['']",
+                  subActive && "before:opacity-100",
+                )}
+              >
+                <SidebarMenuSubButton
+                  render={<SidebarLink href={subItem.href} />}
+                  isActive={subActive}
+                  /* A smaller copy of the top-level active row rather than the
+                     grey pill, which read heavier than the parent it sits
+                     under and inverted the hierarchy. */
+                  className="text-sidebar-foreground/70 hover:bg-sidebar-accent/70 data-active:bg-background data-active:text-sidebar-accent-foreground h-8 transition-colors data-[size=md]:text-[13px] data-active:font-medium data-active:shadow-[0_0_0_1px_var(--color-border)]"
+                >
+                  <span>{t(subItem.key)}</span>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            );
+          })}
+        </SidebarMenuSub>
       )}
     </SidebarMenuItem>
   );
@@ -423,7 +489,7 @@ export const DashboardSidebar = ({
 
         <SidebarContent className="max-md:px-2 ">
           {navigationSections.map((section, index) => (
-            <div key={section.labelKey || "main"} className="w-full">
+            <div key={section.labelKey ?? `section-${index}`} className="w-full">
               {index > 0 && <SidebarSeparator />}
               <DashboardNavSection
                 items={section.items}

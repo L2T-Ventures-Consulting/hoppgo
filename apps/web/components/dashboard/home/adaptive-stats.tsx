@@ -139,7 +139,7 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
         value={formatCurrency(metrics.monthlyRevenue)}
         icon={CreditCardSolidIcon}
         accent="submitted"
-        href="/dashboard/analytics?tab=sales&includeManual=true"
+        href="/dashboard/analytics/sales"
         trend={revenueGrowth}
         subtitle={t("stats.vsLastMonth")}
       />
