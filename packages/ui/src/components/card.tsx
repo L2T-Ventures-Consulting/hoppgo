@@ -5,6 +5,17 @@ import { useRender } from "@base-ui/react/use-render";
 
 import { cn } from "@louez/utils";
 
+/**
+ * Card padding, tighter on phones: a card sits inside the page's own `px-4`
+ * gutter, so 24px per side eats a sixth of a 390px viewport.
+ *
+ * It goes through a variable on purpose — the padding stays a *single* `p-*`
+ * utility, so a consumer passing `p-0` or `p-4` still overrides it cleanly
+ * through `cn()`. A `max-sm:p-4` here would survive those overrides instead.
+ */
+const CARD_PADDING =
+  "p-(--card-padding) [--card-padding:--spacing(4)] sm:[--card-padding:--spacing(6)]";
+
 function Card({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
@@ -93,7 +104,8 @@ function CardFrameFooter({ className, render, ...props }: useRender.ComponentPro
 function CardHeader({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
-      "grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 p-6 in-[[data-slot=card]:has(>[data-slot=card-panel])]:pb-4 has-data-[slot=card-action]:grid-cols-[1fr_auto]",
+      "grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 in-[[data-slot=card]:has(>[data-slot=card-panel])]:pb-4 has-data-[slot=card-action]:grid-cols-[1fr_auto]",
+      CARD_PADDING,
       className,
     ),
     "data-slot": "card-header",
@@ -156,7 +168,8 @@ function CardAction({ className, render, ...props }: useRender.ComponentProps<"d
 function CardPanel({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
-      "flex-1 p-6 in-[[data-slot=card]:has(>[data-slot=card-header]:not(.border-b))]:pt-0 in-[[data-slot=card]:has(>[data-slot=card-footer]:not(.border-t))]:pb-0",
+      "flex-1 in-[[data-slot=card]:has(>[data-slot=card-header]:not(.border-b))]:pt-0 in-[[data-slot=card]:has(>[data-slot=card-footer]:not(.border-t))]:pb-0",
+      CARD_PADDING,
       className,
     ),
     "data-slot": "card-panel",
@@ -172,7 +185,8 @@ function CardPanel({ className, render, ...props }: useRender.ComponentProps<"di
 function CardFooter({ className, render, ...props }: useRender.ComponentProps<"div">) {
   const defaultProps = {
     className: cn(
-      "flex items-center p-6 in-[[data-slot=card]:has(>[data-slot=card-panel])]:pt-4",
+      "flex items-center in-[[data-slot=card]:has(>[data-slot=card-panel])]:pt-4",
+      CARD_PADDING,
       className,
     ),
     "data-slot": "card-footer",
