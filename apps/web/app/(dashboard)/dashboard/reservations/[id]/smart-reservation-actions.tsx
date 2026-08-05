@@ -45,6 +45,8 @@ import {
 } from '@/lib/product-analytics/reservation-analytics-client'
 import { getReservationStatusAnalyticsAction } from '@/lib/product-analytics/reservation-analytics'
 
+import { MobileReservationQuickActions } from './mobile-reservation-quick-actions'
+
 type ReservationStatus = 'pending' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled' | 'rejected' | 'quote' | 'declined'
 type InspectionMode = 'optional' | 'recommended' | 'required'
 type ActionWarning = {
@@ -72,6 +74,7 @@ interface SmartReservationActionsProps {
   inspectionMode?: InspectionMode
   hasDepartureInspection?: boolean
   hasReturnInspection?: boolean
+  onRecordPayment: () => void
 }
 
 export function SmartReservationActions({
@@ -91,6 +94,7 @@ export function SmartReservationActions({
   inspectionMode = 'optional',
   hasDepartureInspection = false,
   hasReturnInspection = false,
+  onRecordPayment,
 }: SmartReservationActionsProps) {
   const t = useTranslations('dashboard.reservations')
   const tInspection = useTranslations('dashboard.settings.inspection')
@@ -340,6 +344,24 @@ export function SmartReservationActions({
     setReturnConfirmOpen(false)
   }
 
+  const handlePickupIntent = () => {
+    if (shouldPromptDepartureInspection) {
+      setInspectionPromptOpen('departure')
+    } else if (hasWarnings) {
+      setPickupConfirmOpen(true)
+    } else {
+      void handlePickup()
+    }
+  }
+
+  const handleReturnIntent = () => {
+    if (shouldPromptReturnInspection) {
+      setInspectionPromptOpen('return')
+    } else {
+      setReturnConfirmOpen(true)
+    }
+  }
+
   const canCancel = !['cancelled', 'completed', 'rejected', 'declined'].includes(status)
 
   // Render based on status
@@ -446,15 +468,7 @@ export function SmartReservationActions({
 
               <Button
                 className="w-full"
-                onClick={() => {
-                  if (shouldPromptDepartureInspection) {
-                    setInspectionPromptOpen('departure')
-                  } else if (hasWarnings) {
-                    setPickupConfirmOpen(true)
-                  } else {
-                    handlePickup()
-                  }
-                }}
+                onClick={handlePickupIntent}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -526,13 +540,7 @@ export function SmartReservationActions({
 
               <Button
                 className="w-full"
-                onClick={() => {
-                  if (shouldPromptReturnInspection) {
-                    setInspectionPromptOpen('return')
-                  } else {
-                    setReturnConfirmOpen(true)
-                  }
-                }}
+                onClick={handleReturnIntent}
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -677,6 +685,17 @@ export function SmartReservationActions({
   return (
     <>
       {renderContent()}
+
+      <MobileReservationQuickActions
+        reservationId={reservationId}
+        status={status}
+        rentalRemaining={rentalRemaining}
+        hasOnlinePaymentPending={hasOnlinePaymentPending}
+        currency={currency}
+        disabled={isLoading}
+        onRecordPayment={onRecordPayment}
+        onStatusAction={status === 'confirmed' ? handlePickupIntent : handleReturnIntent}
+      />
 
       {/* Reject Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>

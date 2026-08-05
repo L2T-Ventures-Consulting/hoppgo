@@ -12,6 +12,8 @@ export const productAnalyticsEvents = {
   reservationActionStarted: 'reservation_action_started',
   reservationActionSucceeded: 'reservation_action_succeeded',
   reservationActionFailed: 'reservation_action_failed',
+  reservationQuickActionsViewed: 'reservation_quick_actions_viewed',
+  reservationQuickActionClicked: 'reservation_quick_action_clicked',
   keyboardShortcutTriggered: 'keyboard_shortcut_triggered',
   keyboardShortcutSettingsUpdated: 'keyboard_shortcut_settings_updated',
   checkoutReservationCreated: 'checkout_reservation_created',

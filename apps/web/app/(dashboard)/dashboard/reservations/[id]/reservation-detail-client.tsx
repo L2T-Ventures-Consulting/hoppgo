@@ -4,7 +4,7 @@ import { ShieldSolidIcon } from "@louez/ui/icons";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight,
   Building2,
@@ -32,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from "@louez/ui";
-import { getCurrencySymbol } from "@louez/utils";
+import { cn, getCurrencySymbol } from "@louez/utils";
 
 import { formatStoreDate } from "@/lib/utils/store-date";
 import { orpc } from "@/lib/orpc/react";
@@ -46,6 +46,7 @@ import { ReservationHeader } from "./reservation-header";
 import { ReservationCustomerNotes, ReservationNotes } from "./reservation-notes";
 import { SmartReservationActions } from "./smart-reservation-actions";
 import { UnifiedPaymentSection, type PaymentMethod } from "./unified-payment-section";
+import { hasMobileReservationQuickActions } from "./util.mobile-reservation-quick-actions";
 import { UnitAssignmentSelector } from "@/components/dashboard/unit-assignment-selector";
 import { InspectionStatusCard } from "@/components/dashboard/inspection-status-card";
 
@@ -140,6 +141,7 @@ export function ReservationDetailClient({
   const t = useTranslations("dashboard.reservations");
   const tCommon = useTranslations("common");
   const hasCapturedReservationView = useRef(false);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
 
   const reservationQuery = useQuery({
     ...orpc.dashboard.reservations.getById.queryOptions({
@@ -235,9 +237,20 @@ export function ReservationDetailClient({
   const hasActiveDepositAuthorization =
     reservation.depositStatus === "authorized" &&
     (!depositAuthorizationExpiresAt || depositAuthorizationExpiresAt > new Date());
+  const rentalRemaining = Math.max(0, rental - rentalPaid);
+  const showMobileQuickActions = hasMobileReservationQuickActions({
+    status,
+    rentalRemaining,
+    hasOnlinePaymentPending,
+  });
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div
+      className={cn(
+        "space-y-4 sm:space-y-6",
+        showMobileQuickActions && "pb-24 md:pb-0",
+      )}
+    >
       <ReservationHeader
         reservationId={reservation.id}
         reservationNumber={reservation.number}
@@ -609,6 +622,7 @@ export function ReservationDetailClient({
             inspectionMode={inspectionSettings.mode}
             hasDepartureInspection={!!departureInspection}
             hasReturnInspection={!!returnInspection}
+            onRecordPayment={() => setPaymentModalOpen(true)}
           />
 
           {/* Delivery & Return card */}
@@ -748,6 +762,8 @@ export function ReservationDetailClient({
             }}
             stripeConfigured={stripeConfigured}
             defaultPaymentMethod={defaultPaymentMethod}
+            paymentModalOpen={paymentModalOpen}
+            onPaymentModalOpenChange={setPaymentModalOpen}
           />
 
           <AdvisorConversationCard reservationId={reservation.id} />

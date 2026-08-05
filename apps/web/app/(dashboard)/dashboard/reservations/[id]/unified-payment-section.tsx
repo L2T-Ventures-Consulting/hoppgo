@@ -131,6 +131,8 @@ interface UnifiedPaymentSectionProps {
   };
   stripeConfigured: boolean;
   defaultPaymentMethod?: PaymentMethod;
+  paymentModalOpen: boolean;
+  onPaymentModalOpenChange: (open: boolean) => void;
 }
 
 const METHOD_ICONS: Record<string, React.ReactNode> = {
@@ -190,6 +192,8 @@ export function UnifiedPaymentSection({
   customer,
   stripeConfigured,
   defaultPaymentMethod = "cash",
+  paymentModalOpen,
+  onPaymentModalOpenChange: setPaymentModalOpen,
 }: UnifiedPaymentSectionProps) {
   const t = useTranslations("dashboard.reservations");
   const tCommon = useTranslations("common");
@@ -199,7 +203,6 @@ export function UnifiedPaymentSection({
   const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [depositReturnModalOpen, setDepositReturnModalOpen] = useState(false);
   const [damageModalOpen, setDamageModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);

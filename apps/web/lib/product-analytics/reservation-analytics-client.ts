@@ -23,6 +23,15 @@ interface ReservationActionAnalyticsProperties extends ReservationAnalyticsPrope
   action: ReservationAnalyticsAction;
 }
 
+interface ReservationQuickActionsViewedProperties extends ReservationAnalyticsProperties {
+  visibleActions: ReservationAnalyticsAction[];
+}
+
+interface ReservationQuickActionClickedProperties
+  extends ReservationActionAnalyticsProperties {
+  slot: "primary" | "secondary";
+}
+
 const getBrowserReservationSource = (): ReservationAnalyticsSource => {
   if (typeof window === "undefined") return "unknown";
 
@@ -84,5 +93,30 @@ export const captureReservationActionFailed = ({
   posthog.capture(productAnalyticsEvents.reservationActionFailed, {
     ...getCommonProperties(properties),
     action,
+  });
+};
+
+export const captureReservationQuickActionsViewed = ({
+  visibleActions,
+  ...properties
+}: ReservationQuickActionsViewedProperties) => {
+  posthog.capture(productAnalyticsEvents.reservationQuickActionsViewed, {
+    ...getCommonProperties(properties),
+    entry_point: "mobile_quick_actions",
+    visible_actions: visibleActions,
+    action_count: visibleActions.length,
+  });
+};
+
+export const captureReservationQuickActionClicked = ({
+  action,
+  slot,
+  ...properties
+}: ReservationQuickActionClickedProperties) => {
+  posthog.capture(productAnalyticsEvents.reservationQuickActionClicked, {
+    ...getCommonProperties(properties),
+    entry_point: "mobile_quick_actions",
+    action,
+    slot,
   });
 };
