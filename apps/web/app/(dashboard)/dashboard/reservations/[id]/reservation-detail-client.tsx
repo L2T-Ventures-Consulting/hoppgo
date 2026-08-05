@@ -248,7 +248,7 @@ export function ReservationDetailClient({
     <div
       className={cn(
         "space-y-4 sm:space-y-6",
-        showMobileQuickActions && "pb-24 md:pb-0",
+        showMobileQuickActions && "pb-28 md:pb-0",
       )}
     >
       <ReservationHeader

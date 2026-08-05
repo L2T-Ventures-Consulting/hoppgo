@@ -117,13 +117,13 @@ export const MobileReservationQuickActions = ({
 
   return createPortal(
     <div
-      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] shadow-[0_-8px_24px_-16px_rgb(0_0_0/0.35)] backdrop-blur md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+1.25rem)] shadow-lg backdrop-blur md:hidden"
       data-testid="mobile-reservation-quick-actions"
     >
       <div className="mx-auto flex w-full max-w-xl gap-2">
         {actions.showPaymentAction && (
-          <Button className="min-w-0 flex-1" disabled={disabled} onClick={handleRecordPayment}>
-            <Banknote className="size-4 shrink-0" />
+          <Button size="lg" disabled={disabled} onClick={handleRecordPayment}>
+            <Banknote data-slot="icon" />
             <span className="truncate">
               {t("payment.record")} {formattedRemaining}
             </span>
@@ -131,15 +131,15 @@ export const MobileReservationQuickActions = ({
         )}
 
         <Button
-          className="min-w-0 flex-1"
+          size="lg"
           disabled={disabled}
           onClick={handleStatusAction}
           variant={actions.showPaymentAction ? "outline" : "default"}
         >
           {actions.statusAction === "pickup" ? (
-            <ArrowUpRight className="size-4 shrink-0" />
+            <ArrowUpRight data-slot="icon" />
           ) : (
-            <ArrowDownRight className="size-4 shrink-0" />
+            <ArrowDownRight data-slot="icon" />
           )}
           <span className="truncate">{statusLabel}</span>
         </Button>
