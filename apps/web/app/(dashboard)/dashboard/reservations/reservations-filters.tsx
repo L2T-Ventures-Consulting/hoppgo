@@ -27,17 +27,20 @@ interface ReservationsFiltersProps {
   counts: ReservationCounts;
   currentStatus?: string;
   currentPeriod?: string;
+  currentPaymentMethod?: string;
   /** Rendered at the end of the search/period row (e.g. display-mode toggle) */
   endSlot?: React.ReactNode;
 }
 
 const STATUS_KEYS = ["all", "pending", "confirmed", "ongoing", "completed", "cancelled"] as const;
 const PERIOD_KEYS = ["all", "today", "thisWeek", "thisMonth"] as const;
+const PAYMENT_METHOD_KEYS = ["stripe", "cash", "card", "transfer", "check", "other"] as const;
 
 export const ReservationsFilters = ({
   counts,
   currentStatus = "all",
   currentPeriod = "all",
+  currentPaymentMethod = "all",
   endSlot,
 }: ReservationsFiltersProps) => {
   const t = useTranslations("dashboard.reservations");
@@ -126,6 +129,16 @@ export const ReservationsFilters = ({
     );
   };
 
+  const handlePaymentMethodChange = (value: string | null) => {
+    if (value === null) return;
+    router.push(
+      `/dashboard/reservations?${createQueryString({
+        paymentMethod: value === "all" ? null : value,
+        page: null,
+      })}`,
+    );
+  };
+
   const handleSearch = useDebouncedCallback((term: string) => {
     navigateToSearch(term);
   }, 300);
@@ -208,9 +221,9 @@ export const ReservationsFilters = ({
       </div>
 
       {/* Row 2: Search + Period */}
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         {/* Search */}
-        <div className="relative max-w-sm flex-1">
+        <div className="relative min-w-0 max-w-sm flex-1">
           <SearchInput
             value={searchQuery}
             onChange={(event) => updateSearchQuery(event.target.value)}
@@ -231,6 +244,26 @@ export const ReservationsFilters = ({
             {PERIOD_KEYS.map((key) => (
               <SelectItem key={key} value={periodUrlMap[key]} label={getPeriodLabel(key)}>
                 {getPeriodLabel(key)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={currentPaymentMethod} onValueChange={handlePaymentMethodChange}>
+          <SelectTrigger className="w-full sm:w-48">
+            <SelectValue placeholder={t("paymentMethod")}>
+              {currentPaymentMethod === "all"
+                ? t("allPaymentMethods")
+                : t(`payment.methods.${currentPaymentMethod}`)}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all" label={t("allPaymentMethods")}>
+              {t("allPaymentMethods")}
+            </SelectItem>
+            {PAYMENT_METHOD_KEYS.map((method) => (
+              <SelectItem key={method} value={method} label={t(`payment.methods.${method}`)}>
+                {t(`payment.methods.${method}`)}
               </SelectItem>
             ))}
           </SelectContent>

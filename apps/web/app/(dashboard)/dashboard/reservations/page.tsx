@@ -44,6 +44,7 @@ interface ReservationsPageProps {
     status?: string;
     period?: string;
     operation?: string;
+    paymentMethod?: string;
     search?: string;
     sort?: string;
     sortDirection?: string;
@@ -83,6 +84,20 @@ function normalizeOperation(value: string | undefined) {
   return undefined;
 }
 
+function normalizePaymentMethod(value: string | undefined) {
+  if (
+    value === "stripe" ||
+    value === "cash" ||
+    value === "card" ||
+    value === "transfer" ||
+    value === "check" ||
+    value === "other"
+  ) {
+    return value;
+  }
+  return undefined;
+}
+
 function normalizeSort(value: string | undefined) {
   if (value === "startDate" || value === "amount" || value === "status" || value === "number")
     return value;
@@ -109,6 +124,7 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
     params.status ||
     params.period ||
     params.operation ||
+    params.paymentMethod ||
     params.search ||
     params.sort ||
     params.sortDirection ||
@@ -128,6 +144,7 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
   const status = normalizeStatus(params.status);
   const period = normalizePeriod(params.period);
   const operation = normalizeOperation(params.operation);
+  const paymentMethod = normalizePaymentMethod(params.paymentMethod);
   const search = params.search?.trim() || undefined;
   const sort = normalizeSort(params.sort);
   const sortDirection = normalizeSortDirection(params.sortDirection);
@@ -141,6 +158,7 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
           status,
           period,
           operation,
+          paymentMethod,
           limit: 100,
           search,
           sort,
@@ -167,6 +185,7 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
         restorePreferredView={!params.view && (!hasListParams || shouldRestorePreferredView)}
         currentStatus={status}
         currentPeriod={period}
+        currentPaymentMethod={paymentMethod}
         initialData={initialData}
         calendarData={{ products: calendarProducts }}
         storeHasReservations={storeHasReservations}

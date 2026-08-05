@@ -5,6 +5,7 @@ import {
   count,
   desc,
   eq,
+  exists,
   gte,
   inArray,
   like,
@@ -17,6 +18,7 @@ import {
 import {
   customers,
   db,
+  payments,
   productsTulip,
   reservationActivity,
   reservations,
@@ -37,6 +39,7 @@ export async function getDashboardReservationsList(params: {
   status?: 'all' | ReservationStatus;
   period?: 'today' | 'week' | 'month';
   operation?: 'departure' | 'return';
+  paymentMethod?: 'stripe' | 'cash' | 'card' | 'transfer' | 'check' | 'other';
   limit: number;
   search?: string;
   sort?: 'startDate' | 'amount' | 'status' | 'number';
@@ -49,6 +52,7 @@ export async function getDashboardReservationsList(params: {
     status,
     period,
     operation,
+    paymentMethod,
     limit,
     search,
     sort,
@@ -58,6 +62,23 @@ export async function getDashboardReservationsList(params: {
   } = params;
   const conditions = [eq(reservations.storeId, storeId)];
   const needsSearch = search && search.trim();
+
+  if (paymentMethod) {
+    conditions.push(
+      exists(
+        db
+          .select({ id: payments.id })
+          .from(payments)
+          .where(
+            and(
+              eq(payments.reservationId, reservations.id),
+              eq(payments.method, paymentMethod),
+              eq(payments.status, 'completed'),
+            ),
+          ),
+      ),
+    );
+  }
 
   if (status && status !== 'all') {
     if (status === 'cancelled') {

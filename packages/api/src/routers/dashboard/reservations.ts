@@ -76,6 +76,7 @@ const list = dashboardProcedure
         status: input.status,
         period: input.period,
         operation: input.operation,
+        paymentMethod: input.paymentMethod,
         limit: input.limit ?? 100,
         search: input.search,
         sort: input.sort,

@@ -49,6 +49,7 @@ interface ReservationsPageContentProps {
   restorePreferredView: boolean;
   currentStatus?: string;
   currentPeriod?: string;
+  currentPaymentMethod?: string;
   initialData?: {
     reservations: Reservation[];
     counts: ReservationCounts;
@@ -70,6 +71,7 @@ export function ReservationsPageContent({
   restorePreferredView,
   currentStatus,
   currentPeriod,
+  currentPaymentMethod,
   initialData,
   calendarData,
   storeHasReservations,
@@ -127,6 +129,7 @@ export function ReservationsPageContent({
   const status = searchParams.get("status") || currentStatus || undefined;
   const period = searchParams.get("period") || currentPeriod || undefined;
   const operation = searchParams.get("operation") || undefined;
+  const paymentMethod = searchParams.get("paymentMethod") || currentPaymentMethod || undefined;
   const search = searchParams.get("search") || undefined;
   const sortParam = searchParams.get("sort") as SortField | null;
   const sortDirectionParam = searchParams.get("sortDirection") as SortDirection | null;
@@ -209,6 +212,15 @@ export function ReservationsPageContent({
             : undefined,
         period: period === "today" || period === "week" || period === "month" ? period : undefined,
         operation: operation === "departure" || operation === "return" ? operation : undefined,
+        paymentMethod:
+          paymentMethod === "stripe" ||
+          paymentMethod === "cash" ||
+          paymentMethod === "card" ||
+          paymentMethod === "transfer" ||
+          paymentMethod === "check" ||
+          paymentMethod === "other"
+            ? paymentMethod
+            : undefined,
         search: search || undefined,
         sort: currentSort,
         sortDirection: currentSortDirection as "asc" | "desc",
@@ -395,6 +407,7 @@ export function ReservationsPageContent({
             counts={counts}
             currentStatus={status}
             currentPeriod={period}
+            currentPaymentMethod={paymentMethod}
             endSlot={
               <div className="hidden sm:block">
                 <ToggleGroup
