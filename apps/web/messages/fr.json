@@ -2725,7 +2725,17 @@
         "applyFilters": "Appliquer",
         "sectionOperation": "Opération du jour",
         "sectionStatus": "Statuts",
-        "sectionProducts": "Produits"
+        "sectionProducts": "Produits",
+        "goToDate": "Aller à une date",
+        "currentlyViewing": "Actuellement affiché : {date}",
+        "dateSearchPlaceholder": "15, demain, vendredi prochain…",
+        "noDateFound": "Aucune date reconnue",
+        "clearSearch": "Effacer",
+        "quickDates": "Raccourcis",
+        "today": "Aujourd’hui",
+        "tomorrow": "Demain",
+        "nextWeek": "Semaine prochaine",
+        "chooseDate": "Choisir une date"
       },
       "export": {
         "button": "Synchroniser le calendrier",

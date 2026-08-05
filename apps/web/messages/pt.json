@@ -2573,7 +2573,17 @@
         "applyFilters": "Aplicar",
         "sectionOperation": "Operação do dia",
         "sectionStatus": "Estados",
-        "sectionProducts": "Produtos"
+        "sectionProducts": "Produtos",
+        "goToDate": "Ir para uma data",
+        "currentlyViewing": "Exibindo atualmente: {date}",
+        "dateSearchPlaceholder": "15, amanhã, próxima sexta-feira…",
+        "noDateFound": "Nenhuma data reconhecida",
+        "clearSearch": "Limpar",
+        "quickDates": "Atalhos",
+        "today": "Hoje",
+        "tomorrow": "Amanhã",
+        "nextWeek": "Próxima semana",
+        "chooseDate": "Escolher uma data"
       },
       "export": {
         "button": "Sincronizar o calendário",

@@ -125,6 +125,7 @@ export function ReservationsCalendarView({
   const locale = useLocale();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const dateParam = searchParams.get("date");
 
   // ---------------------------------------------------------------------------
   // URL-persisted view state (zoom + status/product filters) — shareable links
@@ -323,6 +324,7 @@ export function ReservationsCalendarView({
   const [visibleMonthLabel, setVisibleMonthLabel] = useState(() =>
     formatMonthLabel(anchorDateRef.current),
   );
+  const [visibleDate, setVisibleDate] = useState(anchorDateRef.current);
   const [visibleDayRange, setVisibleDayRange] = useState({ startIndex: 0, endIndex: 0 });
   const [visibleVerticalRange, setVisibleVerticalRange] = useState<VerticalRange>({
     start: 0,
@@ -384,7 +386,8 @@ export function ReservationsCalendarView({
     );
     const centerOffset = element.scrollLeft + element.clientWidth / 2;
     const index = Math.max(0, Math.min(daysCount - 1, Math.floor(centerOffset / dayWidth)));
-    const label = formatMonthLabel(addDays(windowStart, index));
+    const centeredDate = addDays(windowStart, index);
+    const label = formatMonthLabel(centeredDate);
     setVisibleDayRange((previous) =>
       previous.startIndex === leftmostIndex && previous.endIndex === rightmostIndex
         ? previous
@@ -397,19 +400,30 @@ export function ReservationsCalendarView({
         ? previous
         : { start: verticalStart, end: verticalEnd },
     );
+    setVisibleDate((previous) =>
+      previous.getTime() === centeredDate.getTime() ? previous : centeredDate,
+    );
     setVisibleMonthLabel((previous) => (previous === label ? previous : label));
+  };
+
+  const centerInitialAnchorDate = (element: HTMLDivElement) => {
+    // A timeline view can mount while hidden during client-side navigation.
+    // Wait for its real width instead of permanently consuming the initial scroll.
+    if (element.clientWidth === 0 || element.scrollWidth <= element.clientWidth) return false;
+
+    const anchorIndex = diffInDays(windowStart, anchorDateRef.current);
+    const target = (anchorIndex + 0.5) * dayWidth - element.clientWidth / 2;
+    element.scrollLeft = Math.max(0, target);
+    didInitialScrollRef.current = true;
+    updateVisibleViewport(element);
+    return true;
   };
 
   // Center the anchor date on first mount (and again after a window reset)
   useLayoutEffect(() => {
     const element = scrollerRef.current;
     if (!element || didInitialScrollRef.current) return;
-    didInitialScrollRef.current = true;
-
-    const anchorIndex = diffInDays(windowStart, anchorDateRef.current);
-    const target = anchorIndex * dayWidth - Math.max(0, element.clientWidth / 3);
-    element.scrollLeft = Math.max(0, target);
-    updateVisibleViewport(element);
+    centerInitialAnchorDate(element);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowStart]);
 
@@ -437,7 +451,10 @@ export function ReservationsCalendarView({
     const element = scrollerRef.current;
     if (!element) return;
 
-    const resizeObserver = new ResizeObserver(() => updateVisibleViewport(element));
+    const resizeObserver = new ResizeObserver(() => {
+      if (!didInitialScrollRef.current && centerInitialAnchorDate(element)) return;
+      updateVisibleViewport(element);
+    });
     resizeObserver.observe(element);
     return () => resizeObserver.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -546,23 +563,54 @@ export function ReservationsCalendarView({
     element.scrollBy({ left: event.deltaX, top: event.deltaY });
   };
 
-  const goToToday = () => {
+  const goToDate = (date: Date) => {
     const element = scrollerRef.current;
-    if (!element) return;
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    const targetIndex = diffInDays(windowStart, targetDate);
+    anchorDateRef.current = targetDate;
 
-    if (todayIndex >= 0 && todayIndex < daysCount) {
-      const target = todayIndex * dayWidth - Math.max(0, element.clientWidth / 3);
+    if (element && targetIndex >= 0 && targetIndex < daysCount) {
+      const target = (targetIndex + 0.5) * dayWidth - element.clientWidth / 2;
       element.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
       return;
     }
 
-    // Today fell outside the loaded window (anchored far away) — reset around it
-    anchorDateRef.current = new Date();
+    // The chosen date fell outside the loaded window — reset around it.
     didInitialScrollRef.current = false;
-    const initialWindow = reservationCalendarQueries.initialWindow(anchorDateRef.current);
+    const initialWindow = reservationCalendarQueries.initialWindow(targetDate);
     setWindowStart(initialWindow.start);
     setDaysCount(initialWindow.daysCount);
   };
+
+  const goToToday = () => goToDate(new Date());
+
+  // Browser/Next scroll restoration can run after layout effects on a cached
+  // navigation. Home KPI links use the relative `date=today` anchor so one
+  // post-paint pass can win over an older horizontal scroll position.
+  useEffect(() => {
+    if (dateParam !== "today") return;
+
+    let finalFrame = 0;
+    const initialFrame = requestAnimationFrame(() => {
+      finalFrame = requestAnimationFrame(() => {
+        const element = scrollerRef.current;
+        if (!element) return;
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        anchorDateRef.current = today;
+        didInitialScrollRef.current = false;
+        centerInitialAnchorDate(element);
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(initialFrame);
+      cancelAnimationFrame(finalFrame);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateParam]);
 
   // ---------------------------------------------------------------------------
   // Drag-to-create (mouse only — touch keeps native scrolling)
@@ -661,11 +709,13 @@ export function ReservationsCalendarView({
       <TimelineToolbar
         products={products}
         filters={filters}
+        currentDate={visibleDate}
         monthLabel={visibleMonthLabel}
         isFetching={isFetching && hasCompletedInitialLoad}
         onPrevious={() => scrollByDays(-NAV_DAYS[zoom])}
         onNext={() => scrollByDays(NAV_DAYS[zoom])}
         onToday={goToToday}
+        onDateChange={goToDate}
         onRangeChange={handleZoomChange}
       />
 
@@ -685,7 +735,7 @@ export function ReservationsCalendarView({
         <div
           ref={scrollerRef}
           onScroll={handleScroll}
-          className="bg-card absolute inset-0 overflow-auto overscroll-x-contain rounded-lg border select-none"
+          className="bg-card absolute inset-0 overflow-auto overscroll-x-contain overscroll-y-none rounded-lg border select-none"
         >
           <div className="relative flex min-h-full flex-col" style={{ width: timelineWidth }}>
             {/* Sticky header: months + days */}
@@ -757,11 +807,14 @@ export function ReservationsCalendarView({
                 className="absolute inset-0"
                 style={{
                   backgroundImage: [
-                    // Weekend shading — windowStart is always Monday aligned
-                    `repeating-linear-gradient(to right, transparent 0, transparent ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${7 * dayWidth}px)`,
-                    // Day grid lines
-                    `repeating-linear-gradient(to right, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent ${dayWidth}px)`,
+                    // Keep day separators above the weekend tint and visible on mobile displays.
+                    "linear-gradient(to right, color-mix(in srgb, var(--color-muted-foreground) 32%, transparent) 0, color-mix(in srgb, var(--color-muted-foreground) 32%, transparent) 0.5px, transparent 0.5px)",
+                    // Weekend shading — windowStart is always Monday aligned.
+                    `linear-gradient(to right, transparent 0, transparent ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${7 * dayWidth}px)`,
                   ].join(", "),
+                  // Explicit tiles avoid WebKit stretching repeating gradients on tall timelines.
+                  backgroundSize: `${dayWidth}px 100%, ${7 * dayWidth}px 100%`,
+                  backgroundRepeat: "repeat-x",
                 }}
               >
                 {/* Today column */}

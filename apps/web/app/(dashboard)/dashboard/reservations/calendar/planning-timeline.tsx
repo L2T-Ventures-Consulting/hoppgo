@@ -182,11 +182,13 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
   const [retryToken, setRetryToken] = useState(0);
   const coverageRef = useRef<{ start: number; end: number } | null>(null);
   const pendingFetchesRef = useRef(0);
+  const fetchGenerationRef = useRef(0);
 
-  // NOTE: no cleanup/cancellation here on purpose. Coverage is claimed before
-  // fetching so overlapping effect runs don't refetch the same range; merging
-  // is idempotent (Map keyed by id+product), so late results are safe to apply.
+  // Coverage is claimed before fetching so overlapping effect runs don't
+  // refetch the same range. A date jump starts a new generation so late results
+  // from the previous window cannot roll back or overwrite the new state.
   useEffect(() => {
+    const fetchGeneration = fetchGenerationRef.current;
     const winStart = windowStart;
     const winEnd = addDays(windowStart, daysCount - 1);
     winEnd.setHours(23, 59, 59, 999);
@@ -224,6 +226,8 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
       ),
     )
       .then((results) => {
+        if (fetchGeneration !== fetchGenerationRef.current) return;
+
         const failed = results.find((result) => "error" in result);
         if (failed && "error" in failed) {
           coverageRef.current = previousCoverage;
@@ -244,10 +248,14 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
         setHasLoadedOnce(true);
       })
       .catch(() => {
+        if (fetchGeneration !== fetchGenerationRef.current) return;
+
         coverageRef.current = previousCoverage;
         setError("errors.generic");
       })
       .finally(() => {
+        if (fetchGeneration !== fetchGenerationRef.current) return;
+
         pendingFetchesRef.current -= 1;
         if (pendingFetchesRef.current === 0) setIsFetching(false);
       });
@@ -385,6 +393,7 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
   const [visibleMonthLabel, setVisibleMonthLabel] = useState(() =>
     formatMonthLabel(anchorDateRef.current),
   );
+  const [visibleDate, setVisibleDate] = useState(anchorDateRef.current);
   const [leftmostVisibleDayIndex, setLeftmostVisibleDayIndex] = useState(0);
 
   // ---------------------------------------------------------------------------
@@ -398,9 +407,13 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
     );
     const centerOffset = element.scrollLeft + (element.clientWidth - PRODUCT_COLUMN_WIDTH) / 2;
     const index = Math.max(0, Math.min(daysCount - 1, Math.floor(centerOffset / dayWidth)));
-    const label = formatMonthLabel(addDays(windowStart, index));
+    const centeredDate = addDays(windowStart, index);
+    const label = formatMonthLabel(centeredDate);
     setLeftmostVisibleDayIndex((previous) =>
       previous === leftmostIndex ? previous : leftmostIndex,
+    );
+    setVisibleDate((previous) =>
+      previous.getTime() === centeredDate.getTime() ? previous : centeredDate,
     );
     setVisibleMonthLabel((previous) => (previous === label ? previous : label));
   };
@@ -485,23 +498,33 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
     });
   };
 
-  const goToToday = () => {
+  const goToDate = (date: Date) => {
     const element = scrollerRef.current;
-    if (!element) return;
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    const targetIndex = diffInDays(windowStart, targetDate);
+    anchorDateRef.current = targetDate;
 
-    if (todayIndex >= 0 && todayIndex < daysCount) {
+    if (element && targetIndex >= 0 && targetIndex < daysCount) {
       const target =
-        todayIndex * dayWidth - Math.max(0, (element.clientWidth - PRODUCT_COLUMN_WIDTH) / 3);
+        targetIndex * dayWidth - Math.max(0, (element.clientWidth - PRODUCT_COLUMN_WIDTH) / 3);
       element.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
       return;
     }
 
-    // Today fell outside the loaded window (anchored far away) — reset around it
-    anchorDateRef.current = new Date();
+    // The chosen date fell outside the loaded window — reset around it.
+    fetchGenerationRef.current += 1;
+    coverageRef.current = null;
+    pendingFetchesRef.current = 0;
+    setReservationsById(new Map());
+    setHasLoadedOnce(false);
+    setIsFetching(true);
     didInitialScrollRef.current = false;
-    setWindowStart(getMondayOf(addDays(new Date(), -INITIAL_PAST_DAYS)));
+    setWindowStart(getMondayOf(addDays(targetDate, -INITIAL_PAST_DAYS)));
     setDaysCount(INITIAL_DAYS_COUNT);
   };
+
+  const goToToday = () => goToDate(new Date());
 
   const handleZoomChange = (range: CalendarRange) => {
     const element = scrollerRef.current;
@@ -620,11 +643,13 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
       <TimelineToolbar
         products={products}
         filters={filters}
+        currentDate={visibleDate}
         monthLabel={visibleMonthLabel}
         isFetching={isFetching && hasLoadedOnce}
         onPrevious={() => scrollByDays(-NAV_DAYS[zoom])}
         onNext={() => scrollByDays(NAV_DAYS[zoom])}
         onToday={goToToday}
+        onDateChange={goToDate}
         onRangeChange={handleZoomChange}
       />
 
@@ -650,7 +675,7 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
-        className="bg-card relative min-h-0 flex-1 overflow-auto overscroll-x-contain rounded-lg border select-none"
+        className="bg-card relative min-h-0 flex-1 overflow-auto overscroll-x-contain overscroll-y-none rounded-lg border select-none"
       >
         <div className="relative" style={{ width: PRODUCT_COLUMN_WIDTH + timelineWidth }}>
           {/* Sticky header: months + days */}
@@ -744,11 +769,14 @@ export function PlanningTimeline({ products, currency, storeId }: PlanningTimeli
                 left: PRODUCT_COLUMN_WIDTH,
                 width: timelineWidth,
                 backgroundImage: [
-                  // Weekend shading — windowStart is always Monday aligned
-                  `repeating-linear-gradient(to right, transparent 0, transparent ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${7 * dayWidth}px)`,
-                  // Day grid lines
-                  `repeating-linear-gradient(to right, var(--color-border) 0, var(--color-border) 1px, transparent 1px, transparent ${dayWidth}px)`,
+                  // Keep day separators above the weekend tint and visible on mobile displays.
+                  "linear-gradient(to right, color-mix(in srgb, var(--color-muted-foreground) 32%, transparent) 0, color-mix(in srgb, var(--color-muted-foreground) 32%, transparent) 0.5px, transparent 0.5px)",
+                  // Weekend shading — windowStart is always Monday aligned.
+                  `linear-gradient(to right, transparent 0, transparent ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${5 * dayWidth}px, color-mix(in srgb, var(--color-muted) 45%, transparent) ${7 * dayWidth}px)`,
                 ].join(", "),
+                // Explicit tiles avoid WebKit stretching repeating gradients on tall timelines.
+                backgroundSize: `${dayWidth}px 100%, ${7 * dayWidth}px 100%`,
+                backgroundRepeat: "repeat-x",
               }}
             >
               {/* Today column */}

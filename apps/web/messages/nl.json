@@ -2573,7 +2573,17 @@
         "applyFilters": "Toepassen",
         "sectionOperation": "Bewerking van vandaag",
         "sectionStatus": "Statussen",
-        "sectionProducts": "Producten"
+        "sectionProducts": "Producten",
+        "goToDate": "Naar een datum",
+        "currentlyViewing": "Nu getoond: {date}",
+        "dateSearchPlaceholder": "15, morgen, volgende vrijdag…",
+        "noDateFound": "Geen datum herkend",
+        "clearSearch": "Wissen",
+        "quickDates": "Snelkeuzes",
+        "today": "Vandaag",
+        "tomorrow": "Morgen",
+        "nextWeek": "Volgende week",
+        "chooseDate": "Datum kiezen"
       },
       "export": {
         "button": "Agenda synchroniseren",

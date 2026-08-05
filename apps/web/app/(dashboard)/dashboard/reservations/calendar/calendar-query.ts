@@ -76,6 +76,12 @@ export function toCalendarDateParam(date: Date): string {
 }
 
 export function parseCalendarDateParam(value: string | undefined): Date | null {
+  if (value === "today") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return today;
+  }
+
   if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return null;
   }

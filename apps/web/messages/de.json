@@ -2612,7 +2612,17 @@
         "applyFilters": "Übernehmen",
         "sectionOperation": "Tagesvorgang",
         "sectionStatus": "Status",
-        "sectionProducts": "Produkte"
+        "sectionProducts": "Produkte",
+        "goToDate": "Zu einem Datum springen",
+        "currentlyViewing": "Aktuell angezeigt: {date}",
+        "dateSearchPlaceholder": "15, morgen, nächsten Freitag…",
+        "noDateFound": "Kein Datum erkannt",
+        "clearSearch": "Löschen",
+        "quickDates": "Schnellauswahl",
+        "today": "Heute",
+        "tomorrow": "Morgen",
+        "nextWeek": "Nächste Woche",
+        "chooseDate": "Datum auswählen"
       },
       "export": {
         "button": "Kalender synchronisieren",

@@ -61,6 +61,7 @@ import {
   TODAY_OPERATIONS,
   type TodayOperation,
 } from "./calendar-query";
+import { TimelineDateJumpDrawer } from "./timeline-date-jump-drawer";
 import type { Product } from "./types";
 
 // =============================================================================
@@ -480,12 +481,9 @@ function StatusFilterList({ filters }: { filters: TimelineFilters }) {
 function RangeSelect({
   range,
   onRangeChange,
-  compact = false,
 }: {
   range: CalendarRange;
   onRangeChange: (range: CalendarRange) => void;
-  /** Mobile: drops the icon and the fixed width to keep the toolbar on one row */
-  compact?: boolean;
 }) {
   const t = useTranslations("dashboard.calendar");
 
@@ -496,8 +494,8 @@ function RangeSelect({
         if (value !== null) onRangeChange(value as CalendarRange);
       }}
     >
-      <SelectTrigger className={compact ? "w-auto" : "w-36"} aria-label={t("viewMode.label")}>
-        {!compact && <CalendarIcon data-slot="icon" className="size-4 shrink-0" />}
+      <SelectTrigger className="w-36" aria-label={t("viewMode.label")}>
+        <CalendarIcon data-slot="icon" className="size-4 shrink-0" />
         <SelectValue>{t(`periods.${range}`)}</SelectValue>
       </SelectTrigger>
       <SelectContent>
@@ -516,7 +514,7 @@ function ActiveFilterBadge({ count }: { count: number | null }) {
   if (count === null) return null;
 
   return (
-    <span className="bg-primary text-primary-foreground absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold">
+    <span className="bg-primary text-primary-foreground absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold sm:top-0 sm:end-0">
       {count}
     </span>
   );
@@ -583,7 +581,10 @@ function TimelineFiltersDrawer({
           <Button
             variant="outline"
             disabled={filters.activeFilterCount === 0}
-            onClick={() => filters.resetFilters()}
+            onClick={() => {
+              filters.resetFilters();
+              setOpen(false);
+            }}
           >
             {tTimeline("resetFilters")}
           </Button>
@@ -601,12 +602,15 @@ function TimelineFiltersDrawer({
 interface TimelineToolbarProps {
   products: Product[];
   filters: TimelineFilters;
+  /** Date currently centered in the timeline viewport */
+  currentDate: Date;
   /** Month currently centered in the scroller */
   monthLabel: string;
   isFetching: boolean;
   onPrevious: () => void;
   onNext: () => void;
   onToday: () => void;
+  onDateChange: (date: Date) => void;
   /** Views snapshot their scroll anchor before switching zoom */
   onRangeChange: (range: CalendarRange) => void;
 }
@@ -614,11 +618,13 @@ interface TimelineToolbarProps {
 export function TimelineToolbar({
   products,
   filters,
+  currentDate,
   monthLabel,
   isFetching,
   onPrevious,
   onNext,
   onToday,
+  onDateChange,
   onRangeChange,
 }: TimelineToolbarProps) {
   const t = useTranslations("dashboard.calendar");
@@ -635,6 +641,7 @@ export function TimelineToolbar({
         <Button
           variant="outline"
           size="icon-sm"
+          className="max-sm:size-9"
           aria-label={tTimeline("previous")}
           onClick={onPrevious}
         >
@@ -642,7 +649,7 @@ export function TimelineToolbar({
         </Button>
         <Button
           variant="outline"
-          size="icon-sm"
+          size="icon"
           className="sm:hidden"
           aria-label={t("today")}
           onClick={onToday}
@@ -652,7 +659,13 @@ export function TimelineToolbar({
         <Button variant="outline" size="sm" className="max-sm:hidden" onClick={onToday}>
           {t("today")}
         </Button>
-        <Button variant="outline" size="icon-sm" aria-label={tTimeline("next")} onClick={onNext}>
+        <Button
+          variant="outline"
+          size="icon-sm"
+          className="max-sm:size-9"
+          aria-label={tTimeline("next")}
+          onClick={onNext}
+        >
           <ChevronRight />
         </Button>
       </div>
@@ -664,10 +677,11 @@ export function TimelineToolbar({
 
       {isFetching && <Spinner className="text-muted-foreground size-3.5 shrink-0" />}
 
-      {/* Mobile: one drawer for every filter, with the range next to it */}
+      {/* Mobile: filters stay grouped, while temporal navigation gets the
+          high-priority slot that the low-value range selector used to occupy. */}
       <div className="ms-auto flex shrink-0 items-center gap-1 sm:hidden">
         <TimelineFiltersDrawer products={products} filters={filters} onToday={onToday} />
-        <RangeSelect range={range} onRangeChange={onRangeChange} compact />
+        <TimelineDateJumpDrawer currentDate={currentDate} onDateChange={onDateChange} />
       </div>
 
       {/* Desktop: the same controls laid out inline */}
