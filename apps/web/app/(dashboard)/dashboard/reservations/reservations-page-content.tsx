@@ -360,10 +360,10 @@ export function ReservationsPageContent({
           <Button
             render={<Link href="/dashboard/reservations/new?source=reservations_page" />}
             aria-label={t("createReservation")}
-            className="max-sm:size-9 max-sm:px-0"
+            className="max-xl:size-9 max-xl:px-0"
           >
             <Plus className="h-4 w-4" />
-            <span className="max-sm:hidden">{t("createReservation")}</span>
+            <span className="max-xl:hidden">{t("createReservation")}</span>
           </Button>
         </div>
       </div>
