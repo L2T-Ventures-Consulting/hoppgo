@@ -445,7 +445,7 @@ export function AddressMapModal({
   const hasCoordinates = latitude !== null && longitude !== null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog mobileVariant="dialog" open={open} onOpenChange={onOpenChange}>
       <DialogPopup className="flex max-h-[90vh] flex-col overflow-hidden sm:max-w-[700px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">

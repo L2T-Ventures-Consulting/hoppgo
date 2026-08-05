@@ -388,7 +388,7 @@ export function ProductImageCropDialog({
   const headerCopy = getHeaderCopy(view, aiSession?.operation ?? "enhance");
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
+    <Dialog mobileVariant="dialog" open={open} onOpenChange={(nextOpen) => !nextOpen && onClose()}>
       <DialogPopup
         className={cn(
           // The editor bleeds to the popup's edges — the corners have to clip.

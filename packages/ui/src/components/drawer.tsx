@@ -318,4 +318,5 @@ export {
   DrawerPortal,
   DrawerTitle,
   DrawerTrigger,
+  DrawerViewport,
 };
