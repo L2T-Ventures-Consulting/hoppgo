@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { MoreHorizontal, Pencil, Copy, Archive, Trash2, Eye, EyeOff, Package } from 'lucide-react'
@@ -24,7 +25,7 @@ import {
   AlertDialogTitle,
 } from '@louez/ui'
 
-import { getCurrencySymbol } from '@louez/utils'
+import { cn, getCurrencySymbol } from '@louez/utils'
 
 import { ProductImage } from '@/components/product/product-image'
 
@@ -59,6 +60,9 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
   const t = useTranslations('dashboard.products')
   const tCommon = useTranslations('common')
   const currencySymbol = getCurrencySymbol(currency)
+  const tableRef = useRef<HTMLTableElement>(null)
+  const [hasHorizontalOverflow, setHasHorizontalOverflow] = useState(false)
+  const [showActionsFade, setShowActionsFade] = useState(false)
 
   const {
     isLoading,
@@ -70,6 +74,39 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
     requestDelete,
     handleDelete,
   } = useProductActions()
+
+  useEffect(() => {
+    const table = tableRef.current
+    const scrollContainer = table?.parentElement
+
+    if (!table || !scrollContainer) return
+
+    const updateActionsFade = () => {
+      const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth
+      const isOverflowing = maxScrollLeft > 1
+
+      setHasHorizontalOverflow(isOverflowing)
+      setShowActionsFade(isOverflowing && scrollContainer.scrollLeft < maxScrollLeft - 1)
+    }
+
+    updateActionsFade()
+
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateActionsFade)
+    resizeObserver?.observe(table)
+    resizeObserver?.observe(scrollContainer)
+    scrollContainer.addEventListener('scroll', updateActionsFade, { passive: true })
+
+    return () => {
+      resizeObserver?.disconnect()
+      scrollContainer.removeEventListener('scroll', updateActionsFade)
+    }
+  }, [products])
+
+  const actionsFadeClassName = cn(
+    showActionsFade &&
+      "before:pointer-events-none before:absolute before:inset-y-0 before:-left-6 before:w-6 before:bg-linear-to-r before:from-transparent before:via-background/70 before:to-background before:backdrop-blur-[1px] before:content-['']",
+  )
 
   if (products.length === 0) {
     return (
@@ -86,8 +123,8 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
 
   return (
     <>
-      <div className="rounded-md border">
-        <Table>
+      <div className="overflow-hidden rounded-md border">
+        <Table ref={tableRef}>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[80px]">{t('images')}</TableHead>
@@ -96,7 +133,15 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
               <TableHead className="text-right">{t('price')}</TableHead>
               <TableHead className="text-center">{t('quantity')}</TableHead>
               <TableHead>{tCommon('status')}</TableHead>
-              <TableHead className="w-[70px]"></TableHead>
+              <TableHead
+                className={cn(
+                  'sticky right-0 z-20 w-[70px] bg-background',
+                  hasHorizontalOverflow && 'border-l',
+                  actionsFadeClassName,
+                )}
+              >
+                <span className="sr-only">{tCommon('actions')}</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -133,7 +178,13 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                       {t(`status.${product.status || 'draft'}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn(
+                      'sticky right-0 z-10 bg-background',
+                      hasHorizontalOverflow && 'border-l',
+                      actionsFadeClassName,
+                    )}
+                  >
                     <DropdownMenu>
                       <DropdownMenuTrigger
                         render={<Button variant="ghost" size="icon" disabled={isLoading} />}
