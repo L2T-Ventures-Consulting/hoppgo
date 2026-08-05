@@ -19,7 +19,8 @@ import { formatCurrency, getCurrencySymbol } from "@louez/utils";
 import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 
 interface RevenueData {
-  month: string;
+  /** Pre-formatted bucket name — a day for the short periods, a month otherwise. */
+  label: string;
   revenue: number;
   payments: number;
 }
@@ -27,24 +28,14 @@ interface RevenueData {
 interface RevenueChartProps {
   data: RevenueData[];
   currency?: string;
-  includeManualPayments?: boolean;
 }
 
-export const RevenueChart = ({
-  data,
-  currency = "EUR",
-  includeManualPayments = false,
-}: RevenueChartProps) => {
+export const RevenueChart = ({ data, currency = "EUR" }: RevenueChartProps) => {
   const t = useTranslations("dashboard.statistics");
   const currencySymbol = getCurrencySymbol(currency);
 
   if (data.every((point) => point.revenue === 0)) {
-    return (
-      <DashboardEmptyState
-        icon={ChartColumnIcon}
-        description={t(includeManualPayments ? "noRevenueDataWithManual" : "noRevenueData")}
-      />
-    );
+    return <DashboardEmptyState icon={ChartColumnIcon} description={t("noRevenueData")} />;
   }
 
   return (
@@ -59,7 +50,7 @@ export const RevenueChart = ({
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis
-            dataKey="month"
+            dataKey="label"
             tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
@@ -79,13 +70,10 @@ export const RevenueChart = ({
                   <div className="bg-background rounded-lg border p-3 shadow-md">
                     <p className="font-medium">{label}</p>
                     <p className="text-muted-foreground text-sm">
-                      {t(includeManualPayments ? "revenueAbbrevWithManual" : "revenueAbbrev")}:{" "}
-                      {formatCurrency(payload[0].value as number, currency)}
+                      {t("revenueAbbrev")}: {formatCurrency(payload[0].value as number, currency)}
                     </p>
                     <p className="text-muted-foreground text-sm">
-                      {t(includeManualPayments ? "paymentsCountWithManual" : "paymentsCount", {
-                        count: payload[0].payload.payments,
-                      })}
+                      {t("paymentsCount", { count: payload[0].payload.payments })}
                     </p>
                   </div>
                 );
