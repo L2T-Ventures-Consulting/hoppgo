@@ -66,7 +66,7 @@ export const PaymentMethodsBreakdown = ({
     .sort((a, b) => b.amount - a.amount);
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("@container space-y-4", className)}>
       <div className="bg-muted flex h-2.5 w-full overflow-hidden rounded-full">
         {methods.map((method) => (
           <div
@@ -80,9 +80,16 @@ export const PaymentMethodsBreakdown = ({
         ))}
       </div>
 
+      {/* The card can land in a narrow grid column, so each row is sized by its
+          container: the count and share only show when there is room, and the
+          amount wraps to its own right-aligned line rather than colliding with
+          the label. */}
       <div className="space-y-2">
         {methods.map((method) => (
-          <div key={method.method} className="flex items-center justify-between gap-3">
+          <div
+            key={method.method}
+            className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5"
+          >
             <div className="flex min-w-0 items-center gap-2">
               <span
                 aria-hidden="true"
@@ -92,15 +99,17 @@ export const PaymentMethodsBreakdown = ({
                 )}
               />
               <span className="truncate text-sm">{method.label}</span>
-              <span className="text-muted-foreground hidden shrink-0 text-xs sm:inline">
+              <span className="text-muted-foreground hidden shrink-0 text-xs @min-[22rem]:inline">
                 {t("paymentsCount", { count: method.count })}
               </span>
             </div>
-            <div className="flex shrink-0 items-center gap-2 text-sm">
+            <div className="ml-auto flex shrink-0 items-center gap-2 text-sm">
               <span className="font-medium tabular-nums">
                 {formatCurrency(method.amount, currency)}
               </span>
-              <span className="text-muted-foreground tabular-nums">({method.percentage}%)</span>
+              <span className="text-muted-foreground hidden tabular-nums @min-[16rem]:inline">
+                ({method.percentage}%)
+              </span>
             </div>
           </div>
         ))}

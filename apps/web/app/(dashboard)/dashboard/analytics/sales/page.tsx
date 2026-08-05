@@ -287,13 +287,15 @@ export default async function SalesAnalyticsPage({ searchParams }: SalesAnalytic
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <div className="grid gap-4 lg:grid-cols-3">
+      {/* Three columns only from `xl`: at `lg` the sidebar leaves the methods
+          card a ~240px column where its amounts cannot fit. */}
+      <div className="grid gap-4 xl:grid-cols-3">
         <DashboardSectionCard
           title={t("revenueChart")}
           description={t("revenueChartDescription")}
           icon={ChartColumnIcon}
           accent="success"
-          className="lg:col-span-2"
+          className="xl:col-span-2"
           contentClassName="space-y-4"
         >
           <Suspense fallback={<RevenueHeroSkeleton />}>
