@@ -4,7 +4,16 @@ import Link from "next/link";
 
 import { useTranslations } from "next-intl";
 
-import { Badge, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@louez/ui";
+import {
+  Badge,
+  Table,
+  TableBody,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@louez/ui";
 import { ProductSolidIcon } from "@louez/ui/icons";
 import { formatCurrency } from "@louez/utils";
 
@@ -20,17 +29,31 @@ interface TopProduct {
 
 interface TopProductsTableProps {
   products: TopProduct[];
+  /** Allocated receipts of every product over the period, top 10 or not. */
+  allProductsRevenue: number;
+  /** Distinct products that brought receipts over the period. */
+  productCount: number;
 }
 
 /** Gold / silver / bronze for the podium, muted numbers below. */
 const RANK_VARIANTS = ["review", "expired", "pending"] as const;
 
-export const TopProductsTable = ({ products }: TopProductsTableProps) => {
+export const TopProductsTable = ({
+  products,
+  allProductsRevenue,
+  productCount,
+}: TopProductsTableProps) => {
   const t = useTranslations("dashboard.statistics");
 
   if (products.length === 0) {
     return <DashboardEmptyState icon={ProductSolidIcon} description={t("noRentalData")} />;
   }
+
+  // What the ten rows leave out, so the footer adds up to the receipts KPI.
+  const othersCount = Math.max(productCount - products.length, 0);
+  const othersRevenue =
+    allProductsRevenue -
+    products.reduce((sum, product) => sum + parseFloat(product.totalRevenue), 0);
 
   return (
     <div className="-mx-1 overflow-x-auto px-1">
@@ -80,6 +103,26 @@ export const TopProductsTable = ({ products }: TopProductsTableProps) => {
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          {othersCount > 0 && (
+            <TableRow>
+              <TableCell colSpan={3} className="text-muted-foreground font-normal">
+                {t("topProducts.othersRow", { count: othersCount })}
+              </TableCell>
+              <TableCell className="hidden md:table-cell" />
+              <TableCell className="text-muted-foreground text-right font-normal tabular-nums whitespace-nowrap">
+                {formatCurrency(othersRevenue)}
+              </TableCell>
+            </TableRow>
+          )}
+          <TableRow>
+            <TableCell colSpan={3}>{t("topProducts.totalRow")}</TableCell>
+            <TableCell className="hidden md:table-cell" />
+            <TableCell className="text-right tabular-nums whitespace-nowrap">
+              {formatCurrency(allProductsRevenue)}
+            </TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );
