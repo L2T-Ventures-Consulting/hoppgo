@@ -105,9 +105,14 @@ import { dispatchNotification } from "@/lib/notifications/dispatcher";
 import { recordReservationFee, voidReservationFee } from "@/lib/pay-as-you-go";
 import {
   captureProductServerEvent,
+  captureReservationActionSucceeded,
   toAnalyticsAmountCents,
 } from "@/lib/product-analytics/analytics";
-import { productAnalyticsEvents } from "@/lib/product-analytics/analytics-events";
+import {
+  productAnalyticsEvents,
+  reservationAnalyticsActions,
+} from "@/lib/product-analytics/analytics-events";
+import { getReservationStatusAnalyticsAction } from "@/lib/product-analytics/reservation-analytics";
 import { resolveReservationLocationSnapshot } from "@/lib/reservations/location-snapshots";
 import { createReservationInstantAccessUrl } from "@/lib/reservations/instant-access";
 import {
@@ -580,6 +585,21 @@ export async function updateReservationStatus(
     ...(tulipWarning ? [tulipWarning] : []),
   ];
 
+  const analyticsAction = getReservationStatusAnalyticsAction(status);
+  if (analyticsAction) {
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: analyticsAction,
+      properties: {
+        status_before: previousStatus,
+        status_after: status,
+        warning_count: responseWarnings.length,
+      },
+    });
+  }
+
   return {
     success: true,
     ...(responseWarnings.length > 0 && { warnings: responseWarnings }),
@@ -678,6 +698,16 @@ export async function cancelReservation(reservationId: string) {
 
   revalidatePath("/dashboard/reservations");
   revalidatePath(`/dashboard/reservations/${reservationId}`);
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action: reservationAnalyticsActions.cancelReservation,
+    properties: {
+      status_before: reservation.status,
+      status_after: "cancelled",
+    },
+  });
   return { success: true };
 }
 
@@ -704,6 +734,15 @@ export async function updateReservationNotes(reservationId: string, internalNote
     .where(eq(reservations.id, reservationId));
 
   revalidatePath(`/dashboard/reservations/${reservationId}`);
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action: reservationAnalyticsActions.updateNotes,
+    properties: {
+      has_notes: internalNotes.trim().length > 0,
+    },
+  });
   return { success: true };
 }
 
@@ -3329,6 +3368,20 @@ export async function updateReservation(
     }
   }
 
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action: reservationAnalyticsActions.editReservation,
+    properties: {
+      reservation_status: reservation.status,
+      item_count: data.items?.length ?? reservation.items.length,
+      warning_count: responseWarnings.length,
+      notify_customer: Boolean(data.notifyCustomerByEmail),
+      email_sent: emailNotification?.status === "sent" ? true : null,
+    },
+  });
+
   return {
     success: true,
     difference,
@@ -3455,6 +3508,17 @@ export async function recordPayment(reservationId: string, data: RecordPaymentDa
 
   revalidatePath("/dashboard/reservations");
   revalidatePath(`/dashboard/reservations/${reservationId}`);
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action: reservationAnalyticsActions.recordPayment,
+    properties: {
+      payment_type: data.type,
+      payment_method: data.method,
+      amount_cents: toAnalyticsAmountCents(data.amount),
+    },
+  });
   return { success: true, paymentId };
 }
 
@@ -3493,6 +3557,16 @@ export async function deletePayment(paymentId: string) {
 
   revalidatePath("/dashboard/reservations");
   revalidatePath(`/dashboard/reservations/${payment.reservationId}`);
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId: payment.reservationId,
+    action: reservationAnalyticsActions.deletePayment,
+    properties: {
+      payment_type: payment.type,
+      payment_method: payment.method,
+    },
+  });
   return { success: true };
 }
 
@@ -3561,6 +3635,16 @@ export async function returnDeposit(reservationId: string, data: ReturnDepositDa
 
   revalidatePath("/dashboard/reservations");
   revalidatePath(`/dashboard/reservations/${reservationId}`);
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action: reservationAnalyticsActions.returnDeposit,
+    properties: {
+      payment_method: data.method,
+      amount_cents: toAnalyticsAmountCents(data.amount),
+    },
+  });
   return { success: true, paymentId };
 }
 
@@ -3608,6 +3692,16 @@ export async function recordDamage(
 
   revalidatePath("/dashboard/reservations");
   revalidatePath(`/dashboard/reservations/${reservationId}`);
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action: reservationAnalyticsActions.recordDamage,
+    properties: {
+      payment_method: data.method,
+      amount_cents: toAnalyticsAmountCents(data.amount),
+    },
+  });
   return { success: true, paymentId };
 }
 
@@ -3746,6 +3840,13 @@ export async function createDepositHold(reservationId: string) {
 
     revalidatePath("/dashboard/reservations");
     revalidatePath(`/dashboard/reservations/${reservationId}`);
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: reservationAnalyticsActions.createDepositHold,
+      properties: { amount_cents: toAnalyticsAmountCents(depositAmount) },
+    });
     return { success: true, paymentIntentId: result.paymentIntentId };
   } catch (error) {
     console.error("Failed to create deposit hold:", error);
@@ -3874,6 +3975,13 @@ export async function captureDepositHold(
 
     revalidatePath("/dashboard/reservations");
     revalidatePath(`/dashboard/reservations/${reservationId}`);
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: reservationAnalyticsActions.captureDepositHold,
+      properties: { amount_cents: toAnalyticsAmountCents(data.amount) },
+    });
     return { success: true, amountCaptured: result.amountCaptured };
   } catch (error) {
     console.error("Failed to capture deposit:", error);
@@ -3952,6 +4060,13 @@ export async function releaseDepositHold(reservationId: string) {
 
     revalidatePath("/dashboard/reservations");
     revalidatePath(`/dashboard/reservations/${reservationId}`);
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: reservationAnalyticsActions.releaseDepositHold,
+      properties: { amount_cents: toAnalyticsAmountCents(depositAmount) },
+    });
     return { success: true };
   } catch (error) {
     console.error("Failed to release deposit:", error);
@@ -4166,6 +4281,13 @@ export async function sendReservationModificationEmail(
     });
 
     revalidatePath(`/dashboard/reservations/${reservationId}`);
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: reservationAnalyticsActions.sendEmail,
+      properties: { template_id: "reservation_modified", channel: "email" },
+    });
     return { success: true };
   } catch (error) {
     console.error("Failed to send reservation modification email:", error);
@@ -4339,6 +4461,13 @@ export async function sendReservationEmail(reservationId: string, data: SendRese
     });
 
     revalidatePath(`/dashboard/reservations/${reservationId}`);
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: reservationAnalyticsActions.sendEmail,
+      properties: { template_id: data.templateId, channel: "email" },
+    });
     return { success: true };
   } catch (error) {
     console.error("Failed to send reservation email:", error);
@@ -4488,6 +4617,13 @@ export async function sendAccessLink(reservationId: string) {
     });
 
     revalidatePath(`/dashboard/reservations/${reservationId}`);
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: reservationAnalyticsActions.sendEmail,
+      properties: { template_id: "access_link", channel: "email" },
+    });
     return { success: true };
   } catch (error) {
     console.error("Failed to send access link:", error);
@@ -4867,6 +5003,20 @@ export async function requestPayment(
     });
 
     revalidatePath(`/dashboard/reservations/${reservationId}`);
+
+    await captureReservationActionSucceeded({
+      distinctId: store.userId,
+      storeId: store.id,
+      reservationId,
+      action: reservationAnalyticsActions.requestPayment,
+      properties: {
+        payment_type: data.type,
+        channel_email: data.channels.email,
+        channel_sms: data.channels.sms,
+        email_sent: notificationResults.email ?? null,
+        sms_sent: notificationResults.sms ?? null,
+      },
+    });
 
     return {
       success: true,

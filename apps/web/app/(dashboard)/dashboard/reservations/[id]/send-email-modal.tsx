@@ -36,6 +36,11 @@ import { cn } from '@louez/utils'
 
 import { orpc } from '@/lib/orpc/react'
 import { invalidateReservationAll, invalidateReservationDetail } from '@/lib/orpc/invalidation'
+import { reservationAnalyticsActions } from '@/lib/product-analytics/analytics-events'
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from '@/lib/product-analytics/reservation-analytics-client'
 
 type ReservationStatus = 'pending' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled' | 'rejected' | 'quote' | 'declined'
 
@@ -153,6 +158,13 @@ export function SendEmailModal({
       return
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.sendEmail,
+      properties: { template_id: selectedTemplate, channel: 'email' },
+    })
+
     setIsLoading(true)
     try {
       if (selectedTemplate === 'access_link') {
@@ -172,6 +184,16 @@ export function SendEmailModal({
       onOpenChange(false)
       resetForm()
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.sendEmail,
+        properties: {
+          template_id: selectedTemplate,
+          channel: 'email',
+          error_code: 'email_send_failed',
+        },
+      })
       toastManager.add({ title: t('sendError'), type: 'error' })
     } finally {
       setIsLoading(false)

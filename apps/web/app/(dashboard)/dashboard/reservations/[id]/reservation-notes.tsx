@@ -18,6 +18,12 @@ import {
 
 import { orpc } from '@/lib/orpc/react'
 import { invalidateReservationAll } from '@/lib/orpc/invalidation'
+import { reservationAnalyticsActions } from '@/lib/product-analytics/analytics-events'
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+  captureReservationActionSucceeded,
+} from '@/lib/product-analytics/reservation-analytics-client'
 
 interface ReservationNotesProps {
   reservationId: string
@@ -118,11 +124,26 @@ export function ReservationNotes({
   }
 
   const handleSave = async () => {
+    captureReservationActionStarted({
+      reservationId,
+      action: reservationAnalyticsActions.updateNotes,
+      properties: { has_notes: notes.trim().length > 0 },
+    })
     setIsLoading(true)
     try {
       await updateNotesMutation.mutateAsync({ reservationId, notes })
+      captureReservationActionSucceeded({
+        reservationId,
+        action: reservationAnalyticsActions.updateNotes,
+        properties: { has_notes: notes.trim().length > 0 },
+      })
       toastManager.add({ title: t('notes.saved'), type: 'success' })
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        action: reservationAnalyticsActions.updateNotes,
+        properties: { error_code: 'notes_update_failed' },
+      })
       toastManager.add({ title: t('notes.error'), type: 'error' })
     } finally {
       setIsLoading(false)

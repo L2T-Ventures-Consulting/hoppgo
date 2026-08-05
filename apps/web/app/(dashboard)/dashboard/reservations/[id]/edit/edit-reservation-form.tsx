@@ -54,6 +54,11 @@ import { formatStoreDate } from '@/lib/utils/store-date'
 import { isLegacyTulipInsuranceItem } from '@/lib/integrations/tulip/contracts-insurance'
 import { orpc } from '@/lib/orpc/react'
 import { invalidateReservationAll } from '@/lib/orpc/invalidation'
+import { reservationAnalyticsActions } from '@/lib/product-analytics/analytics-events'
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from '@/lib/product-analytics/reservation-analytics-client'
 import type { PricingMode } from '@louez/types'
 import { EditReservationItemsSection } from './components/edit-reservation-items-section'
 import { EditReservationSummarySection } from './components/edit-reservation-summary-section'
@@ -768,6 +773,17 @@ export function EditReservationForm({
       toastManager.add({ title: t('edit.noItems'), type: 'error' })
       return
     }
+    captureReservationActionStarted({
+      reservationId: reservation.id,
+      reservationStatus: reservation.status,
+      action: reservationAnalyticsActions.editReservation,
+      source: 'reservation_edit',
+      properties: {
+        item_count: items.length,
+        notify_customer: notifyCustomerByEmail,
+        override_turnover_buffer: overrideTurnoverBuffer,
+      },
+    })
     setIsLoading(true)
     try {
       // Build delivery payload when delivery is available
@@ -820,6 +836,13 @@ export function EditReservationForm({
       })
 
       if (result.error) {
+        captureReservationActionFailed({
+          reservationId: reservation.id,
+          reservationStatus: reservation.status,
+          action: reservationAnalyticsActions.editReservation,
+          source: 'reservation_edit',
+          properties: { error_code: result.error },
+        })
         if (isBufferConflictResult(result)) {
           const shouldOverride = window.confirm(
             tErrors('turnoverBufferConflict'),
@@ -899,6 +922,18 @@ export function EditReservationForm({
         router.refresh()
       }
     } catch (error) {
+      captureReservationActionFailed({
+        reservationId: reservation.id,
+        reservationStatus: reservation.status,
+        action: reservationAnalyticsActions.editReservation,
+        source: 'reservation_edit',
+        properties: {
+          error_code:
+            error instanceof Error && error.message.startsWith('errors.')
+              ? error.message
+              : 'reservation_update_failed',
+        },
+      })
       if (error instanceof Error && error.message.startsWith('errors.')) {
         toastManager.add({
           title: tErrors(getErrorTranslationKey(error.message)),

@@ -4,6 +4,7 @@ import { ShieldSolidIcon } from "@louez/ui/icons";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import {
   ArrowRight,
   Building2,
@@ -35,6 +36,7 @@ import { getCurrencySymbol } from "@louez/utils";
 
 import { formatStoreDate } from "@/lib/utils/store-date";
 import { orpc } from "@/lib/orpc/react";
+import { captureReservationViewed } from "@/lib/product-analytics/reservation-analytics-client";
 
 import { ActivityTimelineV2 } from "./activity-timeline-v2";
 import { AdvisorConversationCard } from "./advisor-conversation-card";
@@ -43,10 +45,7 @@ import { PhoneContactPopover } from "@/components/dashboard/phone-contact-popove
 import { ReservationHeader } from "./reservation-header";
 import { ReservationCustomerNotes, ReservationNotes } from "./reservation-notes";
 import { SmartReservationActions } from "./smart-reservation-actions";
-import {
-  UnifiedPaymentSection,
-  type PaymentMethod,
-} from "./unified-payment-section";
+import { UnifiedPaymentSection, type PaymentMethod } from "./unified-payment-section";
 import { UnitAssignmentSelector } from "@/components/dashboard/unit-assignment-selector";
 import { InspectionStatusCard } from "@/components/dashboard/inspection-status-card";
 
@@ -140,6 +139,7 @@ export function ReservationDetailClient({
 }: ReservationDetailClientProps) {
   const t = useTranslations("dashboard.reservations");
   const tCommon = useTranslations("common");
+  const hasCapturedReservationView = useRef(false);
 
   const reservationQuery = useQuery({
     ...orpc.dashboard.reservations.getById.queryOptions({
@@ -150,6 +150,23 @@ export function ReservationDetailClient({
   });
 
   const reservation = reservationQuery.data;
+
+  useEffect(() => {
+    if (hasCapturedReservationView.current) return;
+    hasCapturedReservationView.current = true;
+
+    captureReservationViewed({
+      reservationId,
+      reservationStatus:
+        typeof initialReservation?.status === "string" ? initialReservation.status : null,
+      properties: {
+        has_deposit: Number.parseFloat(initialReservation?.depositAmount || "0") > 0,
+        inspection_enabled: inspectionSettings.enabled,
+        inspection_mode: inspectionSettings.mode,
+      },
+    });
+  }, [initialReservation, inspectionSettings.enabled, inspectionSettings.mode, reservationId]);
+
   if (!reservation) return null;
 
   const currencySymbol = getCurrencySymbol(currency);

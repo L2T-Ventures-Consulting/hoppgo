@@ -33,6 +33,12 @@ import { SendEmailModal } from "./send-email-modal";
 import { STATUS_CONFIG } from "../reservations-utils";
 import { generateAccessUrl } from "@/app/(dashboard)/dashboard/reservations/actions";
 import { getDashboardReservationBackHref } from "@/lib/dashboard/util.reservation-navigation";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+  captureReservationActionSucceeded,
+} from "@/lib/product-analytics/reservation-analytics-client";
 
 type ReservationStatus =
   | "pending"
@@ -105,16 +111,32 @@ export function ReservationHeader({
     rentalPaid >= rentalAmount && (depositAmount === 0 || depositCollected >= depositAmount);
   const canEdit = !["completed", "cancelled", "rejected", "declined"].includes(status);
 
-  const handleGenerateAccessUrl = async () => {
+  const handleGenerateAccessUrl = async (
+    action:
+      | typeof reservationAnalyticsActions.copyAccessLink
+      | typeof reservationAnalyticsActions.viewAsCustomer,
+  ) => {
     setIsGeneratingLink(true);
     try {
       const result = await generateAccessUrl(reservationId);
       if ("error" in result) {
+        captureReservationActionFailed({
+          reservationId,
+          reservationStatus: status,
+          action,
+          properties: { error_code: "access_url_failed" },
+        });
         toastManager.add({ title: t("accessLink.sendError"), type: "error" });
         return null;
       }
       return result.url;
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action,
+        properties: { error_code: "access_url_failed" },
+      });
       toastManager.add({ title: t("accessLink.sendError"), type: "error" });
       return null;
     } finally {
@@ -123,22 +145,69 @@ export function ReservationHeader({
   };
 
   const handleViewAsCustomer = async () => {
-    const url = await handleGenerateAccessUrl();
-    if (url) window.open(url, "_blank");
+    const action = reservationAnalyticsActions.viewAsCustomer;
+    captureReservationActionStarted({ reservationId, reservationStatus: status, action });
+    const url = await handleGenerateAccessUrl(action);
+    if (!url) return;
+
+    const openedWindow = window.open(url, "_blank");
+    if (openedWindow) {
+      captureReservationActionSucceeded({ reservationId, reservationStatus: status, action });
+    } else {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action,
+        properties: { error_code: "popup_blocked" },
+      });
+    }
   };
 
   const handleCopyLink = async () => {
-    const url = await handleGenerateAccessUrl();
-    if (url) {
-      navigator.clipboard.writeText(url);
+    const action = reservationAnalyticsActions.copyAccessLink;
+    captureReservationActionStarted({ reservationId, reservationStatus: status, action });
+    const url = await handleGenerateAccessUrl(action);
+    if (!url) return;
+
+    try {
+      await navigator.clipboard.writeText(url);
       setCopiedLink(true);
       toastManager.add({ title: t("linkCopied"), type: "success" });
       setTimeout(() => setCopiedLink(false), 2000);
+      captureReservationActionSucceeded({ reservationId, reservationStatus: status, action });
+    } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action,
+        properties: { error_code: "clipboard_failed" },
+      });
     }
   };
 
   const handleDownloadContract = () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.downloadContract,
+    });
     window.open(`/api/reservations/${reservationId}/contract`, "_blank");
+  };
+
+  const handleEdit = () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.editReservation,
+    });
+    router.push(`/dashboard/reservations/${reservationId}/edit`);
+  };
+
+  const handlePrint = () => {
+    const action = reservationAnalyticsActions.printReservation;
+    captureReservationActionStarted({ reservationId, reservationStatus: status, action });
+    window.print();
+    captureReservationActionSucceeded({ reservationId, reservationStatus: status, action });
   };
 
   return (
@@ -215,9 +284,7 @@ export function ReservationHeader({
 
                 {/* Edit reservation */}
                 {canEdit && (
-                  <DropdownMenuItem
-                    onClick={() => router.push(`/dashboard/reservations/${reservationId}/edit`)}
-                  >
+                  <DropdownMenuItem onClick={handleEdit}>
                     <Pencil className="h-4 w-4 mr-2" />
                     {t("edit.button")}
                   </DropdownMenuItem>
@@ -225,7 +292,7 @@ export function ReservationHeader({
                 {canEdit && <DropdownMenuSeparator />}
 
                 {/* Common items */}
-                <DropdownMenuItem onClick={() => window.print()}>
+                <DropdownMenuItem onClick={handlePrint}>
                   <Printer className="h-4 w-4 mr-2" />
                   {t("actions.print")}
                 </DropdownMenuItem>

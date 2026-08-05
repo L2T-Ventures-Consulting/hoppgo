@@ -32,7 +32,7 @@ import { formatStoreDateRange } from '@/lib/utils/store-date'
 import { getCurrencySymbol } from '@louez/utils'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   ArrowUpDown,
   ArrowUp,
@@ -50,6 +50,10 @@ import type {
   SortDirection,
 } from './reservations-types'
 import { PAYMENT_STATUS_VARIANTS, STATUS_CONFIG, getPaymentStatus } from './reservations-utils'
+import {
+  getReservationDetailHref,
+  isReservationAnalyticsSource,
+} from '@/lib/product-analytics/reservation-analytics'
 
 const STATUS_ICON_MAP: Record<ReservationStatus, typeof PendingSolidIcon> = {
   pending: PendingSolidIcon,
@@ -126,6 +130,11 @@ export function ReservationsTableView({
 }: ReservationsTableViewProps) {
   const t = useTranslations('dashboard.reservations')
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const sourceParam = searchParams.get('source')
+  const reservationSource = isReservationAnalyticsSource(sourceParam)
+    ? sourceParam
+    : 'reservations_list'
   const currencySymbol = getCurrencySymbol(currency)
 
   return (
@@ -187,16 +196,17 @@ export function ReservationsTableView({
                 const isPending = status === 'pending'
                 const isConfirmed = status === 'confirmed'
                 const isOngoing = status === 'ongoing'
+                const reservationHref = getReservationDetailHref(reservation.id, reservationSource)
                 return (
                   <TableRow
                     key={reservation.id}
                     className="cursor-pointer"
-                    onClick={() => router.push(`/dashboard/reservations/${reservation.id}`)}
+                    onClick={() => router.push(reservationHref)}
                   >
                     {/* Number */}
                     <TableCell className="font-mono text-sm font-medium">
                       <Link
-                        href={`/dashboard/reservations/${reservation.id}`}
+                        href={reservationHref}
                         className="hover:underline"
                         onClick={(e) => e.stopPropagation()}
                       >
@@ -323,7 +333,7 @@ export function ReservationsTableView({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {/* View details — always available */}
-                          <DropdownMenuItem render={<Link href={`/dashboard/reservations/${reservation.id}`} />}>
+                          <DropdownMenuItem render={<Link href={reservationHref} />}>
                             {t('viewDetails')}
                           </DropdownMenuItem>
 

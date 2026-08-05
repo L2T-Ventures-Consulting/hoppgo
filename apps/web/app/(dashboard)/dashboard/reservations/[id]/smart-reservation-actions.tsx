@@ -38,6 +38,12 @@ import { formatStoreDate } from '@/lib/utils/store-date'
 
 import { invalidateReservationAll } from '@/lib/orpc/invalidation'
 import { orpc } from '@/lib/orpc/react'
+import { reservationAnalyticsActions } from '@/lib/product-analytics/analytics-events'
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from '@/lib/product-analytics/reservation-analytics-client'
+import { getReservationStatusAnalyticsAction } from '@/lib/product-analytics/reservation-analytics'
 
 type ReservationStatus = 'pending' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled' | 'rejected' | 'quote' | 'declined'
 type InspectionMode = 'optional' | 'recommended' | 'required'
@@ -254,6 +260,16 @@ export function SmartReservationActions({
   )
 
   const handleStatusChange = async (newStatus: ReservationStatus, reason?: string) => {
+    const analyticsAction = getReservationStatusAnalyticsAction(newStatus)
+    if (analyticsAction) {
+      captureReservationActionStarted({
+        reservationId,
+        reservationStatus: status,
+        action: analyticsAction,
+        properties: { status_after: newStatus },
+      })
+    }
+
     setIsLoading(true)
     try {
       const result = await updateStatusMutation.mutateAsync({
@@ -268,6 +284,14 @@ export function SmartReservationActions({
       toastManager.add({ title: t('statusUpdated'), type: 'success' })
       await invalidateReservationAll(queryClient, reservationId)
     } catch {
+      if (analyticsAction) {
+        captureReservationActionFailed({
+          reservationId,
+          reservationStatus: status,
+          action: analyticsAction,
+          properties: { error_code: 'status_update_failed', status_after: newStatus },
+        })
+      }
       toastManager.add({ title: tErrors('generic'), type: 'error' })
     } finally {
       setIsLoading(false)
@@ -282,12 +306,23 @@ export function SmartReservationActions({
   }
 
   const handleCancel = async () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.cancelReservation,
+    })
     setIsLoading(true)
     try {
       await cancelMutation.mutateAsync({ reservationId })
       toastManager.add({ title: t('reservationCancelled'), type: 'success' })
       await invalidateReservationAll(queryClient, reservationId)
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.cancelReservation,
+        properties: { error_code: 'cancel_failed' },
+      })
       toastManager.add({ title: tErrors('generic'), type: 'error' })
     } finally {
       setIsLoading(false)

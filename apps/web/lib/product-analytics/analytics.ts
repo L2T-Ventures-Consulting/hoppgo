@@ -4,6 +4,8 @@ import { getPostHogServer, shutdownPostHogServer } from '@/lib/posthog';
 import {
   type ProductAnalyticsEvent,
   productAnalyticsBaseProperties,
+  productAnalyticsEvents,
+  type ReservationAnalyticsAction,
 } from '@/lib/product-analytics/analytics-events';
 
 export async function captureProductServerEvent({
@@ -31,6 +33,34 @@ export async function captureProductServerEvent({
   } catch {
     // Product analytics must never block core product flows.
   }
+}
+
+export async function captureReservationActionSucceeded({
+  distinctId,
+  storeId,
+  reservationId,
+  action,
+  properties,
+}: {
+  distinctId: string | null | undefined;
+  storeId: string;
+  reservationId: string;
+  action: ReservationAnalyticsAction;
+  properties?: Record<string, unknown>;
+}) {
+  await captureProductServerEvent({
+    distinctId,
+    event: productAnalyticsEvents.reservationActionSucceeded,
+    properties: {
+      feature: 'reservation_management',
+      surface: 'dashboard',
+      source: 'server_mutation',
+      store_id: storeId,
+      reservation_id: reservationId,
+      action,
+      ...properties,
+    },
+  });
 }
 
 export function toAnalyticsAmountCents(

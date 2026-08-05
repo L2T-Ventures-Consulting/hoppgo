@@ -62,6 +62,11 @@ import { useStoreTimezone } from "@/contexts/store-context";
 import { ReferralNudge } from "@/components/dashboard/referral-nudge";
 import { orpc } from "@/lib/orpc/react";
 import { invalidateReservationAll } from "@/lib/orpc/invalidation";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from "@/lib/product-analytics/reservation-analytics-client";
 import { RequestPaymentModal } from "./request-payment-modal";
 
 interface Payment {
@@ -391,6 +396,13 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.recordPayment,
+      properties: { payment_type: paymentType, payment_method: paymentMethodType },
+    });
+
     setIsLoading(true);
     try {
       await recordPaymentMutation.mutateAsync({
@@ -407,6 +419,12 @@ export function UnifiedPaymentSection({
       setPaymentModalOpen(false);
       resetForm();
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.recordPayment,
+        properties: { error_code: "record_payment_failed", payment_type: paymentType },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -425,6 +443,13 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.returnDeposit,
+      properties: { payment_method: paymentMethodType },
+    });
+
     setIsLoading(true);
     try {
       await returnDepositMutation.mutateAsync({
@@ -440,6 +465,12 @@ export function UnifiedPaymentSection({
       setDepositReturnModalOpen(false);
       resetForm();
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.returnDeposit,
+        properties: { error_code: "return_deposit_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -458,6 +489,13 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.recordDamage,
+      properties: { payment_method: paymentMethodType },
+    });
+
     setIsLoading(true);
     try {
       await recordDamageMutation.mutateAsync({
@@ -473,6 +511,12 @@ export function UnifiedPaymentSection({
       setDamageModalOpen(false);
       resetForm();
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.recordDamage,
+        properties: { error_code: "record_damage_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -482,6 +526,13 @@ export function UnifiedPaymentSection({
   const handleDeletePayment = async () => {
     if (!paymentToDelete) return;
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.deletePayment,
+      properties: { payment_type: paymentToDelete.type, payment_method: paymentToDelete.method },
+    });
+
     setIsLoading(true);
     try {
       await deletePaymentMutation.mutateAsync({ paymentId: paymentToDelete.id });
@@ -489,6 +540,12 @@ export function UnifiedPaymentSection({
       setDeleteDialogOpen(false);
       setPaymentToDelete(null);
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.deletePayment,
+        properties: { error_code: "delete_payment_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -497,11 +554,22 @@ export function UnifiedPaymentSection({
 
   // Deposit authorization handlers
   const handleCreateHold = async () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.createDepositHold,
+    });
     setIsLoading(true);
     try {
       await createHoldMutation.mutateAsync({ reservationId });
       toastManager.add({ title: t("deposit.holdCreated"), type: "success" });
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.createDepositHold,
+        properties: { error_code: "create_deposit_hold_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -525,6 +593,12 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.captureDepositHold,
+    });
+
     setIsLoading(true);
     try {
       await captureHoldMutation.mutateAsync({
@@ -539,6 +613,12 @@ export function UnifiedPaymentSection({
       setCaptureAmount("");
       setCaptureReason("");
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.captureDepositHold,
+        properties: { error_code: "capture_deposit_hold_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -546,12 +626,23 @@ export function UnifiedPaymentSection({
   };
 
   const handleRelease = async () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.releaseDepositHold,
+    });
     setIsLoading(true);
     try {
       await releaseHoldMutation.mutateAsync({ reservationId });
       toastManager.add({ title: t("deposit.released"), type: "success" });
       setReleaseDialogOpen(false);
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.releaseDepositHold,
+        properties: { error_code: "release_deposit_hold_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);

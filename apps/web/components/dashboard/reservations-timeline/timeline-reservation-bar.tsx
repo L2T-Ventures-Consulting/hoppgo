@@ -116,7 +116,7 @@ export function TimelineReservationBar({
   const t = useTranslations("dashboard.calendar");
   const status = getTimelineStatus(reservation.status);
   const colorClass = BAR_COLORS[status] ?? BAR_COLORS.pending;
-  const reservationHref = `/dashboard/reservations/${encodeURIComponent(reservation.id)}`;
+  const reservationHref = `/dashboard/reservations/${encodeURIComponent(reservation.id)}?source=reservations_timeline`;
   const rentalPrice = formatCurrency(getTimelineRentalAmount(reservation), currency);
 
   const hasDelivery = Boolean(

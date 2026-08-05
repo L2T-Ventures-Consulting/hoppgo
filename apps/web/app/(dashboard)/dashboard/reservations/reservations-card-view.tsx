@@ -14,6 +14,7 @@ import { formatStoreDateRange } from "@/lib/utils/store-date";
 import { cn, getCurrencySymbol } from "@louez/utils";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import {
   ArrowDownRight,
@@ -39,6 +40,10 @@ import {
 
 import type { Reservation, ReservationStatus } from "./reservations-types";
 import { PAYMENT_STATUS_VARIANTS, STATUS_CONFIG, getPaymentStatus } from "./reservations-utils";
+import {
+  getReservationDetailHref,
+  isReservationAnalyticsSource,
+} from "@/lib/product-analytics/reservation-analytics";
 
 const STATUS_ICON_MAP: Record<ReservationStatus, typeof PendingSolidIcon> = {
   pending: PendingSolidIcon,
@@ -73,6 +78,11 @@ export function ReservationsCardView({
   openRejectDialog,
 }: ReservationsCardViewProps) {
   const t = useTranslations("dashboard.reservations");
+  const searchParams = useSearchParams();
+  const sourceParam = searchParams.get("source");
+  const reservationSource = isReservationAnalyticsSource(sourceParam)
+    ? sourceParam
+    : "reservations_list";
   const currencySymbol = getCurrencySymbol(currency);
 
   return (
@@ -104,7 +114,7 @@ export function ReservationsCardView({
           return (
             <Link
               key={reservation.id}
-              href={`/dashboard/reservations/${reservation.id}`}
+              href={getReservationDetailHref(reservation.id, reservationSource)}
               className="block group"
             >
               <Card

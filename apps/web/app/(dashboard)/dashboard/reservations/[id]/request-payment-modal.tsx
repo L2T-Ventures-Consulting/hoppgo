@@ -35,6 +35,11 @@ import { cn, formatCurrency } from "@louez/utils";
 
 import { orpc } from "@/lib/orpc/react";
 import { invalidateReservationAll } from "@/lib/orpc/invalidation";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from "@/lib/product-analytics/reservation-analytics-client";
 
 interface RequestPaymentModalProps {
   open: boolean;
@@ -152,6 +157,16 @@ export function RequestPaymentModal({
   const handleSubmit = async () => {
     if (!canSubmit) return;
 
+    captureReservationActionStarted({
+      reservationId,
+      action: reservationAnalyticsActions.requestPayment,
+      properties: {
+        payment_type: selectedType,
+        channel_email: sendEmail,
+        channel_sms: sendSms,
+      },
+    });
+
     setIsLoading(true);
     try {
       const result = await requestPaymentMutation.mutateAsync({
@@ -169,6 +184,16 @@ export function RequestPaymentModal({
         setPaymentUrl(result.paymentUrl);
       }
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        action: reservationAnalyticsActions.requestPayment,
+        properties: {
+          payment_type: selectedType,
+          channel_email: sendEmail,
+          channel_sms: sendSms,
+          error_code: "payment_request_failed",
+        },
+      });
       toastManager.add({ title: t("error"), type: "error" });
     } finally {
       setIsLoading(false);

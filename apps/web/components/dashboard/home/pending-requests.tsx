@@ -26,8 +26,9 @@ export const PendingRequests = ({ pending, className }: PendingRequestsProps) =>
       icon={ClockSolidIcon}
       accent="pending"
       reservations={pending}
+      reservationSource="home_pending"
       emptyMessage={t("pending.empty")}
-      viewAllHref="/dashboard/reservations?status=pending"
+      viewAllHref="/dashboard/reservations?status=pending&source=home_pending"
       showPeriod
       showAmount
       className={className}

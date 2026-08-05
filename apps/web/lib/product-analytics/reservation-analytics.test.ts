@@ -1,0 +1,51 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  getReservationDetailHref,
+  getReservationStatusAnalyticsAction,
+  resolveReservationAnalyticsSource,
+} from "@/lib/product-analytics/reservation-analytics";
+
+test("keeps known reservation entry sources and rejects arbitrary query values", () => {
+  assert.equal(resolveReservationAnalyticsSource({ explicitSource: "home_return" }), "home_return");
+  assert.equal(
+    resolveReservationAnalyticsSource({
+      explicitSource: "customer-email@example.com",
+      referrerPathname: "/dashboard",
+    }),
+    "dashboard_home",
+  );
+});
+
+test("infers a coarse source from the previous dashboard page", () => {
+  assert.equal(
+    resolveReservationAnalyticsSource({ referrerPathname: "/dashboard/reservations" }),
+    "reservations_list",
+  );
+  assert.equal(
+    resolveReservationAnalyticsSource({ referrerPathname: "/dashboard/customers/customer-1" }),
+    "customer_detail",
+  );
+  assert.equal(resolveReservationAnalyticsSource({}), "direct");
+});
+
+test("builds a source-tagged reservation detail URL", () => {
+  assert.equal(
+    getReservationDetailHref("reservation/with spaces", "home_departure"),
+    "/dashboard/reservations/reservation%2Fwith%20spaces?source=home_departure",
+  );
+});
+
+test("maps status transitions to their product action", () => {
+  assert.equal(
+    getReservationStatusAnalyticsAction("ongoing"),
+    reservationAnalyticsActions.markPickedUp,
+  );
+  assert.equal(
+    getReservationStatusAnalyticsAction("completed"),
+    reservationAnalyticsActions.confirmReturn,
+  );
+  assert.equal(getReservationStatusAnalyticsAction("cancelled"), null);
+});

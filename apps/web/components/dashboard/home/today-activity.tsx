@@ -42,8 +42,9 @@ export const TodayActivity = ({ departures, returns, className }: TodayActivityP
         icon={ArrowUpRight}
         accent="success"
         reservations={departures}
+        reservationSource="home_departure"
         emptyMessage={t("activity.noDepartures")}
-        viewAllHref="/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=departure&status=confirmed&statuses=confirmed"
+        viewAllHref="/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=departure&status=confirmed&statuses=confirmed&source=home_departure"
         prefetchCalendar
       />
       <ActivityCard
@@ -52,8 +53,9 @@ export const TodayActivity = ({ departures, returns, className }: TodayActivityP
         icon={ArrowDownRight}
         accent="progress"
         reservations={returns}
+        reservationSource="home_return"
         emptyMessage={t("activity.noReturns")}
-        viewAllHref="/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=return&status=ongoing&statuses=ongoing"
+        viewAllHref="/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=return&status=ongoing&statuses=ongoing&source=home_return"
         prefetchCalendar
       />
     </div>

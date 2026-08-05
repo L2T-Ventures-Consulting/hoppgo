@@ -14,6 +14,7 @@ import { ActivityListItem } from "./activity-list-item";
 import type { DashboardAccent } from "@/components/dashboard/shared/dashboard-accent";
 import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
+import type { ReservationAnalyticsSource } from "@/lib/product-analytics/reservation-analytics";
 import type { HomeReservation } from "./home-types";
 import { ReservationCalendarPrefetchBoundary } from "./reservation-calendar-prefetch-boundary";
 
@@ -29,6 +30,7 @@ interface ActivityCardProps {
   showPeriod?: boolean;
   showAmount?: boolean;
   className?: string;
+  reservationSource: ReservationAnalyticsSource;
 }
 
 /** A list of reservations (departures, returns, pending requests). */
@@ -44,6 +46,7 @@ export const ActivityCard = ({
   showPeriod = false,
   showAmount = false,
   className,
+  reservationSource,
 }: ActivityCardProps) => {
   const t = useTranslations("dashboard.home");
   const viewAllAction = (
@@ -81,6 +84,7 @@ export const ActivityCard = ({
               accent={accent}
               showPeriod={showPeriod}
               showAmount={showAmount}
+              source={reservationSource}
             />
           ))}
         </div>

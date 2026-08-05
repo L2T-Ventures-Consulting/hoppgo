@@ -8,6 +8,10 @@ export const productAnalyticsEvents = {
   dashboardReservationOverbookingConfirmed:
     'dashboard_reservation_overbooking_confirmed',
   dashboardReservationCreationFailed: 'dashboard_reservation_creation_failed',
+  reservationViewed: 'reservation_viewed',
+  reservationActionStarted: 'reservation_action_started',
+  reservationActionSucceeded: 'reservation_action_succeeded',
+  reservationActionFailed: 'reservation_action_failed',
   keyboardShortcutTriggered: 'keyboard_shortcut_triggered',
   keyboardShortcutSettingsUpdated: 'keyboard_shortcut_settings_updated',
   checkoutReservationCreated: 'checkout_reservation_created',
@@ -54,6 +58,44 @@ export const dashboardReservationAnalyticsBaseProperties = {
   feature: 'reservation_creation',
   surface: 'dashboard',
 } as const;
+
+export const reservationManagementAnalyticsBaseProperties = {
+  ...productAnalyticsBaseProperties,
+  feature: 'reservation_management',
+  surface: 'dashboard',
+} as const;
+
+export const reservationAnalyticsActions = {
+  acceptRequest: 'accept_request',
+  rejectRequest: 'reject_request',
+  cancelReservation: 'cancel_reservation',
+  markPickedUp: 'mark_picked_up',
+  confirmReturn: 'confirm_return',
+  editReservation: 'edit_reservation',
+  updateNotes: 'update_notes',
+  sendEmail: 'send_email',
+  downloadContract: 'download_contract',
+  printReservation: 'print_reservation',
+  copyAccessLink: 'copy_access_link',
+  viewAsCustomer: 'view_as_customer',
+  requestPayment: 'request_payment',
+  recordPayment: 'record_payment',
+  deletePayment: 'delete_payment',
+  returnDeposit: 'return_deposit',
+  recordDamage: 'record_damage',
+  createDepositHold: 'create_deposit_hold',
+  captureDepositHold: 'capture_deposit_hold',
+  releaseDepositHold: 'release_deposit_hold',
+  startDepartureInspection: 'start_departure_inspection',
+  completeDepartureInspection: 'complete_departure_inspection',
+  signDepartureInspection: 'sign_departure_inspection',
+  startReturnInspection: 'start_return_inspection',
+  completeReturnInspection: 'complete_return_inspection',
+  signReturnInspection: 'sign_return_inspection',
+} as const;
+
+export type ReservationAnalyticsAction =
+  (typeof reservationAnalyticsActions)[keyof typeof reservationAnalyticsActions];
 
 export const keyboardShortcutAnalyticsBaseProperties = {
   ...productAnalyticsBaseProperties,

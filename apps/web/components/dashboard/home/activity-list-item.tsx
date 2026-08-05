@@ -11,6 +11,10 @@ import {
   type DashboardAccent,
 } from "@/components/dashboard/shared/dashboard-accent";
 import { DashboardListRow } from "@/components/dashboard/shared/dashboard-list-row";
+import {
+  getReservationDetailHref,
+  type ReservationAnalyticsSource,
+} from "@/lib/product-analytics/reservation-analytics";
 import type { HomeReservation } from "./home-types";
 import { getCustomerInitials, summarizeProducts } from "./home-utils";
 
@@ -21,6 +25,7 @@ interface ActivityListItemProps {
   /** Show the rental period instead of the product names. */
   showPeriod?: boolean;
   showAmount?: boolean;
+  source: ReservationAnalyticsSource;
 }
 
 export const ActivityListItem = ({
@@ -28,12 +33,13 @@ export const ActivityListItem = ({
   accent,
   showPeriod = false,
   showAmount = false,
+  source,
 }: ActivityListItemProps) => {
   const { names, remainingCount } = summarizeProducts(reservation);
 
   return (
     <DashboardListRow
-      href={`/dashboard/reservations/${reservation.id}`}
+      href={getReservationDetailHref(reservation.id, source)}
       leading={
         <span
           aria-hidden="true"
