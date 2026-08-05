@@ -7,19 +7,19 @@ import { cn } from "@louez/utils";
 const PreviewCard = PreviewCardPrimitive.Root;
 
 function PreviewCardTrigger({ ...props }: PreviewCardPrimitive.Trigger.Props) {
-  return (
-    <PreviewCardPrimitive.Trigger data-slot="preview-card-trigger" {...props} />
-  );
+  return <PreviewCardPrimitive.Trigger data-slot="preview-card-trigger" {...props} />;
 }
 
 function PreviewCardPopup({
   className,
   children,
   align = "center",
+  side,
   sideOffset = 4,
   ...props
 }: PreviewCardPrimitive.Popup.Props & {
   align?: PreviewCardPrimitive.Positioner.Props["align"];
+  side?: PreviewCardPrimitive.Positioner.Props["side"];
   sideOffset?: PreviewCardPrimitive.Positioner.Props["sideOffset"];
 }) {
   return (
@@ -28,6 +28,7 @@ function PreviewCardPopup({
         align={align}
         className="z-50"
         data-slot="preview-card-positioner"
+        side={side}
         sideOffset={sideOffset}
       >
         <PreviewCardPrimitive.Popup

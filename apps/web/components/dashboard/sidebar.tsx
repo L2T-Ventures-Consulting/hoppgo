@@ -17,6 +17,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
   Logo,
+  PreviewCard,
+  PreviewCardPopup,
+  PreviewCardTrigger,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -36,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
   Sidebar as UISidebar,
+  useSidebar,
 } from "@louez/ui";
 import {
   AccentSparklesIcon,
@@ -207,18 +211,55 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
   // the sidebar would answer "where am I".
   const openSection =
     active && (item.items?.some((sub) => isNavigationItemActive(pathname, sub.href)) ?? false);
+  const { state, isMobile } = useSidebar();
+  // The mobile sheet is never "collapsed" — it just isn't a rail.
+  const collapsedToRail = state === "collapsed" && !isMobile;
+
+  const button = (
+    <SidebarMenuButton
+      render={<SidebarLink href={item.href} />}
+      isActive={active && !openSection}
+      /* A section swaps its tooltip for the flyout below, which names it and
+         lists it in one surface — two hover popups on one icon would race. */
+      tooltip={item.items?.length ? undefined : t(item.key)}
+      className={cn(openSection && "text-sidebar-accent-foreground")}
+    >
+      <item.icon />
+      <span>{t(item.key)}</span>
+    </SidebarMenuButton>
+  );
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        render={<SidebarLink href={item.href} />}
-        isActive={active && !openSection}
-        tooltip={t(item.key)}
-        className={cn(openSection && "text-sidebar-accent-foreground")}
-      >
-        <item.icon />
-        <span>{t(item.key)}</span>
-      </SidebarMenuButton>
+      {item.items?.length && collapsedToRail ? (
+        /* The rail hides the sub-entries, which would leave every page but the
+           first one of a section unreachable. The flyout is the rail's version
+           of the expanded tree: it names the section and lists it. */
+        <PreviewCard>
+          {/* A preview card waits ~600ms by default — right for a link
+              preview, far too slow for a navigation rail. */}
+          <PreviewCardTrigger delay={80} closeDelay={120} render={button} />
+          <PreviewCardPopup side="right" align="start" sideOffset={8} className="w-48 p-1">
+            <div className="flex w-full min-w-0 flex-col gap-1">
+              <span className="text-muted-foreground px-2 py-1.5 text-xs font-medium">
+                {t(item.key)}
+              </span>
+              {item.items.map((subItem) => (
+                <SidebarLink
+                  key={subItem.href}
+                  href={subItem.href}
+                  data-active={isNavigationItemActive(pathname, subItem.href) || undefined}
+                  className="text-foreground/70 hover:bg-accent data-active:bg-accent data-active:text-foreground flex h-8 items-center rounded-md px-2 text-[13px] transition-colors data-active:font-medium"
+                >
+                  {t(subItem.key)}
+                </SidebarLink>
+              ))}
+            </div>
+          </PreviewCardPopup>
+        </PreviewCard>
+      ) : (
+        button
+      )}
       {item.badgeCount != null ? (
         /* The vertical offset has to be restated under the same
            `peer-data-[size]` variant as the default it replaces, otherwise the
