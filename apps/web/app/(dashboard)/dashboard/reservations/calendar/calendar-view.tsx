@@ -42,6 +42,7 @@ import {
   type CalendarRange,
   matchesTodayOperation,
   parseCalendarDateParam,
+  persistCalendarDateInHistory,
 } from "./calendar-query";
 import { TimelineToolbar, useTimelineFilters } from "./timeline-toolbar";
 import type { Product, Reservation } from "./types";
@@ -565,7 +566,7 @@ export function ReservationsCalendarView({
     element.scrollBy({ left: event.deltaX, top: event.deltaY });
   };
 
-  const goToDate = (date: Date) => {
+  const goToDate = (date: Date, behavior: ScrollBehavior = "smooth") => {
     const element = scrollerRef.current;
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
@@ -574,36 +575,38 @@ export function ReservationsCalendarView({
 
     if (element && targetIndex >= 0 && targetIndex < daysCount) {
       const target = (targetIndex + 0.5) * dayWidth - element.clientWidth / 2;
-      element.scrollTo({ left: Math.max(0, target), behavior: "smooth" });
+      const left = Math.max(0, target);
+      if (behavior === "auto") {
+        element.scrollLeft = left;
+        updateVisibleViewport(element);
+      } else {
+        element.scrollTo({ left, behavior });
+      }
       return;
     }
 
     // The chosen date fell outside the loaded window — reset around it.
+    pendingPrependRef.current = 0;
+    appendLockRef.current = false;
     didInitialScrollRef.current = false;
     const initialWindow = reservationCalendarQueries.initialWindow(targetDate);
     setWindowStart(initialWindow.start);
     setDaysCount(initialWindow.daysCount);
   };
 
-  const goToToday = () => goToDate(new Date());
+  const goToToday = () => goToDate(new Date(), "auto");
 
   // Browser/Next scroll restoration can run after layout effects on a cached
-  // navigation. Home KPI links use the relative `date=today` anchor so one
-  // post-paint pass can win over an older horizontal scroll position.
+  // navigation. Re-apply any URL anchor after paint so it wins over an older
+  // horizontal scroll position restored by the browser.
   useEffect(() => {
-    if (dateParam !== "today") return;
+    const targetDate = parseCalendarDateParam(dateParam ?? undefined);
+    if (!targetDate) return;
 
     let finalFrame = 0;
     const initialFrame = requestAnimationFrame(() => {
       finalFrame = requestAnimationFrame(() => {
-        const element = scrollerRef.current;
-        if (!element) return;
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        anchorDateRef.current = today;
-        didInitialScrollRef.current = false;
-        centerInitialAnchorDate(element);
+        goToDate(targetDate, "auto");
       });
     });
 
@@ -613,6 +616,10 @@ export function ReservationsCalendarView({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateParam]);
+
+  const persistVisibleDate = () => {
+    persistCalendarDateInHistory(visibleDate);
+  };
 
   // ---------------------------------------------------------------------------
   // Drag-to-create (mouse only — touch keeps native scrolling)
@@ -858,6 +865,7 @@ export function ReservationsCalendarView({
                       key={item.reservation.id}
                       reservation={item.reservation}
                       currency={currency}
+                      onBeforeNavigate={persistVisibleDate}
                       isLabelSticky
                       continuesBeforeViewport={item.startIndex < visibleDayRange.startIndex}
                       style={{

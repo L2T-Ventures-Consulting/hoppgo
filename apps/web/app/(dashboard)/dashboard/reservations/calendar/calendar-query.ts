@@ -75,6 +75,19 @@ export function toCalendarDateParam(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
+export function persistCalendarDateInHistory(
+  date: Date,
+  browserLocation: Pick<Location, "pathname" | "search" | "hash"> = window.location,
+  browserHistory: Pick<History, "state" | "replaceState"> = window.history,
+): void {
+  const params = new URLSearchParams(browserLocation.search);
+  params.set("date", toCalendarDateParam(date));
+
+  const search = params.toString();
+  const nextUrl = `${browserLocation.pathname}${search ? `?${search}` : ""}${browserLocation.hash}`;
+  browserHistory.replaceState(browserHistory.state, "", nextUrl);
+}
+
 export function parseCalendarDateParam(value: string | undefined): Date | null {
   if (value === "today") {
     const today = new Date();

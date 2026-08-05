@@ -89,6 +89,8 @@ export function getStatusDotClass(status: string | null): string {
 interface TimelineReservationBarProps {
   reservation: TimelineReservation;
   currency: string;
+  /** Persists the timeline viewport before navigating to reservation details. */
+  onBeforeNavigate?: () => void;
   /** Flags an overbooked placement (no free unit lane was available) */
   isConflict?: boolean;
   /** Keeps the label visible while its reservation intersects the horizontal viewport */
@@ -107,6 +109,7 @@ interface TimelineReservationBarProps {
 export function TimelineReservationBar({
   reservation,
   currency,
+  onBeforeNavigate,
   isConflict = false,
   isLabelSticky = false,
   stickyLabelOffset = 0,
@@ -163,6 +166,7 @@ export function TimelineReservationBar({
           render={
             <Link
               href={reservationHref}
+              onClick={onBeforeNavigate}
               className={cn(barClassName, "hidden md:block")}
               style={style}
             />
@@ -237,7 +241,10 @@ export function TimelineReservationBar({
             <TimelineReservationDetails reservation={reservation} currency={currency} />
           </DrawerPanel>
           <DrawerFooter>
-            <Button className="w-full" render={<Link href={reservationHref} />}>
+            <Button
+              className="w-full"
+              render={<Link href={reservationHref} onClick={onBeforeNavigate} />}
+            >
               {t("viewReservation")}
             </Button>
           </DrawerFooter>
