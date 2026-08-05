@@ -24,6 +24,10 @@ interface AdaptiveStatsProps {
 
 /** Two columns on phones, one row of four from `lg` — same rhythm everywhere. */
 const GRID_CLASS_NAME = "grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4";
+const TODAY_DEPARTURES_HREF =
+  "/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=departure&status=confirmed&statuses=confirmed";
+const TODAY_RETURNS_HREF =
+  "/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=return&status=ongoing&statuses=ongoing";
 
 export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
   const t = useTranslations("dashboard.home");
@@ -58,23 +62,23 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
   if (storeState === "starting") {
     return (
       <div className={GRID_CLASS_NAME}>
-        <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed">
+        <ReservationCalendarPrefetchBoundary href={TODAY_DEPARTURES_HREF}>
           <DashboardStatCard
             title={t("stats.todaysDepartures")}
             value={metrics.todaysDepartures}
             icon={ArrowUpRight}
             accent="success"
-            href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
+            href={TODAY_DEPARTURES_HREF}
             subtitle={t("stats.toDeliver")}
           />
         </ReservationCalendarPrefetchBoundary>
-        <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing">
+        <ReservationCalendarPrefetchBoundary href={TODAY_RETURNS_HREF}>
           <DashboardStatCard
             title={t("stats.todaysReturns")}
             value={metrics.todaysReturns}
             icon={ArrowDownRight}
             accent="progress"
-            href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
+            href={TODAY_RETURNS_HREF}
             subtitle={t("stats.toRecover")}
           />
         </ReservationCalendarPrefetchBoundary>
@@ -102,23 +106,23 @@ export const AdaptiveStats = ({ metrics, storeState }: AdaptiveStatsProps) => {
 
   return (
     <div className={GRID_CLASS_NAME}>
-      <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed">
+      <ReservationCalendarPrefetchBoundary href={TODAY_DEPARTURES_HREF}>
         <DashboardStatCard
           title={t("stats.todaysDepartures")}
           value={metrics.todaysDepartures}
           icon={ArrowUpRight}
           accent="success"
-          href="/dashboard/reservations?view=calendar&period=today&operation=departure&statuses=confirmed"
+          href={TODAY_DEPARTURES_HREF}
           subtitle={t("stats.toDeliver")}
         />
       </ReservationCalendarPrefetchBoundary>
-      <ReservationCalendarPrefetchBoundary href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing">
+      <ReservationCalendarPrefetchBoundary href={TODAY_RETURNS_HREF}>
         <DashboardStatCard
           title={t("stats.todaysReturns")}
           value={metrics.todaysReturns}
           icon={ArrowDownRight}
           accent="progress"
-          href="/dashboard/reservations?view=calendar&period=today&operation=return&statuses=ongoing"
+          href={TODAY_RETURNS_HREF}
           subtitle={t("stats.toRecover")}
         />
       </ReservationCalendarPrefetchBoundary>

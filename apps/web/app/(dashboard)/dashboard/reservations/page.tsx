@@ -53,6 +53,8 @@ interface ReservationsPageProps {
     date?: string;
     range?: string;
     productId?: string;
+    statuses?: string;
+    restorePreferredView?: string;
   }>;
 }
 
@@ -97,9 +99,12 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
   if (!store) return null;
 
   const params = await searchParams;
+  const shouldRestorePreferredView = !params.view && params.restorePreferredView === "true";
 
-  // A bare reservations URL opens the calendar. Explicit view links win, while
-  // list-specific deep links from alerts and searches keep opening the list.
+  // A bare reservations URL starts on the calendar until the client restores
+  // the store's preferred view. Home activity links can explicitly request the
+  // same restoration with filters, while other list-specific deep links keep
+  // opening the list. An explicit view always wins.
   const hasListParams = Boolean(
     params.status ||
     params.period ||
@@ -113,7 +118,7 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
   );
   const view = params.view
     ? parseReservationView(params.view)
-    : hasListParams
+    : hasListParams && !shouldRestorePreferredView
       ? "list"
       : "calendar";
 
@@ -159,6 +164,7 @@ export default async function ReservationsPage({ searchParams }: ReservationsPag
     <Suspense fallback={<ReservationsTableSkeleton />}>
       <ReservationsPageContent
         view={view}
+        restorePreferredView={!params.view && (!hasListParams || shouldRestorePreferredView)}
         currentStatus={status}
         currentPeriod={period}
         initialData={initialData}

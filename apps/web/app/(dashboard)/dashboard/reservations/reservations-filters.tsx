@@ -178,8 +178,12 @@ export const ReservationsFilters = ({
     <div className="space-y-4">
       {/* Row 1: Status filter — underlined tabs, so it reads as "narrow the
           data" next to the segmented view switcher above it */}
-      <div className="overflow-x-auto">
-        <Tabs value={currentStatus} onValueChange={(value) => handleStatusChange(value as string)}>
+      <div className="h-[45px] overflow-x-auto sm:h-[41px]">
+        <Tabs
+          className="w-max"
+          value={currentStatus}
+          onValueChange={(value) => handleStatusChange(value as string)}
+        >
           <TabsList variant="underline">
             {STATUS_KEYS.map((key) => {
               const count = getCount(key);

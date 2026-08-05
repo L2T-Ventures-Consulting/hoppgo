@@ -21,8 +21,8 @@ interface ReservationsViewSwitcherProps {
 
 /**
  * Segmented control to switch between the list, calendar and planning views
- * of the reservations page. The view is stored in the `view` URL param
- * (absent = calendar).
+ * of the reservations page. The view is reflected in the URL and remembered
+ * per store for future visits without an explicit view.
  *
  * Segmented (`Tabs` default variant) reads as "same data, another layout",
  * as opposed to the underlined status filter below it, which narrows the data.

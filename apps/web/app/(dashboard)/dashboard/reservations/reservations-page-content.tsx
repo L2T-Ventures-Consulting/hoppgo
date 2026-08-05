@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -46,6 +46,7 @@ import type {
 
 interface ReservationsPageContentProps {
   view: ReservationView;
+  restorePreferredView: boolean;
   currentStatus?: string;
   currentPeriod?: string;
   initialData?: {
@@ -66,6 +67,7 @@ interface ReservationsPageContentProps {
 
 export function ReservationsPageContent({
   view,
+  restorePreferredView,
   currentStatus,
   currentPeriod,
   initialData,
@@ -98,6 +100,29 @@ export function ReservationsPageContent({
     },
   );
 
+  useEffect(() => {
+    if (!restorePreferredView || searchParams.has("view")) return;
+
+    let preferredView: ReservationView | undefined;
+    try {
+      const storedView = window.localStorage.getItem(`louez:reservations-view:v1:${storeId}`);
+      preferredView = RESERVATION_VIEWS.find((candidate) => candidate === storedView);
+    } catch {
+      return;
+    }
+
+    if (!preferredView || preferredView === activeView) return;
+
+    if (preferredView !== "list") {
+      setMountedTimelineViews((mountedViews) => {
+        if (mountedViews.has(preferredView)) return mountedViews;
+        return new Set(mountedViews).add(preferredView);
+      });
+    }
+
+    void setReservationViewState({ view: preferredView, page: null }, { history: "replace" });
+  }, [activeView, restorePreferredView, searchParams, setReservationViewState, storeId]);
+
   // Read URL params
   const status = searchParams.get("status") || currentStatus || undefined;
   const period = searchParams.get("period") || currentPeriod || undefined;
@@ -127,6 +152,13 @@ export function ReservationsPageContent({
   const handleViewChange = useCallback(
     (nextView: ReservationView) => {
       if (nextView === activeView) return;
+
+      try {
+        window.localStorage.setItem(`louez:reservations-view:v1:${storeId}`, nextView);
+      } catch {
+        // URL state remains the source of truth when browser storage is unavailable.
+      }
+
       if (nextView !== "list") {
         setMountedTimelineViews((mountedViews) => {
           if (mountedViews.has(nextView)) return mountedViews;
@@ -135,7 +167,7 @@ export function ReservationsPageContent({
       }
       void setReservationViewState({ view: nextView, page: null });
     },
-    [activeView, setReservationViewState],
+    [activeView, setReservationViewState, storeId],
   );
 
   // Actions hook
@@ -292,7 +324,7 @@ export function ReservationsPageContent({
           <p className="text-muted-foreground">{t("description")}</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
           <ReservationsViewSwitcher view={activeView} onViewChange={handleViewChange} />
           {/* Pushes the actions to the far edge once the title is gone */}
           <div className="flex-1 sm:hidden" />
