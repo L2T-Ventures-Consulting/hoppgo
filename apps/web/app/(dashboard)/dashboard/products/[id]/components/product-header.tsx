@@ -74,8 +74,8 @@ export function ProductHeader({ product, storeSlug }: ProductHeaderProps) {
 
   return (
     <>
-      <div className="flex flex-col gap-4 pb-6 border-b sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3">
+      <div className="flex flex-col gap-3 pb-4 border-b sm:flex-row sm:items-start sm:justify-between sm:gap-4 sm:pb-6">
+        <div className="flex min-w-0 items-start gap-2 sm:gap-3">
           <Button
             render={<Link href="/dashboard/products" />}
             variant="ghost"
@@ -90,28 +90,27 @@ export function ProductHeader({ product, storeSlug }: ProductHeaderProps) {
             src={image}
             alt={product.name}
             sizes="56px"
-            containerClassName="aspect-square h-14 w-14 shrink-0"
+            containerClassName="aspect-square size-11 shrink-0 sm:size-14"
           />
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold tracking-tight">{product.name}</h1>
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <h1 className="text-lg font-bold tracking-tight wrap-break-word sm:text-2xl">
+              {product.name}
+            </h1>
+            <div className="flex flex-wrap items-center gap-1.5">
               <Badge variant={STATUS_VARIANTS[status]}>{t(`status.${status}`)}</Badge>
+              {product.categories.map((category) => (
+                <Badge key={category.id} variant="expired" className="font-normal">
+                  {category.name}
+                </Badge>
+              ))}
             </div>
-            {product.categories.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {product.categories.map((category) => (
-                  <Badge key={category.id} variant="expired" className="font-normal">
-                    {category.name}
-                  </Badge>
-                ))}
-              </div>
-            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 sm:shrink-0">
           <Button
+            className="flex-1 sm:flex-none"
             render={<Link href={`/dashboard/products/${product.id}/edit`} />}
           >
             <Pencil className="h-4 w-4 mr-2" />

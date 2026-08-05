@@ -51,6 +51,7 @@ import { cn } from "@louez/utils";
 
 import { ProductImage } from "@/components/product/product-image";
 
+import { TimelineFilterBadge } from "@/components/dashboard/reservations-timeline/timeline-filter-badge";
 import { getStatusDotClass } from "@/components/dashboard/reservations-timeline/timeline-reservation-bar";
 
 import {
@@ -509,17 +510,6 @@ function RangeSelect({
   );
 }
 
-/** `null` hides the badge; `0` is a real value ("no status shown"). */
-function ActiveFilterBadge({ count }: { count: number | null }) {
-  if (count === null) return null;
-
-  return (
-    <span className="bg-primary text-primary-foreground absolute -top-1 -end-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold sm:top-0 sm:end-0">
-      {count}
-    </span>
-  );
-}
-
 // =============================================================================
 // Mobile filter drawer — the four controls don't fit on a phone toolbar, and a
 // horizontal scroller hid half of them. One trigger, everything visible inside.
@@ -543,7 +533,7 @@ function TimelineFiltersDrawer({
         render={<Button variant="outline" size="icon" aria-label={tTimeline("filters")} />}
       >
         <ListFilter />
-        <ActiveFilterBadge count={filters.activeFilterCount || null} />
+        <TimelineFilterBadge count={filters.activeFilterCount || null} />
       </DrawerTrigger>
       <DrawerPopup>
         <DrawerHeader>
@@ -700,7 +690,7 @@ export function TimelineToolbar({
               }
             >
               <ListFilter />
-              <ActiveFilterBadge count={visibleStatusBadgeCount(filters.hiddenStatuses)} />
+              <TimelineFilterBadge count={visibleStatusBadgeCount(filters.hiddenStatuses)} />
             </PopoverTrigger>
             <PopoverContent align="end" className="w-52">
               <StatusFilterList filters={filters} />

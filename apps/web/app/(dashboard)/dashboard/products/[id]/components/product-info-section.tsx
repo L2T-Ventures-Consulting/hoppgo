@@ -88,7 +88,7 @@ export async function ProductInfoSection({
         <div>
           {product.description ? (
             <div
-              className="prose prose-sm dark:prose-invert prose-headings:text-foreground prose-a:text-primary prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-h1:text-xl prose-h2:text-lg prose-h3:text-base max-w-none text-sm text-muted-foreground break-words [&_a]:break-all [&_*]:min-w-0"
+              className="prose prose-sm dark:prose-invert prose-headings:text-foreground prose-a:text-primary prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-0 prose-h1:text-xl prose-h2:text-lg prose-h3:text-base max-w-none text-sm text-muted-foreground wrap-break-word [&_a]:break-all **:min-w-0"
               dangerouslySetInnerHTML={{
                 __html: sanitizeProductDescriptionHtml(product.description),
               }}
@@ -151,9 +151,9 @@ export async function ProductInfoSection({
                 {product.seasonalPricings.map((season) => (
                   <li
                     key={season.id}
-                    className="flex items-center justify-between gap-2"
+                    className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5"
                   >
-                    <span>
+                    <span className="min-w-0">
                       {season.name} · {formatDate(season.startDate)} –{' '}
                       {formatDate(season.endDate)}
                     </span>

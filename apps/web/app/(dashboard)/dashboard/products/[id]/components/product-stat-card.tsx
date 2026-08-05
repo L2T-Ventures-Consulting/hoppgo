@@ -36,19 +36,21 @@ export function ProductStatCard({
 
   return (
     <Card>
-      <CardContent className="p-4">
+      <CardContent className="p-3 sm:p-4">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="min-w-0 text-xs font-medium text-muted-foreground sm:text-sm">{title}</p>
           {Icon && <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />}
         </div>
-        <p className="mt-1 text-2xl font-bold tracking-tight">{value}</p>
+        <p className="mt-1 text-xl font-bold tracking-tight wrap-break-word sm:text-2xl">
+          {value}
+        </p>
 
         {subtitle && !trend && (
           <p className="mt-1 text-xs text-muted-foreground">{subtitle}</p>
         )}
 
         {trend && (
-          <div className="mt-2 flex items-center gap-1.5">
+          <div className="mt-2 flex flex-wrap items-center gap-x-1.5 gap-y-1">
             <div
               className={cn(
                 'flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-xs font-medium',
@@ -59,9 +61,9 @@ export function ProductStatCard({
                 isNeutral && 'bg-muted text-muted-foreground',
               )}
             >
-              {isPositive && <ArrowUpRight className="h-3 w-3" />}
-              {isNegative && <ArrowDownRight className="h-3 w-3" />}
-              {isNeutral && <Minus className="h-3 w-3" />}
+              {isPositive && <ArrowUpRight className="h-3 w-3 shrink-0" />}
+              {isNegative && <ArrowDownRight className="h-3 w-3 shrink-0" />}
+              {isNeutral && <Minus className="h-3 w-3 shrink-0" />}
               <span>
                 {isNeutral
                   ? '0'

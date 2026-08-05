@@ -138,7 +138,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <DashboardBreadcrumbLabel label={product.name} />
 
       <ProductHeader
@@ -152,8 +152,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
         storeSlug={store.slug}
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
+      {/* `min-w-0` on both columns: the timeline and the unit table are wider
+          than a phone viewport, and grid items default to `min-width: auto` —
+          without it their min-content pushes the whole page past the viewport
+          instead of scrolling inside their own container. */}
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="min-w-0 space-y-4 sm:space-y-6 lg:col-span-2">
           <ProductStatsSection
             revenueStats={revenueStats}
             reservationCounts={reservationCounts}
@@ -186,7 +190,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
           <ProductInfoSection product={product} currency={currency} />
         </div>
 
-        <div className="space-y-6">
+        <div className="min-w-0 space-y-4 sm:space-y-6">
           <ProductQuickFacts product={product} currency={currency} />
 
           {product.trackUnits && (
