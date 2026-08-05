@@ -214,7 +214,7 @@ function DrawerPopup({
             <DrawerPrimitive.Close
               aria-label="Close"
               className="absolute end-2 top-2"
-              render={<Button size="icon" variant="ghost" />}
+              render={<Button className="max-sm:size-11" size="icon" variant="ghost" />}
             >
               <XIcon />
             </DrawerPrimitive.Close>
@@ -248,11 +248,11 @@ function DrawerFooter({
   return (
     <div
       className={cn(
-        'flex flex-col-reverse gap-2 px-6 sm:flex-row sm:justify-end',
+        'flex flex-col-reverse gap-2 px-4 max-sm:[&_[data-slot=button]]:min-h-12 max-sm:[&_[data-slot=button]]:min-w-12 sm:flex-row sm:justify-end sm:px-6',
         variant === 'default' &&
-          'border-t bg-muted/72 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]',
+          'border-t bg-muted/72 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(3))] sm:pt-4 sm:pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]',
         variant === 'bare' &&
-          'in-[[data-slot=drawer-popup]:has([data-slot=drawer-panel])]:pt-3 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(6))]',
+          'in-[[data-slot=drawer-popup]:has([data-slot=drawer-panel])]:pt-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))] sm:pt-4 sm:pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(6))]',
         className,
       )}
       data-slot="drawer-footer"

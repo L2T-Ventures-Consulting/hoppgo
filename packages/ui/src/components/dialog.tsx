@@ -237,7 +237,7 @@ const DialogPopup = ({
             <DialogPrimitive.Close
               aria-label="Close"
               className="absolute end-2 top-2"
-              render={<Button size="icon" variant="ghost" />}
+              render={<Button className="max-sm:size-11" size="icon" variant="ghost" />}
             >
               <XIcon />
             </DialogPrimitive.Close>
@@ -271,15 +271,15 @@ const DialogFooter = ({
   return (
     <div
       className={cn(
-        "flex flex-col-reverse gap-2 px-6 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)]",
+        "flex flex-col-reverse gap-2 px-4 max-sm:[&_[data-slot=button]]:min-h-12 max-sm:[&_[data-slot=button]]:min-w-12 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)] sm:px-6",
         variant === "default" &&
           (mode === "drawer"
-            ? "border-t bg-muted/72 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]"
+            ? "border-t bg-muted/72 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(3))]"
             : "border-t bg-muted/72 py-3"),
         variant === "bare" &&
           (mode === "drawer"
-            ? "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-4 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(6))]"
-            : "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-4 pb-6"),
+            ? "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]"
+            : "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-3 pb-4 sm:pt-4 sm:pb-6"),
         className,
       )}
       data-slot="dialog-footer"

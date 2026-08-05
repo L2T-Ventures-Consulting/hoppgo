@@ -95,7 +95,7 @@ function SheetPopup({
             <SheetPrimitive.Close
               aria-label="Close"
               className="absolute end-2 top-2"
-              render={<Button size="icon" variant="ghost" />}
+              render={<Button className="max-sm:size-11" size="icon" variant="ghost" />}
             >
               <XIcon />
             </SheetPrimitive.Close>
@@ -129,10 +129,11 @@ function SheetFooter({
   return (
     <div
       className={cn(
-        "flex flex-col-reverse gap-2 px-6 sm:flex-row sm:justify-end",
-        variant === "default" && "border-t bg-muted/72 py-4",
+        "flex flex-col-reverse gap-2 px-4 max-sm:[&_[data-slot=button]]:min-h-12 max-sm:[&_[data-slot=button]]:min-w-12 sm:flex-row sm:justify-end sm:px-6",
+        variant === "default" &&
+          "border-t bg-muted/72 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(3))] sm:py-4",
         variant === "bare" &&
-          "in-[[data-slot=sheet-popup]:has([data-slot=sheet-panel])]:pt-3 pt-4 pb-6",
+          "in-[[data-slot=sheet-popup]:has([data-slot=sheet-panel])]:pt-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))] sm:pt-4 sm:pb-6",
         className,
       )}
       data-slot="sheet-footer"
