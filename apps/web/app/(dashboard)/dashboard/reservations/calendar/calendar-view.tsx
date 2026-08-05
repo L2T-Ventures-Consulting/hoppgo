@@ -261,6 +261,8 @@ export function ReservationsCalendarView({
                 .filter(Boolean)
                 .join(" ") || "—"
             : "—",
+          subtotalAmount: reservation.subtotalAmount,
+          depositAmount: reservation.depositAmount,
           totalAmount: reservation.totalAmount,
           quantity: reservation.items.reduce((sum, item) => sum + item.quantity, 0),
           assignedUnitIds: [],

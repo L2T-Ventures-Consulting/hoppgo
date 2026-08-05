@@ -1,14 +1,28 @@
 "use client";
 
 import { ChevronLeft, ExternalLink, Truck, TriangleAlert } from "lucide-react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
-import { Badge, Tooltip, TooltipContent, TooltipTrigger } from "@louez/ui";
-import { cn, formatCurrency, formatDateShort, formatTime } from "@louez/utils";
+import {
+  Badge,
+  Button,
+  Drawer,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+  DrawerTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@louez/ui";
+import { cn, formatCurrency } from "@louez/utils";
 
-import { ProductImage } from "@/components/product/product-image";
-
-import type { TimelineReservation, TimelineReservationItem } from "./timeline-utils";
+import { TimelineReservationDetails } from "./timeline-reservation-details";
+import { getTimelineRentalAmount, type TimelineReservation } from "./timeline-utils";
 
 type KnownStatus =
   | "pending"
@@ -86,82 +100,9 @@ interface TimelineReservationBarProps {
   style?: React.CSSProperties;
 }
 
-function DeliveryAddressRow({ label, address }: { label: string; address: string }) {
-  return (
-    <div className="space-y-0.5">
-      <span className="text-muted-foreground/70 flex items-center gap-1">
-        <Truck className="h-3 w-3 shrink-0" />
-        {label}
-      </span>
-      <a
-        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-foreground hover:text-primary inline-flex items-start gap-1 font-medium"
-      >
-        <span>{address}</span>
-        <ExternalLink className="mt-0.5 h-3 w-3 shrink-0" />
-      </a>
-    </div>
-  );
-}
-
 /**
- * One product of the reservation. Links to the product page when the line still
- * points at a live product — custom items and deleted products stay plain text.
- */
-function TooltipProductRow({ item }: { item: TimelineReservationItem }) {
-  const content = (
-    <>
-      <ProductImage
-        src={item.imageUrl}
-        alt={item.name}
-        containerClassName="w-8 shrink-0 rounded"
-        sizes="32px"
-      />
-      <span className="text-foreground min-w-0 flex-1 truncate">{item.name}</span>
-      {item.quantity > 1 && (
-        <span className="text-muted-foreground shrink-0 font-semibold tabular-nums">
-          ×{item.quantity}
-        </span>
-      )}
-    </>
-  );
-
-  // The chevron slot is reserved on every row, so linked and plain lines keep
-  // the same name column width.
-  const rowClassName = "flex items-center gap-2 rounded-md px-1 py-0.5";
-
-  if (!item.productId) {
-    return (
-      <li className={rowClassName}>
-        {content}
-        <span aria-hidden="true" className="h-3 w-3 shrink-0" />
-      </li>
-    );
-  }
-
-  return (
-    <li>
-      <a
-        href={`/dashboard/products/${encodeURIComponent(item.productId)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(
-          rowClassName,
-          "hover:bg-accent focus-visible:ring-ring group transition-colors focus-visible:ring-2 focus-visible:outline-none",
-        )}
-      >
-        {content}
-        <ExternalLink className="text-muted-foreground h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100" />
-      </a>
-    </li>
-  );
-}
-
-/**
- * A single reservation bar on a unit lane. Opens the reservation detail in a
- * new tab so the merchant never loses their place on the product page.
+ * A single reservation bar on a unit lane. Opens the reservation detail in the
+ * current tab so the calendar follows the dashboard's usual navigation behavior.
  */
 export function TimelineReservationBar({
   reservation,
@@ -173,138 +114,135 @@ export function TimelineReservationBar({
   style,
 }: TimelineReservationBarProps) {
   const t = useTranslations("dashboard.calendar");
-  const tReservations = useTranslations("dashboard.reservations");
   const status = getTimelineStatus(reservation.status);
   const colorClass = BAR_COLORS[status] ?? BAR_COLORS.pending;
+  const reservationHref = `/dashboard/reservations/${encodeURIComponent(reservation.id)}`;
+  const rentalPrice = formatCurrency(getTimelineRentalAmount(reservation), currency);
 
   const hasDelivery = Boolean(
     reservation.outboundDeliveryAddress || reservation.returnDeliveryAddress,
   );
 
+  const barLabel = (
+    <span
+      className={cn(
+        "flex h-full w-fit max-w-full items-center gap-1 px-2",
+        isLabelSticky && "sticky",
+      )}
+      style={isLabelSticky ? { left: stickyLabelOffset } : undefined}
+    >
+      {continuesBeforeViewport && (
+        <ChevronLeft aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
+      )}
+      {isConflict && <TriangleAlert className="text-destructive h-3 w-3 shrink-0" />}
+      {hasDelivery && <Truck className="h-3 w-3 shrink-0" />}
+      <span className="truncate">{reservation.customerName}</span>
+      {reservation.quantity > 1 && (
+        <span className="shrink-0 opacity-70">×{reservation.quantity}</span>
+      )}
+      <span className="ms-auto hidden shrink-0 opacity-70 @min-[16rem]:inline">
+        · {rentalPrice}
+      </span>
+    </span>
+  );
+
+  const barClassName = cn(
+    "@container absolute z-5 overflow-hidden rounded-md text-xs font-medium transition-[filter]",
+    isLabelSticky && "overflow-clip",
+    "focus-visible:ring-ring focus-visible:z-10 focus-visible:ring-2 focus-visible:outline-none",
+    "shadow-[0_0_0.5px_0.5px_currentColor] dark:shadow-[0_0_1px_0px_currentColor]",
+    colorClass,
+    isConflict && "ring-destructive/60 ring-1 ring-inset",
+  );
+
   return (
-    <Tooltip>
-      <TooltipTrigger
-        delay={100}
-        render={
-          <a
-            href={`/dashboard/reservations/${encodeURIComponent(reservation.id)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              "absolute z-5 overflow-hidden rounded-md text-xs font-medium transition-[filter]",
-              isLabelSticky && "overflow-clip",
-              "focus-visible:ring-ring focus-visible:z-10 focus-visible:ring-2 focus-visible:outline-none ",
-              // "shadow-[0_0_1px_0px_var(--color-border)]",
-              "shadow-[0_0_0.5px_0.5px_currentColor] dark:shadow-[0_0_1px_0px_currentColor]",
-              colorClass,
-              isConflict && "ring-destructive/60 ring-1 ring-inset",
-            )}
-            style={style}
-          />
-        }
-      >
-        <span
-          className={cn(
-            "flex h-full w-fit max-w-full items-center gap-1 px-2",
-            isLabelSticky && "sticky",
-          )}
-          style={isLabelSticky ? { left: stickyLabelOffset } : undefined}
+    <>
+      <Tooltip>
+        <TooltipTrigger
+          delay={100}
+          render={
+            <Link
+              href={reservationHref}
+              className={cn(barClassName, "hidden md:block")}
+              style={style}
+            />
+          }
         >
-          {continuesBeforeViewport && (
-            <ChevronLeft aria-hidden="true" className="h-3 w-3 shrink-0 opacity-60" />
-          )}
-          {isConflict && <TriangleAlert className="text-destructive h-3 w-3 shrink-0" />}
-          {hasDelivery && <Truck className="h-3 w-3 shrink-0" />}
-          <span className="truncate">{reservation.customerName}</span>
-          {reservation.quantity > 1 && (
-            <span className="shrink-0 opacity-70">×{reservation.quantity}</span>
-          )}
-        </span>
-      </TooltipTrigger>
-      <TooltipContent side="top" className="max-w-xs">
-        <div className="min-w-52 space-y-2 p-1.5">
-          {/* Header — who, which reservation, and where it stands */}
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 space-y-0.5">
-              {reservation.customerId ? (
-                <a
-                  href={`/dashboard/customers/${encodeURIComponent(reservation.customerId)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground hover:text-primary focus-visible:ring-ring group inline-flex max-w-full items-center gap-1 rounded-sm text-sm font-semibold focus-visible:ring-2 focus-visible:outline-none"
-                >
-                  <span className="truncate">{reservation.customerName}</span>
-                  <ExternalLink className="h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
-                </a>
-              ) : (
-                <p className="truncate text-sm font-semibold">{reservation.customerName}</p>
-              )}
-              <p className="text-muted-foreground/70 flex items-center gap-1.5 text-[11px]">
-                <span className="font-mono">#{reservation.number}</span>
-                {reservation.quantity > 1 && (
-                  <span className="tabular-nums">×{reservation.quantity}</span>
+          {barLabel}
+        </TooltipTrigger>
+        <TooltipContent side="top" className="max-w-xs">
+          <div className="min-w-52 space-y-2 p-1.5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 space-y-0.5">
+                {reservation.customerId ? (
+                  <a
+                    href={`/dashboard/customers/${encodeURIComponent(reservation.customerId)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground hover:text-primary focus-visible:ring-ring group inline-flex max-w-full items-center gap-1 rounded-sm text-sm font-semibold focus-visible:ring-2 focus-visible:outline-none"
+                  >
+                    <span className="truncate">{reservation.customerName}</span>
+                    <ExternalLink className="h-3 w-3 shrink-0 opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                  </a>
+                ) : (
+                  <p className="truncate text-sm font-semibold">{reservation.customerName}</p>
                 )}
-              </p>
+                <p className="text-muted-foreground/70 flex items-center gap-1.5 text-[11px]">
+                  <span className="font-mono">#{reservation.number}</span>
+                  {reservation.quantity > 1 && (
+                    <span className="tabular-nums">×{reservation.quantity}</span>
+                  )}
+                </p>
+              </div>
+              <Badge variant={BADGE_VARIANTS[status]} className="mt-0.5 shrink-0">
+                {t(`status.${status}`)}
+              </Badge>
             </div>
-            <Badge variant={BADGE_VARIANTS[status]} className="mt-0.5 shrink-0">
-              {t(`status.${status}`)}
-            </Badge>
+            <TimelineReservationDetails reservation={reservation} currency={currency} />
           </div>
+        </TooltipContent>
+      </Tooltip>
 
-          {/* Products, in catalog order — each opens its product page */}
-          {reservation.items && reservation.items.length > 0 && (
-            <div className="border-t pt-1.5">
-              {/* Pulled out so the row hover surface reaches the tooltip edges */}
-              <ul className="-mx-1 space-y-0.5 text-xs">
-                {reservation.items.map((item) => (
-                  <TooltipProductRow key={item.productId ?? item.name} item={item} />
-                ))}
-              </ul>
+      <Drawer position="bottom">
+        <DrawerTrigger
+          render={
+            <button
+              type="button"
+              className={cn(barClassName, "text-start md:hidden")}
+              style={style}
+              onPointerDown={(event) => event.stopPropagation()}
+            />
+          }
+        >
+          {barLabel}
+        </DrawerTrigger>
+        <DrawerPopup showCloseButton>
+          <DrawerHeader>
+            <div className="flex items-start justify-between gap-3 pe-8">
+              <div className="min-w-0 space-y-1">
+                <DrawerTitle className="truncate">{reservation.customerName}</DrawerTitle>
+                <DrawerDescription className="flex items-center gap-1.5">
+                  <span className="font-mono">#{reservation.number}</span>
+                  {reservation.quantity > 1 && (
+                    <span className="tabular-nums">×{reservation.quantity}</span>
+                  )}
+                </DrawerDescription>
+              </div>
+              <Badge variant={BADGE_VARIANTS[status]} className="shrink-0">
+                {t(`status.${status}`)}
+              </Badge>
             </div>
-          )}
-
-          {/* Delivery legs */}
-          {hasDelivery && (
-            <div className="text-muted-foreground space-y-1.5 border-t pt-1.5 text-[11px]">
-              {reservation.outboundDeliveryAddress && (
-                <DeliveryAddressRow
-                  label={tReservations("deliveryAddressLabel")}
-                  address={reservation.outboundDeliveryAddress}
-                />
-              )}
-              {reservation.returnDeliveryAddress && (
-                <DeliveryAddressRow
-                  label={tReservations("returnAddressLabel")}
-                  address={reservation.returnDeliveryAddress}
-                />
-              )}
-            </div>
-          )}
-
-          <div className="text-muted-foreground space-y-1 border-t pt-1.5 text-[11px]">
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground/70">{tReservations("periodStart")}</span>
-              <span>
-                {formatDateShort(reservation.startDate)}{" "}
-                <span className="tabular-nums">{formatTime(reservation.startDate)}</span>
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-muted-foreground/70">{tReservations("periodEnd")}</span>
-              <span>
-                {formatDateShort(reservation.endDate)}{" "}
-                <span className="tabular-nums">{formatTime(reservation.endDate)}</span>
-              </span>
-            </div>
-            <div className="flex items-center justify-between gap-3 pt-0.5 font-medium">
-              <span className="text-muted-foreground/70">{tReservations("totalAmount")}</span>
-              <span className="text-foreground tabular-nums">
-                {formatCurrency(Number(reservation.totalAmount), currency)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </TooltipContent>
-    </Tooltip>
+          </DrawerHeader>
+          <DrawerPanel className="space-y-2">
+            <TimelineReservationDetails reservation={reservation} currency={currency} />
+          </DrawerPanel>
+          <DrawerFooter>
+            <Button className="w-full" render={<Link href={reservationHref} />}>
+              {t("viewReservation")}
+            </Button>
+          </DrawerFooter>
+        </DrawerPopup>
+      </Drawer>
+    </>
   );
 }

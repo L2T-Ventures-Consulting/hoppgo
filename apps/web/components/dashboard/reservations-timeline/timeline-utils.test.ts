@@ -8,6 +8,7 @@ import {
   diffInDays,
   findNearestTimelineItem,
   getMondayOf,
+  getTimelineRentalAmount,
   getTimelineNavigationBufferDirection,
   placeDowntimes,
   placeReservations,
@@ -65,6 +66,33 @@ test("getMondayOf returns the Monday of the week at midnight", () => {
   assert.equal(monday.getDay(), 1);
   assert.equal(diffInDays(WINDOW_START, monday), 0);
   assert.equal(monday.getHours(), 0);
+});
+
+test("getTimelineRentalAmount excludes deposits from legacy totals", () => {
+  assert.equal(
+    getTimelineRentalAmount({
+      subtotalAmount: "100.00",
+      depositAmount: "500.00",
+      totalAmount: "100.00",
+    }),
+    100,
+  );
+  assert.equal(
+    getTimelineRentalAmount({
+      subtotalAmount: "100.00",
+      depositAmount: "500.00",
+      totalAmount: "600.00",
+    }),
+    100,
+  );
+  assert.equal(
+    getTimelineRentalAmount({
+      subtotalAmount: "75.00",
+      depositAmount: "500.00",
+      totalAmount: "0.00",
+    }),
+    75,
+  );
 });
 
 test("timeline range helpers detect visible items and find the nearest direction", () => {

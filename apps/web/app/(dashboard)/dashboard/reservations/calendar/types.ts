@@ -47,6 +47,8 @@ export interface Reservation {
   status: ReservationStatus | null;
   startDate: Date;
   endDate: Date;
+  subtotalAmount: string;
+  depositAmount: string;
   totalAmount: string;
   customer: {
     id: string;

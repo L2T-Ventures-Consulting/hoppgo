@@ -57,6 +57,8 @@ export async function fetchStoreReservationTimeline(
         customerId: customers.id,
         customerFirstName: customers.firstName,
         customerLastName: customers.lastName,
+        subtotalAmount: reservations.subtotalAmount,
+        depositAmount: reservations.depositAmount,
         totalAmount: reservations.totalAmount,
         itemId: reservationItems.id,
         productId: reservationItems.productId,
@@ -133,6 +135,8 @@ export async function fetchStoreReservationTimeline(
         customerId: row.customerId,
         customerName:
           [row.customerFirstName, row.customerLastName].filter(Boolean).join(" ") || "—",
+        subtotalAmount: row.subtotalAmount,
+        depositAmount: row.depositAmount,
         totalAmount: row.totalAmount,
         quantity: row.quantity,
         assignedUnitIds,
