@@ -24,15 +24,8 @@ import { cn, formatCurrency } from "@louez/utils";
 
 import { formatStoreDate } from "@/lib/utils/store-date";
 
-import type { Customer, ReservationStepId } from "../types";
-
-interface DetailedDuration {
-  days: number;
-  hours: number;
-  minutes: number;
-  totalHours: number;
-  totalMinutes: number;
-}
+import { useReservationDurationLabel } from "../hooks/use-reservation-duration-label";
+import type { Customer, DetailedDuration, ReservationStepId } from "../types";
 
 export type ReservationSectionId = Exclude<ReservationStepId, "confirm">;
 
@@ -130,30 +123,31 @@ export function NewReservationSummaryPanel({
     : null;
   const customerEmail = selectedCustomer?.email;
 
-  const durationLabel = detailedDuration
-    ? [
-        detailedDuration.days > 0 && t("durationDays", { count: detailedDuration.days }),
-        detailedDuration.hours > 0 && t("durationHours", { count: detailedDuration.hours }),
-        detailedDuration.days === 0 &&
-          detailedDuration.hours === 0 &&
-          detailedDuration.minutes > 0 &&
-          `${detailedDuration.minutes} min`,
-      ]
-        .filter(Boolean)
-        .join(", ") || t("durationDays", { count: duration })
-    : t("durationDays", { count: duration });
+  const durationLabel = useReservationDurationLabel(detailedDuration, duration);
 
   const total = subtotal + tulipInsuranceAmount + deliveryFee - discountAmount;
 
   return (
     <Card>
+      {/* Below `lg` this card sheds its recap half — the confirmation sheet
+          owns that job now — and keeps only the three controls that live
+          nowhere else. Swapped in CSS rather than JS so the heading never
+          flashes the wrong wording during hydration. */}
       <CardHeader>
-        <CardTitle>{t("confirmTitle")}</CardTitle>
-        <CardDescription>{t("confirmDescription")}</CardDescription>
+        <CardTitle>
+          <span className="max-lg:hidden">{t("confirmTitle")}</span>
+          <span className="lg:hidden">{t("adjustmentsTitle")}</span>
+        </CardTitle>
+        <CardDescription>
+          <span className="max-lg:hidden">{t("confirmDescription")}</span>
+          <span className="lg:hidden">{t("adjustmentsDescription")}</span>
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
-        {/* Section completeness checklist */}
-        <div className="space-y-2.5">
+        {/* Section completeness checklist. Stacked under the whole form on a
+            phone, it arrives after you have scrolled past everything it
+            reports on — and submitting already scrolls to the first gap. */}
+        <div className="max-lg:hidden space-y-2.5">
           <div className="flex items-center justify-between">
             <Label>{t("summary")}</Label>
             <span className="text-muted-foreground text-xs tabular-nums">
@@ -180,11 +174,11 @@ export function NewReservationSummaryPanel({
           </ul>
         </div>
 
-        {(customerName || isPeriodDone) && <Separator />}
+        {(customerName || isPeriodDone) && <Separator className="max-lg:hidden" />}
 
-        {/* Customer recap */}
+        {/* Customer recap — duplicated by the confirmation sheet on a phone. */}
         {customerName && (
-          <div className="space-y-0.5">
+          <div className="max-lg:hidden space-y-0.5">
             <div className="flex items-center justify-between gap-2">
               <p className="truncate text-sm font-medium">{customerName}</p>
               {isNewCustomer && (
@@ -199,9 +193,9 @@ export function NewReservationSummaryPanel({
           </div>
         )}
 
-        {/* Period recap */}
+        {/* Period recap — duplicated by the confirmation sheet on a phone. */}
         {isPeriodDone && startDate && endDate && (
-          <div className="space-y-1 text-sm">
+          <div className="max-lg:hidden space-y-1 text-sm">
             <div className="flex justify-between gap-2">
               <span className="text-muted-foreground">{t("startDate")}</span>
               <span className="tabular-nums">
@@ -221,7 +215,8 @@ export function NewReservationSummaryPanel({
           </div>
         )}
 
-        <Separator />
+        {/* Nothing to separate from once the recap above is hidden. */}
+        <Separator className="max-lg:hidden" />
 
         {/* Totals */}
         <div className="space-y-1.5 text-sm">

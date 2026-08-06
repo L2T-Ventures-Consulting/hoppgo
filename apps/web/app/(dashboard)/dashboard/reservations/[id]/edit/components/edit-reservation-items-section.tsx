@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { PenLine } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -53,6 +55,21 @@ export function EditReservationItemsSection({
 }: EditReservationItemsSectionProps) {
   const t = useTranslations("dashboard.reservations");
   const tForm = useTranslations("dashboard.reservations.manualForm");
+  const tCommon = useTranslations("common");
+
+  // What the add sheet echoes back per row, so a tap has a visible answer even
+  // though the item cards it updates sit behind the sheet on mobile.
+  const selectedQuantityByProduct = useMemo(() => {
+    const map = new Map<string, number>();
+
+    for (const item of calculations.items) {
+      if (!item.productId) continue;
+
+      map.set(item.productId, (map.get(item.productId) ?? 0) + item.quantity);
+    }
+
+    return map;
+  }, [calculations.items]);
 
   return (
     <Card>
@@ -82,6 +99,8 @@ export function EditReservationItemsSection({
                 emptyLabel={t("edit.noProductsFound")}
                 unavailableLabel={t("edit.unavailableForPeriod")}
                 availableLabel={tForm("available")}
+                doneLabel={tCommon("done")}
+                selectedQuantityByProduct={selectedQuantityByProduct}
                 className="min-w-0 flex-1"
               />
             )}

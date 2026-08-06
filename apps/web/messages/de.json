@@ -24,6 +24,7 @@
     "error": "Fehler",
     "success": "Erfolg",
     "confirm": "Bestätigen",
+    "done": "Fertig",
     "close": "Schließen",
     "play": "Abspielen",
     "pause": "Pause",
@@ -1880,6 +1881,17 @@
         "selectCustomerError": "Bitte wählen Sie einen Kunden aus",
         "confirmTitle": "Zusammenfassung",
         "confirmDescription": "Überprüfen Sie die Informationen vor dem Erstellen der Reservierung",
+        "confirmDrawer": {
+          "title": "Reservierung bestätigen",
+          "titleQuote": "Angebot bestätigen",
+          "description": "Überprüfen Sie die Zusammenfassung vor dem Erstellen der Reservierung.",
+          "descriptionQuote": "Überprüfen Sie die Zusammenfassung vor dem Senden des Angebots.",
+          "warningsTitle": "Zu beachten",
+          "emailOn": "Eine Bestätigungs-E-Mail wird an den Kunden gesendet.",
+          "emailOff": "Es wird keine E-Mail an den Kunden gesendet."
+        },
+        "adjustmentsTitle": "Beträge und Optionen",
+        "adjustmentsDescription": "Passen Sie Rabatt, Kaution und Bestätigungsversand an.",
         "steps": {
           "customer": "Kunde",
           "customerDescription": "Kunde auswählen",

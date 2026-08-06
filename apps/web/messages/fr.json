@@ -24,6 +24,7 @@
     "error": "Erreur",
     "success": "Succès",
     "confirm": "Confirmer",
+    "done": "Terminé",
     "close": "Fermer",
     "play": "Lecture",
     "pause": "Pause",
@@ -2003,6 +2004,17 @@
         "selectCustomerError": "Veuillez sélectionner un client",
         "confirmTitle": "Récapitulatif",
         "confirmDescription": "Vérifiez les informations avant de créer la réservation",
+        "confirmDrawer": {
+          "title": "Confirmer la réservation",
+          "titleQuote": "Confirmer le devis",
+          "description": "Vérifiez le récapitulatif avant de créer la réservation.",
+          "descriptionQuote": "Vérifiez le récapitulatif avant d'envoyer le devis.",
+          "warningsTitle": "Points d'attention",
+          "emailOn": "Un email de confirmation sera envoyé au client.",
+          "emailOff": "Aucun email ne sera envoyé au client."
+        },
+        "adjustmentsTitle": "Montants et options",
+        "adjustmentsDescription": "Ajustez la remise, la caution et l'envoi de la confirmation.",
         "steps": {
           "customer": "Client",
           "customerDescription": "Sélectionnez le client",

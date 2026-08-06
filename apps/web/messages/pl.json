@@ -24,6 +24,7 @@
     "error": "Błąd",
     "success": "Sukces",
     "confirm": "Potwierdź",
+    "done": "Gotowe",
     "close": "Zamknij",
     "play": "Odtwórz",
     "pause": "Pauza",
@@ -1841,6 +1842,17 @@
         "selectCustomerError": "Proszę wybrać klienta",
         "confirmTitle": "Podsumowanie",
         "confirmDescription": "Sprawdź informacje przed utworzeniem rezerwacji",
+        "confirmDrawer": {
+          "title": "Potwierdź rezerwację",
+          "titleQuote": "Potwierdź wycenę",
+          "description": "Sprawdź podsumowanie przed utworzeniem rezerwacji.",
+          "descriptionQuote": "Sprawdź podsumowanie przed wysłaniem wyceny.",
+          "warningsTitle": "Do sprawdzenia",
+          "emailOn": "Do klienta zostanie wysłany e-mail z potwierdzeniem.",
+          "emailOff": "Żaden e-mail nie zostanie wysłany do klienta."
+        },
+        "adjustmentsTitle": "Kwoty i opcje",
+        "adjustmentsDescription": "Dostosuj rabat, kaucję i wysyłanie potwierdzenia.",
         "steps": {
           "customer": "Klient",
           "customerDescription": "Wybierz klienta",

@@ -24,6 +24,7 @@
     "error": "Fout",
     "success": "Gelukt",
     "confirm": "Bevestigen",
+    "done": "Klaar",
     "close": "Sluiten",
     "play": "Afspelen",
     "pause": "Pauze",
@@ -1841,6 +1842,17 @@
         "selectCustomerError": "Selecteer een klant",
         "confirmTitle": "Samenvatting",
         "confirmDescription": "Controleer de informatie voordat u de reservering aanmaakt",
+        "confirmDrawer": {
+          "title": "Reservering bevestigen",
+          "titleQuote": "Offerte bevestigen",
+          "description": "Controleer het overzicht voordat u de reservering aanmaakt.",
+          "descriptionQuote": "Controleer het overzicht voordat u de offerte verstuurt.",
+          "warningsTitle": "Aandachtspunten",
+          "emailOn": "Er wordt een bevestigingsmail naar de klant verzonden.",
+          "emailOff": "Er wordt geen e-mail naar de klant verzonden."
+        },
+        "adjustmentsTitle": "Bedragen en opties",
+        "adjustmentsDescription": "Pas de korting, de borg en het verzenden van de bevestiging aan.",
         "steps": {
           "customer": "Klant",
           "customerDescription": "Selecteer klant",

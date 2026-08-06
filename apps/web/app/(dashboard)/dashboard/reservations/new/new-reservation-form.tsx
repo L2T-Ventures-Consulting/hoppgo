@@ -50,10 +50,12 @@ import {
 import { formatStoreDate } from "@/lib/utils/store-date";
 
 import { useAppForm } from "@/hooks/form/form";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 import { useStoreTimezone } from "@/contexts/store-context";
 
 import { getManualReservationAvailability } from "../actions";
+import { NewReservationConfirmDrawer } from "./components/new-reservation-confirm-drawer";
 import { NewReservationStepCustomer } from "./components/new-reservation-step-customer";
 import { NewReservationStepDelivery } from "./components/new-reservation-step-delivery";
 import { NewReservationStepProducts } from "./components/new-reservation-step-products";
@@ -67,6 +69,7 @@ import {
   getPeriodAvailability,
   useNewReservationWarnings,
 } from "./hooks/use-new-reservation-warnings";
+import { useReservationDurationLabel } from "./hooks/use-reservation-duration-label";
 import type {
   Customer,
   CustomItem,
@@ -76,6 +79,7 @@ import type {
   SelectedProduct,
   StepFieldName,
 } from "./types";
+import { buildRecapDeliveryLeg, buildRecapItemLines } from "./utils/recap-lines";
 import { buildProductCombinations, getLineQuantityConstraints } from "./utils/variant-lines";
 import { createManualReservationSchema } from "./validation";
 
@@ -207,6 +211,15 @@ export function NewReservationForm({
     isOpen: false,
     shortfalls: [],
   });
+
+  // Below `lg` the summary aside stacks under every section, far from the
+  // sticky action bar — matches the `lg:flex-row` switch on the layout below.
+  const isSummaryBelowFold = useMediaQuery("(max-width: 1023px)");
+  const [confirmDrawer, setConfirmDrawer] = useState<{ isOpen: boolean; asQuote: boolean }>({
+    isOpen: false,
+    asQuote: false,
+  });
+  const pendingSubmitValuesRef = useRef<NewReservationFormValues | null>(null);
 
   const isDeliveryEnabled = Boolean(
     (deliverySettings?.enabled && storeLatitude != null && storeLongitude != null) ||
@@ -509,6 +522,15 @@ export function NewReservationForm({
       const failures = getNonFieldSectionFailures();
       if (failures.length > 0) {
         handleInvalidSections(failures);
+        return;
+      }
+
+      // The recap is a confirmation, not a validation step: it only opens
+      // once the payload is known-good, so confirming it can never bounce
+      // the user back into the form.
+      if (isSummaryBelowFold) {
+        pendingSubmitValuesRef.current = value;
+        setConfirmDrawer({ isOpen: true, asQuote: sendAsQuoteRef.current });
         return;
       }
 
@@ -1243,6 +1265,57 @@ export function NewReservationForm({
     [t],
   );
 
+  const effectiveDeposit = depositOverride ?? deposit;
+  const total = subtotal + tulipInsuranceAmount + delivery.totalFee - globalDiscountAmount;
+  const durationLabel = useReservationDurationLabel(detailedDuration, duration);
+
+  const recapItemLines = useMemo(
+    () =>
+      buildRecapItemLines({
+        selectedProducts,
+        customItems,
+        products,
+        getProductPricingDetails,
+        getCustomItemTotal,
+      }),
+    [customItems, getCustomItemTotal, getProductPricingDetails, products, selectedProducts],
+  );
+
+  const recapOutboundLeg = isDeliveryEnabled
+    ? buildRecapDeliveryLeg({
+        method: delivery.outboundMethod,
+        locationId: delivery.pickupLocationId,
+        address: delivery.outboundAddress,
+        fee: delivery.outboundFee,
+        locations: storeLocations,
+      })
+    : null;
+  const recapReturnLeg = isDeliveryEnabled
+    ? buildRecapDeliveryLeg({
+        method: delivery.returnMethod,
+        locationId: delivery.returnLocationId,
+        address: delivery.returnAddress,
+        fee: delivery.returnFee,
+        locations: storeLocations,
+      })
+    : null;
+
+  const handleConfirmDrawerSubmit = async () => {
+    const value = pendingSubmitValuesRef.current;
+    if (!value) return;
+
+    sendAsQuoteRef.current = confirmDrawer.asQuote;
+
+    try {
+      await submitManualReservation(value);
+    } finally {
+      // Closed either way: a success navigates away, and a failure has to
+      // hand the screen back — an overbooking dialog cannot open under a
+      // sheet that is still covering it.
+      setConfirmDrawer((current) => ({ ...current, isOpen: false }));
+    }
+  };
+
   return (
     <>
       <form.AppForm>
@@ -1588,6 +1661,32 @@ export function NewReservationForm({
           </StepActions>
         </form.Form>
       </form.AppForm>
+
+      <NewReservationConfirmDrawer
+        open={confirmDrawer.isOpen}
+        onOpenChange={(open) => setConfirmDrawer((current) => ({ ...current, isOpen: open }))}
+        asQuote={confirmDrawer.asQuote}
+        isSubmitting={isSaving}
+        onConfirm={handleConfirmDrawerSubmit}
+        customer={selectedCustomer}
+        isNewCustomer={isNewCustomer}
+        startDate={watchStartDate}
+        endDate={watchEndDate}
+        durationLabel={durationLabel}
+        timezone={timezone}
+        itemLines={recapItemLines}
+        outboundLeg={recapOutboundLeg}
+        returnLeg={recapReturnLeg}
+        subtotal={subtotal}
+        tulipInsuranceAmount={tulipInsuranceAmount}
+        deliveryFee={delivery.totalFee}
+        discountAmount={globalDiscountAmount}
+        deposit={effectiveDeposit}
+        total={total}
+        willSendConfirmationEmail={confirmDrawer.asQuote || sendConfirmationEmail}
+        periodWarnings={periodWarnings}
+        availabilityWarnings={availabilityWarnings}
+      />
 
       {/* Custom Item Dialog */}
       <Dialog open={showCustomItemDialog} onOpenChange={setShowCustomItemDialog}>
