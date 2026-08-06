@@ -69,6 +69,14 @@ export interface CustomItem {
   basePeriodMinutes: number;
 }
 
+export interface DetailedDuration {
+  days: number;
+  hours: number;
+  minutes: number;
+  totalHours: number;
+  totalMinutes: number;
+}
+
 export interface PeriodWarning {
   type: "advance_notice" | "day_closed" | "outside_hours" | "closure_period";
   field: "start" | "end" | "both";

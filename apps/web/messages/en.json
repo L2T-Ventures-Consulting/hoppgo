@@ -1994,6 +1994,17 @@
         "selectCustomerError": "Please select a customer",
         "confirmTitle": "Summary",
         "confirmDescription": "Review the information before creating the reservation",
+        "confirmDrawer": {
+          "title": "Confirm reservation",
+          "titleQuote": "Confirm quote",
+          "description": "Review the summary before creating the reservation.",
+          "descriptionQuote": "Review the summary before sending the quote.",
+          "warningsTitle": "Worth checking",
+          "emailOn": "A confirmation email will be sent to the customer.",
+          "emailOff": "No email will be sent to the customer."
+        },
+        "adjustmentsTitle": "Amounts and options",
+        "adjustmentsDescription": "Adjust the discount, the deposit and the confirmation email.",
         "steps": {
           "customer": "Customer",
           "customerDescription": "Select customer",

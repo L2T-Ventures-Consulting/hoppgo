@@ -1841,6 +1841,17 @@
         "selectCustomerError": "Por favor, selecione um cliente",
         "confirmTitle": "Resumo",
         "confirmDescription": "Revise as informacoes antes de criar a reserva",
+        "confirmDrawer": {
+          "title": "Confirmar a reserva",
+          "titleQuote": "Confirmar o orçamento",
+          "description": "Reveja o resumo antes de criar a reserva.",
+          "descriptionQuote": "Reveja o resumo antes de enviar o orçamento.",
+          "warningsTitle": "Pontos a verificar",
+          "emailOn": "Um email de confirmação será enviado ao cliente.",
+          "emailOff": "Nenhum email será enviado ao cliente."
+        },
+        "adjustmentsTitle": "Valores e opções",
+        "adjustmentsDescription": "Ajuste o desconto, a caução e o envio da confirmação.",
         "steps": {
           "customer": "Cliente",
           "customerDescription": "Selecionar cliente",

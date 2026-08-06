@@ -1841,6 +1841,17 @@
         "selectCustomerError": "Seleziona un cliente",
         "confirmTitle": "Riepilogo",
         "confirmDescription": "Rivedi le informazioni prima di creare la prenotazione",
+        "confirmDrawer": {
+          "title": "Conferma la prenotazione",
+          "titleQuote": "Conferma il preventivo",
+          "description": "Rivedi il riepilogo prima di creare la prenotazione.",
+          "descriptionQuote": "Rivedi il riepilogo prima di inviare il preventivo.",
+          "warningsTitle": "Punti da verificare",
+          "emailOn": "Verrà inviata un'email di conferma al cliente.",
+          "emailOff": "Nessuna email verrà inviata al cliente."
+        },
+        "adjustmentsTitle": "Importi e opzioni",
+        "adjustmentsDescription": "Regola lo sconto, il deposito e l'invio della conferma.",
         "steps": {
           "customer": "Cliente",
           "customerDescription": "Seleziona cliente",
