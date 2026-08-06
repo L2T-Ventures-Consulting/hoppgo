@@ -1534,17 +1534,23 @@ export function NewReservationForm({
           {/* Actions */}
           <StepActions>
             <div>
+              {/* No cancel on the phone: the breadcrumb and the back gesture
+                  already cover leaving — the bar is for the two real decisions.
+                  The empty wrapper keeps justify-between pushing them right. */}
               <Button
                 type="button"
                 variant="outline"
                 size="lg"
+                className="max-sm:hidden"
                 onClick={() => router.push("/dashboard/reservations")}
               >
                 {tCommon("cancel")}
               </Button>
             </div>
 
-            <div className="flex min-w-0 items-center gap-3">
+            {/* With the cancel gone on the phone, the two decisions share the
+                whole bar — flex-1 with a zero basis splits it evenly. */}
+            <div className="flex min-w-0 items-center gap-3 max-sm:flex-1 max-sm:gap-2">
               <Button
                 type="submit"
                 variant="outline"
@@ -1553,12 +1559,12 @@ export function NewReservationForm({
                 onClick={() => {
                   sendAsQuoteRef.current = true;
                 }}
-                className="min-w-0 flex-1 sm:flex-none"
+                className="max-sm:flex-1 max-sm:px-4"
               >
                 {isSaving && sendAsQuoteRef.current ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <FileText className="mr-2 h-4 w-4" />
+                  <FileText className="mr-2 h-4 w-4 max-sm:hidden" />
                 )}
                 {t("sendAsQuote")}
               </Button>
@@ -1569,12 +1575,12 @@ export function NewReservationForm({
                 onClick={() => {
                   sendAsQuoteRef.current = false;
                 }}
-                className="min-w-0 flex-1 sm:flex-none"
+                className="max-sm:flex-1 max-sm:px-4"
               >
                 {isSaving && !sendAsQuoteRef.current ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
-                  <Check className="mr-2 h-4 w-4" />
+                  <Check className="mr-2 h-4 w-4 max-sm:hidden" />
                 )}
                 {t("create")}
               </Button>

@@ -1,17 +1,11 @@
-'use client';
+"use client";
 
-import {
-  type ReactNode,
-  type RefObject,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { type ReactNode, type RefObject, useEffect, useRef, useState } from "react";
 
-import { Check } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { Check } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
-import { cn } from '@louez/utils';
+import { cn } from "@louez/utils";
 
 interface Step {
   id: string;
@@ -26,27 +20,19 @@ interface StepperProps {
   className?: string;
 }
 
-const SPRING = { type: 'spring', duration: 0.55, bounce: 0 } as const;
-const ICON_SPRING = { type: 'spring', duration: 0.3, bounce: 0 } as const;
+const SPRING = { type: "spring", duration: 0.55, bounce: 0 } as const;
+const ICON_SPRING = { type: "spring", duration: 0.3, bounce: 0 } as const;
 
-export function Stepper({
-  steps,
-  currentStep,
-  onStepClick,
-  className,
-}: StepperProps) {
+export function Stepper({ steps, currentStep, onStepClick, className }: StepperProps) {
   const progress = steps.length > 1 ? currentStep / (steps.length - 1) : 0;
 
   return (
-    <nav aria-label="Progress" className={cn('w-full', className)}>
+    <nav aria-label="Progress" className={cn("w-full", className)}>
       {/* Desktop */}
       <div className="hidden sm:block">
         <ol className="relative flex min-h-14 items-start justify-between">
           {/* Track (background) — spans from center of first chip to center of last chip */}
-          <span
-            aria-hidden
-            className="bg-border absolute top-3 right-3 left-3 h-px"
-          />
+          <span aria-hidden className="bg-border absolute top-3 right-3 left-3 h-px" />
           {/* Track (filled) */}
           <motion.span
             aria-hidden
@@ -70,27 +56,27 @@ export function Stepper({
                   type="button"
                   onClick={() => isClickable && onStepClick?.(index)}
                   disabled={!isClickable}
-                  aria-current={isCurrent ? 'step' : undefined}
+                  aria-current={isCurrent ? "step" : undefined}
                   className={cn(
-                    'group relative -my-2 flex w-6 flex-col items-center py-2',
-                    isClickable && 'cursor-pointer active:scale-[0.98]',
-                    !isReachable && 'opacity-100',
+                    "group relative -my-2 flex w-6 flex-col items-center py-2",
+                    isClickable && "cursor-pointer active:scale-[0.98]",
+                    !isReachable && "opacity-100",
                   )}
                   style={{
-                    transitionProperty: 'opacity, transform',
-                    transitionDuration: '200ms',
+                    transitionProperty: "opacity, transform",
+                    transitionDuration: "200ms",
                   }}
                 >
                   {/* Chip */}
                   <span
                     className={cn(
-                      'bg-background relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] leading-none font-medium tabular-nums',
-                      'transition-[background-color,color,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]',
+                      "bg-background relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] leading-none font-medium tabular-nums",
+                      "transition-[background-color,color,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]",
                       isCompleted
-                        ? 'bg-primary text-primary-foreground'
+                        ? "bg-primary text-primary-foreground"
                         : isCurrent
-                          ? 'bg-primary text-primary-foreground shadow-[0_0_0_1.5px_color-mix(in_oklab,var(--color-primary)_15%,transparent)]'
-                          : 'bg-background text-muted-foreground border-border border',
+                          ? "bg-primary text-primary-foreground shadow-[0_0_0_1.5px_color-mix(in_oklab,var(--color-primary)_15%,transparent)]"
+                          : "bg-background text-muted-foreground border-border border",
                     )}
                   >
                     <AnimatePresence mode="wait" initial={false}>
@@ -100,17 +86,17 @@ export function Stepper({
                           initial={{
                             scale: 0.25,
                             opacity: 0,
-                            filter: 'blur(4px)',
+                            filter: "blur(4px)",
                           }}
                           animate={{
                             scale: 1,
                             opacity: 1,
-                            filter: 'blur(0px)',
+                            filter: "blur(0px)",
                           }}
                           exit={{
                             scale: 0.25,
                             opacity: 0,
-                            filter: 'blur(4px)',
+                            filter: "blur(4px)",
                           }}
                           transition={ICON_SPRING}
                           className="absolute inset-0 flex items-center justify-center leading-none"
@@ -123,17 +109,17 @@ export function Stepper({
                           initial={{
                             scale: 0.25,
                             opacity: 0,
-                            filter: 'blur(4px)',
+                            filter: "blur(4px)",
                           }}
                           animate={{
                             scale: 1,
                             opacity: 1,
-                            filter: 'blur(0px)',
+                            filter: "blur(0px)",
                           }}
                           exit={{
                             scale: 0.25,
                             opacity: 0,
-                            filter: 'blur(4px)',
+                            filter: "blur(4px)",
                           }}
                           transition={ICON_SPRING}
                           className="absolute inset-0 flex items-center justify-center leading-none"
@@ -147,18 +133,14 @@ export function Stepper({
                   {/* Label */}
                   <span
                     className={cn(
-                      'absolute top-full mt-2 whitespace-nowrap pb-1',
-                      'text-[13px] leading-tight tracking-tight transition-colors duration-200 ease-out',
-                      isFirst
-                        ? 'left-0'
-                        : isLast
-                          ? 'right-0'
-                          : 'left-1/2 -translate-x-1/2',
+                      "absolute top-full mt-2 whitespace-nowrap pb-1",
+                      "text-[13px] leading-tight tracking-tight transition-colors duration-200 ease-out",
+                      isFirst ? "left-0" : isLast ? "right-0" : "left-1/2 -translate-x-1/2",
                       isCurrent
-                        ? 'text-foreground font-medium'
+                        ? "text-foreground font-medium"
                         : isCompleted
-                          ? 'text-foreground/80'
-                          : 'text-muted-foreground',
+                          ? "text-foreground/80"
+                          : "text-muted-foreground",
                     )}
                   >
                     {step.title}
@@ -190,9 +172,7 @@ export function Stepper({
           />
         </div>
         {steps[currentStep]?.description && (
-          <p className="text-muted-foreground mt-1.5 text-xs">
-            {steps[currentStep]?.description}
-          </p>
+          <p className="text-muted-foreground mt-1.5 text-xs">{steps[currentStep]?.description}</p>
         )}
       </div>
     </nav>
@@ -202,25 +182,21 @@ export function Stepper({
 interface StepContentProps {
   children: ReactNode;
   className?: string;
-  direction?: 'forward' | 'backward';
+  direction?: "forward" | "backward";
 }
 
-export function StepContent({
-  children,
-  className,
-  direction = 'forward',
-}: StepContentProps) {
+export function StepContent({ children, className, direction = "forward" }: StepContentProps) {
   return (
     <motion.div
       initial={{
         opacity: 0,
-        x: direction === 'forward' ? 16 : -16,
-        filter: 'blur(4px)',
+        x: direction === "forward" ? 16 : -16,
+        filter: "blur(4px)",
       }}
-      animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-      transition={{ type: 'spring', duration: 0.45, bounce: 0 }}
+      animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+      transition={{ type: "spring", duration: 0.45, bounce: 0 }}
       className={className}
-      style={{ willChange: 'transform, opacity, filter' }}
+      style={{ willChange: "transform, opacity, filter" }}
     >
       {children}
     </motion.div>
@@ -230,14 +206,10 @@ export function StepContent({
 interface StepActionsProps {
   children: ReactNode;
   className?: string;
-  position?: 'sticky' | 'fixed';
+  position?: "sticky" | "fixed";
 }
 
-export function StepActions({
-  children,
-  className,
-  position = 'sticky',
-}: StepActionsProps) {
+export function StepActions({ children, className, position = "sticky" }: StepActionsProps) {
   const ref = useRef<HTMLDivElement>(null);
   const showScrollBorder = useShowScrollBorder(ref);
 
@@ -245,13 +217,14 @@ export function StepActions({
     <div
       ref={ref}
       className={cn(
-        'bottom-0 z-20 flex items-center justify-between gap-3 border-t p-3 backdrop-blur-2xl transition-colors sm:px-6 lg:px-8',
-        showScrollBorder
-          ? 'border-border bg-background/70'
-          : 'bg-background/70 border-transparent',
-        position === 'fixed'
-          ? 'fixed inset-x-0'
-          : 'sticky -mx-4 sm:-mx-6 lg:-mx-8',
+        "bottom-0 z-20 flex items-center justify-between gap-3 border-t p-3 backdrop-blur-2xl transition-colors sm:px-6 lg:px-8",
+        // Same mobile treatment as the drawer footers: comfortable tap targets
+        // ending above the home indicator, clear of the screen's rounded corners.
+        "max-sm:px-4 max-sm:pb-[max(calc(env(safe-area-inset-bottom,0px)+--spacing(4)),--spacing(5))]",
+        "max-sm:**:data-[slot=button]:h-12 max-sm:**:data-[slot=button]:rounded-xl",
+        "max-sm:**:data-[slot=button]:text-sm max-sm:**:data-[slot=button]:font-semibold",
+        showScrollBorder ? "border-border bg-background/70" : "bg-background/70 border-transparent",
+        position === "fixed" ? "fixed inset-x-0" : "sticky -mx-4 sm:-mx-6 lg:-mx-8",
         className,
       )}
     >
@@ -272,12 +245,8 @@ function useShowScrollBorder(ref: RefObject<HTMLElement | null>) {
       scrollTarget === window ? null : (scrollTarget as HTMLElement);
 
     const update = () => {
-      const scrollTop = !scrollElement
-        ? window.scrollY
-        : scrollElement.scrollTop;
-      const clientHeight = !scrollElement
-        ? window.innerHeight
-        : scrollElement.clientHeight;
+      const scrollTop = !scrollElement ? window.scrollY : scrollElement.scrollTop;
+      const clientHeight = !scrollElement ? window.innerHeight : scrollElement.clientHeight;
       const scrollHeight = !scrollElement
         ? document.documentElement.scrollHeight
         : scrollElement.scrollHeight;
@@ -287,11 +256,11 @@ function useShowScrollBorder(ref: RefObject<HTMLElement | null>) {
     };
 
     const resizeObserver =
-      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(update);
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
 
     update();
-    scrollTarget.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    scrollTarget.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
     resizeObserver?.observe(element);
 
     if (!scrollElement) {
@@ -302,8 +271,8 @@ function useShowScrollBorder(ref: RefObject<HTMLElement | null>) {
     }
 
     return () => {
-      scrollTarget.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      scrollTarget.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
       resizeObserver?.disconnect();
     };
   }, [ref]);
@@ -317,10 +286,7 @@ function getScrollTarget(element: HTMLElement): Window | HTMLElement {
   while (parent) {
     const { overflowY } = window.getComputedStyle(parent);
 
-    if (
-      /(auto|scroll|overlay)/.test(overflowY) &&
-      parent.scrollHeight > parent.clientHeight
-    ) {
+    if (/(auto|scroll|overlay)/.test(overflowY) && parent.scrollHeight > parent.clientHeight) {
       return parent;
     }
 

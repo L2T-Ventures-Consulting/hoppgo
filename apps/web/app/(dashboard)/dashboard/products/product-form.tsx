@@ -861,7 +861,15 @@ export function ProductForm({
             </div>
 
             <div className="inline-flex">
-              <Button type="submit" size="lg" className="rounded-r-none" isPending={isSaving}>
+              {/* `!`: the StepActions mobile rule rounds every button with a
+                  higher-specificity descendant selector — the split seam must
+                  stay flat. */}
+              <Button
+                type="submit"
+                size="lg"
+                className="rounded-r-none max-sm:rounded-r-none!"
+                isPending={isSaving}
+              >
                 <Check data-slot="icon" />
                 {t("createProduct")}
               </Button>
@@ -871,7 +879,7 @@ export function ProductForm({
                     <Button
                       type="button"
                       size="lg"
-                      className="rounded-l-none border-l-primary-foreground/20 px-2.5"
+                      className="rounded-l-none border-l-primary-foreground/20 px-2.5 max-sm:rounded-l-none!"
                       aria-label={t("createAndDuplicate")}
                       disabled={isSaving}
                     />
