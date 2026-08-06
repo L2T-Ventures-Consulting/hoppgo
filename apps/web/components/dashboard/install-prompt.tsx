@@ -137,10 +137,11 @@ export const InstallPrompt = () => {
               )}
             </DialogPanel>
           )}
-          {/* Dismiss on the left, commit on the right — the row never reverses,
-              not even stacked on mobile. */}
-          <DialogFooter className="flex-row justify-between sm:justify-between">
-            <DialogClose render={<Button variant="ghost" />} onClick={handleDismiss}>
+          {/* No toolbar band on a promo sheet: the actions sit on the sheet
+              surface. Mobile stacks them full-width (DialogFooter); desktop
+              keeps dismiss-left / commit-right. */}
+          <DialogFooter variant="bare" className="sm:justify-between">
+            <DialogClose render={<Button variant="tertiary" />} onClick={handleDismiss}>
               {t("later")}
             </DialogClose>
             {isActionable && (
