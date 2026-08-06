@@ -119,6 +119,8 @@
     },
     "dateTimePicker": {
       "select": "Selecteren",
+      "chooseDate": "Kies een datum",
+      "choosePeriod": "Kies een periode",
       "naturalPlaceholder": "bijv. morgen om 14:00 of 12 mei om 13:00",
       "time": "Tijd",
       "startTime": "Start",

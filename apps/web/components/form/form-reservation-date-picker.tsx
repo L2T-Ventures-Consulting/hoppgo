@@ -26,6 +26,13 @@ import {
 import {
   Button,
   Calendar,
+  Drawer,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerPanel,
+  DrawerPopup,
+  DrawerTitle,
+  DrawerTrigger,
   Input,
   Label,
   Popover,
@@ -37,6 +44,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@louez/ui";
+import { useIsMobile } from "@louez/ui/hooks/use-mobile";
 import { cn } from "@louez/utils";
 
 import { buildStoreDate } from "@/lib/utils/business-hours";
@@ -337,6 +345,7 @@ export function ReservationDatePickerControl({
 }: ReservationDatePickerControlProps) {
   const t = useTranslations("common.dateTimePicker");
   const locale = useLocale();
+  const isMobile = useIsMobile();
   const dateLocale = locale === "fr" ? fr : enUS;
   const resolvedTimezone = timezone?.trim() || undefined;
   const [inputValue, setInputValue] = React.useState("");
@@ -566,6 +575,141 @@ export function ReservationDatePickerControl({
     setIsFocused(false);
   };
 
+  // Day cells are square by default, so a full-width grid grows as tall as it
+  // is wide and pushes the time controls off the sheet. Keeping the width but
+  // capping the height fits a six-week month with room to spare.
+  const mobileCalendarProps = {
+    className:
+      "w-full p-0 [--cell-size:2.25rem] [&_td]:aspect-auto [&_td]:h-(--cell-size) [&_td_button]:aspect-auto [&_td_button]:h-(--cell-size)",
+    classNames: {
+      root: "w-full",
+      month: "flex w-full flex-col gap-2",
+      week: "mt-1 flex w-full",
+    },
+  };
+
+  const calendarElement = range ? (
+    <Calendar
+      mode="range"
+      // Two months side by side never fit a phone, and stacked they turn the
+      // sheet into a scroll marathon — one month at a time, navigable instead.
+      numberOfMonths={isMobile ? 1 : 2}
+      selected={rangeSelected}
+      defaultMonth={rangeSelected?.from ?? rangeSelected?.to}
+      captionLayout="dropdown"
+      startMonth={calendarNavigationBounds.startMonth}
+      endMonth={calendarNavigationBounds.endMonth}
+      modifiers={{ past: isBeforeToday }}
+      modifiersClassNames={{ past: "opacity-50" }}
+      onSelect={handleRangeSelect}
+      disabled={disabledDates}
+      initialFocus
+      locale={dateLocale}
+      {...(isMobile ? mobileCalendarProps : {})}
+    />
+  ) : (
+    <Calendar
+      mode="single"
+      selected={pickerDate}
+      defaultMonth={pickerDate}
+      captionLayout="dropdown"
+      startMonth={calendarNavigationBounds.startMonth}
+      endMonth={calendarNavigationBounds.endMonth}
+      modifiers={{ past: isBeforeToday }}
+      modifiersClassNames={{ past: "opacity-50" }}
+      onSelect={handleDateSelect}
+      disabled={disabledDates}
+      initialFocus
+      locale={dateLocale}
+      {...(isMobile ? mobileCalendarProps : {})}
+    />
+  );
+
+  // Inline label beside its select on the desktop popover; stacked above a
+  // full-width select on the phone, where "Start 21:30 End 21:30" on one line
+  // wraps into a ragged column instead of reading as two fields.
+  const renderTimeField = (fieldLabel: string, control: React.ReactNode) => (
+    <div
+      className={cn(
+        "flex items-center gap-2",
+        isMobile && "min-w-0 flex-col items-stretch gap-1.5",
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <Clock className="text-muted-foreground h-4 w-4 shrink-0" />
+        <Label className="text-sm font-medium">{fieldLabel}</Label>
+      </div>
+      {control}
+    </div>
+  );
+
+  const timeTriggerClassName = cn("w-24", isMobile && "w-full");
+
+  const timeOptionItems = timeOptions.map((option) => (
+    <SelectItem key={option.value} value={option.value} label={option.label}>
+      {option.label}
+    </SelectItem>
+  ));
+
+  const timeControls = !showTime ? null : range ? (
+    <div
+      className={cn(
+        "flex flex-wrap items-center justify-between gap-x-4 gap-y-2",
+        isMobile && "grid grid-cols-2 items-start gap-3",
+      )}
+    >
+      {renderTimeField(
+        t("startTime"),
+        <Select
+          value={rangeStartTime}
+          onValueChange={(time) => handleRangeTimeChange("start", time)}
+          disabled={!rangeStartDate}
+        >
+          <SelectTrigger className={timeTriggerClassName}>
+            <SelectValue placeholder="--:--">
+              {rangeStartDate ? rangeStartTime : "--:--"}
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent>{timeOptionItems}</SelectContent>
+        </Select>,
+      )}
+      {renderTimeField(
+        t("endTime"),
+        <Select
+          value={rangeEndTime}
+          onValueChange={(time) => handleRangeTimeChange("end", time)}
+          disabled={!rangeEndDate}
+        >
+          <SelectTrigger className={timeTriggerClassName}>
+            <SelectValue placeholder="--:--">{rangeEndDate ? rangeEndTime : "--:--"}</SelectValue>
+          </SelectTrigger>
+          <SelectContent>{timeOptionItems}</SelectContent>
+        </Select>,
+      )}
+    </div>
+  ) : (
+    renderTimeField(
+      t("time"),
+      <Select value={currentTime} onValueChange={handleTimeChange} disabled={!value}>
+        <SelectTrigger className={timeTriggerClassName}>
+          <SelectValue placeholder="--:--">{currentTime}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>{timeOptionItems}</SelectContent>
+      </Select>,
+    )
+  );
+
+  const calendarTrigger = (
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="text-muted-foreground absolute top-1/2 right-1 z-10 size-7 -translate-y-1/2 rounded-md"
+      disabled={disabled}
+      aria-label={t("select")}
+    />
+  );
+
   return (
     <div className={cn("space-y-2 min-w-0", className)}>
       {label && (
@@ -614,128 +758,49 @@ export function ReservationDatePickerControl({
             ))}
           </div>
         )}
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-          <PopoverTrigger
-            render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="absolute right-1 text-muted-foreground rounded-md top-1/2 z-10 size-7 -translate-y-1/2"
-                disabled={disabled}
-                aria-label={t("select")}
-              />
-            }
-          >
-            <CalendarIcon data-slot="icon" className="h-4 w-4" />
-          </PopoverTrigger>
-          <PopoverContent
-            sideOffset={12}
-            className="w-auto p-0 *:data-[slot=popover-viewport]:py-0 "
-            align="end"
-          >
-            {range ? (
-              <Calendar
-                mode="range"
-                numberOfMonths={2}
-                selected={rangeSelected}
-                defaultMonth={rangeSelected?.from ?? rangeSelected?.to}
-                captionLayout="dropdown"
-                startMonth={calendarNavigationBounds.startMonth}
-                endMonth={calendarNavigationBounds.endMonth}
-                modifiers={{ past: isBeforeToday }}
-                modifiersClassNames={{ past: "opacity-50" }}
-                onSelect={handleRangeSelect}
-                disabled={disabledDates}
-                initialFocus
-                locale={dateLocale}
-              />
-            ) : (
-              <Calendar
-                mode="single"
-                selected={pickerDate}
-                defaultMonth={pickerDate}
-                captionLayout="dropdown"
-                startMonth={calendarNavigationBounds.startMonth}
-                endMonth={calendarNavigationBounds.endMonth}
-                modifiers={{ past: isBeforeToday }}
-                modifiersClassNames={{ past: "opacity-50" }}
-                onSelect={handleDateSelect}
-                disabled={disabledDates}
-                initialFocus
-                locale={dateLocale}
-              />
-            )}
-            {showTime && !range && (
-              <div className="border-t p-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="text-muted-foreground h-4 w-4" />
-                  <Label className="text-sm font-medium">{t("time")}</Label>
-                  <Select value={currentTime} onValueChange={handleTimeChange} disabled={!value}>
-                    <SelectTrigger className="w-24">
-                      <SelectValue placeholder="--:--">{currentTime}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value} label={option.label}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-            {showTime && range && (
-              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-t p-3">
-                <div className="flex items-center gap-2">
-                  <Clock className="text-muted-foreground h-4 w-4" />
-                  <Label className="text-sm font-medium">{t("startTime")}</Label>
-                  <Select
-                    value={rangeStartTime}
-                    onValueChange={(time) => handleRangeTimeChange("start", time)}
-                    disabled={!rangeStartDate}
-                  >
-                    <SelectTrigger className="w-24">
-                      <SelectValue placeholder="--:--">
-                        {rangeStartDate ? rangeStartTime : "--:--"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value} label={option.label}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="text-muted-foreground h-4 w-4" />
-                  <Label className="text-sm font-medium">{t("endTime")}</Label>
-                  <Select
-                    value={rangeEndTime}
-                    onValueChange={(time) => handleRangeTimeChange("end", time)}
-                    disabled={!rangeEndDate}
-                  >
-                    <SelectTrigger className="w-24">
-                      <SelectValue placeholder="--:--">
-                        {rangeEndDate ? rangeEndTime : "--:--"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value} label={option.label}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            )}
-          </PopoverContent>
-        </Popover>
+        {isMobile ? (
+          // A two-month grid anchored to a 28px trigger has nowhere to go on a
+          // phone — it overflows the viewport and clips. A sheet owns the width.
+          <Drawer open={isOpen} onOpenChange={setIsOpen} position="bottom">
+            <DrawerTrigger render={calendarTrigger}>
+              <CalendarIcon data-slot="icon" className="h-4 w-4" />
+            </DrawerTrigger>
+            <DrawerPopup showCloseButton>
+              <DrawerHeader>
+                <DrawerTitle>{range ? t("choosePeriod") : t("chooseDate")}</DrawerTitle>
+              </DrawerHeader>
+              <DrawerPanel className="space-y-3">
+                {calendarElement}
+                {timeControls && <div className="border-t pt-3">{timeControls}</div>}
+              </DrawerPanel>
+              <DrawerFooter variant="bare">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setIsOpen(false);
+                    onAutoClose?.();
+                  }}
+                >
+                  {t("confirm")}
+                </Button>
+              </DrawerFooter>
+            </DrawerPopup>
+          </Drawer>
+        ) : (
+          <Popover open={isOpen} onOpenChange={setIsOpen}>
+            <PopoverTrigger render={calendarTrigger}>
+              <CalendarIcon data-slot="icon" className="h-4 w-4" />
+            </PopoverTrigger>
+            <PopoverContent
+              sideOffset={12}
+              className="w-auto p-0 *:data-[slot=popover-viewport]:py-0 "
+              align="end"
+            >
+              {calendarElement}
+              {timeControls && <div className="border-t p-3">{timeControls}</div>}
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
       {description && <p className="text-muted-foreground text-sm">{description}</p>}
       {error && <p className="text-destructive text-sm font-medium">{error}</p>}

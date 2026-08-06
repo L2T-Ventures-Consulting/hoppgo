@@ -119,6 +119,8 @@
     },
     "dateTimePicker": {
       "select": "Wybierz",
+      "chooseDate": "Wybierz datę",
+      "choosePeriod": "Wybierz okres",
       "naturalPlaceholder": "np. jutro o 14:00 lub 12 maja o 13:00",
       "time": "Godzina",
       "startTime": "Początek",
