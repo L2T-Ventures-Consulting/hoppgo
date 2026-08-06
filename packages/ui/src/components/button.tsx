@@ -195,7 +195,6 @@ function Button({
 
   return (
     <ButtonPrimitive
-      data-slot="button"
       data-icon-start={startSlot ? true : undefined}
       data-icon-end={endSlot ? true : undefined}
       aria-busy={isPending || undefined}
@@ -204,6 +203,10 @@ function Button({
       nativeButton={usesNativeButton}
       render={render}
       {...props}
+      // Last so it survives: a Base UI part rendered as a Button (`render={<Button />}`)
+      // passes its own `data-slot` down, which would otherwise shadow this one and
+      // make every `[data-slot=button]` rule silently skip that button.
+      data-slot="button"
     >
       <AnimatePresence initial={false} mode="popLayout">
         {startSlot ? (

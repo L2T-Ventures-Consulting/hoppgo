@@ -11,12 +11,14 @@ function ScrollArea({
   scrollFade = false,
   scrollbarGutter = false,
   scrollbarClassName,
+  viewportClassName,
   ...props
 }: ScrollAreaPrimitive.Root.Props & {
   orientation?: "horizontal" | "vertical" | "both";
   scrollFade?: boolean;
   scrollbarGutter?: boolean;
   scrollbarClassName?: string;
+  viewportClassName?: string;
 }) {
   return (
     <ScrollAreaPrimitive.Root
@@ -40,6 +42,7 @@ function ScrollArea({
             orientation !== "vertical" &&
             "mask-l-from-[calc(100%-min(var(--fade-size),round(up,var(--scroll-area-overflow-x-start),var(--fade-size))))] mask-r-from-[calc(100%-min(var(--fade-size),round(up,var(--scroll-area-overflow-x-end),var(--fade-size))))]",
           scrollbarGutter && "data-has-overflow-y:pe-2.5 data-has-overflow-x:pb-2.5",
+          viewportClassName,
         )}
         data-slot="scroll-area-viewport"
       >

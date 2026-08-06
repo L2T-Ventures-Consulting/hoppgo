@@ -9,7 +9,13 @@ import { createContext, useContext, useState, useSyncExternalStore } from "react
 import { cn } from "@louez/utils";
 
 import { Button } from "./button";
-import { DrawerBackdrop, DrawerPopup, DrawerPortal, DrawerViewport } from "./drawer";
+import {
+  DrawerBackdrop,
+  DrawerPopup,
+  DrawerPortal,
+  DrawerViewport,
+  useDrawerKeyboardOpen,
+} from "./drawer";
 import { ScrollArea } from "./scroll-area";
 
 type DialogMode = "dialog" | "drawer";
@@ -194,10 +200,12 @@ const DialogPopup = ({
     return (
       <DrawerPopup
         {...props}
+        // A bottom sheet always spans the full width: a `max-w-*` meant for the
+        // desktop dialog would otherwise leave it hanging off to one side.
         className={
           typeof className === "function"
-            ? (state) => className(getDialogPopupState(state))
-            : className
+            ? (state) => cn("max-sm:max-w-none", className(getDialogPopupState(state)))
+            : cn("max-sm:max-w-none", className)
         }
         data-slot="dialog-popup"
         position="bottom"
@@ -237,7 +245,13 @@ const DialogPopup = ({
             <DialogPrimitive.Close
               aria-label="Close"
               className="absolute end-2 top-2"
-              render={<Button className="max-sm:size-11" size="icon" variant="ghost" />}
+              render={
+                <Button
+                  className="max-sm:size-11 max-sm:bg-muted max-sm:text-muted-foreground"
+                  size="icon"
+                  variant="ghost"
+                />
+              }
             >
               <XIcon />
             </DialogPrimitive.Close>
@@ -271,11 +285,21 @@ const DialogFooter = ({
   return (
     <div
       className={cn(
-        "flex flex-col-reverse gap-2 px-4 max-sm:[&_[data-slot=button]]:min-h-12 max-sm:[&_[data-slot=button]]:min-w-12 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)] sm:px-6",
+        "flex flex-col-reverse gap-2 px-4 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)] sm:px-6",
+        // Mobile actions read as a native bottom sheet: full-width stacked
+        // buttons on the same inset as the header, ending just above the home
+        // indicator instead of a safe area stacked on top of a padding.
+        "max-sm:gap-1 max-sm:px-6 max-sm:pt-4 max-sm:pb-[max(calc(env(safe-area-inset-bottom,0px)+--spacing(2)),--spacing(6))]",
+        // Scrolling above the keyboard, the safe area is covered anyway — a
+        // plain padding keeps the end of the scroll from feeling hollow.
+        "max-sm:in-data-virtual-keyboard-open:pb-4!",
+        "max-sm:**:data-[slot=button]:h-12 max-sm:**:data-[slot=button]:w-full max-sm:**:data-[slot=button]:rounded-xl",
+        "max-sm:**:data-[slot=button]:text-sm max-sm:**:data-[slot=button]:font-semibold",
         variant === "default" &&
-          (mode === "drawer"
-            ? "border-t bg-muted/72 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(3))]"
-            : "border-t bg-muted/72 py-3"),
+          // The toolbar band is a desktop affordance; as a sheet the actions
+          // sit directly on the surface, as native sheets do. No `border-t`
+          // here also gives the panel its bare (tight) bottom padding.
+          (mode === "drawer" ? "pt-3" : "border-t bg-muted/72 py-3"),
         variant === "bare" &&
           (mode === "drawer"
             ? "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]"
@@ -324,9 +348,16 @@ const DialogPanel = ({
   ...props
 }: React.ComponentProps<"div"> & { scrollFade?: boolean }) => {
   const mode = useDialogMode();
+  const keyboardOpen = useDrawerKeyboardOpen();
+  const useKeyboardLayout = mode === "drawer" && keyboardOpen;
 
   return (
-    <ScrollArea className={cn(mode === "drawer" && "touch-auto")} scrollFade={scrollFade}>
+    <ScrollArea
+      className={cn(mode === "drawer" && "touch-auto", useKeyboardLayout && "!contents")}
+      scrollFade={!useKeyboardLayout && scrollFade}
+      scrollbarClassName={cn(useKeyboardLayout && "!hidden")}
+      viewportClassName={cn(useKeyboardLayout && "!contents !mask-none")}
+    >
       <div
         className={cn(
           "p-6 in-[[data-slot=dialog-popup]:has([data-slot=dialog-header])]:pt-1 in-[[data-slot=dialog-popup]:has([data-slot=dialog-footer]:not(.border-t))]:pb-1",
