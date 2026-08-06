@@ -39,6 +39,28 @@ test("does not offer a duplicate manual payment while an online payment is pendi
   );
 });
 
+test("offers accepting a pending request, without a payment shortcut", () => {
+  assert.deepEqual(
+    getMobileReservationQuickActions({
+      status: "pending",
+      rentalRemaining: 132,
+      hasOnlinePaymentPending: false,
+    }),
+    { showPaymentAction: false, statusAction: "confirm" },
+  );
+});
+
+test("stays out of the way while a pending request awaits its online payment", () => {
+  assert.deepEqual(
+    getMobileReservationQuickActions({
+      status: "pending",
+      rentalRemaining: 132,
+      hasOnlinePaymentPending: true,
+    }),
+    { showPaymentAction: false, statusAction: null },
+  );
+});
+
 test("hides the bar when the reservation has no operational status action", () => {
   assert.equal(
     hasMobileReservationQuickActions({

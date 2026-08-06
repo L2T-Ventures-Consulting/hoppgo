@@ -1,4 +1,4 @@
-export type MobileReservationStatusAction = "pickup" | "return";
+export type MobileReservationStatusAction = "confirm" | "pickup" | "return";
 
 interface MobileReservationQuickActionsInput {
   status: string;
@@ -16,10 +16,24 @@ export const getMobileReservationQuickActions = ({
   rentalRemaining,
   hasOnlinePaymentPending,
 }: MobileReservationQuickActionsInput): MobileReservationQuickActions => {
-  const statusAction = status === "confirmed" ? "pickup" : status === "ongoing" ? "return" : null;
+  // A pending request with an online payment underway confirms itself when the
+  // payment lands — there is nothing to accept manually.
+  const statusAction =
+    status === "confirmed"
+      ? "pickup"
+      : status === "ongoing"
+        ? "return"
+        : status === "pending" && !hasOnlinePaymentPending
+          ? "confirm"
+          : null;
 
   return {
-    showPaymentAction: statusAction !== null && rentalRemaining > 0 && !hasOnlinePaymentPending,
+    // Recording money belongs to the rental lifecycle, not to a request that
+    // has not been accepted yet.
+    showPaymentAction:
+      (statusAction === "pickup" || statusAction === "return") &&
+      rentalRemaining > 0 &&
+      !hasOnlinePaymentPending,
     statusAction,
   };
 };
