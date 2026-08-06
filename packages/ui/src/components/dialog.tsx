@@ -4,9 +4,16 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
 import { XIcon } from "lucide-react";
 import type React from "react";
-import { createContext, useContext, useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 
 import { cn } from "@louez/utils";
+
+import {
+  type DialogMobileVariant,
+  DialogModeContext,
+  useDialogMode,
+  useResolvedDialogMode,
+} from "@louez/ui/hooks/use-dialog-mode";
 
 import { Button } from "./button";
 import {
@@ -18,8 +25,6 @@ import {
 } from "./drawer";
 import { ScrollArea } from "./scroll-area";
 
-type DialogMode = "dialog" | "drawer";
-type DialogMobileVariant = "dialog" | "drawer";
 type DialogChangeEventDetails =
   | DialogPrimitive.Root.ChangeEventDetails
   | DrawerPrimitive.Root.ChangeEventDetails;
@@ -27,30 +32,6 @@ type DialogProps<Payload = unknown> = Omit<DialogPrimitive.Root.Props<Payload>, 
   mobileVariant?: DialogMobileVariant;
   onOpenChange?: (open: boolean, eventDetails: DialogChangeEventDetails) => void;
 };
-
-const DIALOG_DRAWER_MEDIA_QUERY = "(max-width: 639px)";
-const DialogModeContext = createContext<DialogMode>("dialog");
-
-const subscribeToDialogDrawerMediaQuery = (onStoreChange: () => void) => {
-  const mediaQuery = window.matchMedia(DIALOG_DRAWER_MEDIA_QUERY);
-  mediaQuery.addEventListener("change", onStoreChange);
-
-  return () => mediaQuery.removeEventListener("change", onStoreChange);
-};
-
-const getDialogDrawerMediaQuerySnapshot = () =>
-  window.matchMedia(DIALOG_DRAWER_MEDIA_QUERY).matches;
-
-const getDialogDrawerMediaQueryServerSnapshot = () => false;
-
-const useDialogMode = () => useContext(DialogModeContext);
-
-const useDialogDrawerMediaQuery = () =>
-  useSyncExternalStore(
-    subscribeToDialogDrawerMediaQuery,
-    getDialogDrawerMediaQuerySnapshot,
-    getDialogDrawerMediaQueryServerSnapshot,
-  );
 
 const getDialogPopupState = (state: DrawerPrimitive.Popup.State): DialogPrimitive.Popup.State => ({
   nested: state.nested,
@@ -68,8 +49,7 @@ const Dialog = <Payload,>({
   open: openProp,
   ...props
 }: DialogProps<Payload>) => {
-  const matchesDrawerBreakpoint = useDialogDrawerMediaQuery();
-  const mode = matchesDrawerBreakpoint && mobileVariant === "drawer" ? "drawer" : "dialog";
+  const mode = useResolvedDialogMode(mobileVariant);
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
   const openProps = openProp === undefined ? { defaultOpen: uncontrolledOpen } : { open: openProp };
 
@@ -186,12 +166,14 @@ const DialogPopup = ({
   className,
   children,
   showCloseButton = true,
+  showHandle = true,
   bottomStickOnMobile = true,
   render,
   style,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean;
+  showHandle?: boolean;
   bottomStickOnMobile?: boolean;
 }) => {
   const mode = useDialogMode();
@@ -215,6 +197,7 @@ const DialogPopup = ({
             : render
         }
         showCloseButton={showCloseButton}
+        showHandle={showHandle}
         style={typeof style === "function" ? (state) => style(getDialogPopupState(state)) : style}
       >
         {children}

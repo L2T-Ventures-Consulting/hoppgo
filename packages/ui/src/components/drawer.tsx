@@ -193,11 +193,13 @@ function DrawerPopup({
   className,
   children,
   showCloseButton = false,
+  showHandle = true,
   position: positionProp,
   variant = "default",
   ...props
 }: DrawerPrimitive.Popup.Props & {
   showCloseButton?: boolean;
+  showHandle?: boolean;
   position?: DrawerPosition;
   variant?: "default" | "straight" | "inset";
 }) {
@@ -252,8 +254,10 @@ function DrawerPopup({
               the swipe transform, and it stays pinned to the top edge once the
               virtual keyboard turns the popup itself into the scroll container.
               The negative bottom margin cancels its own footprint, so the
-              header keeps its own top padding. */}
-          {position === "bottom" && (
+              header keeps its own top padding.
+              Hidden when the sheet can't be swiped away — a handle that
+              advertises a dismissal the sheet refuses is worse than none. */}
+          {position === "bottom" && showHandle && (
             <div
               aria-hidden
               className="pointer-events-none sticky top-2 z-10 mx-auto mt-2 -mb-3 h-1 w-9 shrink-0 rounded-full bg-muted-foreground/25 transition-colors in-data-swiping:bg-muted-foreground/40"
