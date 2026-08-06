@@ -186,6 +186,18 @@ export function NewReservationStepProducts({
     return map;
   }, [products, selectedProducts, periodAvailability, hasSelectedPeriod]);
 
+  // What the add sheet echoes back per row, so a tap has a visible answer even
+  // though the product cards it updates sit behind the sheet on mobile.
+  const selectedQuantityByProduct = useMemo(() => {
+    const map = new Map<string, number>();
+
+    for (const line of selectedProducts) {
+      map.set(line.productId, (map.get(line.productId) ?? 0) + line.quantity);
+    }
+
+    return map;
+  }, [selectedProducts]);
+
   const handleAddFromCombobox = (productId: string) => {
     const remaining = availableQuantityByProduct.get(productId) ?? 0;
     if (remaining <= 0) {
@@ -319,6 +331,8 @@ export function NewReservationStepProducts({
                   emptyLabel={tEdit("noProductsFound")}
                   unavailableLabel={tEdit("unavailableForPeriod")}
                   availableLabel={t("available")}
+                  doneLabel={tCommon("done")}
+                  selectedQuantityByProduct={selectedQuantityByProduct}
                   onBeforeOpen={guardPeriodSelected}
                   className="min-w-0 flex-1"
                 />
@@ -800,6 +814,8 @@ export function NewReservationStepProducts({
                         emptyLabel={tEdit("noProductsFound")}
                         unavailableLabel={tEdit("unavailableForPeriod")}
                         availableLabel={t("available")}
+                        doneLabel={tCommon("done")}
+                        selectedQuantityByProduct={selectedQuantityByProduct}
                       />
                     </div>
                   )}

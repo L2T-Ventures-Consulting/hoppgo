@@ -14,6 +14,7 @@ import {
   CommandItem,
   CommandList,
   Drawer,
+  DrawerFooter,
   DrawerHeader,
   DrawerPopup,
   DrawerTitle,
@@ -42,6 +43,10 @@ interface ProductAddComboboxProps {
   emptyLabel: string;
   unavailableLabel: string;
   availableLabel: string;
+  /** Closes the sheet on mobile, where adding several products keeps it open. */
+  doneLabel: string;
+  /** Quantity already on the reservation, shown per row so the list doubles as a recap. */
+  selectedQuantityByProduct?: Map<string, number>;
   disabled?: boolean;
   /** Return false to keep the popover closed (e.g. a prerequisite is missing). */
   onBeforeOpen?: () => boolean;
@@ -58,6 +63,8 @@ export function ProductAddCombobox({
   emptyLabel,
   unavailableLabel,
   availableLabel,
+  doneLabel,
+  selectedQuantityByProduct,
   disabled = false,
   onBeforeOpen,
   className,
@@ -65,7 +72,16 @@ export function ProductAddCombobox({
   const isMobile = useIsMobile();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const justAddedTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (justAddedTimeoutRef.current) clearTimeout(justAddedTimeoutRef.current);
+    },
+    [],
+  );
 
   // The default CommandInput autoFocus fires before the popover is anchored,
   // making the browser scroll to the not-yet-positioned popup. Focus manually
@@ -84,6 +100,14 @@ export function ProductAddCombobox({
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  // Adding leaves the list open, so the tap needs an answer inside the list
+  // itself: the count badge pops, then settles back to rest.
+  const flagJustAdded = (productId: string) => {
+    setJustAddedId(productId);
+    if (justAddedTimeoutRef.current) clearTimeout(justAddedTimeoutRef.current);
+    justAddedTimeoutRef.current = setTimeout(() => setJustAddedId(null), 220);
+  };
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (nextOpen && onBeforeOpen && !onBeforeOpen()) {
@@ -132,6 +156,7 @@ export function ProductAddCombobox({
           {filteredProducts.map((product) => {
             const remaining = availableQuantityByProduct.get(product.id);
             const isUnavailable = remaining !== undefined && remaining <= 0;
+            const selectedQuantity = selectedQuantityByProduct?.get(product.id) ?? 0;
 
             return (
               <CommandItem
@@ -141,9 +166,12 @@ export function ProductAddCombobox({
                   // Keep the popover open so several products can be
                   // added in a row; Escape or an outside click closes it.
                   onAddProduct(product.id);
+                  flagJustAdded(product.id);
                   setSearchQuery("");
                 }}
-                className="flex items-center gap-2"
+                // Press feedback is felt more than seen: the row gives under
+                // the finger, so the tap registers before the list updates.
+                className="flex items-center gap-2 transition-transform duration-150 ease-out active:scale-[0.98] motion-reduce:active:scale-100"
               >
                 <ProductImage
                   src={product.images?.[0]}
@@ -161,6 +189,17 @@ export function ProductAddCombobox({
                 >
                   {product.name}
                 </span>
+                {selectedQuantity > 0 && (
+                  <Badge
+                    className={cn(
+                      "shrink-0 tabular-nums transition-transform duration-150 ease-out",
+                      justAddedId === product.id && "scale-110",
+                      "motion-reduce:scale-100",
+                    )}
+                  >
+                    ×{selectedQuantity}
+                  </Badge>
+                )}
                 {isUnavailable ? (
                   <Badge variant="pending" size="default">
                     {unavailableLabel}
@@ -193,9 +232,14 @@ export function ProductAddCombobox({
           </DrawerHeader>
           {/* touch-auto, as DrawerPanel does: the popup is touch-none so it
               can be swiped away, which would otherwise eat the list's scroll. */}
-          <div className="flex min-h-0 touch-auto flex-col px-2 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]">
-            {command}
-          </div>
+          <div className="flex min-h-0 touch-auto flex-col px-2">{command}</div>
+          {/* Tapping a product keeps the sheet open so several can be added in
+              a row, so the phone needs an explicit way out. */}
+          <DrawerFooter>
+            <Button type="button" onClick={() => setOpen(false)}>
+              {doneLabel}
+            </Button>
+          </DrawerFooter>
         </DrawerPopup>
       </Drawer>
     );
