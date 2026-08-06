@@ -59,10 +59,16 @@ export function EditReservationItemsSection({
       <CardContent className="p-4 sm:p-6">
         <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-muted-foreground text-sm font-medium">{t("edit.items")}</h2>
-          <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
-            <Button variant="outline" onClick={onOpenCustomItemDialog}>
+          {/* Same row as the new-reservation step: the custom item takes only
+              what its label needs, the product picker gets the rest. */}
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              className="min-w-0 shrink max-sm:max-w-[50%]"
+              onClick={onOpenCustomItemDialog}
+            >
               <PenLine data-slot="icon" className="size-4" />
-              {tForm("customItem.button")}
+              <span className="truncate">{tForm("customItem.button")}</span>
             </Button>
             {availableToAdd.length > 0 && (
               <ProductAddCombobox
@@ -76,6 +82,7 @@ export function EditReservationItemsSection({
                 emptyLabel={t("edit.noProductsFound")}
                 unavailableLabel={t("edit.unavailableForPeriod")}
                 availableLabel={tForm("available")}
+                className="min-w-0 flex-1"
               />
             )}
           </div>

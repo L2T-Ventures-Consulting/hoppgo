@@ -290,10 +290,14 @@ export function NewReservationStepProducts({
             ) : (
               <span />
             )}
-            <div className="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center">
+            {/* One row at every width. The custom item is the side door, so it
+                takes what its label needs and never more than half; the product
+                picker gets the rest. */}
+            <div className="flex items-center gap-2">
               <Button
                 type="button"
                 variant="outline"
+                className="min-w-0 shrink max-sm:max-w-[50%]"
                 onClick={() => {
                   if (guardPeriodSelected()) {
                     onOpenCustomItemDialog();
@@ -301,7 +305,7 @@ export function NewReservationStepProducts({
                 }}
               >
                 <PenLine data-slot="icon" className="size-4" />
-                {t("customItem.add")}
+                <span className="truncate">{t("customItem.button")}</span>
               </Button>
               {products.length > 0 && (
                 <ProductAddCombobox
@@ -316,6 +320,7 @@ export function NewReservationStepProducts({
                   unavailableLabel={tEdit("unavailableForPeriod")}
                   availableLabel={t("available")}
                   onBeforeOpen={guardPeriodSelected}
+                  className="min-w-0 flex-1"
                 />
               )}
             </div>

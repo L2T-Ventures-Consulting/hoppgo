@@ -1894,7 +1894,7 @@
         "customItem": {
           "title": "Niestandardowe przedmioty",
           "add": "Dodaj",
-          "button": "Niestandardowy",
+          "button": "Własna pozycja",
           "units": "jednostka(i)",
           "badge": "Niestandardowy",
           "empty": "Brak dodanych niestandardowych przedmiotów",

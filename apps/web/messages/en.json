@@ -2051,7 +2051,7 @@
         "customItem": {
           "title": "Custom items",
           "add": "Add",
-          "button": "Custom",
+          "button": "Custom item",
           "units": "unit(s)",
           "badge": "Custom",
           "empty": "No custom items added",
