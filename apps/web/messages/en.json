@@ -1456,6 +1456,8 @@
           "title": "Product information",
           "noDescription": "No description provided",
           "seasonalPricing": "Seasonal pricing",
+          "ratesShowMore": "Show all rates ({count})",
+          "ratesShowLess": "Show less",
           "accessories": "Accessories",
           "noAccessories": "No accessories linked",
           "gallery": "Photos",
