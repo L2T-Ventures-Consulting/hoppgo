@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Loader2, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button, Input, Switch } from "@louez/ui";
@@ -122,8 +122,7 @@ export const AiCreditsAutoTopup = ({
         )}
 
         <div className="flex items-center gap-3">
-          <Button type="button" variant="outline" size="sm" onClick={handleSave} disabled={saving}>
-            {saving && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
+          <Button type="button" variant="outline" size="sm" onClick={handleSave} isPending={saving}>
             {t("autoTopup.save")}
           </Button>
           {saved && <span className="text-success text-xs">{t("autoTopup.saved")}</span>}

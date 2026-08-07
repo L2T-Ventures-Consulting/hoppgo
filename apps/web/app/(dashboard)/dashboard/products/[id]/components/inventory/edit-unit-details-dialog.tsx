@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -141,8 +140,7 @@ export const EditUnitDetailsDialog = ({
           <DialogClose render={<Button variant="outline" />}>
             {t('cancel')}
           </DialogClose>
-          <Button onClick={handleSubmit} disabled={isSubmitting || !unit}>
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          <Button onClick={handleSubmit} isPending={isSubmitting} disabled={!unit}>
             {t('submit')}
           </Button>
         </DialogFooter>

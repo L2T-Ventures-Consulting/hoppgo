@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle, ChevronRight, Loader2 } from 'lucide-react'
+import { AlertTriangle, ChevronRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import { Button, Card, CardContent, Checkbox, Separator } from '@louez/ui'
@@ -222,13 +222,10 @@ export function EditReservationSummarySection({
           className="mt-6 w-full"
           size="lg"
           onClick={onSave}
-          disabled={isLoading || isDeliveryCalculating || !hasChanges}
+          isPending={isLoading}
+          disabled={isDeliveryCalculating || !hasChanges}
         >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <ChevronRight className="mr-2 h-4 w-4" />
-          )}
+          <ChevronRight data-slot="icon" />
           {t('edit.save')}
         </Button>
       </CardContent>

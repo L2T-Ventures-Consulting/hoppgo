@@ -344,11 +344,9 @@ export const CategoryManager = ({
             <Button
               type="button"
               onClick={() => void handleCreate()}
+              isPending={createMutation.isPending}
               disabled={isMutating}
             >
-              {createMutation.isPending && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               {t('common.create')}
             </Button>
           </DialogFooter>
@@ -393,11 +391,9 @@ export const CategoryManager = ({
             <Button
               type="button"
               onClick={() => void handleEdit()}
+              isPending={updateMutation.isPending}
               disabled={isMutating}
             >
-              {updateMutation.isPending && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               {t('common.save')}
             </Button>
           </DialogFooter>
@@ -469,11 +465,9 @@ export const CategoryManager = ({
               type="button"
               variant="destructive"
               onClick={() => void handleDelete()}
+              isPending={deleteMutation.isPending}
               disabled={isMutating}
             >
-              {deleteMutation.isPending && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               {t('common.delete')}
             </Button>
           </AlertDialogFooter>

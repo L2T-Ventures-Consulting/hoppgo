@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { useMutation } from "@tanstack/react-query";
-import { Banknote, CalendarCheck, Check, Loader2, Minus, ShieldCheck, Zap } from "lucide-react";
+import { Banknote, CalendarCheck, Check, Minus, ShieldCheck, Zap } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 
@@ -115,8 +115,7 @@ function PaymentPanel({ stripeReturnPath }: { stripeReturnPath?: string }) {
       </section>
 
       <div className="space-y-3">
-        <Button onClick={handleConfigureNow} disabled={isConnecting}>
-          {isConnecting && <Loader2 className="size-4 animate-spin" />}
+        <Button onClick={handleConfigureNow} isPending={isConnecting}>
           {t(hasPendingAccount ? "resumeNow" : "configureNow")}
         </Button>
         <p className="text-muted-foreground text-sm">{t("configureLater")}</p>

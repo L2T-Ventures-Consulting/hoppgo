@@ -1,0 +1,290 @@
+{
+  "common": {
+    "greeting": "Ciao {name},",
+    "regards": "Cordiali saluti,",
+    "team": "Il team {storeName}",
+    "viewReservation": "Vedi la mia prenotazione",
+    "contactUs": "Contattaci",
+    "reservationNumber": "Prenotazione #{number}",
+    "period": "Periodo",
+    "periodFrom": "Dal {startDate}",
+    "periodTo": "Al {endDate}",
+    "address": "Indirizzo",
+    "pickupAddress": "Indirizzo ritiro",
+    "returnAddress": "Indirizzo di reso",
+    "subtotal": "Subtotale",
+    "subtotalExclTax": "Subtotale IVA esclusa",
+    "taxAmount": "IVA ({rate}%)",
+    "subtotalInclTax": "Subtotale IVA inclusa",
+    "deposit": "Deposito",
+    "total": "Totale",
+    "totalToPay": "Totale da pagare",
+    "question": "Domande? Contattaci:",
+    "summary": "Riepilogo",
+    "timezone": "Fuso orario: {timezone}",
+    "seeYouSoon": "A presto,\n{storeName}"
+  },
+  "verificationCode": {
+    "subject": "Il tuo codice di accesso: {code}",
+    "title": "Codice di accesso",
+    "body": "Ecco il tuo codice di accesso per accedere al tuo account su {storeName}:",
+    "expiry": "Questo codice scade tra 10 minuti. Se non hai richiesto questo codice, puoi ignorare tranquillamente questa email."
+  },
+  "confirmReservation": {
+    "subject": "La tua prenotazione #{number} e confermata",
+    "title": "Prenotazione confermata!",
+    "body": "La tua prenotazione #{number} e confermata. Ecco il riepilogo:",
+    "summary": "Riepilogo"
+  },
+  "requestReceived": {
+    "subject": "Richiesta prenotazione #{number} ricevuta",
+    "title": "Richiesta ricevuta",
+    "body": "Abbiamo ricevuto la tua richiesta di prenotazione.",
+    "review": "Il nostro team sta esaminando la tua richiesta e ti rispondera a breve.",
+    "confirmation": "Riceverai un'email di conferma una volta che la tua prenotazione sara convalidata.",
+    "seeYouSoon": "A presto,"
+  },
+  "requestAccepted": {
+    "subject": "La tua richiesta #{number} e stata accettata!",
+    "title": "Richiesta accettata!",
+    "body": "Buone notizie! La tua richiesta di prenotazione #{number} e stata accettata.",
+    "rentalPeriod": "Periodo di noleggio",
+    "yourReservation": "La tua prenotazione",
+    "proceedPayment": "Procedi al pagamento",
+    "legalAcceptance": "La convalida della prenotazione comporta l'accettazione del contratto di noleggio e dei termini e condizioni.",
+    "contractAvailable": "Consulta il contratto di noleggio associato alla tua prenotazione.",
+    "viewContract": "Consulta il contratto",
+    "viewTerms": "Consulta i termini e le condizioni"
+  },
+  "requestRejected": {
+    "subject": "Richiesta prenotazione #{number}",
+    "title": "Richiesta non accettata",
+    "body": "Ci dispiace, la tua richiesta di prenotazione #{number} non ha potuto essere accettata.",
+    "contactForAlternative": "Contattaci per maggiori informazioni o per trovare un'alternativa che potrebbe essere adatta a te."
+  },
+  "reminderPickup": {
+    "subject": "Promemoria: il tuo noleggio inizia domani!",
+    "title": "Il tuo noleggio inizia domani!",
+    "body": "Questo e un promemoria per la tua prenotazione #{number}.",
+    "scheduledPickup": "Ritiro programmato",
+    "dontForget": "Non dimenticare:",
+    "bringId": "Un documento d'identita valido",
+    "bringConfirmation": "La tua conferma di prenotazione",
+    "seeTomorrow": "Ci vediamo domani!"
+  },
+  "reminderReturn": {
+    "subject": "Promemoria: ritorno attrezzatura il {date}",
+    "title": "Ricordati di restituire la tua attrezzatura",
+    "body": "Questo e un promemoria per la tua prenotazione #{number}. Il ritorno dell'attrezzatura e previsto per il {date}.",
+    "scheduledReturn": "Ritorno programmato",
+    "returnInfo": "Restituisci l'attrezzatura in buone condizioni. Il deposito sara restituito dopo la verifica.",
+    "thanks": "Grazie per la tua fiducia!"
+  },
+  "reminderPickupAdmin": {
+    "subject": "Ritiro in arrivo: prenotazione #{number}",
+    "title": "Ritiro attrezzatura in arrivo",
+    "body": "Si avvicina un ritiro per la prenotazione #{number}. Ecco i dettagli per preparare l'attrezzatura.",
+    "scheduledPickup": "Ritiro programmato",
+    "customer": "Cliente:",
+    "email": "E-mail:",
+    "phone": "Telefono:",
+    "amount": "Importo:",
+    "viewReservation": "Visualizza prenotazione",
+    "connectToManage": "Accedi alla tua dashboard per gestire questa prenotazione."
+  },
+  "reminderReturnAdmin": {
+    "subject": "Ritorno in arrivo: prenotazione #{number}",
+    "title": "Ritorno attrezzatura in arrivo",
+    "body": "Si avvicina un ritorno per la prenotazione #{number}. Ecco i dettagli per prepararti a ricevere l'attrezzatura.",
+    "scheduledReturn": "Ritorno programmato",
+    "customer": "Cliente:",
+    "email": "E-mail:",
+    "phone": "Telefono:",
+    "amount": "Importo:",
+    "viewReservation": "Visualizza prenotazione",
+    "connectToManage": "Accedi alla tua dashboard per gestire questa prenotazione."
+  },
+  "reminderDigestAdmin": {
+    "subject": "Il tuo programma del {date}",
+    "title": "Il programma di oggi",
+    "body": "Ecco cosa succede oggi presso {storeName}.",
+    "pickupsTitle": "Ritiri ({count})",
+    "returnsTitle": "Restituzioni ({count})",
+    "viewCalendar": "Visualizza calendario",
+    "connectToManage": "Accedi alla tua dashboard per gestire la tua giornata."
+  },
+  "thankYouReview": {
+    "subject": "Grazie per il tuo noleggio!",
+    "title": "Grazie per la tua fiducia!",
+    "body": "Speriamo che il tuo noleggio sia andato bene. La tua recensione ci aiuta a migliorare e aiuta altri clienti nella loro scelta.",
+    "cta": "Lascia una recensione",
+    "disclaimer": "Ci vuole solo un minuto e sarebbe di grande aiuto!",
+    "smsThankYou": "Grazie per il noleggio!",
+    "smsReview": "La tua opinione conta:"
+  },
+  "newRequestLandlord": {
+    "subject": "Nuova richiesta di prenotazione #{number}",
+    "title": "Nuova richiesta di prenotazione",
+    "body": "Hai ricevuto una nuova richiesta su {storeName}.",
+    "customer": "Cliente:",
+    "email": "Email:",
+    "period": "Periodo:",
+    "amount": "Importo:",
+    "viewRequest": "Vedi richiesta",
+    "connectToManage": "Accedi alla tua dashboard per accettare o rifiutare questa richiesta."
+  },
+  "phoneCallbackLandlord": {
+    "subject": "Un cliente da richiamare — {store}",
+    "title": "Un cliente da richiamare",
+    "body": "Il tuo assistente vocale non è riuscito a completare una richiesta su {storeName} e ti inoltra questo messaggio.",
+    "phone": "Numero da richiamare:",
+    "message": "Messaggio:",
+    "listen": "Apri la chiamata",
+    "footer": "Apri la conversazione per leggere lo scambio e riascoltare la registrazione della chiamata."
+  },
+  "voiceNumberBilling": {
+    "numberLabel": "Numero:",
+    "rentalLabel": "Canone mensile:",
+    "rentalValue": "{credits} crediti IA / mese",
+    "deadlineLabel": "Scadenza:",
+    "ctaRecharge": "Ricarica i miei crediti",
+    "ctaOpen": "Apri il mio Assistente IA",
+    "footer": "Il canone del numero viene pagato automaticamente in crediti IA ogni mese.",
+    "warning": {
+      "subject": "Ricarica necessaria — rinnovo del numero {number}",
+      "title": "Il tuo saldo non copre il prossimo rinnovo",
+      "body": "Il numero {number} di {storeName} verrà rinnovato il {date} per {credits} crediti IA, ma il tuo saldo attuale non è sufficiente. Ricarica prima di quella data per conservare il numero."
+    },
+    "failed": {
+      "subject": "Azione richiesta — il numero {number} rischia di essere scollegato",
+      "title": "Rinnovo non riuscito",
+      "body": "Il rinnovo del numero {number} ({credits} crediti IA) non è andato a buon fine: saldo insufficiente. Ricarica entro il {date}, altrimenti il numero verrà scollegato automaticamente. Ritentiamo l'addebito ogni giorno non appena ricarichi."
+    },
+    "released": {
+      "subject": "Il numero {number} è stato scollegato",
+      "title": "Numero scollegato",
+      "body": "Il numero {number} di {storeName} è stato scollegato e non è più attivo. Puoi scegliere un nuovo numero in qualsiasi momento dal tuo Assistente IA."
+    }
+  },
+  "teamInvitation": {
+    "subject": "{inviterName} ti invita a unirti a {storeName}",
+    "title": "Invito al team",
+    "greeting": "Ciao,",
+    "body": "{inviterName} ti invita a unirti al team di {storeName} su Louez.io.",
+    "accessDescription": "Accettando questo invito, avrai accesso alla dashboard del negozio per gestire prenotazioni, prodotti e clienti.",
+    "acceptButton": "Accetta invito",
+    "expiry": "Questo invito scade tra 7 giorni. Se non hai richiesto di unirti a questo team, puoi ignorare tranquillamente questa email."
+  },
+  "baseLayout": {
+    "sentBy": "Questa email e stata inviata da {storeName}",
+    "ignoreIfNotYou": "Se non hai avviato questa azione, ignora questa email.",
+    "poweredBy": "Powered by"
+  },
+  "instantAccess": {
+    "subject": "Accedi alla tua prenotazione #{number}",
+    "title": "Accedi alla tua prenotazione",
+    "body": "Clicca per accedere alla tua prenotazione #{number}.",
+    "paymentPending": "Il pagamento di questa prenotazione e in sospeso.",
+    "viewAndPay": "Visualizza e paga",
+    "linkValid": "Questo link e valido per 30 giorni."
+  },
+  "reservationCancelled": {
+    "subject": "Prenotazione #{number} annullata",
+    "title": "Prenotazione annullata",
+    "body": "La tua prenotazione #{number} è stata annullata.",
+    "cancelledPeriod": "Periodo annullato",
+    "reasonLabel": "Motivo",
+    "contactForQuestions": "Per qualsiasi domanda, non esitare a contattarci.",
+    "browseEquipment": "Sfoglia il nostro catalogo",
+    "thankYou": "Grazie per la comprensione."
+  },
+  "reservationCompleted": {
+    "subject": "Prenotazione #{number} completata",
+    "title": "Noleggio completato!",
+    "body": "La tua prenotazione #{number} è stata completata.",
+    "rentalPeriod": "Periodo di noleggio",
+    "depositReturned": "Il tuo deposito di {amount} sarà rimborsato.",
+    "depositPending": "Il tuo deposito di {amount} sarà verificato e rimborsato a breve.",
+    "thankYouMessage": "Grazie per aver scelto i nostri servizi!",
+    "rentAgain": "Noleggia di nuovo",
+    "seeYouSoon": "A presto!"
+  },
+  "paymentConfirmation": {
+    "subject": "Pagamento confermato - Prenotazione #{number}",
+    "title": "Pagamento ricevuto!",
+    "body": "Abbiamo ricevuto il tuo pagamento per la prenotazione #{number}.",
+    "paymentDetails": "Dettagli del pagamento",
+    "amount": "Importo",
+    "date": "Data",
+    "method": "Metodo",
+    "reservation": "Prenotazione",
+    "confirmation": "Il tuo pagamento è stato elaborato con successo.",
+    "keepEmail": "Conserva questa email come ricevuta di pagamento."
+  },
+  "paymentFailed": {
+    "subject": "Pagamento fallito - Prenotazione #{number}",
+    "title": "Pagamento fallito",
+    "body": "Il pagamento di {amount} per la tua prenotazione #{number} non è andato a buon fine.",
+    "whatToDo": "Cosa fare?",
+    "tip1": "Verifica che la tua carta sia valida e abbia fondi sufficienti",
+    "tip2": "Prova con un'altra carta",
+    "tip3": "Contatta la tua banca se il problema persiste",
+    "retryPayment": "Riprova pagamento",
+    "contactSupport": "Hai bisogno di aiuto? Contattaci."
+  },
+  "paymentRequest": {
+    "subject": "Richiesta di pagamento per prenotazione #{number}",
+    "title": "Richiesta di pagamento",
+    "body": "{storeName} richiede un pagamento di {amount} per la tua prenotazione #{number}.",
+    "paymentDetails": "Dettagli pagamento",
+    "reservation": "Prenotazione",
+    "description": "Descrizione",
+    "amountDue": "Importo dovuto",
+    "payNow": "Paga {amount}",
+    "linkFallback": "Oppure copia questo link nel tuo browser:",
+    "securePayment": "Questo pagamento è protetto da Stripe. I tuoi dati di pagamento non vengono mai condivisi con il noleggiatore.",
+    "manualBody": "Ti contattiamo in merito al pagamento della tua prenotazione #{number}.",
+    "payPromptly": "Ti preghiamo di procedere al pagamento il prima possibile."
+  },
+  "depositAuthorizationRequest": {
+    "subject": "Autorizzazione cauzione per prenotazione #{number}",
+    "title": "Autorizzazione cauzione richiesta",
+    "body": "{storeName} richiede un'autorizzazione cauzione di {amount} per la tua prenotazione #{number}.",
+    "howItWorks": "Come funziona",
+    "step1": "Autorizzi l'importo della cauzione sulla tua carta",
+    "step2": "L'importo viene temporaneamente bloccato (non addebitato)",
+    "step3": "Alla fine del noleggio, l'autorizzazione viene rilasciata automaticamente",
+    "step4": "In caso di danni, può essere addebitato in parte o totalmente",
+    "authorizeNow": "Autorizza cauzione",
+    "linkFallback": "Oppure copia questo link nel tuo browser:",
+    "securePayment": "Questa autorizzazione è protetta da Stripe. L'importo non verrà addebitato immediatamente."
+  },
+  "quoteSent": {
+    "subject": "Preventivo #{number}",
+    "title": "Ha ricevuto un preventivo",
+    "body": "{store} le ha inviato un preventivo per la prenotazione #{number}.",
+    "rentalPeriod": "Periodo di noleggio",
+    "yourQuote": "Il suo preventivo",
+    "viewQuote": "Vedi preventivo",
+    "expiry": "Può accettare o rifiutare questo preventivo dal suo account."
+  },
+  "rewardUnlocked": {
+    "subject": "Hai guadagnato prenotazioni gratuite 🎉",
+    "title": "Il tuo referral ha funzionato!",
+    "greeting": "Ciao,",
+    "body": "{referredStoreName} ha appena effettuato la sua prima vendita online. Guadagni {freeReservations} prenotazioni gratuite, pari a ≈ {rewardValue}.",
+    "cta": "Vedi i miei premi",
+    "footer": "Grazie per far crescere la comunità Louez.",
+    "subjectCredit": "Hai guadagnato un credito Louez 🎉",
+    "bodyCredit": "{referredStoreName} ha appena effettuato la sua prima vendita online. Guadagni un credito di {rewardValue} sulla tua prossima fattura Louez."
+  },
+  "contract": {
+    "subject": "Il tuo contratto di noleggio #{number}",
+    "title": "Il tuo contratto di noleggio",
+    "body": "Ecco il contratto di noleggio per la tua prenotazione #{number}.",
+    "downloadContract": "Scarica il contratto"
+  },
+  "customMessage": {
+    "subject": "Riguardo alla tua prenotazione #{number}"
+  }
+}

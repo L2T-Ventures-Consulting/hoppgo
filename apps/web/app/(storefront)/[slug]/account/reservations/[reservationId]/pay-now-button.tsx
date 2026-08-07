@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { CreditCard, Loader2 } from 'lucide-react';
+import { CreditCard } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { toastManager } from '@louez/ui';
@@ -52,14 +52,10 @@ export function PayNowButton({ storeSlug, reservationId }: PayNowButtonProps) {
   return (
     <Button
       onClick={handlePayment}
-      disabled={isLoading}
+      isPending={isLoading}
       className="w-full sm:w-auto"
     >
-      {isLoading ? (
-        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-      ) : (
-        <CreditCard className="mr-2 h-4 w-4" />
-      )}
+      <CreditCard data-slot="icon" />
       {t('payNow')}
     </Button>
   );

@@ -440,13 +440,9 @@ export function SmartReservationActions({
                   variant="default"
                   className="w-full"
                   onClick={() => handleStatusChange("confirmed")}
-                  disabled={isLoading}
+                  isPending={isLoading}
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-3.5 w-3.5" />
-                  )}
+                  <CheckCircle data-slot="icon" />
                   {t("acceptRequest")}
                 </Button>
                 <Button
@@ -492,12 +488,8 @@ export function SmartReservationActions({
                 })}
               </p>
 
-              <Button className="w-full" onClick={handlePickupIntent} disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ArrowUpRight className="mr-2 h-3.5 w-3.5" />
-                )}
+              <Button className="w-full" onClick={handlePickupIntent} isPending={isLoading}>
+                <ArrowUpRight data-slot="icon" />
                 {t("actions.markPickedUp")}
               </Button>
 
@@ -560,12 +552,8 @@ export function SmartReservationActions({
                 })}
               </p>
 
-              <Button className="w-full" onClick={handleReturnIntent} disabled={isLoading}>
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ArrowDownRight className="mr-2 h-3.5 w-3.5" />
-                )}
+              <Button className="w-full" onClick={handleReturnIntent} isPending={isLoading}>
+                <ArrowDownRight data-slot="icon" />
                 {t("actions.markReturned")}
               </Button>
 
@@ -653,13 +641,9 @@ export function SmartReservationActions({
                   variant="default"
                   className="w-full"
                   onClick={() => handleStatusChange("confirmed")}
-                  disabled={isLoading}
+                  isPending={isLoading}
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-3.5 w-3.5" />
-                  )}
+                  <CheckCircle data-slot="icon" />
                   {t("quoteCard.confirm")}
                 </Button>
               </div>
@@ -745,8 +729,7 @@ export function SmartReservationActions({
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button variant="destructive" onClick={handleReject} isPending={isLoading}>
               {t("rejectRequest")}
             </Button>
           </DialogFooter>
@@ -853,14 +836,14 @@ export function SmartReservationActions({
             </Button>
             <Button
               onClick={handlePickup}
-              disabled={isLoading || !acknowledgeWarnings}
+              isPending={isLoading}
+              disabled={!acknowledgeWarnings}
               className={cn(
                 "sm:flex-1",
                 acknowledgeWarnings ? "bg-amber-600 hover:bg-amber-700 text-white" : "",
               )}
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <ArrowUpRight className="mr-2 h-4 w-4" />
+              <ArrowUpRight data-slot="icon" />
               {t("smartActions.confirmPickup")}
             </Button>
           </DialogFooter>
@@ -942,9 +925,8 @@ export function SmartReservationActions({
             >
               {tCommon("cancel")}
             </Button>
-            <Button onClick={handleReturn} disabled={isLoading} className="sm:flex-1">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <CheckCircle className="mr-2 h-4 w-4" />
+            <Button onClick={handleReturn} isPending={isLoading} className="sm:flex-1">
+              <CheckCircle data-slot="icon" />
               {t("smartActions.confirmReturn")}
             </Button>
           </DialogFooter>

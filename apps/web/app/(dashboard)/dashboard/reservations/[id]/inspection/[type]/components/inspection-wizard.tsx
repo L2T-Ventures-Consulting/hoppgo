@@ -13,7 +13,6 @@ import {
   CheckCircle2,
   ClipboardCheck,
   FileCheck,
-  Loader2,
   Package,
   PenLine,
 } from "lucide-react";
@@ -846,12 +845,8 @@ export function InspectionWizard({
           )}
 
           {isLastStep ? (
-            <Button onClick={handleSubmit} disabled={!canProceed || isSubmitting}>
-              {isSubmitting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <FileCheck className="mr-2 h-4 w-4" />
-              )}
+            <Button onClick={handleSubmit} isPending={isSubmitting} disabled={!canProceed}>
+              <FileCheck data-slot="icon" />
               {t("wizard.complete")}
             </Button>
           ) : (

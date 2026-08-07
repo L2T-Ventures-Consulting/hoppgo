@@ -174,6 +174,10 @@ export const dashboardReservationSendReservationEmailInputSchema = z.object({
   }),
 });
 
+export const dashboardReservationGetEmailRenderContextInputSchema = z.object({
+  reservationId: z.string().length(21),
+});
+
 export const dashboardReservationSendModificationEmailInputSchema = z.object({
   reservationId: z.string().length(21),
   payload: z
@@ -186,6 +190,11 @@ export const dashboardReservationSendModificationEmailInputSchema = z.object({
 
 export const dashboardReservationSendAccessLinkInputSchema = z.object({
   reservationId: z.string().length(21),
+  payload: z
+    .object({
+      customMessage: z.string().max(100000).optional(),
+    })
+    .optional(),
 });
 
 export const dashboardReservationSendAccessLinkSmsInputSchema = z.object({
@@ -546,6 +555,9 @@ export type DashboardReservationReleaseDepositHoldInput = z.infer<
 >;
 export type DashboardReservationSendReservationEmailInput = z.infer<
   typeof dashboardReservationSendReservationEmailInputSchema
+>;
+export type DashboardReservationGetEmailRenderContextInput = z.infer<
+  typeof dashboardReservationGetEmailRenderContextInputSchema
 >;
 export type DashboardReservationSendModificationEmailInput = z.infer<
   typeof dashboardReservationSendModificationEmailInputSchema

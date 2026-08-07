@@ -380,6 +380,7 @@ export const VoiceNumberProvisioning = ({
                     </div>
                     <Button
                       size="sm"
+                      isPending={busyNumber === number.phoneNumber}
                       disabled={disabled || provisionMutation.isPending}
                       onClick={() => {
                         setError(null);
@@ -389,11 +390,7 @@ export const VoiceNumberProvisioning = ({
                       }}
                       className="gap-2"
                     >
-                      {busyNumber === number.phoneNumber ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Check className="h-4 w-4" />
-                      )}
+                      <Check data-slot="icon" />
                       {t("provision")}
                     </Button>
                   </div>
@@ -430,15 +427,13 @@ export const VoiceNumberProvisioning = ({
                     <Button
                       type="button"
                       variant="outline"
-                      disabled={
-                        disabled || linkMutation.isPending || manualNumber.trim().length === 0
-                      }
+                      isPending={linkMutation.isPending}
+                      disabled={disabled || manualNumber.trim().length === 0}
                       onClick={() => {
                         setError(null);
                         linkMutation.mutate({ phoneNumber: manualNumber.trim() });
                       }}
                     >
-                      {linkMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                       {t("link")}
                     </Button>
                   </div>

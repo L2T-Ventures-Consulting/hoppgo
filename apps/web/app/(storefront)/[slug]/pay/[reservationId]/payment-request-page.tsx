@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
-import { Loader2, CreditCard, Shield } from 'lucide-react'
+import { CreditCard, Shield } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
@@ -117,22 +117,14 @@ export function PaymentRequestPage({
             size="lg"
             className="w-full"
             onClick={handlePay}
-            disabled={isPending}
+            isPending={isPending}
+            pendingContent={t('redirecting')}
             style={{
               backgroundColor: store.theme?.primaryColor || undefined,
             }}
           >
-            {isPending ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('redirecting')}
-              </>
-            ) : (
-              <>
-                <Shield className="mr-2 h-4 w-4" />
-                {t('payButton', { amount: formattedAmount })}
-              </>
-            )}
+            <Shield data-slot="icon" />
+            {t('payButton', { amount: formattedAmount })}
           </Button>
 
           {/* Security note */}

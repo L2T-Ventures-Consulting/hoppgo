@@ -5,7 +5,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { ArrowRight, KeyRound, Loader2, Mail, RotateCcw } from "lucide-react";
+import { ArrowRight, KeyRound, Mail, RotateCcw } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
 
@@ -159,20 +159,13 @@ export function LoginForm({ storeId, storeSlug }: LoginFormProps) {
             <Button
               type="button"
               className="h-11 w-full"
-              disabled={isLoading || code.length !== 6}
+              isPending={isLoading}
+              pendingContent={t("verifying")}
+              disabled={code.length !== 6}
               onClick={() => onCodeSubmit(code)}
             >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("verifying")}
-                </>
-              ) : (
-                <>
-                  {t("verify")}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
+              {t("verify")}
+              <ArrowRight data-slot="icon" />
             </Button>
 
             <div className="flex flex-col items-center gap-3 pt-2">
@@ -231,18 +224,14 @@ export function LoginForm({ storeId, storeSlug }: LoginFormProps) {
               )}
             </emailForm.AppField>
 
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t("sending")}
-                </>
-              ) : (
-                <>
-                  {t("sendCode")}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
+            <Button
+              type="submit"
+              className="w-full"
+              isPending={isLoading}
+              pendingContent={t("sending")}
+            >
+              {t("sendCode")}
+              <ArrowRight data-slot="icon" />
             </Button>
           </emailForm.Form>
         </emailForm.AppForm>

@@ -589,8 +589,7 @@ export function UnitAssignmentSelector({
           )}
         </div>
         {hasChanges && (
-          <Button onClick={() => handleSave()} disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+          <Button onClick={() => handleSave()} isPending={isPending}>
             {t('save')}
           </Button>
         )}

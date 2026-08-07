@@ -2,7 +2,7 @@
 
 import { useMemo, useRef } from "react";
 
-import { Loader2, Pause, Play } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button, MediaLightbox } from "@louez/ui";
@@ -103,13 +103,12 @@ const WhatsNewVideoControls = ({ player }: { player: WhatsNewVideoPlayerApi }) =
         onClick={toggle}
         size="icon"
         type="button"
+        isPending={isLoading}
       >
-        {isLoading ? (
-          <Loader2 className="size-4 animate-spin" data-slot="icon" />
-        ) : isPlaying ? (
-          <Pause className="size-4 fill-current" data-slot="icon" />
+        {isPlaying ? (
+          <Pause className="fill-current" data-slot="icon" />
         ) : (
-          <Play className="size-4 translate-x-px fill-current" data-slot="icon" />
+          <Play className="translate-x-px fill-current" data-slot="icon" />
         )}
       </Button>
 

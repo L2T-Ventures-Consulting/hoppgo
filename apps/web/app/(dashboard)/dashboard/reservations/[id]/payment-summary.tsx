@@ -802,8 +802,7 @@ export function PaymentSummary({
             <Button variant="outline" onClick={() => setPaymentModalOpen(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button onClick={handleRecordPayment} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleRecordPayment} isPending={isLoading}>
               {t("payment.record")}
             </Button>
           </DialogFooter>
@@ -930,8 +929,7 @@ export function PaymentSummary({
             <Button variant="outline" onClick={() => setDepositReturnModalOpen(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button onClick={handleReturnDeposit} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleReturnDeposit} isPending={isLoading}>
               {t("payment.return")}
             </Button>
           </DialogFooter>
@@ -1019,8 +1017,7 @@ export function PaymentSummary({
             <Button variant="outline" onClick={() => setDamageModalOpen(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button onClick={handleRecordDamage} disabled={isLoading} variant="destructive">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleRecordDamage} isPending={isLoading} variant="destructive">
               {t("payment.recordDamage")}
             </Button>
           </DialogFooter>

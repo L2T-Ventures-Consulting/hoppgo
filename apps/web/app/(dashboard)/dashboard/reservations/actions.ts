@@ -79,11 +79,14 @@ import {
 import { sendEmail } from "@/lib/email/client";
 import { getLocaleFromCountry } from "@/lib/email/i18n";
 import {
+  buildManualReservationEmail,
+  toManualEmailRenderContext,
+} from "@/lib/email/manual-reservation-email";
+import type { ManualEmailRenderContext } from "@/lib/email/manual-reservation-email-core";
+import {
+  logEmail,
   sendDepositAuthorizationRequestEmail,
-  sendInstantAccessEmail,
   sendPaymentRequestEmail,
-  sendReminderPickupEmail,
-  sendReminderReturnEmail,
   sendReservationConfirmationEmail,
   sendReservationModifiedEmail,
 } from "@/lib/email/send";
@@ -136,7 +139,6 @@ import {
   releaseDeposit,
   toStripeCents,
 } from "@/lib/stripe";
-import { getContrastColorHex } from "@/lib/utils/colors";
 import { calculateTotalDeliveryFee, validateDelivery } from "@/lib/utils/geo";
 import { evaluateReservationRules } from "@/lib/utils/reservation-rules";
 import { buildUnitEvent } from "@/lib/utils/unit-mutations";
@@ -4301,163 +4303,94 @@ export async function sendReservationModificationEmail(
   }
 }
 
-export async function sendReservationEmail(reservationId: string, data: SendReservationEmailData) {
-  if (!isEmailConfigured()) {
-    return { error: "errors.emailSendFailed" };
-  }
-
+/**
+ * Fetches everything the manual reservation emails need, in the shape the
+ * shared builder expects. Used by both the send action and its preview.
+ */
+async function getManualEmailContext(reservationId: string) {
   const store = await getStoreForUser();
   if (!store) {
-    return { error: "errors.unauthorized" };
+    return { error: "errors.unauthorized" as const };
   }
 
   const reservation = await db.query.reservations.findFirst({
     where: and(eq(reservations.id, reservationId), eq(reservations.storeId, store.id)),
     with: {
       customer: true,
-      items: {
-        with: {
-          product: true,
-        },
-      },
+      items: { with: { product: true } },
+      payments: true,
     },
   });
 
   if (!reservation) {
-    return { error: "errors.reservationNotFound" };
+    return { error: "errors.reservationNotFound" as const };
   }
 
-  const storeData = {
-    id: store.id,
-    name: store.name,
-    logoUrl: store.logoUrl,
-    darkLogoUrl: store.darkLogoUrl,
-    email: store.email,
-    phone: store.phone,
-    address: store.address,
-    theme: store.theme,
-    emailSettings: store.emailSettings,
-  };
+  return { store, reservation };
+}
 
-  const customerData = {
-    firstName: reservation.customer.firstName,
-    lastName: reservation.customer.lastName,
-    email: reservation.customer.email,
-  };
+export async function sendReservationEmail(reservationId: string, data: SendReservationEmailData) {
+  if (!isEmailConfigured()) {
+    return { error: "errors.emailSendFailed" };
+  }
 
-  const reservationUrl = getStorefrontUrl(store.slug, `/account/reservations/${reservationId}`);
+  const context = await getManualEmailContext(reservationId);
+  if ("error" in context) {
+    return { error: context.error };
+  }
+  const { store, reservation } = context;
 
   try {
-    // Get button colors based on primary color contrast
-    const primaryColor = store.theme?.primaryColor || "#0066FF";
-    const buttonTextColor = getContrastColorHex(primaryColor);
+    const email = await buildManualReservationEmail({
+      store,
+      reservation,
+      payload: data,
+      mode: "send",
+    });
 
-    switch (data.templateId) {
-      case "contract": {
-        const contractUrl = await createReservationInstantAccessUrl({
+    if ("error" in email) {
+      return { error: email.error };
+    }
+
+    try {
+      const result = await sendEmail({
+        to: email.to,
+        subject: email.subject,
+        html: email.html,
+        attachments: email.attachments,
+        fromName: store.name,
+      });
+
+      if (email.logTemplateType) {
+        await logEmail({
           storeId: store.id,
-          storeSlug: store.slug,
-          customerEmail: customerData.email,
           reservationId,
-          redirectPath: `/account/reservations/${reservationId}/contract`,
+          to: email.to,
+          subject: email.subject,
+          templateType: email.logTemplateType,
+          status: "sent",
+          messageId: result.messageId,
         });
-        const subject =
-          data.customSubject || `Contrat de location #${reservation.number} - ${store.name}`;
-        const html = `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Bonjour ${customerData.firstName},</h2>
-            <p>Veuillez trouver ci-joint le contrat de location pour votre réservation #${reservation.number}.</p>
-            ${data.customMessage ? `<p>${data.customMessage}</p>` : ""}
-            <p><a href="${contractUrl}" style="display: inline-block; background: ${primaryColor}; color: ${buttonTextColor}; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Télécharger le contrat</a></p>
-            <p>À bientôt,<br/>${store.name}</p>
-          </div>
-        `;
-        await sendEmail({ to: customerData.email, subject, html });
-        break;
       }
-
-      case "payment_request": {
-        // Send payment request email
-        const amountDue =
-          parseFloat(reservation.totalAmount) + parseFloat(reservation.depositAmount);
-        const currencySymbol = getCurrencySymbol(store.settings?.currency || "EUR");
-        const subject =
-          data.customSubject || `Demande de paiement - Réservation #${reservation.number}`;
-        const html = `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Bonjour ${customerData.firstName},</h2>
-            <p>Nous vous contactons concernant le paiement de votre réservation #${reservation.number}.</p>
-            ${data.customMessage ? `<p>${data.customMessage}</p>` : ""}
-            <p><strong>Montant total : ${amountDue.toFixed(2)}${currencySymbol}</strong></p>
-            <p>Merci de procéder au règlement dans les meilleurs délais.</p>
-            <p><a href="${reservationUrl}" style="display: inline-block; background: ${primaryColor}; color: ${buttonTextColor}; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Voir ma réservation</a></p>
-            <p>À bientôt,<br/>${store.name}</p>
-          </div>
-        `;
-        await sendEmail({ to: customerData.email, subject, html });
-        break;
-      }
-
-      case "reminder_pickup": {
-        // TODO: Use customer's stored locale preference when available
-        await sendReminderPickupEmail({
-          to: customerData.email,
-          store: storeData,
-          customer: customerData,
-          reservation: {
-            id: reservationId,
-            number: reservation.number,
-            startDate: reservation.startDate,
-          },
-          reservationUrl,
-          locale: getLocaleFromCountry(store.settings?.country),
+    } catch (sendError) {
+      if (email.logTemplateType) {
+        await logEmail({
+          storeId: store.id,
+          reservationId,
+          to: email.to,
+          subject: email.subject,
+          templateType: email.logTemplateType,
+          status: "failed",
+          error: String(sendError),
         });
-        break;
       }
-
-      case "reminder_return": {
-        // TODO: Use customer's stored locale preference when available
-        await sendReminderReturnEmail({
-          to: customerData.email,
-          store: storeData,
-          customer: customerData,
-          reservation: {
-            id: reservationId,
-            number: reservation.number,
-            endDate: reservation.endDate,
-          },
-          locale: getLocaleFromCountry(store.settings?.country),
-        });
-        break;
-      }
-
-      case "custom": {
-        if (!data.customMessage) {
-          return { error: "errors.messageRequired" };
-        }
-        const subject =
-          data.customSubject ||
-          `À propos de votre réservation #${reservation.number} - ${store.name}`;
-        const html = `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Bonjour ${customerData.firstName},</h2>
-            <p>${data.customMessage.replace(/\n/g, "<br/>")}</p>
-            <p><a href="${reservationUrl}" style="display: inline-block; background: ${primaryColor}; color: ${buttonTextColor}; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Voir ma réservation</a></p>
-            <p>À bientôt,<br/>${store.name}</p>
-          </div>
-        `;
-        await sendEmail({ to: customerData.email, subject, html });
-        break;
-      }
-
-      default:
-        return { error: "errors.invalidEmailTemplate" };
+      throw sendError;
     }
 
     // Log activity
     await logReservationActivity(reservationId, "note_updated", {
       templateId: data.templateId,
-      to: customerData.email,
+      to: email.to,
     });
 
     revalidatePath(`/dashboard/reservations/${reservationId}`);
@@ -4472,6 +4405,27 @@ export async function sendReservationEmail(reservationId: string, data: SendRese
   } catch (error) {
     console.error("Failed to send reservation email:", error);
     return { error: "errors.emailSendFailed" };
+  }
+}
+
+/**
+ * Serializes everything the manual reservation emails need so the dashboard
+ * can render its live preview in the browser — with the very builder the send
+ * action uses, minus the minted links a real send earns.
+ */
+export async function getManualEmailRenderContext(
+  reservationId: string,
+): Promise<ManualEmailRenderContext | { error: string }> {
+  const context = await getManualEmailContext(reservationId);
+  if ("error" in context) {
+    return { error: context.error ?? "errors.reservationNotFound" };
+  }
+
+  try {
+    return await toManualEmailRenderContext(context.store, context.reservation);
+  } catch (error) {
+    console.error("Failed to build the email render context:", error);
+    return { error: "errors.emailPreviewFailed" };
   }
 }
 
@@ -4515,7 +4469,10 @@ export async function generateAccessUrl(reservationId: string) {
   return { url };
 }
 
-export async function sendAccessLink(reservationId: string) {
+export async function sendAccessLink(
+  reservationId: string,
+  data?: { customMessage?: string },
+) {
   if (!isEmailConfigured()) {
     return { error: "errors.accessLinkSendFailed" };
   }
@@ -4559,55 +4516,50 @@ export async function sendAccessLink(reservationId: string) {
     // Build access URL
     const accessUrl = getStorefrontUrl(store.slug, `/r/${reservationId}?token=${token}`);
 
-    // Calculate payment status
-    const isPaid = reservation.payments.some(
-      (p) => p.type === "rental" && p.status === "completed",
-    );
-    const isStripeEnabled = store.stripeAccountId && store.stripeChargesEnabled;
-
-    // Build store and customer data
-    const storeData = {
-      id: store.id,
-      name: store.name,
-      logoUrl: store.logoUrl,
-      darkLogoUrl: store.darkLogoUrl,
-      email: store.email,
-      phone: store.phone,
-      address: store.address,
-      theme: store.theme,
-      settings: store.settings,
-    };
-
-    const customerData = {
-      firstName: reservation.customer.firstName,
-      lastName: reservation.customer.lastName,
-      email: reservation.customer.email,
-    };
-
-    // Build items data
-    const items = reservation.items.map((item) => ({
-      name: item.productSnapshot.name,
-      quantity: item.quantity,
-      totalPrice: parseFloat(item.totalPrice),
-    }));
-
-    // Send email
-    await sendInstantAccessEmail({
-      to: reservation.customer.email,
-      store: storeData,
-      customer: customerData,
-      reservation: {
-        id: reservationId,
-        number: reservation.number,
-        startDate: reservation.startDate,
-        endDate: reservation.endDate,
-        totalAmount: parseFloat(reservation.totalAmount),
-      },
-      items,
+    // Rendered by the shared builder so the dashboard preview and this send
+    // never drift apart; the token above stays here, with its activity log.
+    const email = await buildManualReservationEmail({
+      store,
+      reservation,
+      payload: { templateId: "access_link", customMessage: data?.customMessage },
+      mode: "send",
       accessUrl,
-      showPaymentCta: !isPaid && !!isStripeEnabled,
-      locale: getLocaleFromCountry(store.settings?.country),
     });
+
+    if ("error" in email) {
+      return { error: email.error };
+    }
+
+    try {
+      const result = await sendEmail({
+        to: email.to,
+        subject: email.subject,
+        html: email.html,
+        attachments: email.attachments,
+        fromName: store.name,
+      });
+
+      await logEmail({
+        storeId: store.id,
+        reservationId,
+        to: email.to,
+        subject: email.subject,
+        templateType: email.logTemplateType ?? "instant_access",
+        status: "sent",
+        messageId: result.messageId,
+      });
+    } catch (sendError) {
+      await logEmail({
+        storeId: store.id,
+        reservationId,
+        to: email.to,
+        subject: email.subject,
+        templateType: email.logTemplateType ?? "instant_access",
+        status: "failed",
+        error: String(sendError),
+      });
+      throw sendError;
+    }
 
     // Log activity
     await logReservationActivity(reservationId, "access_link_sent", {

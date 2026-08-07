@@ -300,13 +300,9 @@ export function ReservationActions({
                   variant="default"
                   className="w-full"
                   onClick={() => handleStatusChange('confirmed')}
-                  disabled={isLoading}
+                  isPending={isLoading}
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-3.5 w-3.5" />
-                  )}
+                  <CheckCircle data-slot="icon" />
                   {t('acceptRequest')}
                 </Button>
                 <Button
@@ -344,13 +340,9 @@ export function ReservationActions({
               <Button
                 className="w-full"
                 onClick={() => handleStatusChange('ongoing')}
-                disabled={isLoading}
+                isPending={isLoading}
               >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ArrowUpRight className="mr-2 h-3.5 w-3.5" />
-                )}
+                <ArrowUpRight data-slot="icon" />
                 {t('actions.markPickedUp')}
               </Button>
 
@@ -408,13 +400,9 @@ export function ReservationActions({
               <Button
                 className="w-full"
                 onClick={() => handleStatusChange('completed')}
-                disabled={isLoading}
+                isPending={isLoading}
               >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ArrowDownRight className="mr-2 h-3.5 w-3.5" />
-                )}
+                <ArrowDownRight data-slot="icon" />
                 {t('actions.markReturned')}
               </Button>
 
@@ -535,9 +523,8 @@ export function ReservationActions({
             <Button
               variant="destructive"
               onClick={handleReject}
-              disabled={isLoading}
+              isPending={isLoading}
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('rejectRequest')}
             </Button>
           </DialogFooter>

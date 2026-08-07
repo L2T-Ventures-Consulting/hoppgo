@@ -5,7 +5,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   CreditCard,
   Shield,
-  Loader2,
   Send,
   Mail,
   MessageSquare,
@@ -464,12 +463,8 @@ export function RequestPaymentModal({
           <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isLoading}>
             {tCommon("cancel")}
           </Button>
-          <Button onClick={handleSubmit} disabled={!canSubmit || isLoading}>
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="mr-2 h-4 w-4" />
-            )}
+          <Button onClick={handleSubmit} isPending={isLoading} disabled={!canSubmit}>
+            <Send data-slot="icon" />
             {t("send")}
           </Button>
         </DialogFooter>

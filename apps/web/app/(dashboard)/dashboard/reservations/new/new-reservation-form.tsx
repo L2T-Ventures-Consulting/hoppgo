@@ -11,7 +11,6 @@ import {
   Calendar,
   Check,
   FileText,
-  Loader2,
   PenLine,
   Plus,
   ShieldCheckIcon,
@@ -1628,33 +1627,27 @@ export function NewReservationForm({
                 type="submit"
                 variant="outline"
                 size="lg"
+                isPending={isSaving && sendAsQuoteRef.current}
                 disabled={isSaving}
                 onClick={() => {
                   sendAsQuoteRef.current = true;
                 }}
                 className="max-sm:flex-1 max-sm:px-4"
               >
-                {isSaving && sendAsQuoteRef.current ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <FileText className="mr-2 h-4 w-4 max-sm:hidden" />
-                )}
+                <FileText data-slot="icon" className="max-sm:hidden" />
                 {t("sendAsQuote")}
               </Button>
               <Button
                 type="submit"
                 size="lg"
+                isPending={isSaving && !sendAsQuoteRef.current}
                 disabled={isSaving}
                 onClick={() => {
                   sendAsQuoteRef.current = false;
                 }}
                 className="max-sm:flex-1 max-sm:px-4"
               >
-                {isSaving && !sendAsQuoteRef.current ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Check className="mr-2 h-4 w-4 max-sm:hidden" />
-                )}
+                <Check data-slot="icon" className="max-sm:hidden" />
                 {t("create")}
               </Button>
             </div>
@@ -2071,7 +2064,7 @@ export function NewReservationForm({
             <Button
               type="button"
               variant="destructive"
-              disabled={isSaving}
+              isPending={isSaving}
               onClick={async () => {
                 posthog.capture(productAnalyticsEvents.dashboardReservationOverbookingConfirmed, {
                   ...dashboardReservationAnalyticsBaseProperties,
@@ -2084,7 +2077,6 @@ export function NewReservationForm({
                 });
               }}
             >
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
               {t("overbooking.createAnyway")}
             </Button>
           </DialogFooter>

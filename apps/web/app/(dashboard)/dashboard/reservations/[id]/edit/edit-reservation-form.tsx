@@ -1127,27 +1127,21 @@ export function EditReservationForm({
                 </Button>
                 <Button
                   onClick={handleSave}
-                  disabled={isLoading || delivery.isCalculating || !hasChanges}
+                  isPending={isLoading}
+                  disabled={delivery.isCalculating || !hasChanges}
                   size="icon"
                   className="sm:hidden"
                   title={t('edit.save')}
                 >
-                  {isLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="h-4 w-4" />
-                  )}
+                  <Check data-slot="icon" />
                 </Button>
                 <Button
                   onClick={handleSave}
-                  disabled={isLoading || delivery.isCalculating || !hasChanges}
+                  isPending={isLoading}
+                  disabled={delivery.isCalculating || !hasChanges}
                   className="hidden sm:inline-flex"
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Check className="mr-2 h-4 w-4" />
-                  )}
+                  <Check data-slot="icon" />
                   {t('edit.save')}
                 </Button>
               </div>
@@ -1177,13 +1171,9 @@ export function EditReservationForm({
                       type="button"
                       size="sm"
                       onClick={handleRetryModificationEmail}
-                      disabled={isLoading}
+                      isPending={isLoading}
                     >
-                      {isLoading ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        <Mail className="mr-2 h-4 w-4" />
-                      )}
+                      <Mail data-slot="icon" />
                       {t('edit.retryEmailNotification')}
                     </Button>
                   </div>
@@ -1619,12 +1609,8 @@ export function EditReservationForm({
             >
               {tCommon('cancel')}
             </Button>
-            <Button onClick={handleConfirmWarningSave} disabled={isLoading}>
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <AlertTriangle className="mr-2 h-4 w-4" />
-              )}
+            <Button onClick={handleConfirmWarningSave} isPending={isLoading}>
+              <AlertTriangle data-slot="icon" />
               {t('edit.confirmWithWarnings')}
             </Button>
           </DialogFooter>

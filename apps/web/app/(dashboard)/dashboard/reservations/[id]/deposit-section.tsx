@@ -458,14 +458,10 @@ export function DepositSection({
             {status === 'card_saved' && (
               <Button
                 onClick={handleCreateHold}
-                disabled={isLoading}
+                isPending={isLoading}
                 className="w-full"
               >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <ShieldCheck className="mr-2 h-4 w-4" />
-                )}
+                <ShieldCheck data-slot="icon" />
                 {t('createHold')}
               </Button>
             )}
@@ -574,9 +570,8 @@ export function DepositSection({
             <Button
               variant="destructive"
               onClick={handleCapture}
-              disabled={isLoading}
+              isPending={isLoading}
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('confirmCapture')}
             </Button>
           </DialogFooter>

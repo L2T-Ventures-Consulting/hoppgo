@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, CreditCard, Loader2, Send } from 'lucide-react';
+import { ChevronLeft, CreditCard, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button, Card, CardContent, Checkbox, Label } from '@louez/ui';
@@ -175,16 +175,13 @@ export function CheckoutConfirmStep({
                 id={CHECKOUT_SUBMIT_ID}
                 size="lg"
                 className="flex-1"
-                disabled={isSubmitting || !canSubmitCheckout}
+                isPending={isSubmitting}
+                pendingContent={t('processing')}
+                disabled={!canSubmitCheckout}
               >
-                {isSubmitting ? (
+                {reservationMode === 'payment' ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : reservationMode === 'payment' ? (
-                  <>
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard data-slot="icon" />
                     {depositPercentage < 100
                       ? t('payDeposit', {
                           amount: formatCurrency(
@@ -196,7 +193,7 @@ export function CheckoutConfirmStep({
                   </>
                 ) : (
                   <>
-                    <Send className="mr-2 h-4 w-4" />
+                    <Send data-slot="icon" />
                     {t('submitRequest')}
                   </>
                 )}

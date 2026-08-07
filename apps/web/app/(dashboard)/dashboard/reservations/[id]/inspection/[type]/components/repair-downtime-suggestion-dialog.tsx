@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import Link from 'next/link';
 
-import { AlertTriangle, Loader2, Wrench } from 'lucide-react';
+import { AlertTriangle, Wrench } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -246,10 +246,7 @@ export const RepairDowntimeSuggestionDialog = ({
           {conflictsDetected ? (
             <Button onClick={onDone}>{t('done')}</Button>
           ) : (
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : null}
+            <Button onClick={handleSubmit} isPending={isSubmitting}>
               {t('submit')}
             </Button>
           )}

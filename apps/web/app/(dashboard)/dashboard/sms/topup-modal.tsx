@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
-import { Loader2, CreditCard, Sparkles, Check, X, ArrowRight } from 'lucide-react'
+import { CreditCard, Sparkles, Check, X, ArrowRight } from 'lucide-react'
 
 import {
   Dialog,
@@ -196,22 +196,14 @@ export function TopupModal({ open, onOpenChange, priceCents, planSlug }: TopupMo
               </Button>
               <Button
                 onClick={handlePurchase}
-                disabled={loading}
+                isPending={loading}
+                pendingContent={t('processing')}
                 className="flex-1 shadow-sm shadow-primary/20"
               >
-                {loading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    {t('pay', {
-                      amount: formatPrice(selectedPackage * priceCents),
-                    })}
-                  </>
-                )}
+                <CreditCard data-slot="icon" />
+                {t('pay', {
+                  amount: formatPrice(selectedPackage * priceCents),
+                })}
               </Button>
             </div>
           </div>
