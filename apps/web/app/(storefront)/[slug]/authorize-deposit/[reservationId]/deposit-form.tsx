@@ -162,22 +162,15 @@ function CheckoutForm({
         type="submit"
         size="lg"
         className="w-full"
-        disabled={!stripe || !elements || !isPaymentElementReady || isProcessing}
+        isPending={isProcessing}
+        pendingContent={t('processing')}
+        disabled={!stripe || !elements || !isPaymentElementReady}
         style={{
           backgroundColor: store.theme?.primaryColor || undefined,
         }}
       >
-        {isProcessing ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {t('processing')}
-          </>
-        ) : (
-          <>
-            <Shield className="mr-2 h-4 w-4" />
-            {t('authorizeButton', { amount: formatCurrency(reservation.depositAmount, currency) })}
-          </>
-        )}
+        <Shield data-slot="icon" />
+        {t('authorizeButton', { amount: formatCurrency(reservation.depositAmount, currency) })}
       </Button>
 
       {/* Security note */}

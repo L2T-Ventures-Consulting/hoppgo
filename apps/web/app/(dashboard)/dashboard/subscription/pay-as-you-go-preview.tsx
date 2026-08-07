@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { ChevronRight, Loader2, Zap } from 'lucide-react'
+import { ChevronRight, Zap } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import {
@@ -90,8 +90,7 @@ export function PayAsYouGoPreview({
               <AlertDescription>{t('deferredNote')}</AlertDescription>
             </Alert>
           )}
-          <Button onClick={handleActivate} disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleActivate} isPending={isPending}>
             {t('activate')}
           </Button>
         </CardContent>

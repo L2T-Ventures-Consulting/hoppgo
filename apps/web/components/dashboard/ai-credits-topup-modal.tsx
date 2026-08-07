@@ -7,7 +7,6 @@ import {
   BadgePercent,
   Check,
   CreditCard,
-  Loader2,
   MessagesSquare,
   Phone,
   PhoneCall,
@@ -309,22 +308,15 @@ export function AiCreditsTopupModal({
             <Button
               type="button"
               onClick={handlePurchase}
-              disabled={loading || !selected}
+              isPending={loading}
+              pendingContent={t('processing')}
+              disabled={!selected}
               className="shadow-primary/20 flex-1 shadow-sm transition-transform duration-150 ease-out active:scale-[0.96]"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('processing')}
-                </>
-              ) : (
-                <>
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  {selected
-                    ? t('pay', { amount: formatPrice(selected.priceCents) })
-                    : t('pay', { amount: '—' })}
-                </>
-              )}
+              <CreditCard data-slot="icon" />
+              {selected
+                ? t('pay', { amount: formatPrice(selected.priceCents) })
+                : t('pay', { amount: '—' })}
             </Button>
           </div>
         </DialogPanel>

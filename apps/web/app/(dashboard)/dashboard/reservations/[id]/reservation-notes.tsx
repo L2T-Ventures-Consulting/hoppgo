@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Loader2 } from 'lucide-react'
 import { toastManager } from '@louez/ui'
 import { useTranslations } from 'next-intl'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -168,10 +167,9 @@ export function ReservationNotes({
         {hasChanges && (
           <Button
             onClick={handleSave}
-            disabled={isLoading}
+            isPending={isLoading}
             className="w-full"
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {tCommon('save')}
           </Button>
         )}

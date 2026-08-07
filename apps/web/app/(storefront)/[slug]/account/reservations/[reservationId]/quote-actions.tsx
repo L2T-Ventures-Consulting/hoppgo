@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { CheckCircle, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@louez/ui';
@@ -72,14 +72,11 @@ export function QuoteActions({ storeSlug, reservationId }: QuoteActionsProps) {
       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
         <Button
           onClick={handleAccept}
-          disabled={isAccepting || isDeclining}
+          isPending={isAccepting}
+          disabled={isDeclining}
           className="bg-emerald-600 text-white hover:bg-emerald-700"
         >
-          {isAccepting ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <CheckCircle className="mr-2 h-4 w-4" />
-          )}
+          <CheckCircle data-slot="icon" />
           {t('quote.accept')}
         </Button>
         <Button
@@ -108,9 +105,8 @@ export function QuoteActions({ storeSlug, reservationId }: QuoteActionsProps) {
             <Button
               variant="destructive"
               onClick={handleDecline}
-              disabled={isDeclining}
+              isPending={isDeclining}
             >
-              {isDeclining && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('quote.confirmDecline')}
             </Button>
           </AlertDialogFooter>

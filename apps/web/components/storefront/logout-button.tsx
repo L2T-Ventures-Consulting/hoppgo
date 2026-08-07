@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { LogOut, Loader2 } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { toastManager } from '@louez/ui'
 
@@ -42,14 +42,10 @@ export function LogoutButton({ storeSlug }: LogoutButtonProps) {
     <Button
       variant="outline"
       onClick={handleLogout}
-      disabled={isLoading}
+      isPending={isLoading}
       className="gap-2 bg-background/80 backdrop-blur-sm"
     >
-      {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <LogOut className="h-4 w-4" />
-      )}
+      <LogOut data-slot="icon" />
       {t('logout')}
     </Button>
   )

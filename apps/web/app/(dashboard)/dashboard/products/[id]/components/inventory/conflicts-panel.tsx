@@ -5,12 +5,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import {
-  AlertTriangle,
-  CheckCircle2,
-  ExternalLink,
-  Loader2,
-} from 'lucide-react';
+import { AlertTriangle, CheckCircle2, ExternalLink } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -253,13 +248,9 @@ export const ConflictsPanel = ({
                   <Button
                     type="button"
                     onClick={() => handleReassign(conflict)}
-                    disabled={
-                      isPending || conflict.replacementCandidates.length === 0
-                    }
+                    isPending={isPending}
+                    disabled={conflict.replacementCandidates.length === 0}
                   >
-                    {isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : null}
                     {t('reassign')}
                   </Button>
                   <Button

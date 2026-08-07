@@ -137,14 +137,9 @@ export const VoicePicker = ({ value, onChange, language }: VoicePickerProps) => 
       size="icon"
       aria-label={t('voicePreview')}
       onClick={() => togglePreview(voiceId)}
+      isPending={loadingId === voiceId}
     >
-      {loadingId === voiceId ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : playingId === voiceId ? (
-        <Pause className="h-4 w-4" />
-      ) : (
-        <Play className="h-4 w-4" />
-      )}
+      {playingId === voiceId ? <Pause data-slot="icon" /> : <Play data-slot="icon" />}
     </Button>
   )
 

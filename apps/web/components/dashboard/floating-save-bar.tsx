@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 
-import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@louez/ui';
@@ -106,11 +105,10 @@ export function FloatingSaveBar({
             <Button
               type={onSubmit || formId ? 'button' : 'submit'}
               form={formId}
-              disabled={isLoading}
+              isPending={isLoading}
               data-keyboard-shortcut-save={isDirty ? '' : undefined}
               onClick={onSubmit}
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {t('save')}
               <kbd className="font-mono text-[10px] text-current/70">
                 {saveShortcut.label}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Download, Loader2 } from 'lucide-react'
+import { Download } from 'lucide-react'
 import { Button } from '@louez/ui'
 
 interface DownloadContractButtonProps {
@@ -56,14 +56,10 @@ export function DownloadContractButton({ href, label }: DownloadContractButtonPr
     <Button
       variant="outline"
       onClick={handleClick}
-      disabled={isLoading}
+      isPending={isLoading}
       className="gap-2 self-start"
     >
-      {isLoading ? (
-        <Loader2 className="h-4 w-4 animate-spin" />
-      ) : (
-        <Download className="h-4 w-4" />
-      )}
+      <Download data-slot="icon" />
       {label}
     </Button>
   )

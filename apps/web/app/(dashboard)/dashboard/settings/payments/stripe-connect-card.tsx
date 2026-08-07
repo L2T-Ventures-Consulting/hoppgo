@@ -179,8 +179,8 @@ export function StripeConnectCard({
                 {t("openDashboard")}
               </Button>
 
-              <Button variant="outline" onClick={handleSync} disabled={isSyncing}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+              <Button variant="outline" onClick={handleSync} isPending={isSyncing}>
+                <RefreshCw data-slot="icon" />
                 {t("sync")}
               </Button>
 
@@ -224,8 +224,8 @@ export function StripeConnectCard({
                 {t("completeSetup")}
               </Button>
 
-              <Button variant="outline" onClick={handleSync} disabled={isSyncing}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+              <Button variant="outline" onClick={handleSync} isPending={isSyncing}>
+                <RefreshCw data-slot="icon" />
                 {t("sync")}
               </Button>
 

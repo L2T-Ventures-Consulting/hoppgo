@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Reorder, useDragControls } from 'framer-motion'
-import { GripVertical, Loader2 } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
 import { toastManager } from '@louez/ui'
 
 import { ProductImage } from '@/components/product/product-image'
@@ -140,8 +140,7 @@ export function ProductsOrderDialog({
           >
             {tCommon('cancel')}
           </Button>
-          <Button onClick={handleSave} disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleSave} isPending={isLoading}>
             {tCommon('save')}
           </Button>
         </DialogFooter>

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 
 import { useRouter } from 'next/navigation';
 
-import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -172,9 +171,9 @@ export const RetireDialog = ({
           <Button
             variant="destructive"
             onClick={handleSubmit}
-            disabled={isSubmitting || !unit}
+            isPending={isSubmitting}
+            disabled={!unit}
           >
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {t('submit')}
           </Button>
         </DialogFooter>

@@ -36,7 +36,6 @@ import {
 } from "@louez/ui";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@louez/ui";
 import { LinkIcon } from "@louez/ui/icons";
-import { cn } from "@louez/utils";
 
 import type {
   TulipCatalogItem,
@@ -257,10 +256,12 @@ export function TulipProductMappingSection({
             variant="outline"
             size="sm"
             onClick={() => void onRefresh()}
-            disabled={disabled || isRefreshing}
+            isPending={isRefreshing}
+            pendingContent={t("refreshingButton")}
+            disabled={disabled}
           >
-            <RefreshCw className={cn("h-4 w-4", isRefreshing && "animate-spin")} />
-            {isRefreshing ? t("refreshingButton") : t("refreshButton")}
+            <RefreshCw data-slot="icon" />
+            {t("refreshButton")}
           </Button>
         </div>
       </CardHeader>

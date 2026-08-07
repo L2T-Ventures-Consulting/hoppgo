@@ -11,7 +11,6 @@ import {
   CreditCard,
   Gauge,
   Gift,
-  Loader2,
   Package,
   Receipt,
   Zap,
@@ -159,13 +158,9 @@ export function PayAsYouGoSummary({
               size="sm"
               className="mt-3 self-start"
               onClick={handleManageBilling}
-              disabled={isPending}
+              isPending={isPending}
             >
-              {isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <CreditCard className="mr-2 h-4 w-4" />
-              )}
+              <CreditCard data-slot="icon" />
               {t('addPaymentMethod')}
             </Button>
           </AlertDescription>
@@ -222,13 +217,9 @@ export function PayAsYouGoSummary({
                 variant="outline"
                 size="sm"
                 onClick={handleManageBilling}
-                disabled={isPending}
+                isPending={isPending}
               >
-                {isPending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <CreditCard className="mr-2 h-4 w-4" />
-                )}
+                <CreditCard data-slot="icon" />
                 {t('managePayment')}
               </Button>
             </div>

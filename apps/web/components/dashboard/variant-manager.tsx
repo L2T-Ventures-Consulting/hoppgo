@@ -413,11 +413,9 @@ const VariantManager = () => {
             <Button
               type="button"
               onClick={() => void handleCreate()}
+              isPending={ensureDefinitionMutation.isPending}
               disabled={isMutating}
             >
-              {ensureDefinitionMutation.isPending && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               {tCommon('create')}
             </Button>
           </DialogFooter>
@@ -460,11 +458,9 @@ const VariantManager = () => {
             <Button
               type="button"
               onClick={() => void handleRename()}
+              isPending={updateDefinitionMutation.isPending}
               disabled={isMutating}
             >
-              {updateDefinitionMutation.isPending && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               {tCommon('save')}
             </Button>
           </DialogFooter>
@@ -495,11 +491,9 @@ const VariantManager = () => {
               type="button"
               variant="destructive"
               onClick={() => void handleDelete()}
+              isPending={deleteDefinitionMutation.isPending}
               disabled={isMutating}
             >
-              {deleteDefinitionMutation.isPending && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               {tCommon('delete')}
             </Button>
           </AlertDialogFooter>
@@ -915,11 +909,9 @@ const VariantDefinitionRow = ({
             <Button
               type="button"
               onClick={() => void handleUpdateValue()}
-              disabled={updateValueMutation.isPending || !editValueLabel.trim()}
+              isPending={updateValueMutation.isPending}
+              disabled={!editValueLabel.trim()}
             >
-              {updateValueMutation.isPending && (
-                <Loader2 className="size-4 animate-spin" />
-              )}
               {tCommon('save')}
             </Button>
           </DialogFooter>

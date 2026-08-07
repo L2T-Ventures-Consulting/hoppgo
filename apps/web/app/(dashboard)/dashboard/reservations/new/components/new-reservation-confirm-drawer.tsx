@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, Check, FileText, Loader2, Mail, MailX } from "lucide-react";
+import { AlertTriangle, Check, FileText, Mail, MailX } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import {
@@ -296,14 +296,8 @@ export function NewReservationConfirmDrawer({
           <DrawerClose render={<Button type="button" variant="outline" disabled={isSubmitting} />}>
             {tCommon("edit")}
           </DrawerClose>
-          <Button type="button" onClick={onConfirm} disabled={isSubmitting}>
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : asQuote ? (
-              <FileText className="h-4 w-4" />
-            ) : (
-              <Check className="h-4 w-4" />
-            )}
+          <Button type="button" onClick={onConfirm} isPending={isSubmitting}>
+            {asQuote ? <FileText data-slot="icon" /> : <Check data-slot="icon" />}
             {asQuote ? t("sendAsQuote") : t("create")}
           </Button>
         </DrawerFooter>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { AlertTriangle, CheckCircle2, CreditCard, Loader2, Sparkles, Wallet } from "lucide-react";
+import { AlertTriangle, CheckCircle2, CreditCard, Sparkles, Wallet } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 
 import { Badge, Button, Input, Switch } from "@louez/ui";
@@ -243,9 +243,8 @@ export function AiCreditsSection({
                 variant="outline"
                 size="sm"
                 onClick={handleSaveAutoTopup}
-                disabled={saving}
+                isPending={saving}
               >
-                {saving && <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />}
                 {t("autoTopup.save")}
               </Button>
               {saved && <span className="text-xs text-success">{t("autoTopup.saved")}</span>}
