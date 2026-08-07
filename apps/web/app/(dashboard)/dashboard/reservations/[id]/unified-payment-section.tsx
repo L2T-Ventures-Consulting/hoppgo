@@ -1325,7 +1325,7 @@ export function UnifiedPaymentSection({
             </div>
           </DialogPanel>
 
-          <DialogFooter className="flex-row justify-between">
+          <DialogFooter className="sm:justify-between">
             <Button variant="outline" onClick={() => setPaymentModalOpen(false)}>
               {tCommon("cancel")}
             </Button>
