@@ -1,15 +1,16 @@
-import {
-  Button,
-  Column,
-  Heading,
-  Hr,
-  Link,
-  Row,
-  Section,
-  Text,
-} from '@react-email/components'
+import { Link } from '@react-email/components'
 import { BaseLayout } from './base-layout'
-import { getContrastColorHex } from '@/lib/utils/colors'
+import {
+  CtaButton,
+  EmailHeading,
+  EmailText,
+  FooterNote,
+  InfoCard,
+  InfoCardItem,
+  ItemsTable,
+  emailTheme,
+  resolveCustomContent,
+} from './components'
 import {
   getEmailTranslations,
   getDateFormatPatterns,
@@ -17,10 +18,7 @@ import {
   type EmailLocale,
 } from '../i18n'
 import type { EmailCustomContent } from '@louez/types'
-import {
-  formatEmailDateInStoreTimezone,
-  getStoreTimezoneLabel,
-} from '../date-time'
+import { formatEmailDateInStoreTimezone, getStoreTimezoneLabel } from '../date-time'
 
 interface ReservationItem {
   name: string
@@ -56,7 +54,7 @@ interface RequestAcceptedEmailProps {
 export function RequestAcceptedEmail({
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   storeAddress,
   storeEmail,
   storePhone,
@@ -88,26 +86,29 @@ export function RequestAcceptedEmail({
       ? tc.timezone.replace('{timezone}', timezoneLabel)
       : `Timezone: ${timezoneLabel}`
 
-  const buttonStyle = {
-    ...button,
-    backgroundColor: primaryColor,
-    color: getContrastColorHex(primaryColor),
-  }
+  const formatDate = (date: Date) =>
+    formatEmailDateInStoreTimezone(date, locale, datePatterns.full, storeTimezone, storeCountry)
 
-  // Use custom content or defaults
-  const greeting = customContent?.greeting
-    ? customContent.greeting.replace('{name}', customerFirstName)
-    : tc.greeting.replace('{name}', customerFirstName)
+  const { greeting, message } = resolveCustomContent(
+    customContent,
+    {
+      greeting: tc.greeting,
+      signature: `${tc.regards}\n${tc.team.replace('{storeName}', storeName)}`,
+    },
+    { name: customerFirstName, number: reservationNumber },
+  )
 
-  const customMessage = customContent?.message
-    ? customContent.message
-        .replace('{number}', reservationNumber)
-        .replace('{name}', customerFirstName)
-    : null
+  const totals = [
+    ...(deposit > 0 ? [{ label: tc.deposit, amount: deposit }] : []),
+    { label: tc.totalToPay, amount: total, bold: true },
+  ]
 
   return (
     <BaseLayout
-      preview={customContent?.subject?.replace('{number}', reservationNumber) || messages.subject.replace('{number}', reservationNumber)}
+      preview={
+        customContent?.subject?.replace('{number}', reservationNumber) ||
+        messages.subject.replace('{number}', reservationNumber)
+      }
       storeName={storeName}
       logoUrl={logoUrl}
       primaryColor={primaryColor}
@@ -116,226 +117,72 @@ export function RequestAcceptedEmail({
       storeAddress={storeAddress}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      <Text style={paragraph}>{greeting}</Text>
+      <EmailText>{greeting}</EmailText>
 
-      <Text style={paragraph}>
-        {messages.body.replace('{number}', reservationNumber)}
-      </Text>
+      <EmailText>{messages.body.replace('{number}', reservationNumber)}</EmailText>
 
       {/* Custom message from store settings */}
-      {customMessage && (
-        <Text style={paragraph}>{customMessage}</Text>
-      )}
+      {message && <EmailText>{message}</EmailText>}
 
-      {/* Period */}
-      <Section style={section}>
-        <Text style={sectionTitle}>{messages.rentalPeriod}</Text>
-        <Text style={paragraph}>
-          {tc.periodFrom.replace(
-            '{startDate}',
-            formatEmailDateInStoreTimezone(
-              startDate,
-              locale,
-              datePatterns.full,
-              storeTimezone,
-              storeCountry
-            )
-          )}
-          <br />
-          {tc.periodTo.replace(
-            '{endDate}',
-            formatEmailDateInStoreTimezone(
-              endDate,
-              locale,
-              datePatterns.full,
-              storeTimezone,
-              storeCountry
-            )
-          )}
-        </Text>
-        <Text style={timezoneText}>{timezoneLine}</Text>
-      </Section>
-
-      {/* Pickup Address */}
-      {storeAddress && (
-        <Section style={section}>
-          <Text style={sectionTitle}>{tc.pickupAddress}</Text>
-          <Text style={paragraph}>
-            {storeName}
+      <InfoCard
+        label={messages.rentalPeriod}
+        value={
+          <>
+            {tc.periodFrom.replace('{startDate}', formatDate(startDate))}
             <br />
-            {storeAddress}
-          </Text>
-        </Section>
-      )}
-
-      <Hr style={hr} />
-
-      {/* Items Summary */}
-      <Section>
-        <Text style={sectionTitle}>{messages.yourReservation}</Text>
-        {items.map((item, index) => (
-          <Row key={index} style={tableRow}>
-            <Column>
-              <Text style={paragraph}>
-                {item.name} x {item.quantity}
-              </Text>
-            </Column>
-            <Column align="right">
-              <Text style={paragraph}>{formatCurrency(item.totalPrice)}</Text>
-            </Column>
-          </Row>
-        ))}
-        <Hr style={hr} />
-        <Row style={tableRow}>
-          <Column>
-            <Text style={paragraphBold}>{tc.totalToPay}</Text>
-          </Column>
-          <Column align="right">
-            <Text style={paragraphBold}>{formatCurrency(total)}</Text>
-          </Column>
-        </Row>
-        {deposit > 0 && (
-          <Row style={tableRow}>
-            <Column>
-              <Text style={depositText}>{tc.deposit}</Text>
-            </Column>
-            <Column align="right">
-              <Text style={depositText}>{formatCurrency(deposit)}</Text>
-            </Column>
-          </Row>
+            {tc.periodTo.replace('{endDate}', formatDate(endDate))}
+          </>
+        }
+        footnote={timezoneLine}
+      >
+        {storeAddress && (
+          <InfoCardItem
+            label={tc.pickupAddress}
+            value={
+              <>
+                {storeName}
+                <br />
+                {storeAddress}
+              </>
+            }
+          />
         )}
-      </Section>
+      </InfoCard>
 
-      {/* CTA */}
-      <Section style={ctaSection}>
-        {paymentUrl ? (
-          <Button href={paymentUrl} style={buttonStyle}>
-            {messages.proceedPayment}
-          </Button>
-        ) : (
-          <Button href={reservationUrl} style={buttonStyle}>
-            {tc.viewReservation}
-          </Button>
-        )}
-      </Section>
+      <EmailText bold>{messages.yourReservation}</EmailText>
 
-      <Text style={footerNote}>
+      <ItemsTable items={items} totals={totals} formatCurrency={formatCurrency} />
+
+      <CtaButton
+        href={paymentUrl || reservationUrl}
+        label={paymentUrl ? messages.proceedPayment : tc.viewReservation}
+        primaryColor={primaryColor}
+      />
+
+      <FooterNote>
         {termsUrl ? messages.legalAcceptance : messages.contractAvailable}
-      </Text>
-      <Text style={legalLinks}>
+        <br />
         <Link href={contractUrl} style={legalLink}>
           {messages.viewContract}
         </Link>
         {termsUrl && (
           <>
-            <span style={legalLinksSeparator}>·</span>
+            {' · '}
             <Link href={termsUrl} style={legalLink}>
               {messages.viewTerms}
             </Link>
           </>
         )}
-      </Text>
+      </FooterNote>
     </BaseLayout>
   )
 }
 
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '14px',
-  lineHeight: '24px',
-  color: '#525f7f',
-  margin: '0 0 10px 0',
-}
-
-const paragraphBold = {
-  ...paragraph,
-  fontWeight: 'bold' as const,
-}
-
-const depositText = {
-  fontSize: '13px',
-  lineHeight: '20px',
-  color: '#8898aa',
-  margin: '4px 0 0 0',
-  fontStyle: 'italic' as const,
-}
-
-const section = {
-  marginBottom: '24px',
-}
-
-const sectionTitle = {
-  fontSize: '12px',
-  fontWeight: 'bold' as const,
-  textTransform: 'uppercase' as const,
-  color: '#8898aa',
-  marginBottom: '8px',
-}
-
-const timezoneText = {
-  fontSize: '12px',
-  lineHeight: '18px',
-  color: '#8898aa',
-  margin: '4px 0 0 0',
-}
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
-}
-
-const tableRow = {
-  marginBottom: '8px',
-}
-
-const ctaSection = {
-  textAlign: 'center' as const,
-  marginTop: '32px',
-  marginBottom: '32px',
-}
-
-const button = {
-  backgroundColor: '#0066FF',
-  borderRadius: '6px',
-  color: '#fff',
-  fontSize: '14px',
-  fontWeight: 'bold' as const,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '12px 24px',
-}
-
-const footerNote = {
-  fontSize: '13px',
-  color: '#8898aa',
-  fontStyle: 'italic' as const,
-  textAlign: 'center' as const,
-  marginBottom: '8px',
-}
-
-const legalLinks = {
-  fontSize: '13px',
-  textAlign: 'center' as const,
-  margin: 0,
-}
-
 const legalLink = {
-  color: '#525f7f',
+  color: emailTheme.colors.muted,
   textDecoration: 'underline',
-}
-
-const legalLinksSeparator = {
-  color: '#8898aa',
-  margin: '0 8px',
 }
 
 export default RequestAcceptedEmail

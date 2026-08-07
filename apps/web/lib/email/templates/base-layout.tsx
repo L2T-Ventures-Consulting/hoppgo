@@ -11,6 +11,7 @@ import {
   Link,
 } from '@react-email/components'
 import { getEmailTranslations, type EmailLocale } from '../i18n'
+import { DEFAULT_PRIMARY_COLOR, emailTheme } from './components/theme'
 
 interface BaseLayoutProps {
   preview: string
@@ -24,19 +25,37 @@ interface BaseLayoutProps {
   children: React.ReactNode
 }
 
+/**
+ * The shared shell of every store-branded email: white card, store logo (or
+ * wordmark) over a primary-color hairline, content, slim footer. The postal
+ * address deliberately stays out of the footer — it appears in the body of the
+ * emails where the customer actually needs it (pickup information).
+ */
 export function BaseLayout({
   preview,
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor = DEFAULT_PRIMARY_COLOR,
   storeEmail,
   storePhone,
-  storeAddress,
   locale = 'fr',
   children,
 }: BaseLayoutProps) {
   const t = getEmailTranslations(locale)
   const baseLayout = t.baseLayout
+
+  const contactParts = [
+    storeEmail && (
+      <Link key="email" href={`mailto:${storeEmail}`} style={footerLink}>
+        {storeEmail}
+      </Link>
+    ),
+    storePhone && (
+      <Link key="phone" href={`tel:${storePhone}`} style={footerLink}>
+        {storePhone}
+      </Link>
+    ),
+  ].filter(Boolean)
 
   return (
     <Html>
@@ -44,7 +63,7 @@ export function BaseLayout({
       <Preview>{preview}</Preview>
       <Body style={main}>
         <Container style={container}>
-          {/* Header with primary color accent */}
+          {/* Header: the store's mark over its one accent line */}
           <Section
             style={{
               ...header,
@@ -55,7 +74,7 @@ export function BaseLayout({
               <Img
                 src={logoUrl}
                 alt={storeName}
-                height={48}
+                height={40}
                 style={{ display: 'block', margin: '0 auto' }}
               />
             ) : (
@@ -68,43 +87,24 @@ export function BaseLayout({
 
           {/* Footer */}
           <Section style={footer}>
-            <Hr style={hr} />
-
-            {/* Store info */}
             <Text style={footerStoreName}>{storeName}</Text>
 
-            {(storeAddress || storeEmail || storePhone) && (
-              <div style={footerContactContainer}>
-                {storeAddress && (
-                  <Text style={footerContactText}>{storeAddress}</Text>
-                )}
-                {storeEmail && (
-                  <Text style={footerContactText}>
-                    <Link href={`mailto:${storeEmail}`} style={footerLink}>
-                      {storeEmail}
-                    </Link>
-                  </Text>
-                )}
-                {storePhone && (
-                  <Text style={footerContactText}>
-                    <Link href={`tel:${storePhone}`} style={footerLink}>
-                      {storePhone}
-                    </Link>
-                  </Text>
-                )}
-              </div>
+            {contactParts.length > 0 && (
+              <Text style={footerContactText}>
+                {contactParts.map((part, index) => (
+                  <span key={index}>
+                    {index > 0 && ' · '}
+                    {part}
+                  </span>
+                ))}
+              </Text>
             )}
 
-            <Hr style={hrLight} />
+            <Hr style={hr} />
 
-            <Text style={footerText}>
-              {baseLayout.sentBy.replace('{storeName}', storeName)}
-            </Text>
-            <Text style={footerText}>
-              {baseLayout.ignoreIfNotYou}
-            </Text>
+            <Text style={footerText}>{baseLayout.sentBy.replace('{storeName}', storeName)}</Text>
+            <Text style={footerText}>{baseLayout.ignoreIfNotYou}</Text>
 
-            {/* Powered by */}
             <Text style={poweredBy}>
               {baseLayout.poweredBy}{' '}
               <Link href="https://louez.io" style={poweredByLink}>
@@ -119,95 +119,85 @@ export function BaseLayout({
 }
 
 const main = {
-  backgroundColor: '#f6f9fc',
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, sans-serif',
+  backgroundColor: emailTheme.colors.bgPage,
+  fontFamily: emailTheme.fontFamily,
 }
 
 const container = {
-  backgroundColor: '#ffffff',
+  backgroundColor: emailTheme.colors.card,
   margin: '0 auto',
   marginTop: '40px',
   marginBottom: '40px',
   maxWidth: '600px',
   borderRadius: '8px',
   overflow: 'hidden' as const,
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)',
 }
 
 const header = {
-  padding: '32px 48px',
-  backgroundColor: '#fafafa',
+  padding: '28px 48px 24px',
+  backgroundColor: emailTheme.colors.card,
   textAlign: 'center' as const,
 }
 
 const logoText = {
-  fontSize: '28px',
-  fontWeight: 'bold' as const,
+  fontSize: '20px',
+  fontWeight: '600' as const,
   margin: '0',
   textAlign: 'center' as const,
 }
 
 const content = {
-  padding: '40px 48px',
+  padding: '36px 48px',
 }
 
 const footer = {
-  padding: '32px 48px',
-  backgroundColor: '#fafafa',
-}
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '0 0 24px 0',
-}
-
-const hrLight = {
-  borderColor: '#e6ebf1',
-  margin: '24px 0',
+  padding: '24px 48px',
+  backgroundColor: emailTheme.colors.bgFooter,
+  borderTop: `1px solid ${emailTheme.colors.border}`,
 }
 
 const footerStoreName = {
-  fontSize: '16px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  margin: '0 0 8px 0',
-  textAlign: 'center' as const,
-}
-
-const footerContactContainer = {
-  textAlign: 'center' as const,
-  marginBottom: '16px',
-}
-
-const footerContactText = {
   fontSize: '13px',
-  color: '#525f7f',
+  fontWeight: '600' as const,
+  color: emailTheme.colors.ink,
   margin: '0 0 4px 0',
   textAlign: 'center' as const,
 }
 
+const footerContactText = {
+  fontSize: '12px',
+  color: emailTheme.colors.muted,
+  margin: '0',
+  textAlign: 'center' as const,
+}
+
 const footerLink = {
-  color: '#525f7f',
+  color: emailTheme.colors.muted,
   textDecoration: 'none' as const,
 }
 
+const hr = {
+  borderColor: emailTheme.colors.border,
+  margin: '16px 0',
+}
+
 const footerText = {
-  fontSize: '12px',
-  color: '#8898aa',
+  fontSize: '11px',
+  color: emailTheme.colors.faint,
   margin: '0 0 4px 0',
   textAlign: 'center' as const,
 }
 
 const poweredBy = {
   fontSize: '11px',
-  color: '#8898aa',
-  margin: '16px 0 0 0',
+  color: emailTheme.colors.faint,
+  margin: '12px 0 0 0',
   textAlign: 'center' as const,
 }
 
 const poweredByLink = {
-  color: '#0066FF',
+  color: emailTheme.colors.muted,
   textDecoration: 'none' as const,
-  fontWeight: 'bold' as const,
+  fontWeight: '600' as const,
 }

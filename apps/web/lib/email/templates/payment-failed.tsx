@@ -1,12 +1,5 @@
-import {
-  Button,
-  Heading,
-  Hr,
-  Section,
-  Text,
-} from '@react-email/components'
 import { BaseLayout } from './base-layout'
-import { getContrastColorHex } from '@/lib/utils/colors'
+import { CtaButton, EmailHeading, EmailText, FooterNote } from './components'
 import { getEmailTranslations, getCurrencyFormatter, type EmailLocale } from '../i18n'
 
 interface PaymentFailedEmailProps {
@@ -28,7 +21,7 @@ interface PaymentFailedEmailProps {
 export function PaymentFailedEmail({
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   storeAddress,
   storeEmail,
   storePhone,
@@ -46,12 +39,6 @@ export function PaymentFailedEmail({
 
   const formatCurrency = getCurrencyFormatter(locale, currency)
 
-  const buttonStyle = {
-    ...button,
-    backgroundColor: primaryColor,
-    color: getContrastColorHex(primaryColor),
-  }
-
   return (
     <BaseLayout
       preview={messages.subject.replace('{number}', reservationNumber)}
@@ -63,118 +50,33 @@ export function PaymentFailedEmail({
       storeAddress={storeAddress}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      <Text style={paragraph}>{tc.greeting.replace('{name}', customerFirstName)}</Text>
+      <EmailText>{tc.greeting.replace('{name}', customerFirstName)}</EmailText>
 
-      <Text style={paragraph}>
+      <EmailText>
         {messages.body
           .replace('{number}', reservationNumber)
           .replace('{amount}', formatCurrency(paymentAmount))}
-      </Text>
+      </EmailText>
 
       {/* Error info if provided */}
-      {errorMessage && (
-        <Section style={errorSection}>
-          <Text style={errorText}>{errorMessage}</Text>
-        </Section>
-      )}
+      {errorMessage && <EmailText muted>{errorMessage}</EmailText>}
 
-      <Hr style={hr} />
+      <EmailText>{messages.whatToDo}</EmailText>
 
-      <Text style={paragraph}>
-        {messages.whatToDo}
-      </Text>
-
-      <Section style={listSection}>
-        <Text style={listItem}>• {messages.tip1}</Text>
-        <Text style={listItem}>• {messages.tip2}</Text>
-        <Text style={listItem}>• {messages.tip3}</Text>
-      </Section>
+      <EmailText small>
+        {messages.tip1} · {messages.tip2} · {messages.tip3}
+      </EmailText>
 
       {/* CTA */}
       {paymentUrl && (
-        <Section style={ctaSection}>
-          <Button href={paymentUrl} style={buttonStyle}>
-            {messages.retryPayment}
-          </Button>
-        </Section>
+        <CtaButton href={paymentUrl} label={messages.retryPayment} primaryColor={primaryColor} />
       )}
 
-      <Text style={footerNote}>
-        {messages.contactSupport}
-      </Text>
+      <FooterNote>{messages.contactSupport}</FooterNote>
     </BaseLayout>
   )
-}
-
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '14px',
-  lineHeight: '24px',
-  color: '#525f7f',
-  margin: '0 0 10px 0',
-}
-
-const errorSection = {
-  backgroundColor: '#fef2f2',
-  borderRadius: '8px',
-  padding: '16px',
-  marginTop: '16px',
-  marginBottom: '16px',
-}
-
-const errorText = {
-  fontSize: '14px',
-  color: '#dc2626',
-  margin: '0',
-}
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
-}
-
-const listSection = {
-  marginBottom: '24px',
-}
-
-const listItem = {
-  fontSize: '14px',
-  lineHeight: '28px',
-  color: '#525f7f',
-  margin: '0',
-}
-
-const ctaSection = {
-  textAlign: 'center' as const,
-  marginTop: '32px',
-  marginBottom: '32px',
-}
-
-const button = {
-  backgroundColor: '#0066FF',
-  borderRadius: '6px',
-  color: '#fff',
-  fontSize: '14px',
-  fontWeight: 'bold' as const,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '12px 24px',
-}
-
-const footerNote = {
-  fontSize: '13px',
-  color: '#8898aa',
-  fontStyle: 'italic' as const,
-  textAlign: 'center' as const,
 }
 
 export default PaymentFailedEmail

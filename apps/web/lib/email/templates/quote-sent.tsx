@@ -1,14 +1,14 @@
-import {
-  Button,
-  Column,
-  Heading,
-  Hr,
-  Row,
-  Section,
-  Text,
-} from '@react-email/components'
 import { BaseLayout } from './base-layout'
-import { getContrastColorHex } from '@/lib/utils/colors'
+import {
+  CtaButton,
+  EmailHeading,
+  EmailText,
+  FooterNote,
+  InfoCard,
+  InfoCardItem,
+  ItemsTable,
+  resolveCustomContent,
+} from './components'
 import {
   getEmailTranslations,
   getDateFormatPatterns,
@@ -16,10 +16,7 @@ import {
   type EmailLocale,
 } from '../i18n'
 import type { EmailCustomContent } from '@louez/types'
-import {
-  formatEmailDateInStoreTimezone,
-  getStoreTimezoneLabel,
-} from '../date-time'
+import { formatEmailDateInStoreTimezone, getStoreTimezoneLabel } from '../date-time'
 
 interface ReservationItem {
   name: string
@@ -51,7 +48,7 @@ interface QuoteSentEmailProps {
 export function QuoteSentEmail({
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   storeAddress,
   storeEmail,
   storePhone,
@@ -79,15 +76,17 @@ export function QuoteSentEmail({
       ? tc.timezone.replace('{timezone}', timezoneLabel)
       : `Timezone: ${timezoneLabel}`
 
-  const buttonStyle = {
-    ...button,
-    backgroundColor: primaryColor,
-    color: getContrastColorHex(primaryColor),
-  }
+  const formatDate = (date: Date) =>
+    formatEmailDateInStoreTimezone(date, locale, datePatterns.full, storeTimezone, storeCountry)
 
-  const greeting = customContent?.greeting
-    ? customContent.greeting.replace('{name}', customerFirstName)
-    : tc.greeting.replace('{name}', customerFirstName)
+  const { greeting } = resolveCustomContent(
+    customContent,
+    {
+      greeting: tc.greeting,
+      signature: `${tc.regards}\n${tc.team.replace('{storeName}', storeName)}`,
+    },
+    { name: customerFirstName, number: reservationNumber },
+  )
 
   return (
     <BaseLayout
@@ -100,167 +99,52 @@ export function QuoteSentEmail({
       storeAddress={storeAddress}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      <Text style={paragraph}>{greeting}</Text>
+      <EmailText>{greeting}</EmailText>
 
-      <Text style={paragraph}>
+      <EmailText>
         {messages.body.replace('{number}', reservationNumber).replace('{store}', storeName)}
-      </Text>
+      </EmailText>
 
-      {/* Period */}
-      <Section style={section}>
-        <Text style={sectionTitle}>{messages.rentalPeriod}</Text>
-        <Text style={paragraph}>
-          {tc.periodFrom.replace(
-            '{startDate}',
-            formatEmailDateInStoreTimezone(
-              startDate,
-              locale,
-              datePatterns.full,
-              storeTimezone,
-              storeCountry
-            )
-          )}
-          <br />
-          {tc.periodTo.replace(
-            '{endDate}',
-            formatEmailDateInStoreTimezone(
-              endDate,
-              locale,
-              datePatterns.full,
-              storeTimezone,
-              storeCountry
-            )
-          )}
-        </Text>
-        <Text style={timezoneText}>{timezoneLine}</Text>
-      </Section>
-
-      {/* Pickup Address */}
-      {storeAddress && (
-        <Section style={section}>
-          <Text style={sectionTitle}>{tc.pickupAddress}</Text>
-          <Text style={paragraph}>
-            {storeName}
+      <InfoCard
+        label={messages.rentalPeriod}
+        value={
+          <>
+            {tc.periodFrom.replace('{startDate}', formatDate(startDate))}
             <br />
-            {storeAddress}
-          </Text>
-        </Section>
-      )}
+            {tc.periodTo.replace('{endDate}', formatDate(endDate))}
+          </>
+        }
+        footnote={timezoneLine}
+      >
+        {storeAddress && (
+          <InfoCardItem
+            label={tc.pickupAddress}
+            value={
+              <>
+                {storeName}
+                <br />
+                {storeAddress}
+              </>
+            }
+          />
+        )}
+      </InfoCard>
 
-      <Hr style={hr} />
+      <EmailText bold>{messages.yourQuote}</EmailText>
 
-      {/* Items Summary */}
-      <Section>
-        <Text style={sectionTitle}>{messages.yourQuote}</Text>
-        {items.map((item, index) => (
-          <Row key={index} style={tableRow}>
-            <Column>
-              <Text style={paragraph}>
-                {item.name} x {item.quantity}
-              </Text>
-            </Column>
-            <Column align="right">
-              <Text style={paragraph}>{formatCurrency(item.totalPrice)}</Text>
-            </Column>
-          </Row>
-        ))}
-        <Hr style={hr} />
-        <Row style={tableRow}>
-          <Column>
-            <Text style={paragraphBold}>{tc.totalToPay}</Text>
-          </Column>
-          <Column align="right">
-            <Text style={paragraphBold}>{formatCurrency(total)}</Text>
-          </Column>
-        </Row>
-      </Section>
+      <ItemsTable
+        items={items}
+        totals={[{ label: tc.totalToPay, amount: total, bold: true }]}
+        formatCurrency={formatCurrency}
+      />
 
-      {/* CTA */}
-      <Section style={ctaSection}>
-        <Button href={reservationUrl} style={buttonStyle}>
-          {messages.viewQuote}
-        </Button>
-      </Section>
+      <CtaButton href={reservationUrl} label={messages.viewQuote} primaryColor={primaryColor} />
 
-      <Text style={footerNote}>
-        {messages.expiry}
-      </Text>
+      <FooterNote>{messages.expiry}</FooterNote>
     </BaseLayout>
   )
-}
-
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '14px',
-  lineHeight: '24px',
-  color: '#525f7f',
-  margin: '0 0 10px 0',
-}
-
-const paragraphBold = {
-  ...paragraph,
-  fontWeight: 'bold' as const,
-}
-
-const section = {
-  marginBottom: '24px',
-}
-
-const sectionTitle = {
-  fontSize: '12px',
-  fontWeight: 'bold' as const,
-  textTransform: 'uppercase' as const,
-  color: '#8898aa',
-  marginBottom: '8px',
-}
-
-const timezoneText = {
-  fontSize: '12px',
-  lineHeight: '18px',
-  color: '#8898aa',
-  margin: '4px 0 0 0',
-}
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
-}
-
-const tableRow = {
-  marginBottom: '8px',
-}
-
-const ctaSection = {
-  textAlign: 'center' as const,
-  marginTop: '32px',
-  marginBottom: '32px',
-}
-
-const button = {
-  backgroundColor: '#0066FF',
-  borderRadius: '6px',
-  color: '#fff',
-  fontSize: '14px',
-  fontWeight: 'bold' as const,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '12px 24px',
-}
-
-const footerNote = {
-  fontSize: '13px',
-  color: '#8898aa',
-  fontStyle: 'italic' as const,
-  textAlign: 'center' as const,
 }
 
 export default QuoteSentEmail

@@ -2,33 +2,35 @@ import { fr, enUS, de, es, it, nl, pl, ptBR } from 'date-fns/locale'
 import type { Locale as DateFnsLocale } from 'date-fns'
 import { createTranslator } from 'next-intl'
 
-// Import message files
-import frMessages from '@/messages/fr.json'
-import enMessages from '@/messages/en.json'
-import deMessages from '@/messages/de.json'
-import esMessages from '@/messages/es.json'
-import itMessages from '@/messages/it.json'
-import nlMessages from '@/messages/nl.json'
-import plMessages from '@/messages/pl.json'
-import ptMessages from '@/messages/pt.json'
+// Email message files — the `emails` subtree lives in its own small per-locale
+// files so the templates (also rendered in the browser for the dashboard
+// preview) don't drag the full app messages into the client bundle.
+import frEmails from '@/messages/emails/fr.json'
+import enEmails from '@/messages/emails/en.json'
+import deEmails from '@/messages/emails/de.json'
+import esEmails from '@/messages/emails/es.json'
+import itEmails from '@/messages/emails/it.json'
+import nlEmails from '@/messages/emails/nl.json'
+import plEmails from '@/messages/emails/pl.json'
+import ptEmails from '@/messages/emails/pt.json'
 
 import type { EmailLocale } from '@louez/email'
 export type { EmailLocale }
 
-// Type for email messages structure (use frMessages as reference)
-type EmailMessages = typeof frMessages
+// Type for email messages structure (use the French subtree as reference)
+type EmailMessages = { emails: typeof frEmails }
 
 // Map of locale to messages
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const messagesMap: Record<EmailLocale, any> = {
-  fr: frMessages,
-  en: enMessages,
-  de: deMessages,
-  es: esMessages,
-  it: itMessages,
-  nl: nlMessages,
-  pl: plMessages,
-  pt: ptMessages,
+  fr: { emails: frEmails },
+  en: { emails: enEmails },
+  de: { emails: deEmails },
+  es: { emails: esEmails },
+  it: { emails: itEmails },
+  nl: { emails: nlEmails },
+  pl: { emails: plEmails },
+  pt: { emails: ptEmails },
 }
 
 // Map of locale to date-fns locale

@@ -1,6 +1,6 @@
-import { Button, Heading, Section, Text } from '@react-email/components'
+import { Section } from '@react-email/components'
 import { BaseLayout } from './base-layout'
-import { getContrastColorHex } from '@/lib/utils/colors'
+import { CtaButton, EmailHeading, EmailText, FooterNote, styles } from './components'
 import { getEmailTranslations, type EmailLocale } from '../i18n'
 
 interface RewardUnlockedEmailProps {
@@ -18,7 +18,7 @@ interface RewardUnlockedEmailProps {
 export function RewardUnlockedEmail({
   storeName,
   storeLogoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   referredStoreName,
   kind,
   freeReservations,
@@ -28,16 +28,9 @@ export function RewardUnlockedEmail({
 }: RewardUnlockedEmailProps) {
   const messages = getEmailTranslations(locale).rewardUnlocked
 
-  const buttonStyle = {
-    ...button,
-    backgroundColor: primaryColor,
-    color: getContrastColorHex(primaryColor),
-  }
-
   // A subscribed referrer earns a euro invoice credit (no free reservations); use the
   // credit-specific copy so the email is not misleading.
-  const template =
-    kind === 'invoice_credit' ? messages.bodyCredit : messages.body
+  const template = kind === 'invoice_credit' ? messages.bodyCredit : messages.body
   const body = template
     .replace('{referredStoreName}', referredStoreName)
     .replace('{freeReservations}', String(freeReservations))
@@ -51,60 +44,21 @@ export function RewardUnlockedEmail({
       primaryColor={primaryColor}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      <Text style={paragraph}>{messages.greeting}</Text>
+      <EmailText>{messages.greeting}</EmailText>
 
-      <Text style={paragraph}>{body}</Text>
-
-      <Section style={ctaSection}>
-        <Button href={ctaUrl} style={buttonStyle}>
-          {messages.cta}
-        </Button>
+      <Section style={styles.card}>
+        <EmailText bold style={{ margin: '0' }}>
+          {body}
+        </EmailText>
       </Section>
 
-      <Text style={footerNote}>{messages.footer}</Text>
+      <CtaButton href={ctaUrl} label={messages.cta} primaryColor={primaryColor} />
+
+      <FooterNote>{messages.footer}</FooterNote>
     </BaseLayout>
   )
-}
-
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '14px',
-  lineHeight: '24px',
-  color: '#525f7f',
-  margin: '0 0 16px 0',
-}
-
-const ctaSection = {
-  textAlign: 'center' as const,
-  marginTop: '32px',
-  marginBottom: '32px',
-}
-
-const button = {
-  backgroundColor: '#0066FF',
-  borderRadius: '6px',
-  color: '#fff',
-  fontSize: '14px',
-  fontWeight: 'bold' as const,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '12px 24px',
-}
-
-const footerNote = {
-  fontSize: '13px',
-  color: '#8898aa',
-  fontStyle: 'italic' as const,
-  textAlign: 'center' as const,
 }
 
 export default RewardUnlockedEmail

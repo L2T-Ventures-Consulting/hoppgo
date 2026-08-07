@@ -1,14 +1,14 @@
-import {
-  Button,
-  Column,
-  Heading,
-  Hr,
-  Row,
-  Section,
-  Text,
-} from '@react-email/components'
+import { Column, Hr, Row, Section, Text } from '@react-email/components'
 import { BaseLayout } from './base-layout'
-import { getContrastColorHex } from '@/lib/utils/colors'
+import {
+  CtaButton,
+  EmailHeading,
+  EmailText,
+  FooterNote,
+  Signature,
+  StoreNote,
+  styles,
+} from './components'
 import { getEmailTranslations, getCurrencyFormatter, type EmailLocale } from '../i18n'
 
 interface PaymentRequestEmailProps {
@@ -21,9 +21,15 @@ interface PaymentRequestEmailProps {
   customerFirstName: string
   reservationNumber: string
   amount: number
-  description: string
+  /**
+   * `stripe`: a payment link with an amount and description, secured notice.
+   * `manual`: the store owner asks for payment by hand from a reservation —
+   * no payment link exists, the CTA opens the customer's reservation page.
+   */
+  variant?: 'stripe' | 'manual'
+  description?: string
   paymentUrl: string
-  customMessage?: string
+  customMessage?: string | null
   locale?: EmailLocale
   currency?: string
 }
@@ -31,13 +37,14 @@ interface PaymentRequestEmailProps {
 export function PaymentRequestEmail({
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   storeAddress,
   storeEmail,
   storePhone,
   customerFirstName,
   reservationNumber,
   amount,
+  variant = 'stripe',
   description,
   paymentUrl,
   customMessage,
@@ -48,12 +55,14 @@ export function PaymentRequestEmail({
   const messages = t.paymentRequest
   const tc = t.common
   const formatCurrency = getCurrencyFormatter(locale, currency)
+  const isManual = variant === 'manual'
 
-  const buttonStyle = {
-    ...button,
-    backgroundColor: primaryColor,
-    color: getContrastColorHex(primaryColor),
-  }
+  const body = isManual
+    ? messages.manualBody.replace('{number}', reservationNumber)
+    : messages.body
+        .replace('{storeName}', storeName)
+        .replace('{amount}', formatCurrency(amount))
+        .replace('{number}', reservationNumber)
 
   return (
     <BaseLayout
@@ -66,199 +75,76 @@ export function PaymentRequestEmail({
       storeAddress={storeAddress}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      <Text style={paragraph}>{tc.greeting.replace('{name}', customerFirstName)}</Text>
+      <EmailText>{tc.greeting.replace('{name}', customerFirstName)}</EmailText>
 
-      <Text style={paragraph}>
-        {messages.body
-          .replace('{storeName}', storeName)
-          .replace('{amount}', formatCurrency(amount))
-          .replace('{number}', reservationNumber)}
-      </Text>
+      <EmailText>{body}</EmailText>
+
+      <StoreNote message={customMessage} />
 
       {/* Payment details */}
-      <Section style={boxSection}>
-        <Text style={sectionTitle}>{messages.paymentDetails}</Text>
-
+      <Section style={styles.card}>
         <Row style={detailRow}>
           <Column>
             <Text style={detailLabel}>{messages.reservation}</Text>
           </Column>
           <Column align="right">
-            <Text style={detailValue}>#{reservationNumber}</Text>
+            <Text style={styles.value}>#{reservationNumber}</Text>
           </Column>
         </Row>
 
-        <Row style={detailRow}>
-          <Column>
-            <Text style={detailLabel}>{messages.description}</Text>
-          </Column>
-          <Column align="right">
-            <Text style={detailValue}>{description}</Text>
-          </Column>
-        </Row>
+        {!isManual && description && (
+          <Row style={detailRow}>
+            <Column>
+              <Text style={detailLabel}>{messages.description}</Text>
+            </Column>
+            <Column align="right">
+              <Text style={styles.value}>{description}</Text>
+            </Column>
+          </Row>
+        )}
 
-        <Hr style={hrInner} />
+        <Hr style={styles.hr} />
 
         <Row style={detailRow}>
           <Column>
             <Text style={detailLabel}>{messages.amountDue}</Text>
           </Column>
           <Column align="right">
-            <Text style={amountValue}>{formatCurrency(amount)}</Text>
+            <Text style={styles.amount}>{formatCurrency(amount)}</Text>
           </Column>
         </Row>
       </Section>
 
-      {/* Custom message from store owner */}
-      {customMessage && (
-        <>
-          <Section style={customMessageSection}>
-            <Text style={customMessageText}>{customMessage}</Text>
-          </Section>
-          <Hr style={hr} />
-        </>
+      {isManual && <EmailText>{messages.payPromptly}</EmailText>}
+
+      <CtaButton
+        href={paymentUrl}
+        label={
+          isManual ? tc.viewReservation : messages.payNow.replace('{amount}', formatCurrency(amount))
+        }
+        primaryColor={primaryColor}
+      />
+
+      {isManual ? (
+        <Signature text={tc.seeYouSoon.replace('{storeName}', storeName)} />
+      ) : (
+        <FooterNote>{messages.securePayment}</FooterNote>
       )}
-
-      {/* CTA */}
-      <Section style={ctaSection}>
-        <Button href={paymentUrl} style={buttonStyle}>
-          {messages.payNow.replace('{amount}', formatCurrency(amount))}
-        </Button>
-      </Section>
-
-      <Text style={fallbackText}>
-        {messages.linkFallback}
-      </Text>
-      <Text style={linkText}>{paymentUrl}</Text>
-
-      <Hr style={hr} />
-
-      <Text style={footerNote}>
-        {messages.securePayment}
-      </Text>
     </BaseLayout>
   )
 }
 
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '14px',
-  lineHeight: '24px',
-  color: '#525f7f',
-  margin: '0 0 10px 0',
-}
-
-const boxSection = {
-  backgroundColor: '#f8fafc',
-  borderRadius: '8px',
-  padding: '20px',
-  marginBottom: '24px',
-}
-
-const sectionTitle = {
-  fontSize: '12px',
-  fontWeight: 'bold' as const,
-  textTransform: 'uppercase' as const,
-  color: '#8898aa',
-  marginBottom: '16px',
-}
-
 const detailRow = {
-  marginBottom: '8px',
+  marginBottom: '4px',
 }
 
 const detailLabel = {
   fontSize: '14px',
-  color: '#525f7f',
-  margin: '0',
-}
-
-const detailValue = {
-  fontSize: '14px',
-  fontWeight: '600' as const,
-  color: '#1a1a1a',
-  margin: '0',
-}
-
-const amountValue = {
-  fontSize: '18px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  margin: '0',
-}
-
-const hrInner = {
-  borderColor: '#e6ebf1',
-  margin: '12px 0',
-}
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
-}
-
-const customMessageSection = {
-  backgroundColor: '#fffbeb',
-  borderRadius: '8px',
-  padding: '16px',
-  marginBottom: '24px',
-  borderLeft: '4px solid #f59e0b',
-}
-
-const customMessageText = {
-  fontSize: '14px',
   lineHeight: '22px',
-  color: '#78350f',
+  color: '#4b5563',
   margin: '0',
-  fontStyle: 'italic' as const,
-}
-
-const ctaSection = {
-  textAlign: 'center' as const,
-  marginTop: '32px',
-  marginBottom: '16px',
-}
-
-const button = {
-  backgroundColor: '#0066FF',
-  borderRadius: '6px',
-  color: '#fff',
-  fontSize: '16px',
-  fontWeight: 'bold' as const,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '14px 32px',
-}
-
-const fallbackText = {
-  fontSize: '12px',
-  color: '#8898aa',
-  textAlign: 'center' as const,
-  margin: '0 0 4px 0',
-}
-
-const linkText = {
-  fontSize: '11px',
-  color: '#8898aa',
-  textAlign: 'center' as const,
-  wordBreak: 'break-all' as const,
-  margin: '0',
-}
-
-const footerNote = {
-  fontSize: '13px',
-  color: '#8898aa',
-  fontStyle: 'italic' as const,
-  textAlign: 'center' as const,
 }
 
 export default PaymentRequestEmail

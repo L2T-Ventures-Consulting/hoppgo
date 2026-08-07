@@ -1,15 +1,11 @@
-import { Button, Heading, Hr, Section, Text } from '@react-email/components'
 import { BaseLayout } from './base-layout'
-import { getContrastColorHex } from '@/lib/utils/colors'
+import { CtaButton, EmailHeading, EmailText, InfoCard } from './components'
 import {
   getDateFormatPatterns,
   getEmailTranslations,
   type EmailLocale,
 } from '../i18n'
-import {
-  formatEmailDateInStoreTimezone,
-  getStoreTimezoneLabel,
-} from '../date-time'
+import { formatEmailDateInStoreTimezone, getStoreTimezoneLabel } from '../date-time'
 
 interface ReservationModifiedEmailProps {
   storeName: string
@@ -126,7 +122,7 @@ export function getReservationModifiedEmailSubject(
 export function ReservationModifiedEmail({
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   storeAddress,
   storePhone,
   storeEmail,
@@ -179,12 +175,6 @@ export function ReservationModifiedEmail({
         ),
       )
 
-  const buttonStyle = {
-    ...button,
-    backgroundColor: primaryColor,
-    color: getContrastColorHex(primaryColor),
-  }
-
   return (
     <BaseLayout
       preview={messages.subject.replace('{number}', reservationNumber)}
@@ -196,102 +186,37 @@ export function ReservationModifiedEmail({
       storeAddress={storeAddress}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
-      <Text style={paragraph}>{tc.greeting.replace('{name}', customerFirstName)}</Text>
-      <Text style={paragraph}>{messages.body.replace('{number}', reservationNumber)}</Text>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      {hasScheduleChange && previousStartDate && previousEndDate && (
-        <Section style={section}>
-          <Text style={sectionTitle}>{messages.scheduleChanged}</Text>
-          <Text style={label}>{messages.previousSchedule}</Text>
-          <Text style={paragraph}>{formatPeriod(previousStartDate, previousEndDate)}</Text>
-          <Text style={label}>{messages.newSchedule}</Text>
-          <Text style={paragraph}>{formatPeriod(startDate, endDate)}</Text>
-          <Text style={timezoneText}>{timezoneLine}</Text>
-        </Section>
+      <EmailText>{tc.greeting.replace('{name}', customerFirstName)}</EmailText>
+
+      <EmailText>{messages.body.replace('{number}', reservationNumber)}</EmailText>
+
+      {hasScheduleChange && previousStartDate && previousEndDate ? (
+        <>
+          <EmailText>{messages.scheduleChanged}</EmailText>
+          <EmailText muted small>
+            {messages.previousSchedule}
+            <br />
+            {formatPeriod(previousStartDate, previousEndDate)}
+          </EmailText>
+          <InfoCard
+            label={messages.newSchedule}
+            value={formatPeriod(startDate, endDate)}
+            footnote={timezoneLine}
+          />
+        </>
+      ) : (
+        <InfoCard
+          label={tc.period}
+          value={formatPeriod(startDate, endDate)}
+          footnote={timezoneLine}
+        />
       )}
 
-      {!hasScheduleChange && (
-        <Section style={section}>
-          <Text style={sectionTitle}>{tc.period}</Text>
-          <Text style={paragraph}>{formatPeriod(startDate, endDate)}</Text>
-          <Text style={timezoneText}>{timezoneLine}</Text>
-        </Section>
-      )}
-
-      <Hr style={hr} />
-
-      <Section style={ctaSection}>
-        <Button href={reservationUrl} style={buttonStyle}>
-          {tc.viewReservation}
-        </Button>
-      </Section>
+      <CtaButton href={reservationUrl} label={tc.viewReservation} primaryColor={primaryColor} />
     </BaseLayout>
   )
-}
-
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '14px',
-  lineHeight: '24px',
-  color: '#525f7f',
-  margin: '0 0 10px 0',
-}
-
-const section = {
-  marginTop: '24px',
-  marginBottom: '24px',
-}
-
-const sectionTitle = {
-  fontSize: '14px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  margin: '0 0 12px 0',
-}
-
-const label = {
-  fontSize: '12px',
-  fontWeight: 'bold' as const,
-  textTransform: 'uppercase' as const,
-  color: '#8898aa',
-  margin: '16px 0 4px 0',
-}
-
-const timezoneText = {
-  fontSize: '12px',
-  lineHeight: '18px',
-  color: '#8898aa',
-  margin: '4px 0 0 0',
-}
-
-const hr = {
-  borderColor: '#e6ebf1',
-  margin: '20px 0',
-}
-
-const ctaSection = {
-  textAlign: 'center' as const,
-  marginTop: '32px',
-  marginBottom: '32px',
-}
-
-const button = {
-  backgroundColor: '#0066FF',
-  borderRadius: '6px',
-  color: '#fff',
-  fontSize: '14px',
-  fontWeight: 'bold' as const,
-  textDecoration: 'none',
-  textAlign: 'center' as const,
-  display: 'inline-block',
-  padding: '12px 24px',
 }
 
 export default ReservationModifiedEmail
