@@ -31,6 +31,12 @@ export interface HomeReservation {
   number: string;
   startDate: Date;
   endDate: Date;
+  /**
+   * Its scheduled moment has passed and the status says it still has not been
+   * handed over (or brought back). Computed on the server: comparing against
+   * the browser's clock would disagree with the server-rendered markup.
+   */
+  isOverdue?: boolean;
   totalAmount: string;
   customer: {
     firstName: string;

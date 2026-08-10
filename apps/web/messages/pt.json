@@ -692,7 +692,8 @@
         "noDepartures": "Nenhuma entrega agendada para hoje",
         "noReturns": "Nenhuma devolucao agendada para hoje",
         "noActivityTitle": "Dia tranquilo",
-        "noActivityDescription": "Nenhuma operacao agendada para hoje"
+        "noActivityDescription": "Nenhuma operacao agendada para hoje",
+        "overdue": "Atrasado"
       },
       "pending": {
         "title": "Solicitacoes pendentes",

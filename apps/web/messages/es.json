@@ -731,7 +731,8 @@
         "noDepartures": "No hay entregas programadas hoy",
         "noReturns": "No hay devoluciones programadas hoy",
         "noActivityTitle": "Dia tranquilo",
-        "noActivityDescription": "No hay operaciones programadas hoy"
+        "noActivityDescription": "No hay operaciones programadas hoy",
+        "overdue": "Vencido"
       },
       "pending": {
         "title": "Solicitudes pendientes",

@@ -692,7 +692,8 @@
         "noDepartures": "Brak wydań zaplanowanych na dziś",
         "noReturns": "Brak zwrotów zaplanowanych na dziś",
         "noActivityTitle": "Spokojny dzień",
-        "noActivityDescription": "Brak operacji zaplanowanych na dziś"
+        "noActivityDescription": "Brak operacji zaplanowanych na dziś",
+        "overdue": "Po terminie"
       },
       "pending": {
         "title": "Oczekujące żądania",

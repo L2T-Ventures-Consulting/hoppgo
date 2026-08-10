@@ -731,7 +731,8 @@
         "noDepartures": "Keine Übergaben heute geplant",
         "noReturns": "Keine Rückgaben heute geplant",
         "noActivityTitle": "Ruhiger Tag",
-        "noActivityDescription": "Heute keine Vorgänge geplant"
+        "noActivityDescription": "Heute keine Vorgänge geplant",
+        "overdue": "Überfällig"
       },
       "pending": {
         "title": "Ausstehende Anfragen",

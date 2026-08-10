@@ -692,7 +692,8 @@
         "noDepartures": "Geen overdrachten gepland vandaag",
         "noReturns": "Geen retours gepland vandaag",
         "noActivityTitle": "Rustige dag",
-        "noActivityDescription": "Geen operaties gepland vandaag"
+        "noActivityDescription": "Geen operaties gepland vandaag",
+        "overdue": "Te laat"
       },
       "pending": {
         "title": "Openstaande aanvragen",

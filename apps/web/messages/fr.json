@@ -731,7 +731,8 @@
         "noDepartures": "Pas de remise prévue aujourd'hui",
         "noReturns": "Pas de retour prévu aujourd'hui",
         "noActivityTitle": "Journée tranquille",
-        "noActivityDescription": "Aucune opération prévue aujourd'hui"
+        "noActivityDescription": "Aucune opération prévue aujourd'hui",
+        "overdue": "Dépassé"
       },
       "pending": {
         "title": "Demandes en attente",

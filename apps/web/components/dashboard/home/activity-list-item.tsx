@@ -1,6 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 
 import { Badge } from "@louez/ui";
 import { ClockSolidIcon, ProductSolidIcon } from "@louez/ui/icons";
@@ -35,6 +36,7 @@ export const ActivityListItem = ({
   showAmount = false,
   source,
 }: ActivityListItemProps) => {
+  const t = useTranslations("dashboard.home");
   const { names, remainingCount } = summarizeProducts(reservation);
 
   return (
@@ -59,6 +61,11 @@ export const ActivityListItem = ({
           <Badge variant="expired" size="sm" className="shrink-0 font-mono">
             #{reservation.number}
           </Badge>
+          {reservation.isOverdue && (
+            <Badge variant="warning" size="sm" className="shrink-0">
+              {t("activity.overdue")}
+            </Badge>
+          )}
         </>
       }
       subtitle={

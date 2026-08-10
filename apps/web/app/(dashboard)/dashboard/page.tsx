@@ -27,12 +27,13 @@ export const instant = false;
 // =============================================================================
 
 async function getTodaysDeparturesList(storeId: string) {
-  const today = new Date();
+  const now = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  return db.query.reservations.findMany({
+  const rows = await db.query.reservations.findMany({
     where: and(
       eq(reservations.storeId, storeId),
       eq(reservations.status, "confirmed"),
@@ -50,15 +51,21 @@ async function getTodaysDeparturesList(storeId: string) {
     orderBy: [reservations.startDate],
     limit: 5,
   });
+
+  // Still `confirmed` past its pickup time means nobody came for it — or nobody
+  // recorded that they did. Either way it is the row that needs the owner, so
+  // it is flagged rather than hidden. Ascending order already floats these up.
+  return rows.map((row) => ({ ...row, isOverdue: row.startDate < now }));
 }
 
 async function getTodaysReturnsList(storeId: string) {
-  const today = new Date();
+  const now = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
-  return db.query.reservations.findMany({
+  const rows = await db.query.reservations.findMany({
     where: and(
       eq(reservations.storeId, storeId),
       eq(reservations.status, "ongoing"),
@@ -76,6 +83,10 @@ async function getTodaysReturnsList(storeId: string) {
     orderBy: [reservations.endDate],
     limit: 5,
   });
+
+  // Same reading on the way back: still `ongoing` past its return time means
+  // the gear is not back yet.
+  return rows.map((row) => ({ ...row, isOverdue: row.endDate < now }));
 }
 
 async function getPendingReservationsList(storeId: string) {

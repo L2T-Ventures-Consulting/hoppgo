@@ -731,7 +731,8 @@
         "noDepartures": "No handovers scheduled today",
         "noReturns": "No returns scheduled today",
         "noActivityTitle": "Quiet day",
-        "noActivityDescription": "No operations scheduled today"
+        "noActivityDescription": "No operations scheduled today",
+        "overdue": "Overdue"
       },
       "pending": {
         "title": "Pending requests",
