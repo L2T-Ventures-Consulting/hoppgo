@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { MouseEvent } from "react";
 
 import { History, Maximize2, PenSquare, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -59,6 +60,15 @@ export const ChatModal = ({ open, onOpenChange }: ChatModalProps) => {
   const handleOpenFullPage = () => {
     onOpenChange(false);
     router.push("/dashboard/ai-assistant");
+  };
+
+  // Answers link to reservations, customers and products. Following one
+  // navigates the page underneath, so the dialog has to step aside — staying
+  // open would cover the very record the merchant asked to see.
+  const handleContentClick = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.target instanceof HTMLElement && event.target.closest("a")) {
+      onOpenChange(false);
+    }
   };
 
   return (
@@ -183,6 +193,7 @@ export const ChatModal = ({ open, onOpenChange }: ChatModalProps) => {
             <div
               ref={scrollRef}
               onScroll={onScroll}
+              onClick={handleContentClick}
               className="min-h-0 flex-1 overflow-y-auto motion-safe:scroll-smooth"
             >
               <div className="flex min-h-full flex-col px-4 py-4 sm:px-5">

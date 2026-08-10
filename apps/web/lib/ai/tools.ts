@@ -1035,19 +1035,27 @@ export function createAITools(ctx: AIChatContext) {
     // ── Calendar ──────────────────────────────────────────────────────────
 
     calendar_upcoming: tool({
-      description: 'Get upcoming pickups and returns for the next N days',
+      description:
+        'Get upcoming pickups and returns, starting from the beginning of today. Use days=1 for today only.',
       inputSchema: z.object({
         days: z
           .number()
           .optional()
-          .describe('Number of days to look ahead (default 7)'),
+          .describe(
+            'Number of days to cover, counted from today (default 7). 1 = today only.',
+          ),
       }),
       execute: async ({ days }) => {
         requirePermission(ctx, 'reservations', 'read');
 
         const lookAhead = Math.min(days ?? 7, 90);
+        // Anchored at midnight, not at the current time: a pickup booked for
+        // 9am is still today's business at 2pm, and dropping it made this tool
+        // disagree with the dashboard's "today" widgets, which count from
+        // midnight too.
         const now = new Date();
-        const future = new Date();
+        now.setHours(0, 0, 0, 0);
+        const future = new Date(now);
         future.setDate(future.getDate() + lookAhead);
 
         const pickups = await db

@@ -3,8 +3,16 @@
 import type { ReactNode } from "react";
 
 import type { UIMessage } from "@ai-sdk/react";
+import Link from "next/link";
 
 import { cn } from "@louez/utils";
+
+/**
+ * Only in-app dashboard paths become real links. The assistant writes these
+ * itself, so anything else — an absolute URL, a protocol-relative `//host` — is
+ * a model invention we render as plain text rather than as something clickable.
+ */
+const isDashboardPath = (href: string) => /^\/dashboard\/[\w\-/]*$/.test(href);
 
 interface ChatMessagesProps {
   messages: UIMessage[];
@@ -58,13 +66,28 @@ const MessageParts = ({ parts }: { parts: UIMessage["parts"] }) => (
   </>
 );
 
-/** Render inline formatting: **bold**, `code`, *italic* */
+/** Render inline formatting: [link](/dashboard/…), **bold**, `code`, *italic* */
 const InlineFormat = ({ text }: { text: string }) => {
-  // Split on **bold**, `code`, and *italic* (in order of priority)
-  const parts = text.split(/(\*\*.*?\*\*|`[^`]+`|\*[^*]+\*)/);
+  // Links first: their label may itself contain ** or `, and matching those
+  // before the link would split it in half.
+  const parts = text.split(/(\[[^\]]+\]\([^)]+\)|\*\*.*?\*\*|`[^`]+`|\*[^*]+\*)/);
   return (
     <>
       {parts.map((segment, j) => {
+        const link = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(segment);
+        if (link) {
+          const [, label, href] = link;
+          if (!isDashboardPath(href)) return label;
+          return (
+            <Link
+              key={j}
+              href={href}
+              className="decoration-muted-foreground/40 hover:decoration-foreground font-medium underline underline-offset-2 transition-colors"
+            >
+              {label}
+            </Link>
+          );
+        }
         if (segment.startsWith("**") && segment.endsWith("**")) {
           return (
             <strong key={j} className="font-semibold">
