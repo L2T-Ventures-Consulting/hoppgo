@@ -9,7 +9,6 @@ import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-
 import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 
 import { formatCredits, secondsToMinutes } from "./credits-format";
-import { RechargeButton } from "./recharge-button";
 
 interface AiCreditsValueProps {
   /** Current-month recap, already derived from the billed ledger. */
@@ -22,15 +21,17 @@ interface AiCreditsValueProps {
   };
   /** True when the store has never bought nor spent a single credit. */
   isNewcomer: boolean;
-  canTopup: boolean;
 }
 
 /**
  * Two faces of the same question — "what are credits worth to me?". A merchant
  * who has never spent one gets the pitch; everyone else gets the receipt of
  * what this month's credits actually did for the shop.
+ *
+ * No recharge button here: the page header already carries it, and the low
+ * balance banner adds a contextual one when it matters.
  */
-export const AiCreditsValue = async ({ summary, isNewcomer, canTopup }: AiCreditsValueProps) => {
+export const AiCreditsValue = async ({ summary, isNewcomer }: AiCreditsValueProps) => {
   const t = await getTranslations("dashboard.aiCredits");
 
   if (isNewcomer) {
@@ -55,7 +56,6 @@ export const AiCreditsValue = async ({ summary, isNewcomer, canTopup }: AiCredit
     return (
       <DashboardSectionCard
         title={t("page.pitchTitle")}
-        description={t("page.pitchDescription")}
         icon={Sparkles}
         accent="primary"
         contentClassName="space-y-4"
@@ -70,12 +70,9 @@ export const AiCreditsValue = async ({ summary, isNewcomer, canTopup }: AiCredit
               </div>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            {canTopup && <RechargeButton label={t("recharge")} />}
-            <Button variant="outline" render={<Link href="/dashboard/ai-assistant" />}>
-              {t("page.pitchSecondaryCta")}
-            </Button>
-          </div>
+          <Button variant="outline" render={<Link href="/dashboard/ai-assistant/advisor" />}>
+            {t("page.pitchSecondaryCta")}
+          </Button>
           <p className="text-muted-foreground/70 text-xs">{t("page.pitchFootnote")}</p>
         </>
       </DashboardSectionCard>

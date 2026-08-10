@@ -236,27 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "AI Assistant",
-        "subtitle": "Your store advises, answers and books — automatically",
-        "credits": "{count} credits",
-        "creditsUnlimited": "Unlimited credits",
-        "recharge": "Recharge",
-        "manageCredits": "Manage"
-      },
-      "tabs": {
-        "label": "AI assistant sections",
-        "advisor": "Online advisor",
-        "voice": "Voice agent",
-        "conversations": "Conversations"
-      },
       "hero": {
         "eyebrow": "AI Assistant",
-        "title": "Your store answers, advises and books, even when you're away",
-        "subtitle": "Turn on the online advisor and the voice agent: your customers get instant answers, you get qualified bookings.",
         "activate": "Activate",
         "upgrade": "Upgrade plan",
-        "upgradeHint": "The AI Assistant is included from the Pro plan.",
         "advisor": {
           "title": "Online advisor",
           "b1": "Answers your customers' questions about your store 24/7",
@@ -268,6 +251,20 @@
           "b1": "Picks up every call, at any hour",
           "b2": "Shares hours, prices and availability out loud",
           "b3": "Takes bookings and passes on messages"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Online advisor",
+          "description": "Let an AI assistant welcome your customers on your storefront, answer their questions and guide them to the right rental"
+        },
+        "voice": {
+          "title": "Voice agent",
+          "description": "An AI voice agent that answers your phone line — it informs your customers and takes reservations, in the language you choose."
+        },
+        "conversations": {
+          "title": "Customer conversations",
+          "description": "Review what customers asked the advisor and which chats led to a reservation"
         }
       }
     },
@@ -592,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "AI Assistant",
+      "aiConversations": "Customer conversations",
+      "aiAdvisor": "Online advisor",
+      "aiVoice": "Voice agent",
       "home": "Home",
       "products": "Products",
       "inventory": "Inventory",
@@ -4751,8 +4751,6 @@
         "title": "AI Advisor",
         "description": "Let an AI assistant welcome your customers on your storefront, answer their questions and guide them to the right rental",
         "saved": "AI Advisor settings saved",
-        "enableSection": "AI Advisor",
-        "enableSectionDescription": "Configure the assistant that chats with your customers on your storefront",
         "enabled": "Enable the AI advisor",
         "enabledDescription": "Show the chat widget on your storefront",
         "mode": "Checkout mode",
@@ -4778,17 +4776,12 @@
           "description": "The platform operator must set the AI_PROVIDER and AI_API_KEY environment variables before the advisor can answer customers. You can still prepare your settings below."
         },
         "locked": {
-          "title": "Unlock the AI Advisor",
-          "description": "Turn storefront visitors into reservations with an AI assistant",
           "upgrade": "Upgrade to Pro",
-          "featureLocked": "Feature locked",
-          "upgradeToUnlock": "Upgrade to Pro to enable this feature"
+          "featureLocked": "Feature locked"
         },
         "conversations": {
           "columnCredits": "Credits",
           "creditsUsed": "{count} cr",
-          "title": "Conversations",
-          "description": "Review what customers asked the advisor and which chats led to a reservation",
           "filterAll": "All",
           "filterConverted": "Converted",
           "filterNotConverted": "Not converted",
@@ -4847,9 +4840,6 @@
           "confirm": "Disable and detach"
         },
         "numberReleaseFailed": "The number could not be detached — it is still attached, automatic retry scheduled",
-        "description": "An AI voice agent that answers your phone line — it informs your customers and takes reservations, in the language you choose.",
-        "enableSection": "AI voice agent",
-        "enableSectionDescription": "Configure the voice agent that answers when your customers call",
         "enabled": "Enable the AI voice agent",
         "enabledDescription": "The AI answers inbound calls to your number",
         "number": {
@@ -4963,7 +4953,10 @@
       "emptyState": "How can I help you?",
       "emptyStateHint": "Try one of these suggestions or ask your own question.",
       "placeholder": "What would you like to know or do?",
+      "send": "Send",
+      "disclaimer": "The AI assistant can make mistakes. Check important information.",
       "newConversation": "New conversation",
+      "openFullPage": "Open full page",
       "history": {
         "title": "History",
         "empty": "No conversations yet",
@@ -4984,11 +4977,17 @@
         "reservations": "Any pickups or returns scheduled today?",
         "stats": "Show me this month's revenue and top products",
         "products": "Which products are rented the most?",
-        "customers": "How many new customers this month?"
+        "customers": "How many new customers this month?",
+        "overdue": "Are any returns overdue?",
+        "pending": "Show me reservations awaiting confirmation"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "AI Assistant",
+      "aiConversations": "Customer conversations",
+      "aiAdvisor": "Online advisor",
+      "aiVoice": "Voice agent",
+      "aiCredits": "AI credits",
       "label": "Breadcrumb",
       "home": "Home",
       "products": "Products",
@@ -5167,7 +5166,6 @@
         "prepaidTitle": "Prepaid credits",
         "prepaidHint": "They never expire",
         "pitchTitle": "What your credits unlock",
-        "pitchDescription": "One wallet for every AI feature in your shop.",
         "perkAdvisorTitle": "An advisor around the clock",
         "perkAdvisorDescription": "Customers ask about your catalogue and get an answer straight away, even at night.",
         "perkVoiceTitle": "An agent that picks up",

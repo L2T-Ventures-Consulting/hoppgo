@@ -2,11 +2,9 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 import { useTranslations } from "next-intl";
-import { Check, MessagesSquare, PhoneCall, Sparkles } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 
 import { Badge, Button } from "@louez/ui";
-
-import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
 
 interface FeaturePresentationProps {
   variant: "advisor" | "voice";
@@ -32,8 +30,11 @@ const itemVariants = {
 /**
  * What a face of the assistant does, shown INSIDE its card while it is still
  * disabled — the merchant reads the value proposition right where the
- * activation happens, instead of meeting a bare switch. Shares the animated
- * AI mesh identity with the hero and the dashboard AI chat.
+ * activation happens, instead of meeting a bare switch.
+ *
+ * The page title and the breadcrumb already name the feature, so this card
+ * deliberately carries no heading and no icon tile: only what the page does not
+ * say yet — what it does for you, what it costs, and how to turn it on.
  */
 export const FeaturePresentation = ({
   variant,
@@ -43,32 +44,15 @@ export const FeaturePresentation = ({
   const t = useTranslations(`dashboard.aiAssistant.hero.${variant}`);
   const tHero = useTranslations("dashboard.aiAssistant.hero");
   const reducedMotion = useReducedMotion();
-  const Icon = variant === "voice" ? PhoneCall : MessagesSquare;
 
   return (
-    <div className="relative isolate overflow-hidden rounded-xl border bg-card p-5">
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="ai-mesh-orb ai-mesh-orb--1" />
-        <div className="ai-mesh-orb ai-mesh-orb--2" />
-      </div>
-
+    <div className="bg-card rounded-xl border p-5">
       <motion.div
-        className="relative space-y-4"
+        className="space-y-4"
         initial={reducedMotion ? false : "hidden"}
         animate="visible"
         variants={containerVariants}
       >
-        <motion.div variants={itemVariants} className="flex items-center gap-3">
-          <DashboardIconTile icon={Icon} accent="primary" />
-          <div>
-            <h3 className="text-balance font-semibold">{t("title")}</h3>
-            <p className="text-primary flex items-center gap-1 text-xs font-medium">
-              <Sparkles className="h-3 w-3" />
-              {tHero("eyebrow")}
-            </p>
-          </div>
-        </motion.div>
-
         <ul className="space-y-2">
           {(["b1", "b2", "b3"] as const).map((key) => (
             <motion.li key={key} variants={itemVariants} className="flex items-start gap-2 text-sm">

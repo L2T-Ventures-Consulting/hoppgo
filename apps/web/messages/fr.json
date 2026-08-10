@@ -236,27 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "Assistant IA",
-        "subtitle": "Votre boutique conseille, répond et réserve — automatiquement",
-        "credits": "{count} crédits",
-        "creditsUnlimited": "Crédits illimités",
-        "recharge": "Recharger",
-        "manageCredits": "Gérer"
-      },
-      "tabs": {
-        "label": "Sections de l'assistant IA",
-        "advisor": "Conseiller en ligne",
-        "voice": "Agent vocal",
-        "conversations": "Conversations"
-      },
       "hero": {
         "eyebrow": "Assistant IA",
-        "title": "Votre boutique répond, conseille et réserve, même quand vous n'êtes pas là",
-        "subtitle": "Activez le conseiller en ligne et l'agent vocal : vos clients obtiennent des réponses immédiates, vous récupérez des réservations qualifiées.",
         "activate": "Activer",
         "upgrade": "Passer au plan supérieur",
-        "upgradeHint": "L'Assistant IA est inclus à partir du plan Pro.",
         "advisor": {
           "title": "Conseiller en ligne",
           "b1": "Répond aux questions de vos clients 24h/24 sur votre boutique",
@@ -268,6 +251,20 @@
           "b1": "Décroche tous vos appels, à toute heure",
           "b2": "Renseigne horaires, tarifs et disponibilités de vive voix",
           "b3": "Prend des réservations et vous transmet des messages"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Conseiller en ligne",
+          "description": "Laissez un assistant IA accueillir vos clients sur votre vitrine, répondre à leurs questions et les guider vers la bonne location"
+        },
+        "voice": {
+          "title": "Agent vocal",
+          "description": "Un agent vocal IA qui répond sur votre ligne téléphonique — il informe vos clients et prend des réservations, dans la langue de votre choix."
+        },
+        "conversations": {
+          "title": "Conversations clients",
+          "description": "Consultez les questions posées au conseiller et les discussions qui ont abouti à une réservation"
         }
       }
     },
@@ -592,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "Assistant IA",
+      "aiConversations": "Conversations clients",
+      "aiAdvisor": "Conseiller en ligne",
+      "aiVoice": "Agent vocal",
       "home": "Accueil",
       "products": "Produits",
       "inventory": "Inventaire",
@@ -4751,8 +4751,6 @@
         "title": "Conseiller IA",
         "description": "Laissez un assistant IA accueillir vos clients sur votre vitrine, répondre à leurs questions et les guider vers la bonne location",
         "saved": "Paramètres du conseiller IA enregistrés",
-        "enableSection": "Conseiller IA",
-        "enableSectionDescription": "Configurez l'assistant qui échange avec vos clients sur votre vitrine",
         "enabled": "Activer le conseiller IA",
         "enabledDescription": "Affiche le widget de discussion sur votre vitrine",
         "mode": "Mode au moment de la réservation",
@@ -4778,17 +4776,12 @@
           "description": "L'opérateur de la plateforme doit définir les variables d'environnement AI_PROVIDER et AI_API_KEY pour que le conseiller puisse répondre aux clients. Vous pouvez tout de même préparer vos réglages ci-dessous."
         },
         "locked": {
-          "title": "Débloquez le conseiller IA",
-          "description": "Transformez les visiteurs de votre vitrine en réservations grâce à un assistant IA",
           "upgrade": "Passer au plan Pro",
-          "featureLocked": "Fonctionnalité verrouillée",
-          "upgradeToUnlock": "Passez au plan Pro pour activer cette fonctionnalité"
+          "featureLocked": "Fonctionnalité verrouillée"
         },
         "conversations": {
           "columnCredits": "Crédits",
           "creditsUsed": "{count} cr",
-          "title": "Conversations",
-          "description": "Consultez les questions posées au conseiller et les discussions qui ont abouti à une réservation",
           "filterAll": "Toutes",
           "filterConverted": "Converties",
           "filterNotConverted": "Non converties",
@@ -4847,9 +4840,6 @@
           "confirm": "Désactiver et détacher"
         },
         "numberReleaseFailed": "Le numéro n'a pas pu être détaché — il reste attaché, nouvel essai automatique prévu",
-        "description": "Un agent vocal IA qui répond sur votre ligne téléphonique — il informe vos clients et prend des réservations, dans la langue de votre choix.",
-        "enableSection": "Agent vocal IA",
-        "enableSectionDescription": "Configurez l'agent vocal qui répond quand vos clients appellent",
         "enabled": "Activer l'agent vocal IA",
         "enabledDescription": "L'IA décroche les appels entrants sur votre numéro",
         "number": {
@@ -4963,7 +4953,10 @@
       "emptyState": "Comment puis-je vous aider ?",
       "emptyStateHint": "Essayez une de ces suggestions ou posez votre propre question.",
       "placeholder": "Que voulez-vous savoir ou faire ?",
+      "send": "Envoyer",
+      "disclaimer": "L'assistant IA peut faire des erreurs. Vérifiez les informations importantes.",
       "newConversation": "Nouvelle conversation",
+      "openFullPage": "Ouvrir en pleine page",
       "history": {
         "title": "Historique",
         "empty": "Aucune conversation",
@@ -4984,11 +4977,17 @@
         "reservations": "Y a-t-il des récupérations ou retours prévus aujourd'hui ?",
         "stats": "Montre-moi le chiffre d'affaires et les meilleurs produits du mois",
         "products": "Quels sont les produits les plus loués ?",
-        "customers": "Combien de nouveaux clients ce mois-ci ?"
+        "customers": "Combien de nouveaux clients ce mois-ci ?",
+        "overdue": "Y a-t-il des retours en retard ?",
+        "pending": "Montre-moi les réservations en attente de confirmation"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "Assistant IA",
+      "aiConversations": "Conversations clients",
+      "aiAdvisor": "Conseiller en ligne",
+      "aiVoice": "Agent vocal",
+      "aiCredits": "Crédits IA",
       "label": "Fil d'Ariane",
       "home": "Accueil",
       "products": "Produits",
@@ -5167,7 +5166,6 @@
         "prepaidTitle": "Crédits prépayés",
         "prepaidHint": "Ils n'expirent jamais",
         "pitchTitle": "Ce que vos crédits débloquent",
-        "pitchDescription": "Un seul porte-monnaie pour toutes les fonctions IA de votre boutique.",
         "perkAdvisorTitle": "Un conseiller 24 h/24",
         "perkAdvisorDescription": "Vos clients posent leurs questions sur la boutique et reçoivent une réponse immédiate, même la nuit.",
         "perkVoiceTitle": "Un agent qui décroche",

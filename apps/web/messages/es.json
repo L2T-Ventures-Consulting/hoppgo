@@ -236,27 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "Asistente IA",
-        "subtitle": "Tu tienda aconseja, responde y reserva — automáticamente",
-        "credits": "{count} créditos",
-        "creditsUnlimited": "Créditos ilimitados",
-        "recharge": "Recargar",
-        "manageCredits": "Gestionar"
-      },
-      "tabs": {
-        "label": "Secciones del asistente IA",
-        "advisor": "Asesor en línea",
-        "voice": "Agente de voz",
-        "conversations": "Conversaciones"
-      },
       "hero": {
         "eyebrow": "Asistente IA",
-        "title": "Tu tienda responde, aconseja y reserva, incluso cuando no estás",
-        "subtitle": "Activa el asesor en línea y el agente de voz: tus clientes obtienen respuestas inmediatas y tú consigues reservas cualificadas.",
         "activate": "Activar",
         "upgrade": "Mejorar plan",
-        "upgradeHint": "El Asistente IA está incluido a partir del plan Pro.",
         "advisor": {
           "title": "Asesor en línea",
           "b1": "Responde a las preguntas de tus clientes sobre tu tienda 24/7",
@@ -268,6 +251,20 @@
           "b1": "Atiende todas tus llamadas, a cualquier hora",
           "b2": "Informa de horarios, tarifas y disponibilidad de viva voz",
           "b3": "Toma reservas y te transmite mensajes"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Asesor en línea",
+          "description": "Deje que un asistente de IA reciba a sus clientes en su tienda, responda sus preguntas y les guíe hacia el alquiler adecuado"
+        },
+        "voice": {
+          "title": "Agente de voz",
+          "description": "Un agente de voz con IA que responde tu línea telefónica — informa a tus clientes y registra reservas, en el idioma que elijas."
+        },
+        "conversations": {
+          "title": "Conversaciones de clientes",
+          "description": "Consulte qué preguntaron los clientes al asesor y qué conversaciones terminaron en una reserva"
         }
       }
     },
@@ -592,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "Asistente IA",
+      "aiConversations": "Conversaciones de clientes",
+      "aiAdvisor": "Asesor en línea",
+      "aiVoice": "Agente de voz",
       "home": "Inicio",
       "products": "Productos",
       "inventory": "Inventario",
@@ -4569,8 +4569,6 @@
         "title": "Asesor IA",
         "description": "Deje que un asistente de IA reciba a sus clientes en su tienda, responda sus preguntas y les guíe hacia el alquiler adecuado",
         "saved": "Configuración del asesor IA guardada",
-        "enableSection": "Asesor IA",
-        "enableSectionDescription": "Configure el asistente que conversa con sus clientes en su tienda",
         "enabled": "Activar el asesor IA",
         "enabledDescription": "Muestra el widget de chat en su tienda",
         "mode": "Modo en el momento de la reserva",
@@ -4596,17 +4594,12 @@
           "description": "El operador de la plataforma debe definir las variables de entorno AI_PROVIDER y AI_API_KEY para que el asesor pueda responder a los clientes. Aun así, puede preparar su configuración a continuación."
         },
         "locked": {
-          "title": "Desbloquear el asesor IA",
-          "description": "Convierta a los visitantes de su tienda en reservas con un asistente de IA",
           "upgrade": "Actualizar a Pro",
-          "featureLocked": "Función bloqueada",
-          "upgradeToUnlock": "Actualice a Pro para habilitar esta función"
+          "featureLocked": "Función bloqueada"
         },
         "conversations": {
           "columnCredits": "Créditos",
           "creditsUsed": "{count} cr",
-          "title": "Conversaciones",
-          "description": "Consulte qué preguntaron los clientes al asesor y qué conversaciones terminaron en una reserva",
           "filterAll": "Todas",
           "filterConverted": "Convertidas",
           "filterNotConverted": "No convertidas",
@@ -4665,9 +4658,6 @@
           "confirm": "Desactivar y desvincular"
         },
         "numberReleaseFailed": "No se pudo desvincular el número — sigue vinculado, reintento automático programado",
-        "description": "Un agente de voz con IA que responde tu línea telefónica — informa a tus clientes y registra reservas, en el idioma que elijas.",
-        "enableSection": "Agente de voz IA",
-        "enableSectionDescription": "Configura el agente de voz que responde cuando tus clientes llaman",
         "enabled": "Activar el agente de voz IA",
         "enabledDescription": "La IA atiende las llamadas entrantes a tu número",
         "number": {
@@ -4781,7 +4771,10 @@
       "emptyState": "¿Cómo puedo ayudarte?",
       "emptyStateHint": "Prueba una de estas sugerencias o haz tu propia pregunta.",
       "placeholder": "¿Qué quieres saber o hacer?",
+      "send": "Enviar",
+      "disclaimer": "El asistente de IA puede cometer errores. Comprueba la información importante.",
       "newConversation": "Nueva conversación",
+      "openFullPage": "Abrir en página completa",
       "history": {
         "title": "Historial",
         "empty": "Sin conversaciones",
@@ -4802,11 +4795,17 @@
         "reservations": "¿Hay recogidas o devoluciones programadas para hoy?",
         "stats": "Muéstrame los ingresos y los mejores productos del mes",
         "products": "¿Cuáles son los productos más alquilados?",
-        "customers": "¿Cuántos clientes nuevos este mes?"
+        "customers": "¿Cuántos clientes nuevos este mes?",
+        "overdue": "¿Hay devoluciones atrasadas?",
+        "pending": "Muéstrame las reservas pendientes de confirmación"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "Asistente IA",
+      "aiConversations": "Conversaciones de clientes",
+      "aiAdvisor": "Asesor en línea",
+      "aiVoice": "Agente de voz",
+      "aiCredits": "Créditos IA",
       "label": "Miga de pan",
       "home": "Inicio",
       "products": "Productos",
@@ -4985,7 +4984,6 @@
         "prepaidTitle": "Créditos prepago",
         "prepaidHint": "Nunca caducan",
         "pitchTitle": "Lo que desbloquean tus créditos",
-        "pitchDescription": "Un único monedero para todas las funciones de IA de tu tienda.",
         "perkAdvisorTitle": "Un asesor 24/7",
         "perkAdvisorDescription": "Tus clientes preguntan por el catálogo y reciben respuesta al instante, incluso de noche.",
         "perkVoiceTitle": "Un agente que contesta",

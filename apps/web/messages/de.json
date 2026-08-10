@@ -236,27 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "KI-Assistent",
-        "subtitle": "Ihr Shop berät, antwortet und reserviert — automatisch",
-        "credits": "{count} Credits",
-        "creditsUnlimited": "Unbegrenzte Credits",
-        "recharge": "Aufladen",
-        "manageCredits": "Verwalten"
-      },
-      "tabs": {
-        "label": "Bereiche des KI-Assistenten",
-        "advisor": "Online-Berater",
-        "voice": "Sprachagent",
-        "conversations": "Gespräche"
-      },
       "hero": {
         "eyebrow": "KI-Assistent",
-        "title": "Ihr Shop antwortet, berät und reserviert — auch wenn Sie nicht da sind",
-        "subtitle": "Aktivieren Sie den Online-Berater und den Sprachagenten: Ihre Kunden erhalten sofort Antworten, Sie erhalten qualifizierte Reservierungen.",
         "activate": "Aktivieren",
         "upgrade": "Plan upgraden",
-        "upgradeHint": "Der KI-Assistent ist ab dem Pro-Plan enthalten.",
         "advisor": {
           "title": "Online-Berater",
           "b1": "Beantwortet Kundenfragen zu Ihrem Shop rund um die Uhr",
@@ -268,6 +251,20 @@
           "b1": "Nimmt jeden Anruf entgegen, zu jeder Uhrzeit",
           "b2": "Nennt Öffnungszeiten, Preise und Verfügbarkeiten am Telefon",
           "b3": "Nimmt Reservierungen auf und übermittelt Nachrichten"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Online-Berater",
+          "description": "Lassen Sie einen KI-Assistenten Ihre Kunden im Shop begrüßen, ihre Fragen beantworten und sie zur passenden Vermietung führen"
+        },
+        "voice": {
+          "title": "Sprachagent",
+          "description": "Ein KI-Sprachagent, der Ihre Telefonleitung beantwortet — er informiert Ihre Kunden und nimmt Reservierungen entgegen, in der Sprache Ihrer Wahl."
+        },
+        "conversations": {
+          "title": "Kundengespräche",
+          "description": "Sehen Sie, was Kunden den Berater gefragt haben und welche Gespräche zu einer Reservierung geführt haben"
         }
       }
     },
@@ -592,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "KI-Assistent",
+      "aiConversations": "Kundengespräche",
+      "aiAdvisor": "Online-Berater",
+      "aiVoice": "Sprachagent",
       "home": "Startseite",
       "products": "Produkte",
       "inventory": "Inventar",
@@ -4563,8 +4563,6 @@
         "title": "KI-Berater",
         "description": "Lassen Sie einen KI-Assistenten Ihre Kunden im Shop begrüßen, ihre Fragen beantworten und sie zur passenden Vermietung führen",
         "saved": "KI-Berater-Einstellungen gespeichert",
-        "enableSection": "KI-Berater",
-        "enableSectionDescription": "Konfigurieren Sie den Assistenten, der in Ihrem Shop mit Ihren Kunden chattet",
         "enabled": "KI-Berater aktivieren",
         "enabledDescription": "Zeigt das Chat-Widget in Ihrem Shop an",
         "mode": "Modus bei der Reservierung",
@@ -4590,17 +4588,12 @@
           "description": "Der Plattformbetreiber muss die Umgebungsvariablen AI_PROVIDER und AI_API_KEY setzen, damit der Berater Kunden antworten kann. Sie können Ihre Einstellungen unten trotzdem vorbereiten."
         },
         "locked": {
-          "title": "KI-Berater freischalten",
-          "description": "Verwandeln Sie Shop-Besucher mit einem KI-Assistenten in Reservierungen",
           "upgrade": "Auf Pro upgraden",
-          "featureLocked": "Funktion gesperrt",
-          "upgradeToUnlock": "Upgraden Sie auf Pro, um diese Funktion zu aktivieren"
+          "featureLocked": "Funktion gesperrt"
         },
         "conversations": {
           "columnCredits": "Credits",
           "creditsUsed": "{count} Cr.",
-          "title": "Gespräche",
-          "description": "Sehen Sie, was Kunden den Berater gefragt haben und welche Gespräche zu einer Reservierung geführt haben",
           "filterAll": "Alle",
           "filterConverted": "Konvertiert",
           "filterNotConverted": "Nicht konvertiert",
@@ -4659,9 +4652,6 @@
           "confirm": "Deaktivieren und trennen"
         },
         "numberReleaseFailed": "Die Nummer konnte nicht getrennt werden — sie bleibt verbunden, automatischer Wiederholungsversuch geplant",
-        "description": "Ein KI-Sprachagent, der Ihre Telefonleitung beantwortet — er informiert Ihre Kunden und nimmt Reservierungen entgegen, in der Sprache Ihrer Wahl.",
-        "enableSection": "KI-Sprachagent",
-        "enableSectionDescription": "Konfigurieren Sie den Sprachagenten, der antwortet, wenn Ihre Kunden anrufen",
         "enabled": "KI-Sprachagent aktivieren",
         "enabledDescription": "Die KI nimmt eingehende Anrufe auf Ihrer Nummer entgegen",
         "number": {
@@ -4775,7 +4765,10 @@
       "emptyState": "Wie kann ich Ihnen helfen?",
       "emptyStateHint": "Probieren Sie einen Vorschlag oder stellen Sie Ihre eigene Frage.",
       "placeholder": "Was möchten Sie wissen oder tun?",
+      "send": "Senden",
+      "disclaimer": "Der KI-Assistent kann Fehler machen. Überprüfen Sie wichtige Informationen.",
       "newConversation": "Neues Gespräch",
+      "openFullPage": "Als ganze Seite öffnen",
       "history": {
         "title": "Verlauf",
         "empty": "Keine Gespräche",
@@ -4796,11 +4789,17 @@
         "reservations": "Gibt es heute Abholungen oder Rückgaben?",
         "stats": "Zeig mir den Umsatz und die Top-Produkte dieses Monats",
         "products": "Welche Produkte werden am meisten vermietet?",
-        "customers": "Wie viele neue Kunden diesen Monat?"
+        "customers": "Wie viele neue Kunden diesen Monat?",
+        "overdue": "Gibt es überfällige Rückgaben?",
+        "pending": "Zeig mir Reservierungen, die auf Bestätigung warten"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "KI-Assistent",
+      "aiConversations": "Kundengespräche",
+      "aiAdvisor": "Online-Berater",
+      "aiVoice": "Sprachagent",
+      "aiCredits": "KI-Guthaben",
       "label": "Breadcrumb",
       "home": "Startseite",
       "products": "Produkte",
@@ -4979,7 +4978,6 @@
         "prepaidTitle": "Aufgeladenes Guthaben",
         "prepaidHint": "Verfällt nie",
         "pitchTitle": "Das leistet Ihr Guthaben",
-        "pitchDescription": "Ein Guthaben für sämtliche KI-Funktionen Ihres Shops.",
         "perkAdvisorTitle": "Ein Berater rund um die Uhr",
         "perkAdvisorDescription": "Kundinnen und Kunden fragen nach Ihrem Sortiment und bekommen sofort eine Antwort – auch nachts.",
         "perkVoiceTitle": "Ein Agent, der abnimmt",

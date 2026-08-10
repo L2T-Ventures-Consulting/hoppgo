@@ -236,27 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "Asystent AI",
-        "subtitle": "Twój sklep doradza, odpowiada i rezerwuje — automatycznie",
-        "credits": "{count} kredytów",
-        "creditsUnlimited": "Nielimitowane kredyty",
-        "recharge": "Doładuj",
-        "manageCredits": "Zarządzaj"
-      },
-      "tabs": {
-        "label": "Sekcje asystenta AI",
-        "advisor": "Doradca online",
-        "voice": "Agent głosowy",
-        "conversations": "Rozmowy"
-      },
       "hero": {
         "eyebrow": "Asystent AI",
-        "title": "Twój sklep odpowiada, doradza i rezerwuje, nawet gdy Cię nie ma",
-        "subtitle": "Włącz doradcę online i agenta głosowego: Twoi klienci otrzymują natychmiastowe odpowiedzi, a Ty zyskujesz wartościowe rezerwacje.",
         "activate": "Aktywuj",
         "upgrade": "Zmień plan na wyższy",
-        "upgradeHint": "Asystent AI jest dostępny od planu Pro.",
         "advisor": {
           "title": "Doradca online",
           "b1": "Odpowiada na pytania klientów o Twój sklep 24/7",
@@ -268,6 +251,20 @@
           "b1": "Odbiera każde połączenie, o każdej porze",
           "b2": "Podaje godziny otwarcia, ceny i dostępność na głos",
           "b3": "Przyjmuje rezerwacje i przekazuje Ci wiadomości"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Doradca online",
+          "description": "Pozwól asystentowi AI witać klientów w Twoim sklepie, odpowiadać na ich pytania i prowadzić ich do odpowiedniego wynajmu"
+        },
+        "voice": {
+          "title": "Agent głosowy",
+          "description": "Głosowy agent IA, który odbiera Twoją linię telefoniczną — informuje klientów i przyjmuje rezerwacje, w wybranym języku."
+        },
+        "conversations": {
+          "title": "Rozmowy z klientami",
+          "description": "Sprawdź, o co klienci pytali doradcę i które rozmowy zakończyły się rezerwacją"
         }
       }
     },
@@ -592,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "Asystent AI",
+      "aiConversations": "Rozmowy z klientami",
+      "aiAdvisor": "Doradca online",
+      "aiVoice": "Agent głosowy",
       "home": "Strona główna",
       "products": "Produkty",
       "inventory": "Inwentarz",
@@ -4563,8 +4563,6 @@
         "title": "Doradca AI",
         "description": "Pozwól asystentowi AI witać klientów w Twoim sklepie, odpowiadać na ich pytania i prowadzić ich do odpowiedniego wynajmu",
         "saved": "Zapisano ustawienia doradcy AI",
-        "enableSection": "Doradca AI",
-        "enableSectionDescription": "Skonfiguruj asystenta, który rozmawia z Twoimi klientami w sklepie",
         "enabled": "Włącz doradcę AI",
         "enabledDescription": "Wyświetla widżet czatu w Twoim sklepie",
         "mode": "Tryb podczas rezerwacji",
@@ -4590,17 +4588,12 @@
           "description": "Operator platformy musi ustawić zmienne środowiskowe AI_PROVIDER i AI_API_KEY, aby doradca mógł odpowiadać klientom. Mimo to możesz przygotować swoje ustawienia poniżej."
         },
         "locked": {
-          "title": "Odblokuj Doradcę AI",
-          "description": "Zamień odwiedzających Twój sklep w rezerwacje dzięki asystentowi AI",
           "upgrade": "Przejdź na Pro",
-          "featureLocked": "Funkcja zablokowana",
-          "upgradeToUnlock": "Przejdź na Pro, aby włączyć tę funkcję"
+          "featureLocked": "Funkcja zablokowana"
         },
         "conversations": {
           "columnCredits": "Kredyty",
           "creditsUsed": "{count} kr",
-          "title": "Rozmowy",
-          "description": "Sprawdź, o co klienci pytali doradcę i które rozmowy zakończyły się rezerwacją",
           "filterAll": "Wszystkie",
           "filterConverted": "Z rezerwacją",
           "filterNotConverted": "Bez rezerwacji",
@@ -4659,9 +4652,6 @@
           "confirm": "Wyłącz i odłącz"
         },
         "numberReleaseFailed": "Nie udało się odłączyć numeru — pozostaje podłączony, automatyczna ponowna próba zaplanowana",
-        "description": "Głosowy agent IA, który odbiera Twoją linię telefoniczną — informuje klientów i przyjmuje rezerwacje, w wybranym języku.",
-        "enableSection": "Głosowy agent IA",
-        "enableSectionDescription": "Skonfiguruj agenta głosowego, który odbiera, gdy dzwonią Twoi klienci",
         "enabled": "Włącz głosowego agenta IA",
         "enabledDescription": "IA odbiera połączenia przychodzące na Twój numer",
         "number": {
@@ -4775,7 +4765,10 @@
       "emptyState": "Jak mogę Ci pomóc?",
       "emptyStateHint": "Wypróbuj jedną z sugestii lub zadaj własne pytanie.",
       "placeholder": "Co chcesz wiedzieć lub zrobić?",
+      "send": "Wyślij",
+      "disclaimer": "Asystent AI może popełniać błędy. Sprawdzaj ważne informacje.",
       "newConversation": "Nowa rozmowa",
+      "openFullPage": "Otwórz na pełnej stronie",
       "history": {
         "title": "Historia",
         "empty": "Brak rozmów",
@@ -4796,11 +4789,17 @@
         "reservations": "Czy są dziś zaplanowane odbiory lub zwroty?",
         "stats": "Pokaż mi przychody i najlepsze produkty tego miesiąca",
         "products": "Które produkty są najczęściej wynajmowane?",
-        "customers": "Ilu nowych klientów w tym miesiącu?"
+        "customers": "Ilu nowych klientów w tym miesiącu?",
+        "overdue": "Czy są jakieś zaległe zwroty?",
+        "pending": "Pokaż rezerwacje oczekujące na potwierdzenie"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "Asystent AI",
+      "aiConversations": "Rozmowy z klientami",
+      "aiAdvisor": "Doradca online",
+      "aiVoice": "Agent głosowy",
+      "aiCredits": "Kredyty AI",
       "label": "Okruszki",
       "home": "Strona główna",
       "products": "Produkty",
@@ -4979,7 +4978,6 @@
         "prepaidTitle": "Kredyty przedpłacone",
         "prepaidHint": "Nigdy nie wygasają",
         "pitchTitle": "Co dają Ci kredyty",
-        "pitchDescription": "Jeden portfel dla wszystkich funkcji AI w sklepie.",
         "perkAdvisorTitle": "Doradca przez całą dobę",
         "perkAdvisorDescription": "Klienci pytają o ofertę i od razu dostają odpowiedź – nawet w nocy.",
         "perkVoiceTitle": "Agent, który odbiera",

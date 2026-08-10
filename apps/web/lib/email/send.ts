@@ -1124,7 +1124,7 @@ export async function sendVoiceNumberBillingEmail({
       e164,
       credits,
       deadlineText,
-      ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/ai-assistant`,
+      ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/ai-assistant/voice`,
       locale,
     })
   )

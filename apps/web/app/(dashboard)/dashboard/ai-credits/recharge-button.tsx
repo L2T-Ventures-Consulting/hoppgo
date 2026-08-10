@@ -7,22 +7,17 @@ import { CreditCard } from "lucide-react";
 import { Button } from "@louez/ui";
 import { cn } from "@louez/utils";
 
-/**
- * The recharge modal lives once, in the sticky header, next to the balance it
- * refills. Every other call to action on the page asks for it through this
- * window event instead of mounting its own copy.
- */
-export const OPEN_AI_CREDITS_TOPUP_EVENT = "ai-credits:open-topup";
-
-export const openAiCreditsTopup = () => {
-  window.dispatchEvent(new Event(OPEN_AI_CREDITS_TOPUP_EVENT));
-};
+import { openAiCreditsTopup } from "@/components/dashboard/ai-credits-topup-host";
 
 type RechargeButtonProps = Omit<ComponentProps<typeof Button>, "onClick"> & {
   label: string;
 };
 
-/** Opens the recharge modal from anywhere on the credits page. */
+/**
+ * Opens the recharge modal from anywhere on the page. The modal itself is
+ * mounted once per page by `AiCreditsTopupHost`; every call to action asks for
+ * it through the shared window event instead of mounting its own copy.
+ */
 export const RechargeButton = ({ label, className, ...props }: RechargeButtonProps) => (
   <Button
     type="button"

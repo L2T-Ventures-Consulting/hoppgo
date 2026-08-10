@@ -10,6 +10,8 @@ import { Bot, ChevronLeft, ChevronRight, Loader2, MessagesSquare, Phone } from "
 import {
   Badge,
   Button,
+  Card,
+  CardPanel,
   Table,
   TableBody,
   TableCell,
@@ -24,7 +26,6 @@ import type { AdvisorConversationFilter } from "@louez/validations";
 
 import { AdvisorConversationSheet } from "@/components/dashboard/advisor-conversation-sheet";
 import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
-import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import { orpc } from "@/lib/orpc/react";
 
 const PAGE_SIZE = 20;
@@ -63,15 +64,10 @@ export const AdvisorConversationsSection = () => {
     }
   };
 
+  // The page owns the heading; the card is just the surface the list sits on.
   return (
-    <DashboardSectionCard
-      title={t("title")}
-      description={t("description")}
-      icon={MessagesSquare}
-      accent="neutral"
-      contentClassName="space-y-4"
-    >
-      <>
+    <Card className="flex min-w-0 flex-col">
+      <CardPanel className="flex-1 space-y-4 p-4 sm:p-5">
         <Tabs value={filter} onValueChange={handleFilterChange}>
           <TabsList className="w-full sm:w-auto">
             <TabsTab value="all" className="flex-1 sm:flex-none">
@@ -222,7 +218,7 @@ export const AdvisorConversationsSection = () => {
             if (!open) setSelectedConversationId(null);
           }}
         />
-      </>
-    </DashboardSectionCard>
+      </CardPanel>
+    </Card>
   );
 };

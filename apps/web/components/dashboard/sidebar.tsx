@@ -50,7 +50,6 @@ import {
 } from "@louez/ui/icons";
 import {
   AiAssistantGlassIcon,
-  AiCreditsGlassIcon,
   AnalyticsGlassIcon,
   CustomersGlassIcon,
   HelpGlassIcon,
@@ -104,14 +103,14 @@ const mainNavigation = [
   { key: "home", href: "/dashboard", icon: HomeGlassIcon },
   { key: "reservations", href: "/dashboard/reservations", icon: ReservationsGlassIcon },
   { key: "customers", href: "/dashboard/customers", icon: CustomersGlassIcon },
-  { key: "aiAssistant", href: "/dashboard/ai-assistant", icon: AiAssistantGlassIcon },
 ];
 
-const aiCreditsNavigationItem = {
-  key: "aiCredits",
-  href: "/dashboard/ai-credits",
-  icon: AiCreditsGlassIcon,
-};
+/** What the assistant produces first, then what configures it. */
+const aiAssistantSubItems = [
+  { key: "aiConversations", href: "/dashboard/ai-assistant/conversations" },
+  { key: "aiAdvisor", href: "/dashboard/ai-assistant/advisor" },
+  { key: "aiVoice", href: "/dashboard/ai-assistant/voice" },
+];
 
 const catalogNavigation = [
   { key: "products", href: "/dashboard/products", icon: ProductGlassIcon },
@@ -140,6 +139,10 @@ const managementNavigation = [
 interface NavigationSubItem {
   key: string;
   href: string;
+  /** Discreet warning marker on the sub-row (currently: AI credits running out). */
+  alert?: boolean;
+  /** Numeric badge on the sub-row (currently: the AI credit balance). */
+  badgeCount?: number;
 }
 
 interface NavigationItem {
@@ -150,10 +153,13 @@ interface NavigationItem {
   activeHref?: string;
   /** Sub-entries listed under the item (hidden while the sidebar is collapsed). */
   items?: NavigationSubItem[];
-  /** Draws the discreet warning marker (currently: AI credits running out). */
+  /**
+   * Draws the discreet warning marker. The AI credit balance now lives on a
+   * sub-entry, so the parent only ever relays its alert — the rail hides
+   * sub-entries and the expanded tree keeps them closed until you are in the
+   * section, and the warning has to reach you either way.
+   */
   alert?: boolean;
-  /** Numeric badge on the entry (currently: the AI credit balance). */
-  badgeCount?: number;
 }
 
 interface NavigationSection {
@@ -162,33 +168,49 @@ interface NavigationSection {
 }
 
 /**
- * The AI wallet only exists when the operator sells credits, so the manage group
- * is assembled per render rather than declared once.
+ * The AI wallet only exists when the operator sells credits, so the assistant
+ * section is assembled per render rather than declared once: without credits it
+ * is three entries, with them the wallet joins as a fourth.
  */
-const buildNavigationSections = (
+const buildAiAssistantItem = (
   aiCredits: { low: boolean; credits: number | null; hasUsedCredits: boolean } | null,
-): NavigationSection[] => [
-  { items: mainNavigation },
-  { labelKey: "catalog", items: catalogNavigation },
-  // No label: the group would only ever read "Analyses / Analyses", the entry
-  // repeating the heading above it. The separator already opens the section.
-  { items: analyticsNavigation },
-  {
-    labelKey: "manage",
+): NavigationItem => {
+  const alert = aiCredits !== null && aiCredits.hasUsedCredits && aiCredits.low;
+
+  return {
+    key: "aiAssistant",
+    href: "/dashboard/ai-assistant",
+    icon: AiAssistantGlassIcon,
+    // The balance warning has to survive the wallet moving into a sub-entry:
+    // the rail hides sub-entries, and the expanded tree only reveals them once
+    // you are in the section, so the parent carries the marker.
+    alert,
     items: aiCredits
       ? [
-          ...managementNavigation,
+          ...aiAssistantSubItems,
           {
-            ...aiCreditsNavigationItem,
-            alert: aiCredits.hasUsedCredits && aiCredits.low,
+            key: "aiCredits",
+            href: "/dashboard/ai-credits",
+            alert,
             badgeCount:
               aiCredits.credits !== null && (aiCredits.credits > 0 || aiCredits.hasUsedCredits)
                 ? aiCredits.credits
                 : undefined,
           },
         ]
-      : managementNavigation,
-  },
+      : aiAssistantSubItems,
+  };
+};
+
+const buildNavigationSections = (
+  aiCredits: { low: boolean; credits: number | null; hasUsedCredits: boolean } | null,
+): NavigationSection[] => [
+  { items: [...mainNavigation, buildAiAssistantItem(aiCredits)] },
+  { labelKey: "catalog", items: catalogNavigation },
+  // No label: the group would only ever read "Analyses / Analyses", the entry
+  // repeating the heading above it. The separator already opens the section.
+  { items: analyticsNavigation },
+  { labelKey: "manage", items: managementNavigation },
 ];
 
 const isNavigationItemActive = (pathname: string, href: string) => {
@@ -199,18 +221,56 @@ const isNavigationItemActive = (pathname: string, href: string) => {
   return pathname === href || pathname.startsWith(`${href}/`);
 };
 
+/**
+ * The parent's badge, shrunk to fit a sub-row: the AI wallet keeps showing its
+ * balance (and its warning) now that it hangs under the assistant.
+ */
+const NavSubItemBadge = ({ alert, badgeCount }: { alert?: boolean; badgeCount?: number }) => {
+  const t = useTranslations("dashboard.sidebar");
+  const format = useFormatter();
+
+  if (badgeCount == null && !alert) {
+    return null;
+  }
+
+  return (
+    <span
+      className={cn(
+        "ml-auto shrink-0 rounded-full",
+        badgeCount == null
+          ? "bg-badge-warning-foreground size-2"
+          : cn(
+              "px-1.5 py-0.5 text-[11px] leading-none font-semibold tabular-nums",
+              alert
+                ? "bg-badge-warning-background text-badge-warning-foreground"
+                : "bg-sidebar-accent text-sidebar-foreground/70",
+            ),
+      )}
+    >
+      {badgeCount != null &&
+        format.number(Math.floor(badgeCount), {
+          maximumFractionDigits: 0,
+          useGrouping: false,
+        })}
+      {alert && <span className="sr-only">{t("aiCreditsLow")}</span>}
+    </span>
+  );
+};
+
 const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: string }) => {
   const t = useTranslations("dashboard.navigation");
   const tSidebar = useTranslations("dashboard.sidebar");
-  const format = useFormatter();
-  const active = isNavigationItemActive(pathname, item.activeHref ?? item.href);
+  // A sub-entry can sit outside the parent's path (the AI wallet lives at
+  // `/dashboard/ai-credits`), so the section counts as yours whenever any of
+  // its rows is — otherwise the tree would close over the current page.
+  const activeSub = item.items?.some((sub) => isNavigationItemActive(pathname, sub.href)) ?? false;
+  const active = activeSub || isNavigationItemActive(pathname, item.activeHref ?? item.href);
   // Inside a section, the current page is one of the sub-entries — so the
   // parent drops the active card and keeps only the ink of an opened section.
   // Two stacked "selected" rows otherwise fight over which one you are on.
   // A section with no matching sub-entry keeps its card — otherwise nothing in
   // the sidebar would answer "where am I".
-  const openSection =
-    active && (item.items?.some((sub) => isNavigationItemActive(pathname, sub.href)) ?? false);
+  const openSection = activeSub;
   const { state, isMobile } = useSidebar();
   // The mobile sheet is never "collapsed" — it just isn't a rail.
   const collapsedToRail = state === "collapsed" && !isMobile;
@@ -249,9 +309,10 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
                   key={subItem.href}
                   href={subItem.href}
                   data-active={isNavigationItemActive(pathname, subItem.href) || undefined}
-                  className="text-foreground/70 hover:bg-accent data-active:bg-accent data-active:text-foreground flex h-8 items-center rounded-md px-2 text-[13px] transition-colors data-active:font-medium"
+                  className="text-foreground/70 hover:bg-accent data-active:bg-accent data-active:text-foreground flex h-8 items-center gap-2 rounded-md px-2 text-[13px] transition-colors data-active:font-medium"
                 >
                   {t(subItem.key)}
+                  <NavSubItemBadge alert={subItem.alert} badgeCount={subItem.badgeCount} />
                 </SidebarLink>
               ))}
             </div>
@@ -260,31 +321,14 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
       ) : (
         button
       )}
-      {item.badgeCount != null ? (
+      {item.alert && (
         /* The vertical offset has to be restated under the same
            `peer-data-[size]` variant as the default it replaces, otherwise the
-           more specific default wins and the badge rides high on these `h-10`
+           more specific default wins and the dot rides high on these `h-10`
            buttons. */
-        <SidebarMenuBadge
-          className={cn(
-            "rounded-full font-semibold peer-data-[size=default]/menu-button:top-2.5",
-            item.alert
-              ? "bg-badge-warning-background text-badge-warning-foreground peer-hover/menu-button:text-badge-warning-foreground peer-data-active/menu-button:text-badge-warning-foreground"
-              : "bg-sidebar-accent",
-          )}
-        >
-          {format.number(Math.floor(item.badgeCount), {
-            maximumFractionDigits: 0,
-            useGrouping: false,
-          })}
-          {item.alert && <span className="sr-only">{tSidebar("aiCreditsLow")}</span>}
+        <SidebarMenuBadge className="bg-badge-warning-foreground peer-data-[size=default]/menu-button:top-4 size-2 min-w-0 rounded-full p-0">
+          <span className="sr-only">{tSidebar("aiCreditsLow")}</span>
         </SidebarMenuBadge>
-      ) : (
-        item.alert && (
-          <SidebarMenuBadge className="bg-badge-warning-foreground peer-data-[size=default]/menu-button:top-4 size-2 min-w-0 rounded-full p-0">
-            <span className="sr-only">{tSidebar("aiCreditsLow")}</span>
-          </SidebarMenuBadge>
-        )
       )}
       {item.alert && (
         /* Collapsed sidebar: the badge is hidden by its own styles, so the
@@ -340,6 +384,7 @@ const DashboardNavItem = ({ item, pathname }: { item: NavigationItem; pathname: 
                       className="text-sidebar-foreground/70 hover:bg-sidebar-accent/70 data-active:bg-background data-active:text-sidebar-accent-foreground h-8 transition-colors data-[size=md]:text-[13px] data-active:font-medium data-active:shadow-[0_0_0_1px_var(--color-border)]"
                     >
                       <span>{t(subItem.key)}</span>
+                      <NavSubItemBadge alert={subItem.alert} badgeCount={subItem.badgeCount} />
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                 );

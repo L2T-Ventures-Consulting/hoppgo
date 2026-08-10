@@ -6,18 +6,7 @@ import { revalidateLogic, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import {
-  ArrowRight,
-  Clock3,
-  CreditCard,
-  Lock,
-  Phone,
-  PhoneCall,
-  TriangleAlert,
-  Voicemail,
-  Wallet,
-  Zap,
-} from "lucide-react";
+import { Clock3, CreditCard, PhoneCall, TriangleAlert, Voicemail, Wallet } from "lucide-react";
 
 import {
   Alert,
@@ -33,10 +22,7 @@ import {
   Badge,
   Button,
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+  CardPanel,
   SelectItem,
   Switch,
   toastManager,
@@ -49,13 +35,13 @@ import {
 import type { AiPhoneSettings } from "@louez/types";
 
 import { updateAiPhoneSettings } from "./phone-actions";
+import { FeatureLockedCard } from "./feature-locked-card";
 import { FeaturePresentation } from "./feature-presentation";
-import { OPEN_TOPUP_EVENT } from "./ai-assistant-header";
 import { VoiceNumberProvisioning } from "./voice-number-provisioning";
 import { VoicePicker } from "./voice-picker";
+import { openAiCreditsTopup } from "@/components/dashboard/ai-credits-topup-host";
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
 import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
-import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
 import { RootError } from "@/components/form/root-error";
 import { useAppForm } from "@/hooks/form/form";
@@ -117,7 +103,6 @@ export const VoiceAgentForm = ({
 }: VoiceAgentFormProps) => {
   const router = useRouter();
   const t = useTranslations("dashboard.settings.aiVoiceAgent");
-  const tAdvisor = useTranslations("dashboard.settings.aiAdvisor");
   const tValidation = useTranslations("validation");
   const tCommon = useTranslations("common");
 
@@ -173,34 +158,7 @@ export const VoiceAgentForm = ({
 
   // Locked state for plans without access — reuses the advisor upgrade copy.
   if (!hasFeatureAccess) {
-    return (
-      <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px] z-10 flex items-center justify-center">
-          <div className="text-center p-6">
-            <Lock className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-            <p className="font-medium">{tAdvisor("locked.featureLocked")}</p>
-            <Button onClick={() => router.push("/dashboard/subscription")} className="gap-2 mt-3">
-              <Zap className="h-4 w-4" />
-              {tAdvisor("locked.upgrade")}
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-        <CardHeader className="flex flex-row items-center gap-3 p-4 pb-3 sm:p-5 sm:pb-3">
-          <DashboardIconTile icon={Phone} accent="success" />
-          <div className="min-w-0 flex-1">
-            <CardTitle className="text-base">{t("enableSection")}</CardTitle>
-            <CardDescription className="mt-0.5">{t("description")}</CardDescription>
-          </div>
-        </CardHeader>
-        <CardContent className="pointer-events-none space-y-4 p-4 pt-0 opacity-50 sm:p-5 sm:pt-0">
-          <div className="flex items-center justify-between rounded-lg border p-3">
-            <span className="text-sm">{t("enabled")}</span>
-            <Switch disabled />
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <FeatureLockedCard variant="voice" />;
   }
 
   return (
@@ -216,14 +174,9 @@ export const VoiceAgentForm = ({
           </Alert>
         )}
 
-        <DashboardSectionCard
-          title={t("enableSection")}
-          description={t("enableSectionDescription")}
-          icon={Phone}
-          accent="success"
-          contentClassName="space-y-6"
-        >
-          <>
+        {/* The page owns the heading; the card is just the surface the form sits on. */}
+        <Card className="flex min-w-0 flex-col">
+          <CardPanel className="flex-1 space-y-6 p-4 sm:p-5">
             {/* Enabled switch — turning OFF with a bound number asks for
                 confirmation, because saving then detaches the number. */}
             <form.Field name="enabled">
@@ -355,7 +308,7 @@ export const VoiceAgentForm = ({
                           type="button"
                           size="sm"
                           className="gap-1.5 transition-transform duration-150 ease-out active:scale-[0.96]"
-                          onClick={() => window.dispatchEvent(new Event(OPEN_TOPUP_EVENT))}
+                          onClick={openAiCreditsTopup}
                         >
                           <CreditCard className="h-3.5 w-3.5" />
                           {t("setup.insufficientCta")}
@@ -512,8 +465,8 @@ export const VoiceAgentForm = ({
                 </div>
               </div>
             )}
-          </>
-        </DashboardSectionCard>
+          </CardPanel>
+        </Card>
 
         <FloatingSaveBar
           isDirty={isDirty}

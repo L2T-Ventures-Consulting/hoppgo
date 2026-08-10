@@ -75,7 +75,7 @@ export async function createAiCreditTopupCheckout(
   const safeReturn =
     returnPath && returnPath.startsWith('/dashboard/')
       ? returnPath
-      : '/dashboard/ai-assistant'
+      : '/dashboard/ai-assistant/advisor'
 
   // Build the return URLs safely so an existing query string in the path can't
   // produce a malformed `?a=b?topup=…`.
@@ -128,9 +128,9 @@ export async function updateAiCreditsAutoTopup(config: {
     priceCents: pack?.priceCents ?? 0,
   })
 
-  // Both surfaces render the auto-top-up config (the assistant page and the
-  // dedicated credits page), so both have to be refreshed.
-  revalidatePath('/dashboard/ai-assistant')
+  // Every assistant section carries the credit header, and the dedicated
+  // credits page carries the config itself — refresh the whole subtree.
+  revalidatePath('/dashboard/ai-assistant', 'layout')
   revalidatePath('/dashboard/ai-credits')
   return { success: true }
 }

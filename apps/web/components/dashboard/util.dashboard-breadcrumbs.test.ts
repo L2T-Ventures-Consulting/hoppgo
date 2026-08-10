@@ -6,6 +6,10 @@ import { getDashboardBreadcrumbItems } from "./util.dashboard-breadcrumbs";
 test("covers every static dashboard breadcrumb route", () => {
   const cases = [
     ["/dashboard/ai-assistant", ["aiAssistant"]],
+    ["/dashboard/ai-assistant/advisor", ["aiAssistant", "aiAdvisor"]],
+    ["/dashboard/ai-assistant/conversations", ["aiAssistant", "aiConversations"]],
+    ["/dashboard/ai-assistant/voice", ["aiAssistant", "aiVoice"]],
+    ["/dashboard/ai-credits", ["aiCredits"]],
     ["/dashboard/products", ["products"]],
     ["/dashboard/products/new", ["products", "productsNew"]],
     ["/dashboard/reservations", ["reservations"]],
@@ -48,6 +52,22 @@ test("covers every static dashboard breadcrumb route", () => {
       pathname,
     );
   }
+});
+
+test("prefers the static route over a label registered by the page shell", () => {
+  // `SettingsPageShell` registers its title for the current path. On routes the
+  // table already names, that must stay a no-op — one crumb, translated, never
+  // a second one next to it.
+  assert.deepEqual(
+    getDashboardBreadcrumbItems("/dashboard/ai-assistant/voice", {
+      "/dashboard/ai-assistant/voice": "Agent vocal",
+      "/dashboard/ai-credits": "Crédits IA",
+    }),
+    [
+      { href: "/dashboard/ai-assistant", translationKey: "aiAssistant" },
+      { href: "/dashboard/ai-assistant/voice", translationKey: "aiVoice" },
+    ],
+  );
 });
 
 test("builds collection and creation breadcrumbs from the route hierarchy", () => {

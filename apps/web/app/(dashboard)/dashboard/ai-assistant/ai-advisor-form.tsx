@@ -6,20 +6,9 @@ import { revalidateLogic, useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { z } from "zod";
-import { ArrowRight, Bot, Lock, TriangleAlert, Zap } from "lucide-react";
+import { TriangleAlert } from "lucide-react";
 
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-  Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  Switch,
-  toastManager,
-} from "@louez/ui";
+import { Alert, AlertDescription, AlertTitle, Card, CardPanel, toastManager } from "@louez/ui";
 import {
   AI_ADVISOR_DISPLAY_NAME_MAX_LENGTH,
   AI_ADVISOR_STORE_CONTEXT_MAX_LENGTH,
@@ -29,10 +18,9 @@ import {
 import type { AiAdvisorSettings } from "@louez/types";
 
 import { updateAiAdvisorSettings } from "./actions";
+import { FeatureLockedCard } from "./feature-locked-card";
 import { FeaturePresentation } from "./feature-presentation";
 import { FloatingSaveBar } from "@/components/dashboard/floating-save-bar";
-import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
-import { DashboardSectionCard } from "@/components/dashboard/shared/dashboard-section-card";
 import { FormRadioCardGroup } from "@/components/form/form-radio-card-group";
 import { RootError } from "@/components/form/root-error";
 import { useAppForm } from "@/hooks/form/form";
@@ -121,54 +109,7 @@ export const AiAdvisorForm = ({ store, hasFeatureAccess, aiConfigured }: AiAdvis
 
   // Locked state for plans without AI advisor access
   if (!hasFeatureAccess) {
-    return (
-      <div className="space-y-6">
-        {/* Locked Banner */}
-        <Card>
-          <CardContent className="p-4 sm:p-5">
-            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-              <div className="flex min-w-0 items-start gap-3">
-                <DashboardIconTile icon={Bot} accent="primary" />
-                <div className="min-w-0">
-                  <h3 className="font-semibold">{t("locked.title")}</h3>
-                  <p className="text-muted-foreground mt-1 text-sm">{t("locked.description")}</p>
-                </div>
-              </div>
-              <Button
-                onClick={() => router.push("/dashboard/subscription")}
-                className="w-full shrink-0 gap-2 sm:w-auto"
-              >
-                <Zap className="h-4 w-4" />
-                {t("locked.upgrade")}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Preview of features (locked) */}
-        <Card className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px] z-10 flex items-center justify-center">
-            <div className="text-center p-6">
-              <Lock className="h-8 w-8 mx-auto mb-3 text-muted-foreground" />
-              <p className="font-medium">{t("locked.featureLocked")}</p>
-              <p className="text-sm text-muted-foreground mt-1">{t("locked.upgradeToUnlock")}</p>
-            </div>
-          </div>
-          <CardHeader className="flex flex-row items-center gap-3 p-4 pb-3 sm:p-5 sm:pb-3">
-            <DashboardIconTile icon={Bot} accent="primary" />
-            <CardTitle className="text-base">{t("enableSection")}</CardTitle>
-          </CardHeader>
-          <CardContent className="pointer-events-none space-y-4 p-4 pt-0 opacity-50 sm:p-5 sm:pt-0">
-            <div className="flex items-center justify-between rounded-lg border p-3">
-              <span className="text-sm">{t("enabled")}</span>
-              <Switch disabled />
-            </div>
-            <div className="bg-muted/50 h-24 rounded-md border" />
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <FeatureLockedCard variant="advisor" />;
   }
 
   return (
@@ -184,14 +125,9 @@ export const AiAdvisorForm = ({ store, hasFeatureAccess, aiConfigured }: AiAdvis
           </Alert>
         )}
 
-        <DashboardSectionCard
-          title={t("enableSection")}
-          description={t("enableSectionDescription")}
-          icon={Bot}
-          accent="progress"
-          contentClassName="space-y-6"
-        >
-          <>
+        {/* The page owns the heading; the card is just the surface the form sits on. */}
+        <Card className="flex min-w-0 flex-col">
+          <CardPanel className="flex-1 space-y-6 p-4 sm:p-5">
             {/* Enable Switch */}
             <form.AppField name="enabled">
               {(field) => (
@@ -285,8 +221,8 @@ export const AiAdvisorForm = ({ store, hasFeatureAccess, aiConfigured }: AiAdvis
                 </div>
               </div>
             )}
-          </>
-        </DashboardSectionCard>
+          </CardPanel>
+        </Card>
 
         <FloatingSaveBar
           isDirty={isDirty}

@@ -29,11 +29,14 @@ import {
 } from "@louez/ui";
 import {
   AnalyticsIcon,
+  BotIcon,
   CalendarDaysIcon,
   CalendarIcon,
+  ChatIcon,
   ExternalLinkIcon,
   HomeIcon,
   PackageIcon,
+  PhoneCallIcon,
   SettingsIcon,
   SparklesIcon,
   UsersIcon,
@@ -406,6 +409,31 @@ export const DashboardCommandPalette = ({
           icon: AnalyticsIcon,
           kind: "navigate",
           href: "/dashboard/analytics/traffic",
+        },
+        {
+          value: "ai-conversations",
+          label: t("navigation.aiConversations"),
+          keywords:
+            "conversations discussions echanges clients conseiller appels transcriptions chats customer calls transcripts",
+          icon: ChatIcon,
+          kind: "navigate",
+          href: "/dashboard/ai-assistant/conversations",
+        },
+        {
+          value: "ai-advisor",
+          label: t("navigation.aiAdvisor"),
+          keywords: "conseiller advisor ia ai vitrine widget chatbot configuration",
+          icon: BotIcon,
+          kind: "navigate",
+          href: "/dashboard/ai-assistant/advisor",
+        },
+        {
+          value: "ai-voice",
+          label: t("navigation.aiVoice"),
+          keywords: "agent vocal voix telephone appels numero voice phone calls number",
+          icon: PhoneCallIcon,
+          kind: "navigate",
+          href: "/dashboard/ai-assistant/voice",
         },
         {
           value: "settings",

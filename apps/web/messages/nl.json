@@ -236,27 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "AI-assistent",
-        "subtitle": "Je winkel adviseert, antwoordt en reserveert — automatisch",
-        "credits": "{count} credits",
-        "creditsUnlimited": "Onbeperkte credits",
-        "recharge": "Opwaarderen",
-        "manageCredits": "Beheren"
-      },
-      "tabs": {
-        "label": "Onderdelen van de AI-assistent",
-        "advisor": "Online adviseur",
-        "voice": "Spraakagent",
-        "conversations": "Gesprekken"
-      },
       "hero": {
         "eyebrow": "AI-assistent",
-        "title": "Je winkel antwoordt, adviseert en reserveert, ook als je er niet bent",
-        "subtitle": "Activeer de online adviseur en de spraakagent: je klanten krijgen direct antwoord, jij krijgt gekwalificeerde reserveringen.",
         "activate": "Activeren",
         "upgrade": "Plan upgraden",
-        "upgradeHint": "De AI-assistent is inbegrepen vanaf het Pro-plan.",
         "advisor": {
           "title": "Online adviseur",
           "b1": "Beantwoordt 24/7 vragen van je klanten over je winkel",
@@ -268,6 +251,20 @@
           "b1": "Neemt elke oproep aan, op elk uur",
           "b2": "Deelt openingstijden, tarieven en beschikbaarheid mondeling",
           "b3": "Neemt reserveringen aan en geeft berichten aan je door"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Online adviseur",
+          "description": "Laat een AI-assistent uw klanten verwelkomen in uw winkel, hun vragen beantwoorden en hen naar de juiste verhuur begeleiden"
+        },
+        "voice": {
+          "title": "Spraakagent",
+          "description": "Een AI-spraakagent die je telefoonlijn beantwoordt — informeert je klanten en neemt reserveringen op, in de taal die je kiest."
+        },
+        "conversations": {
+          "title": "Klantgesprekken",
+          "description": "Bekijk wat klanten de adviseur vroegen en welke gesprekken tot een reservering leidden"
         }
       }
     },
@@ -592,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "AI-assistent",
+      "aiConversations": "Klantgesprekken",
+      "aiAdvisor": "Online adviseur",
+      "aiVoice": "Spraakagent",
       "home": "Home",
       "products": "Producten",
       "inventory": "Inventaris",
@@ -4563,8 +4563,6 @@
         "title": "AI-adviseur",
         "description": "Laat een AI-assistent uw klanten verwelkomen in uw winkel, hun vragen beantwoorden en hen naar de juiste verhuur begeleiden",
         "saved": "AI-adviseur instellingen opgeslagen",
-        "enableSection": "AI-adviseur",
-        "enableSectionDescription": "Configureer de assistent die met uw klanten chat in uw winkel",
         "enabled": "AI-adviseur inschakelen",
         "enabledDescription": "Toon de chatwidget in uw winkel",
         "mode": "Modus bij het reserveren",
@@ -4590,17 +4588,12 @@
           "description": "De platformbeheerder moet de omgevingsvariabelen AI_PROVIDER en AI_API_KEY instellen voordat de adviseur klanten kan antwoorden. U kunt uw instellingen hieronder alvast voorbereiden."
         },
         "locked": {
-          "title": "Ontgrendel de AI-adviseur",
-          "description": "Zet bezoekers van uw winkel om in reserveringen met een AI-assistent",
           "upgrade": "Upgrade naar Pro",
-          "featureLocked": "Functie vergrendeld",
-          "upgradeToUnlock": "Upgrade naar Pro om deze functie in te schakelen"
+          "featureLocked": "Functie vergrendeld"
         },
         "conversations": {
           "columnCredits": "Credits",
           "creditsUsed": "{count} cr",
-          "title": "Gesprekken",
-          "description": "Bekijk wat klanten de adviseur vroegen en welke gesprekken tot een reservering leidden",
           "filterAll": "Alle",
           "filterConverted": "Geconverteerd",
           "filterNotConverted": "Niet geconverteerd",
@@ -4659,9 +4652,6 @@
           "confirm": "Uitschakelen en loskoppelen"
         },
         "numberReleaseFailed": "Het nummer kon niet worden losgekoppeld — het blijft gekoppeld, automatische nieuwe poging gepland",
-        "description": "Een AI-spraakagent die je telefoonlijn beantwoordt — informeert je klanten en neemt reserveringen op, in de taal die je kiest.",
-        "enableSection": "AI-spraakagent",
-        "enableSectionDescription": "Configureer de spraakagent die antwoordt wanneer je klanten bellen",
         "enabled": "AI-spraakagent inschakelen",
         "enabledDescription": "De AI beantwoordt inkomende oproepen op uw nummer",
         "number": {
@@ -4775,7 +4765,10 @@
       "emptyState": "Hoe kan ik u helpen?",
       "emptyStateHint": "Probeer een suggestie of stel uw eigen vraag.",
       "placeholder": "Wat wilt u weten of doen?",
+      "send": "Versturen",
+      "disclaimer": "De AI-assistent kan fouten maken. Controleer belangrijke informatie.",
       "newConversation": "Nieuw gesprek",
+      "openFullPage": "Openen als volledige pagina",
       "history": {
         "title": "Geschiedenis",
         "empty": "Geen gesprekken",
@@ -4796,11 +4789,17 @@
         "reservations": "Zijn er vandaag ophalingen of retouren gepland?",
         "stats": "Toon me de omzet en topproducten van deze maand",
         "products": "Welke producten worden het meest verhuurd?",
-        "customers": "Hoeveel nieuwe klanten deze maand?"
+        "customers": "Hoeveel nieuwe klanten deze maand?",
+        "overdue": "Zijn er retouren te laat?",
+        "pending": "Toon me de reserveringen die wachten op bevestiging"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "AI-assistent",
+      "aiConversations": "Klantgesprekken",
+      "aiAdvisor": "Online adviseur",
+      "aiVoice": "Spraakagent",
+      "aiCredits": "AI-tegoed",
       "label": "Kruimelpad",
       "home": "Home",
       "products": "Producten",
@@ -4979,7 +4978,6 @@
         "prepaidTitle": "Vooruitbetaald tegoed",
         "prepaidHint": "Verloopt nooit",
         "pitchTitle": "Wat je tegoed mogelijk maakt",
-        "pitchDescription": "Eén tegoed voor alle AI-functies van je winkel.",
         "perkAdvisorTitle": "Een adviseur die nooit slaapt",
         "perkAdvisorDescription": "Klanten stellen vragen over je aanbod en krijgen meteen antwoord, ook 's nachts.",
         "perkVoiceTitle": "Een agent die opneemt",

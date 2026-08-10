@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 
-import { CheckCircle2 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { AiCreditsTopupBanners } from "@/components/dashboard/ai-credits-topup-banners";
+import { AiCreditsTopupHost } from "@/components/dashboard/ai-credits-topup-host";
+import { SettingsPageShell } from "@/components/dashboard/settings-page-shell";
 import {
   getAiCreditDebitHistory,
   getAiCreditHistory,
@@ -17,11 +19,10 @@ import { getImageFiles } from "@/lib/storage/files";
 import { getCurrentStore } from "@/lib/store-context";
 
 import { AiCreditsAutoTopup } from "./ai-credits-auto-topup";
-import { AiCreditsHeader } from "./ai-credits-header";
 import { AiCreditsHistory, type AiCreditsHistoryTab } from "./ai-credits-history";
 import { AiCreditsOverview } from "./ai-credits-overview";
 import { AiCreditsValue } from "./ai-credits-value";
-import { LOW_BALANCE_CREDITS } from "./credits-format";
+import { RechargeButton } from "./recharge-button";
 
 // TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
 // See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
@@ -80,8 +81,6 @@ export default async function AiCreditsPage({
   const monthlyRemainingCredits =
     info.monthlyRemainingMicro === null ? null : microToCredits(info.monthlyRemainingMicro);
   const prepaidCredits = microToCredits(info.prepaidBalanceMicro);
-  const totalCredits =
-    monthlyRemainingCredits === null ? null : monthlyRemainingCredits + prepaidCredits;
 
   // A merchant who has never bought a pack AND never burned a credit gets the
   // pitch instead of an empty receipt.
@@ -101,80 +100,71 @@ export default async function AiCreditsPage({
   );
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-5xl">
-      <AiCreditsHeader
-        totalCredits={totalCredits}
-        low={!isNewcomer && totalCredits !== null && totalCredits < LOW_BALANCE_CREDITS}
+    <SettingsPageShell
+      title={t("page.title")}
+      description={t("page.subtitle")}
+      width="wide"
+      // The wallet's own page is the one place a recharge belongs in the header.
+      actions={packages.length > 0 ? <RechargeButton label={t("recharge")} /> : undefined}
+    >
+      <AiCreditsTopupBanners topup={topup} />
+
+      <AiCreditsTopupHost
         packages={packages}
         voiceCreditsPerMinute={voiceCreditsPerMinute > 0 ? voiceCreditsPerMinute : null}
         numberRentalCredits={numberRentalCredits > 0 ? numberRentalCredits : null}
       />
 
-      <div className="space-y-4 py-4 sm:space-y-6 sm:py-6">
-        {topup === "success" && (
-          <div className="bg-badge-success-background/60 text-badge-success-foreground ring-badge-success-foreground/15 flex items-center gap-2 rounded-xl px-3.5 py-3 text-sm ring-1 ring-inset">
-            <CheckCircle2 className="h-4 w-4 shrink-0" />
-            {t("topupSuccess")}
-          </div>
-        )}
-        {topup === "cancelled" && (
-          <div className="bg-muted/40 text-muted-foreground rounded-xl px-3.5 py-3 text-sm">
-            {t("topupCancelled")}
-          </div>
-        )}
+      <AiCreditsOverview
+        monthlyIncludedCredits={monthlyIncludedCredits}
+        monthlyRemainingCredits={monthlyRemainingCredits}
+        prepaidCredits={prepaidCredits}
+        isNewcomer={isNewcomer}
+        canTopup={packages.length > 0}
+      />
 
-        <AiCreditsOverview
-          monthlyIncludedCredits={monthlyIncludedCredits}
-          monthlyRemainingCredits={monthlyRemainingCredits}
-          prepaidCredits={prepaidCredits}
-          isNewcomer={isNewcomer}
-          canTopup={packages.length > 0}
+      <AiCreditsValue
+        isNewcomer={isNewcomer}
+        summary={{
+          conversations: summary.conversations,
+          calls: summary.calls,
+          callSeconds: summary.callSeconds,
+          images: summary.images,
+          credits: microToCredits(summary.creditsMicro),
+        }}
+      />
+
+      {packages.length > 0 && (
+        <AiCreditsAutoTopup
+          enabled={info.autoTopupEnabled}
+          thresholdCredits={
+            info.autoTopupThresholdMicro ? microToCredits(info.autoTopupThresholdMicro) : 0
+          }
+          packIndex={packages.findIndex(
+            (pack) =>
+              pack.credits === info.autoTopupCredits &&
+              pack.priceCents === info.autoTopupPriceCents,
+          )}
+          packages={packages}
         />
+      )}
 
-        <AiCreditsValue
-          isNewcomer={isNewcomer}
-          canTopup={packages.length > 0}
-          summary={{
-            conversations: summary.conversations,
-            calls: summary.calls,
-            callSeconds: summary.callSeconds,
-            images: summary.images,
-            credits: microToCredits(summary.creditsMicro),
-          }}
-        />
-
-        {packages.length > 0 && (
-          <AiCreditsAutoTopup
-            enabled={info.autoTopupEnabled}
-            thresholdCredits={
-              info.autoTopupThresholdMicro ? microToCredits(info.autoTopupThresholdMicro) : 0
-            }
-            packIndex={packages.findIndex(
-              (pack) =>
-                pack.credits === info.autoTopupCredits &&
-                pack.priceCents === info.autoTopupPriceCents,
-            )}
-            packages={packages}
-          />
-        )}
-
-        <AiCreditsHistory
-          tab={tab}
-          page={page}
-          pageSize={USAGE_PAGE_SIZE}
-          usageTotal={debits.total}
-          usage={usageRows}
-          purchases={purchases.map((row) => ({
-            id: row.id,
-            type: row.type,
-            credits: microToCredits(row.creditsMicro),
-            amountCents: row.amountCents,
-            currency: row.currency,
-            status: row.status,
-            createdAt: row.createdAt.toISOString(),
-          }))}
-        />
-      </div>
-    </div>
+      <AiCreditsHistory
+        tab={tab}
+        page={page}
+        pageSize={USAGE_PAGE_SIZE}
+        usageTotal={debits.total}
+        usage={usageRows}
+        purchases={purchases.map((row) => ({
+          id: row.id,
+          type: row.type,
+          credits: microToCredits(row.creditsMicro),
+          amountCents: row.amountCents,
+          currency: row.currency,
+          status: row.status,
+          createdAt: row.createdAt.toISOString(),
+        }))}
+      />
+    </SettingsPageShell>
   );
 }

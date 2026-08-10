@@ -252,7 +252,7 @@ export async function provisionVoiceNumber(input: {
     };
   }
 
-  revalidatePath("/dashboard/ai-assistant");
+  revalidatePath("/dashboard/ai-assistant/voice");
   return { e164: provisioned.e164 };
 }
 
@@ -303,7 +303,7 @@ export async function linkVoiceNumber(input: {
   });
 
   if (!result.ok) return { error: result.error };
-  revalidatePath("/dashboard/ai-assistant");
+  revalidatePath("/dashboard/ai-assistant/voice");
   return { e164: phoneNumber };
 }
 
@@ -325,6 +325,6 @@ export async function releaseVoiceNumber(): Promise<{ success: true } | { error:
   const released = await releaseNumberBinding(binding);
   if (!released.ok) return { error: "errors.releaseFailed" };
 
-  revalidatePath("/dashboard/ai-assistant");
+  revalidatePath("/dashboard/ai-assistant/voice");
   return { success: true };
 }

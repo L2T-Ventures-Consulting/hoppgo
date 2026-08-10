@@ -1,117 +1,114 @@
-'use client'
+"use client";
 
-import type { UIMessage } from '@ai-sdk/react'
-import { Sparkles } from 'lucide-react'
+import type { ReactNode } from "react";
 
-import { cn } from '@louez/utils'
+import type { UIMessage } from "@ai-sdk/react";
 
-type ChatMessagesProps = {
-  messages: UIMessage[]
-  isLoading: boolean
+import { cn } from "@louez/utils";
+
+interface ChatMessagesProps {
+  messages: UIMessage[];
+  isLoading: boolean;
 }
 
-export function ChatMessages({ messages, isLoading }: ChatMessagesProps) {
-  return (
-    <div className="space-y-4 pb-2">
-      {messages.map((message) => (
+export const ChatMessages = ({ messages, isLoading }: ChatMessagesProps) => (
+  <div className="space-y-4 pb-2">
+    {messages.map((message) => (
+      <div
+        key={message.id}
+        className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
+      >
         <div
-          key={message.id}
           className={cn(
-            'flex',
-            message.role === 'user' ? 'justify-end' : 'justify-start',
+            "text-sm leading-relaxed",
+            message.role === "user"
+              ? // Neutral, not `bg-primary`: `--primary` is near-white in dark
+                // mode, which turned the merchant's own bubble into a glare.
+                "bg-muted text-foreground max-w-[80%] rounded-2xl rounded-br-md px-3.5 py-2"
+              : // No avatar, so the answer itself carries the turn: full width
+                // reads as the page speaking, a capped column as a stray bubble.
+                "text-foreground min-w-0 flex-1 pt-0.5",
           )}
         >
-          {message.role === 'assistant' && (
-            <div className="mr-2.5 mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Sparkles className="h-3 w-3 text-primary" />
-            </div>
-          )}
-          <div
-            className={cn(
-              'max-w-[80%] text-sm leading-relaxed',
-              message.role === 'user'
-                ? 'rounded-2xl rounded-br-md bg-primary px-3.5 py-2 text-primary-foreground'
-                : 'text-foreground pt-0.5',
-            )}
-          >
-            <MessageParts parts={message.parts} />
-          </div>
+          <MessageParts parts={message.parts} />
         </div>
-      ))}
+      </div>
+    ))}
 
-      {isLoading && messages[messages.length - 1]?.role === 'user' && (
-        <div className="flex items-start">
-          <div className="mr-2.5 mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-            <Sparkles className="h-3 w-3 text-primary animate-pulse" />
-          </div>
-          <span className="flex gap-1.5 pt-2.5">
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/40 [animation-delay:0ms]" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/40 [animation-delay:150ms]" />
-            <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-primary/40 [animation-delay:300ms]" />
-          </span>
-        </div>
-      )}
-    </div>
-  )
-}
+    {isLoading && messages[messages.length - 1]?.role === "user" && (
+      <div className="flex items-start">
+        <span className="flex gap-1.5 pt-1">
+          <span className="bg-muted-foreground/50 size-1.5 rounded-full motion-safe:animate-bounce" />
+          <span className="bg-muted-foreground/50 size-1.5 rounded-full [animation-delay:150ms] motion-safe:animate-bounce" />
+          <span className="bg-muted-foreground/50 size-1.5 rounded-full [animation-delay:300ms] motion-safe:animate-bounce" />
+        </span>
+      </div>
+    )}
+  </div>
+);
 
-function MessageParts({ parts }: { parts: UIMessage['parts'] }) {
-  return (
-    <>
-      {parts.map((part, i) => {
-        if (part.type === 'text') {
-          return <TextContent key={i} text={part.text} />
-        }
-        return null
-      })}
-    </>
-  )
-}
+const MessageParts = ({ parts }: { parts: UIMessage["parts"] }) => (
+  <>
+    {parts.map((part, i) => {
+      if (part.type === "text") {
+        return <TextContent key={i} text={part.text} />;
+      }
+      return null;
+    })}
+  </>
+);
 
 /** Render inline formatting: **bold**, `code`, *italic* */
-function InlineFormat({ text }: { text: string }) {
+const InlineFormat = ({ text }: { text: string }) => {
   // Split on **bold**, `code`, and *italic* (in order of priority)
-  const parts = text.split(/(\*\*.*?\*\*|`[^`]+`|\*[^*]+\*)/)
+  const parts = text.split(/(\*\*.*?\*\*|`[^`]+`|\*[^*]+\*)/);
   return (
     <>
       {parts.map((segment, j) => {
-        if (segment.startsWith('**') && segment.endsWith('**')) {
-          return <strong key={j} className="font-semibold">{segment.slice(2, -2)}</strong>
-        }
-        if (segment.startsWith('`') && segment.endsWith('`')) {
+        if (segment.startsWith("**") && segment.endsWith("**")) {
           return (
-            <code key={j} className="rounded-md bg-primary/8 px-1.5 py-0.5 text-[12px] text-primary">
+            <strong key={j} className="font-semibold">
+              {segment.slice(2, -2)}
+            </strong>
+          );
+        }
+        if (segment.startsWith("`") && segment.endsWith("`")) {
+          return (
+            <code
+              key={j}
+              className="bg-foreground/8 text-foreground rounded-md px-1.5 py-0.5 text-xs"
+            >
               {segment.slice(1, -1)}
             </code>
-          )
+          );
         }
-        if (segment.startsWith('*') && segment.endsWith('*') && segment.length > 2) {
-          return <em key={j}>{segment.slice(1, -1)}</em>
+        if (segment.startsWith("*") && segment.endsWith("*") && segment.length > 2) {
+          return <em key={j}>{segment.slice(1, -1)}</em>;
         }
-        return segment
+        return segment;
       })}
     </>
-  )
-}
+  );
+};
 
-function TextContent({ text }: { text: string }) {
-  if (!text) return null
+const TextContent = ({ text }: { text: string }) => {
+  if (!text) return null;
 
-  const lines = text.split('\n')
-  const elements: React.ReactNode[] = []
-  let listItems: string[] = []
-  let listType: 'ul' | 'ol' = 'ul'
-  let listStart = 0
+  const lines = text.split("\n");
+  const elements: ReactNode[] = [];
+  let listItems: string[] = [];
+  let listType: "ul" | "ol" = "ul";
+  let listStart = 0;
 
   const flushList = () => {
-    if (listItems.length === 0) return
-    const Tag = listType
+    if (listItems.length === 0) return;
+    const Tag = listType;
     elements.push(
       <Tag
         key={`list-${listStart}`}
         className={cn(
-          'my-1.5 ml-4 space-y-1 marker:text-primary/40',
-          listType === 'ul' ? 'list-disc' : 'list-decimal',
+          "marker:text-muted-foreground/60 my-1.5 ml-4 space-y-1",
+          listType === "ul" ? "list-disc" : "list-decimal",
         )}
       >
         {listItems.map((item, j) => (
@@ -120,67 +117,73 @@ function TextContent({ text }: { text: string }) {
           </li>
         ))}
       </Tag>,
-    )
-    listItems = []
-  }
+    );
+    listItems = [];
+  };
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]
-    const trimmed = line.trim()
+    const line = lines[i];
+    const trimmed = line.trim();
 
     // Empty line
     if (!trimmed) {
-      flushList()
-      elements.push(<br key={i} />)
-      continue
+      flushList();
+      elements.push(<br key={i} />);
+      continue;
     }
 
     // Headers: ## or ###
-    const headerMatch = trimmed.match(/^(#{1,3})\s+(.+)$/)
+    const headerMatch = trimmed.match(/^(#{1,3})\s+(.+)$/);
     if (headerMatch) {
-      flushList()
-      const level = headerMatch[1].length
-      const content = headerMatch[2]
+      flushList();
+      const level = headerMatch[1].length;
+      const content = headerMatch[2];
       const className =
         level === 1
-          ? 'text-sm font-semibold mt-3 mb-1'
+          ? "mt-3 mb-1 text-sm font-semibold"
           : level === 2
-            ? 'text-[13px] font-semibold mt-2.5 mb-1 text-primary/90'
-            : 'text-xs font-medium mt-2 mb-0.5 text-muted-foreground uppercase tracking-wide'
+            ? "mt-2.5 mb-1 text-sm font-semibold"
+            : "text-muted-foreground mt-2 mb-0.5 text-xs font-medium tracking-wide uppercase";
       elements.push(
         <p key={i} className={className}>
           <InlineFormat text={content} />
         </p>,
-      )
-      continue
+      );
+      continue;
     }
 
     // Unordered list: - item or * item
-    const ulMatch = trimmed.match(/^[-*]\s+(.+)$/)
+    const ulMatch = trimmed.match(/^[-*]\s+(.+)$/);
     if (ulMatch) {
-      if (listItems.length === 0) { listStart = i; listType = 'ul' }
-      listItems.push(ulMatch[1])
-      continue
+      if (listItems.length === 0) {
+        listStart = i;
+        listType = "ul";
+      }
+      listItems.push(ulMatch[1]);
+      continue;
     }
 
     // Ordered list: 1. item
-    const olMatch = trimmed.match(/^\d+\.\s+(.+)$/)
+    const olMatch = trimmed.match(/^\d+\.\s+(.+)$/);
     if (olMatch) {
-      if (listItems.length === 0) { listStart = i; listType = 'ol' }
-      listItems.push(olMatch[1])
-      continue
+      if (listItems.length === 0) {
+        listStart = i;
+        listType = "ol";
+      }
+      listItems.push(olMatch[1]);
+      continue;
     }
 
     // Regular paragraph
-    flushList()
+    flushList();
     elements.push(
       <p key={i}>
         <InlineFormat text={trimmed} />
       </p>,
-    )
+    );
   }
 
-  flushList()
+  flushList();
 
-  return <div className="space-y-1">{elements}</div>
-}
+  return <div className="space-y-1">{elements}</div>;
+};

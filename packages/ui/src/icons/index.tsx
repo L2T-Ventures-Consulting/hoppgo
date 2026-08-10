@@ -126,6 +126,7 @@ export {
   LogOut as LogOutIcon,
   LineChart as LineChartIcon,
   Package as PackageIcon,
+  PhoneCall as PhoneCallIcon,
   Settings as SettingsIcon,
   Shield as ShieldIcon,
   Sparkles as SparklesIcon,

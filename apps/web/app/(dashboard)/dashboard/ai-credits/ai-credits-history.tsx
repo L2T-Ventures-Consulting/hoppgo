@@ -196,7 +196,7 @@ export const AiCreditsHistory = ({
                               <div className="min-w-0">
                                 {row.conversationId ? (
                                   <Link
-                                    href={`/dashboard/ai-assistant?conversation=${row.conversationId}`}
+                                    href={`/dashboard/ai-assistant/conversations?conversation=${row.conversationId}`}
                                     className="hover:text-primary truncate text-sm font-medium underline-offset-4 hover:underline"
                                   >
                                     {label}
