@@ -36,6 +36,7 @@ const DISMISS_TTL_MS = 30 * 24 * 60 * 60 * 1000; // ~30 days
 export const PushPrimer = () => {
   const t = useTranslations("dashboard.settings.notifications.push");
   const tInstall = useTranslations("dashboard.installPrompt");
+  const tErrors = useTranslations("errors");
   const { state, busy, enable } = usePushSubscription();
   const [dismissed, setDismissed] = React.useState<boolean | null>(null);
   const [open, setOpen] = React.useState(false);
@@ -56,7 +57,10 @@ export const PushPrimer = () => {
 
   const handleEnable = async () => {
     const ok = await enable();
-    if (!ok) return;
+    if (!ok) {
+      toastManager.add({ title: tErrors("generic"), type: "error" });
+      return;
+    }
     setOpen(false);
     toastManager.add({ title: t("confirmTitle"), type: "success" });
     try {

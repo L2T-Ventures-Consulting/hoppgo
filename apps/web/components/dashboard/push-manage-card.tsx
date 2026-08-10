@@ -23,13 +23,17 @@ import { usePushSubscription } from "@/hooks/use-push-subscription";
  */
 export function PushManageCard() {
   const t = useTranslations("dashboard.settings.notifications.push");
+  const tErrors = useTranslations("errors");
   const { state, busy, enable, disable } = usePushSubscription();
 
   if (state === "loading" || state === "unsupported") return null;
 
   const handleEnable = async () => {
     const ok = await enable();
-    if (!ok) return;
+    if (!ok) {
+      toastManager.add({ title: tErrors("generic"), type: "error" });
+      return;
+    }
     toastManager.add({ title: t("confirmTitle"), type: "success" });
     // A real notification doubles as proof the pipeline works end to end.
     try {

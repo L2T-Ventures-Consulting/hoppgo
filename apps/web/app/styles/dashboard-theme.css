@@ -415,7 +415,7 @@
 
 /* Desktop only: below md the content panel is full-bleed and the sidebar is a
    Sheet, so this layer would never be visible. */
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .dashboard [data-slot="sidebar-wrapper"]::before {
     content: "";
     position: fixed;
@@ -456,41 +456,33 @@
         transparent 100%
       );
   }
-}
+} */
 
 /* Mobile: the sheet is its own opaque panel, so the orbs go straight on it.
    Not scoped under .dashboard — the sheet is portalled to <body>. */
-[data-slot="sidebar"][data-mobile="true"] {
+/* [data-slot="sidebar"][data-mobile="true"] {
   background-image:
-    radial-gradient(
-      circle 380px at 80px -10%,
+    radial-gradient(circle 380px at 80px -10%,
       color-mix(in oklab, var(--primary) 9%, transparent) 0%,
       color-mix(in oklab, var(--primary) 5%, transparent) 40%,
       color-mix(in oklab, var(--primary) 2%, transparent) 70%,
-      transparent 100%
-    ),
-    radial-gradient(
-      circle 300px at 0 90%,
+      transparent 100%),
+    radial-gradient(circle 300px at 0 90%,
       color-mix(in oklab, var(--primary) 5%, transparent) 0%,
       color-mix(in oklab, var(--primary) 2%, transparent) 50%,
-      transparent 100%
-    );
+      transparent 100%);
   background-repeat: no-repeat;
 }
 
 .dark [data-slot="sidebar"][data-mobile="true"] {
   background-image:
-    radial-gradient(
-      circle 380px at 80px 130px,
+    radial-gradient(circle 380px at 80px 130px,
       color-mix(in oklab, var(--primary) 12%, transparent) 0%,
       color-mix(in oklab, var(--primary) 6%, transparent) 40%,
       color-mix(in oklab, var(--primary) 2.5%, transparent) 70%,
-      transparent 100%
-    ),
-    radial-gradient(
-      circle 300px at 0 100%,
+      transparent 100%),
+    radial-gradient(circle 300px at 0 100%,
       color-mix(in oklab, var(--primary) 6%, transparent) 0%,
       color-mix(in oklab, var(--primary) 2.5%, transparent) 50%,
-      transparent 100%
-    );
-}
+      transparent 100%);
+} */

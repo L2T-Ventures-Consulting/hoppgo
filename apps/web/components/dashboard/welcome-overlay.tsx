@@ -29,6 +29,8 @@ const TIMING = {
 
 const STORAGE_KEY = 'louez-show-welcome'
 
+export const WELCOME_OVERLAY_COMPLETED_EVENT = 'louez:welcome-overlay-completed'
+
 /**
  * Check if welcome animation should be triggered
  * Priority: sessionStorage (from onboarding) > URL param (direct access)
@@ -79,6 +81,8 @@ export function WelcomeOverlay() {
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const hasCheckedTriggerRef = useRef(false)
   const hasStartedAnimationRef = useRef(false)
+  const hasTriggeredWelcomeRef = useRef(false)
+  const hasNotifiedCompletionRef = useRef(false)
 
   /**
    * Clear all pending animation timers
@@ -125,6 +129,7 @@ export function WelcomeOverlay() {
     hasCheckedTriggerRef.current = true
 
     if (shouldShowWelcome()) {
+      hasTriggeredWelcomeRef.current = true
       setPhase('entering')
     }
   }, [])
@@ -160,6 +165,19 @@ export function WelcomeOverlay() {
   useEffect(() => {
     return () => clearTimers()
   }, [clearTimers])
+
+  useEffect(() => {
+    if (
+      phase !== 'complete' ||
+      !hasTriggeredWelcomeRef.current ||
+      hasNotifiedCompletionRef.current
+    ) {
+      return
+    }
+
+    hasNotifiedCompletionRef.current = true
+    window.dispatchEvent(new Event(WELCOME_OVERLAY_COMPLETED_EVENT))
+  }, [phase])
 
   // Keyboard shortcuts to skip
   useEffect(() => {

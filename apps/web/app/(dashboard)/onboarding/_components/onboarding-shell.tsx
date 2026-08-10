@@ -104,7 +104,7 @@ export function OnboardingShell({
 
           {/* Right: live preview, bleeds off the right edge like the moodboard.
             The stripe step swaps it for a readable mode explainer instead. */}
-          <aside className="bg-muted/30 relative hidden flex-1 items-center overflow-hidden border-l lg:flex lg:flex-1">
+          <aside className="bg-background relative hidden flex-1 items-center overflow-hidden border-l lg:flex lg:flex-1">
             {isStripeStep || isSourceStep ? (
               <div className="mx-auto max-h-full w-full max-w-md overflow-y-auto px-10 py-10">
                 {isStripeStep ? (

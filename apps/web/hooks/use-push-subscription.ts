@@ -3,11 +3,13 @@
 import * as React from 'react';
 
 import { useMutation } from '@tanstack/react-query';
+import { log } from 'evlog/next/client';
 
+import { env } from '@/env';
 import { detectPlatform, type PlatformInfo } from '@/lib/pwa/detect';
 import { orpc } from '@/lib/orpc/react';
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+const VAPID_PUBLIC_KEY = env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
 /**
  *  - loading           — resolving capabilities (server / first paint)
@@ -96,13 +98,20 @@ export function usePushSubscription(): UsePushSubscription {
 
   const enable = React.useCallback(async (): Promise<boolean> => {
     if (!VAPID_PUBLIC_KEY) return false;
+    let stage = 'permission';
+
     try {
-      // requestPermission must be the first call so the user gesture carries
-      // through (required on iOS).
-      const result = await Notification.requestPermission();
+      // Once permission is granted, requesting it again can leave some
+      // browsers waiting on a prompt that will never be shown. Reuse the
+      // current grant and continue directly with the device subscription.
+      const result =
+        Notification.permission === 'granted'
+          ? 'granted'
+          : await Notification.requestPermission();
       setPermission(result);
       if (result !== 'granted') return false;
 
+      stage = 'browser_subscription';
       const reg = await navigator.serviceWorker.ready;
       const existing = await reg.pushManager.getSubscription();
       const sub =
@@ -114,9 +123,11 @@ export function usePushSubscription(): UsePushSubscription {
 
       const json = sub.toJSON();
       if (!json.endpoint || !json.keys?.p256dh || !json.keys?.auth) {
+        log.warn({ action: 'push_subscription_invalid', stage });
         return false;
       }
 
+      stage = 'server_registration';
       await subscribeMutation.mutateAsync({
         endpoint: json.endpoint,
         keys: { p256dh: json.keys.p256dh, auth: json.keys.auth },
@@ -124,9 +135,14 @@ export function usePushSubscription(): UsePushSubscription {
       });
       setSubscribed(true);
       return true;
-    } catch {
-      // Subscribe / network failure — surface nothing here; the caller keeps the
-      // enable affordance so the merchant can retry. No unhandled rejection.
+    } catch (error) {
+      log.warn({
+        action: 'push_subscription_enable_failed',
+        stage,
+        error: error instanceof Error ? error.message : String(error),
+      });
+      setPermission(Notification.permission);
+      setSubscribed(false);
       return false;
     }
   }, [subscribeMutation]);

@@ -398,11 +398,11 @@ const StoreHeader = ({
           <SidebarLink href="/dashboard" className="flex min-w-0 items-center gap-2">
             <Logo className="h-5 w-auto shrink-0 group-data-[collapsible=icon]:hidden" />
             <Image
-              src={"/favicon.svg"}
+              src={"/icons/maskable-512.png"}
               width={32}
               height={32}
               alt="Logo"
-              className="hidden size-8 shrink-0 group-data-[collapsible=icon]:block"
+              className="hidden size-8 shrink-0 group-data-[collapsible=icon]:block rounded-md"
             />
           </SidebarLink>
           <PlanBadge planSlug={planSlug} />

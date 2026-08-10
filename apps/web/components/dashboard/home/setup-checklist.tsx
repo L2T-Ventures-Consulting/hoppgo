@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
@@ -11,6 +11,7 @@ import { cn } from "@louez/utils";
 
 import { useStorefrontUrl } from "@/hooks/use-storefront-url";
 
+import { WELCOME_OVERLAY_COMPLETED_EVENT } from "../welcome-overlay";
 import { useMeasuredSize } from "./use-measured-size";
 
 // Types defined inline to avoid server-only module import
@@ -195,17 +196,21 @@ export function SetupChecklist({
 
   const [expandedKey, setExpandedKey] = useState<string | null>(nextStep?.key ?? null);
 
-  const toggleChecklist = () => {
+  const openChecklist = useCallback(() => {
     measureNow();
+    setExpandedLayout(true);
+    setOpen(true);
+  }, [measureNow]);
 
+  const toggleChecklist = () => {
     if (open) {
+      measureNow();
       setOpen(false);
       setExpandedLayout(false);
       return;
     }
 
-    setExpandedLayout(true);
-    setOpen(true);
+    openChecklist();
   };
 
   const toggleChecklistItem = (itemKey: string, isExpanded: boolean) => {
@@ -234,6 +239,13 @@ export function SetupChecklist({
       document.removeEventListener("keydown", onKeyDown);
     };
   }, [measureNow, open]);
+
+  useEffect(() => {
+    window.addEventListener(WELCOME_OVERLAY_COMPLETED_EVENT, openChecklist);
+    return () => {
+      window.removeEventListener(WELCOME_OVERLAY_COMPLETED_EVENT, openChecklist);
+    };
+  }, [openChecklist]);
 
   if (allCompleted) {
     return null;
