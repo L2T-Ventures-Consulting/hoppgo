@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import Script from "next/script";
 
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -39,11 +40,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Instance capabilities are injected into the prebuilt Docker image at
+  // runtime. Without this request boundary, Cache Components can freeze the
+  // build host's default LOUEZ_MODE into the static shell and hydrate the
+  // client with the wrong deployment mode.
+  await connection();
+  const instanceConfig = getInstanceConfig();
+
   return (
     <>
       {/* {process.env.NODE_ENV === 'development' && <Agentation />} */}
@@ -70,7 +78,7 @@ export default function RootLayout({
           />
         </head>
         <body className="font-sans antialiased">
-          <InstanceProvider config={getInstanceConfig()}>
+          <InstanceProvider config={instanceConfig}>
             <NuqsAdapter>
               <EvlogProvider>
                 <ORPCProvider>

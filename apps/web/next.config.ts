@@ -255,6 +255,11 @@ function buildSecurityHeaders() {
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  // PostHog error tracking resolves browser stack frames by fetching the map
+  // next to each production chunk. Keep these in the standalone image so
+  // hydration failures point back to application components instead of only
+  // the minified React runtime.
+  productionBrowserSourceMaps: true,
   // Enable standalone output for Docker deployment
   output: "standalone",
   // The changelog reads its write-ups from content/whats-new/**/*.md at runtime.
