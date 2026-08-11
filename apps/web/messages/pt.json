@@ -5404,6 +5404,12 @@
       "contactDescription": "Precisamos dessas informações para entrar em contato com você",
       "addressDescription": "Opcional - Insira seu endereço se necessário",
       "confirmDescription": "Revise suas informações antes de confirmar",
+      "advanceNotice": {
+        "title": "Alterar a data de início",
+        "guidance": "Esta loja exige pelo menos {duration} de antecedência. Escolha um início a partir de {minimum}.",
+        "preserved": "Os seus dados de contacto e seleções ficam guardados durante a alteração.",
+        "editDates": "Alterar datas"
+      },
       "continue": "Continuar",
       "back": "Voltar",
       "modify": "Editar",

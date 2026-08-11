@@ -43,8 +43,9 @@ anonyme du navigateur — d'où l'événement client `checkout_completed` qui se
 | Événement | Quand | Propriétés clés |
 | --- | --- | --- |
 | `checkout_step_viewed` | Changement d'étape visible | `step` (contact/delivery/confirm), `step_index`, `steps_total`, `direction`, `store_id` |
-| `checkout_step_validation_failed` | Blocage « Continuer » par la validation | `step`, `failed_fields[]`, `store_id` |
-| `checkout_submit_failed` | Échec de la soumission (client ou serveur) | `error_code`, `store_id` |
+| `checkout_step_validation_failed` | Blocage par la validation client, y compris un délai de prévenance devenu invalide avant l'envoi | `step`, `failed_fields[]`, `error_code`, `validation_type`, `store_id` |
+| `checkout_submit_failed` | Échec pendant la soumission ; `failure_source` distingue une précondition client d'un refus serveur | `error_code`, `failure_source`, `store_id` |
+| `checkout_validation_recovered` | Correction réussie après une validation bloquante du checkout | `error_code`, `original_failure_source`, `recovery_action`, `store_id` |
 | `checkout_completed` | Réservation soumise avec succès (avant redirect Stripe éventuel) | `reservation_id`, `reservation_mode`, `item_count`, `subtotal_amount_cents`, `total_amount_cents`, `store_id` |
 | `checkout_reservation_created` / `checkout_payment_*` (serveur, préexistants) | Création + paiement | voir `checkout/actions.ts` |
 

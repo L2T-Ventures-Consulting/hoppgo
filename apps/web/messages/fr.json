@@ -5598,6 +5598,12 @@
       "contactDescription": "Nous avons besoin de ces informations pour vous contacter",
       "addressDescription": "Renseignez votre adresse pour continuer",
       "confirmDescription": "Vérifiez vos informations avant de valider",
+      "advanceNotice": {
+        "title": "Modifiez la date de début",
+        "guidance": "Cette boutique demande un délai de prévenance d'au moins {duration}. Choisissez un début à partir du {minimum}.",
+        "preserved": "Vos coordonnées et vos choix sont conservés pendant la modification.",
+        "editDates": "Modifier les dates"
+      },
       "insuranceRequiredNotice": "Une garantie casse/vol est intégrée à votre réservation et sera appliquée automatiquement.",
       "insuranceOptionalLabel": "Ajouter la garantie casse/vol",
       "insuranceOptionalHelp": "Protégez le matériel contre la casse et le vol grâce à la garantie Tulip.",

@@ -5598,6 +5598,12 @@
       "contactDescription": "We need this information to contact you",
       "addressDescription": "Enter your address details to continue",
       "confirmDescription": "Review your information before confirming",
+      "advanceNotice": {
+        "title": "Change the start date",
+        "guidance": "This store requires at least {duration} advance notice. Choose a start time from {minimum} onward.",
+        "preserved": "Your contact details and selections are kept while you make this change.",
+        "editDates": "Change dates"
+      },
       "insuranceRequiredNotice": "Breakage/theft coverage is included in your reservation and will be applied automatically.",
       "insuranceOptionalLabel": "Add breakage/theft coverage",
       "insuranceOptionalHelp": "Protect equipment against breakage and theft with Tulip coverage.",

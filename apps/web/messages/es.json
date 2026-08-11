@@ -5410,6 +5410,12 @@
       "contactDescription": "Necesitamos esta información para contactarle",
       "addressDescription": "Opcional - Ingrese su dirección si es necesario",
       "confirmDescription": "Revise su información antes de confirmar",
+      "advanceNotice": {
+        "title": "Cambiar la fecha de inicio",
+        "guidance": "Esta tienda requiere al menos {duration} de antelación. Elija un inicio a partir del {minimum}.",
+        "preserved": "Sus datos de contacto y selecciones se conservan durante el cambio.",
+        "editDates": "Cambiar fechas"
+      },
       "continue": "Continuar",
       "back": "Volver",
       "modify": "Editar",

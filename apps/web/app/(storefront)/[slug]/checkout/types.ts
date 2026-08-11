@@ -2,6 +2,7 @@ import type { ComponentType, ReactNode } from 'react';
 
 import type {
   AiAdvisorMode,
+  BusinessHours,
   DeliverySettings,
   LegMethod,
   TaxSettings,
@@ -31,6 +32,10 @@ export interface CheckoutFormProps {
   hasActivePromoCodes?: boolean;
   /** AI advisor checkout participation; null when the advisor is inactive. */
   advisorMode?: AiAdvisorMode | null;
+  businessHours?: BusinessHours;
+  advanceNoticeMinutes: number;
+  minRentalMinutes: number;
+  timezone?: string;
 }
 
 export interface CheckoutLocationOption {

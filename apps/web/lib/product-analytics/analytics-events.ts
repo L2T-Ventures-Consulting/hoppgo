@@ -20,6 +20,7 @@ export const productAnalyticsEvents = {
   checkoutStepViewed: 'checkout_step_viewed',
   checkoutStepValidationFailed: 'checkout_step_validation_failed',
   checkoutSubmitFailed: 'checkout_submit_failed',
+  checkoutValidationRecovered: 'checkout_validation_recovered',
   checkoutCompleted: 'checkout_completed',
   checkoutPaymentStarted: 'checkout_payment_started',
   checkoutPaymentCompleted: 'checkout_payment_completed',

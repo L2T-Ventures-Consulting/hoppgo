@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
-import { Shield, Tag, Truck } from 'lucide-react';
+import { CalendarDays, Shield, Tag, Truck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import type { TaxSettings } from '@louez/types';
@@ -10,6 +10,7 @@ import {
   Alert,
   AlertDescription,
   Badge,
+  Button,
   Card,
   CardContent,
   Separator,
@@ -74,6 +75,7 @@ interface CheckoutOrderSummaryProps {
   discountAmount: number;
   onApplyPromo: (promo: ValidatedPromo) => void;
   onRemovePromo: () => void;
+  onEditDates: () => void;
 }
 
 export function CheckoutOrderSummary({
@@ -105,6 +107,7 @@ export function CheckoutOrderSummary({
   discountAmount,
   onApplyPromo,
   onRemovePromo,
+  onEditDates,
 }: CheckoutOrderSummaryProps) {
   const t = useTranslations('storefront.checkout');
   const tCart = useTranslations('storefront.cart');
@@ -150,7 +153,7 @@ export function CheckoutOrderSummary({
           <h3 className="font-semibold">{t('summary')}</h3>
 
           {globalStartDate && globalEndDate && (
-            <div className="bg-muted/50 flex items-center justify-between rounded-lg px-3 py-2 text-sm">
+            <div className="bg-muted/50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
               <span className="text-muted-foreground">
                 {format(new Date(globalStartDate), 'dd MMM', {
                   locale: dateLocale,
@@ -160,7 +163,18 @@ export function CheckoutOrderSummary({
                   locale: dateLocale,
                 })}
               </span>
-              <Badge variant="expired">{durationLabel}</Badge>
+              <Badge variant="expired" className="ml-auto">
+                {durationLabel}
+              </Badge>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={onEditDates}
+                aria-label={tCart('updateDates')}
+              >
+                <CalendarDays />
+              </Button>
             </div>
           )}
 

@@ -5404,6 +5404,12 @@
       "contactDescription": "We hebben deze informatie nodig om contact met u op te nemen",
       "addressDescription": "Optioneel - Vul uw adres in indien nodig",
       "confirmDescription": "Controleer uw gegevens voor bevestiging",
+      "advanceNotice": {
+        "title": "Wijzig de startdatum",
+        "guidance": "Deze winkel vereist minimaal {duration} voorafgaande kennisgeving. Kies een start vanaf {minimum}.",
+        "preserved": "Uw contactgegevens en keuzes blijven bewaard tijdens de wijziging.",
+        "editDates": "Datums wijzigen"
+      },
       "continue": "Doorgaan",
       "back": "Terug",
       "modify": "Bewerken",
