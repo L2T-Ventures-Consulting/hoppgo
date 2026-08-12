@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 import { getTranslations } from "next-intl/server";
 
@@ -46,6 +47,8 @@ export default async function AiCreditsPage({
 }: {
   searchParams: Promise<{ page?: string; tab?: string; topup?: string }>;
 }) {
+  await connection();
+
   if (!areAiCreditsEnabled()) {
     redirect("/dashboard/ai-assistant");
   }
