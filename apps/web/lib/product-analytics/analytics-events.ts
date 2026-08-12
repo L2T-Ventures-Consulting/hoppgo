@@ -1,4 +1,5 @@
 export const productAnalyticsEvents = {
+  accountCreated: 'account_created',
   productCreated: 'product_created',
   dashboardReservationCreated: 'dashboard_reservation_created',
   dashboardReservationCreationStarted: 'dashboard_reservation_creation_started',
@@ -46,6 +47,12 @@ export type ProductAnalyticsEvent =
 export const productAnalyticsBaseProperties = {
   analytics_area: 'core_product',
   analytics_version: 1,
+} as const;
+
+export const authenticationAnalyticsBaseProperties = {
+  ...productAnalyticsBaseProperties,
+  feature: 'authentication',
+  surface: 'dashboard',
 } as const;
 
 // Shared by every onboarding event so funnels can be filtered on one pair of

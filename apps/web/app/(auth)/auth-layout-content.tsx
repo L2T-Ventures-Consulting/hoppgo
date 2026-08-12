@@ -2,6 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { PostHogProvider } from "@/components/posthog-provider";
 
 export const AuthLayoutContent = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth();
@@ -14,8 +15,10 @@ export const AuthLayoutContent = async ({ children }: { children: React.ReactNod
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      <div className="dashboard min-h-screen bg-background">{children}</div>
-    </NextIntlClientProvider>
+    <PostHogProvider>
+      <NextIntlClientProvider messages={messages}>
+        <div className="dashboard min-h-screen bg-background">{children}</div>
+      </NextIntlClientProvider>
+    </PostHogProvider>
   );
 };

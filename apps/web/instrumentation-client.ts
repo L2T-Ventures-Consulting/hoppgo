@@ -19,6 +19,90 @@ import posthog from 'posthog-js'
 
 import { env } from '@/env'
 
+const POSTHOG_DISTINCT_ID_FRAGMENT = 'ph_distinct_id'
+const POSTHOG_SESSION_ID_FRAGMENT = 'ph_session_id'
+const MAX_POSTHOG_ID_LENGTH = 200
+
+type AcquisitionBootstrap = {
+  distinctID: string
+  isIdentifiedID: false
+  sessionID?: string
+}
+
+function isValidPostHogId(value: string | null): value is string {
+  return Boolean(
+    value &&
+      value.length <= MAX_POSTHOG_ID_LENGTH &&
+      !Array.from(value).some((character) => {
+        const codePoint = character.codePointAt(0)
+        return codePoint !== undefined && (codePoint <= 31 || codePoint === 127)
+      }),
+  )
+}
+
+function hasPersistedPostHogIdentity(projectKey: string): boolean {
+  const persistenceName = `ph_${projectKey}_posthog`
+
+  try {
+    if (window.localStorage.getItem(persistenceName)) {
+      return true
+    }
+  } catch {
+    // localStorage can be unavailable in strict privacy modes.
+  }
+
+  return document.cookie
+    .split('; ')
+    .some((cookie) => cookie.startsWith(`${persistenceName}=`))
+}
+
+function readAcquisitionBootstrap({
+  isDashboard,
+  projectKey,
+}: {
+  isDashboard: boolean
+  projectKey: string
+}): AcquisitionBootstrap | undefined {
+  if (!isDashboard || hasPersistedPostHogIdentity(projectKey)) {
+    return undefined
+  }
+
+  const fragment = new URLSearchParams(window.location.hash.slice(1))
+  const distinctID = fragment.get(POSTHOG_DISTINCT_ID_FRAGMENT)
+  const sessionID = fragment.get(POSTHOG_SESSION_ID_FRAGMENT)
+
+  if (!isValidPostHogId(distinctID)) {
+    return undefined
+  }
+
+  return {
+    distinctID,
+    isIdentifiedID: false,
+    ...(isValidPostHogId(sessionID) ? { sessionID } : {}),
+  }
+}
+
+function removeAcquisitionFragment() {
+  const url = new URL(window.location.href)
+  const fragment = new URLSearchParams(url.hash.slice(1))
+
+  if (
+    !fragment.has(POSTHOG_DISTINCT_ID_FRAGMENT) &&
+    !fragment.has(POSTHOG_SESSION_ID_FRAGMENT)
+  ) {
+    return
+  }
+
+  fragment.delete(POSTHOG_DISTINCT_ID_FRAGMENT)
+  fragment.delete(POSTHOG_SESSION_ID_FRAGMENT)
+  url.hash = fragment.toString()
+  window.history.replaceState(
+    window.history.state,
+    '',
+    `${url.pathname}${url.search}${url.hash}`,
+  )
+}
+
 function resolveSurface(): { isDashboard: boolean; storeSlug: string | null } {
   const hostname = window.location.hostname.toLowerCase()
   const baseDomain = (env.NEXT_PUBLIC_APP_DOMAIN || 'localhost:3000')
@@ -49,6 +133,10 @@ function resolveSurface(): { isDashboard: boolean; storeSlug: string | null } {
 
 if (typeof window !== 'undefined' && env.NEXT_PUBLIC_POSTHOG_KEY) {
   const { isDashboard, storeSlug } = resolveSurface()
+  const acquisitionBootstrap = readAcquisitionBootstrap({
+    isDashboard,
+    projectKey: env.NEXT_PUBLIC_POSTHOG_KEY,
+  })
 
   posthog.init(env.NEXT_PUBLIC_POSTHOG_KEY, {
     // Route analytics through our reverse proxy to avoid CORS and ad blockers
@@ -72,6 +160,7 @@ if (typeof window !== 'undefined' && env.NEXT_PUBLIC_POSTHOG_KEY) {
     capture_pageview: false,
     // Capture pageleaves for session duration
     capture_pageleave: true,
+    ...(acquisitionBootstrap ? { bootstrap: acquisitionBootstrap } : {}),
     ...(isDashboard
       ? {
           // Scope the PostHog cookie to the dashboard host so merchant
@@ -101,6 +190,8 @@ if (typeof window !== 'undefined' && env.NEXT_PUBLIC_POSTHOG_KEY) {
       ? { $app_version: env.NEXT_PUBLIC_APP_VERSION }
       : {}),
   })
+
+  removeAcquisitionFragment()
 }
 
 export default posthog
