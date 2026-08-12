@@ -35,7 +35,8 @@ const ERROR_BODY_SNIPPET = 500;
 const getEnhancePrompt = (chromaColor: ChromaKeyColor) =>
   [
     "Create a clean, professional 4:3 product photo of the exact rental product shown in the input.",
-    "First inspect the original composition and choose the correct framing rule. If the entire product is visible with space around it, keep the ENTIRE product visible and place it centered with comfortable, even margins. If any part of the product is intentionally cropped by an image edge, preserve the original framing exactly: keep the same camera angle, perspective, product scale, zoom, position and the same parts cropped at the same edges.",
+    "Framing is strict, not creative: preserve the original camera angle, perspective, product scale, zoom, position and surrounding margin proportions. Never enlarge the product or move it closer to an image edge.",
+    "First inspect the original composition and choose the correct framing rule. If the entire product is visible with space around it, keep the ENTIRE product visible with at least the same proportional clearance on every side; center it only within that constraint. If any part of the product is intentionally cropped by an image edge, preserve the original framing exactly and keep the same parts cropped at the same edges.",
     "For a cropped product, never zoom out, shrink, reveal, reconstruct or invent any off-frame part. Keep the visible product at the exact same relative size, and do not introduce new background margins around it.",
     "Keep every visible part completely unchanged: same shape, proportions, colors, materials, textures, logos, labels, markings, scratches, wear and every small detail.",
     "Do not add, remove or modify anything: no props, no accessories, no text, no watermark, no reflection, no drop shadow or contact shadow outside the product itself.",

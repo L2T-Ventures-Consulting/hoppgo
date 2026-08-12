@@ -119,7 +119,7 @@ test("auto framing preserves the provider composition on a single edge contact",
   assert.equal(bounds.maxY, 119);
 });
 
-test("auto framing removes clear transparent gutters around opposite edge contacts", async () => {
+test("auto framing preserves side gutters around vertical edge contacts", async () => {
   const source = await sharp({
     create: {
       width: 400,
@@ -153,10 +153,50 @@ test("auto framing removes clear transparent gutters around opposite edge contac
   const bounds = await getAlphaBounds(result.buffer);
 
   assert.equal(result.resolvedFramingMode, "preserve");
-  assert.equal(bounds.minX, 0);
-  assert.equal(bounds.maxX, 159);
+  assertApproximately(bounds.minX, 32);
+  assertApproximately(bounds.maxX, 127);
   assert.equal(bounds.minY, 0);
   assert.equal(bounds.maxY, 119);
+});
+
+test("auto framing does not crop a wide product touching both side edges", async () => {
+  const source = await sharp({
+    create: {
+      width: 400,
+      height: 300,
+      channels: 4,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    },
+  })
+    .composite([
+      {
+        input: {
+          create: {
+            width: 400,
+            height: 200,
+            channels: 4,
+            background: { r: 255, g: 0, b: 0, alpha: 1 },
+          },
+        },
+        left: 0,
+        top: 50,
+      },
+    ])
+    .png()
+    .toBuffer();
+
+  const result = await standardizeProductImage(source, {
+    canvasWidth: 160,
+    canvasHeight: 120,
+    framingStrategy: "auto",
+  });
+  const bounds = await getAlphaBounds(result.buffer);
+
+  assert.equal(result.resolvedFramingMode, "preserve");
+  assert.equal(bounds.minX, 0);
+  assert.equal(bounds.maxX, 159);
+  assertApproximately(bounds.minY, 20);
+  assertApproximately(bounds.maxY, 99);
 });
 
 test("auto framing preserves a fully enclosed provider composition", async () => {

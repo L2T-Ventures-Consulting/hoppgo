@@ -11,7 +11,6 @@ export interface StandardizeOptions {
 
 const ALPHA_THRESHOLD = 8;
 const EDGE_CONTACT_RATIO = 0.015;
-const MIN_LETTERBOX_GUTTER_RATIO = 0.03;
 
 interface EdgeContacts {
   left: boolean;
@@ -19,59 +18,6 @@ interface EdgeContacts {
   top: boolean;
   bottom: boolean;
 }
-
-const clamp = (value: number, minimum: number, maximum: number) =>
-  Math.min(maximum, Math.max(minimum, value));
-
-/**
- * GPT sometimes respects a cropped edge but shrinks the subject on the other
- * axis. Build the tightest 4:3 crop around the alpha bounds and place any
- * unavoidable extra crop on an edge that was already intentionally cut.
- */
-const getPreservedCrop = (input: {
-  sourceWidth: number;
-  sourceHeight: number;
-  minX: number;
-  minY: number;
-  width: number;
-  height: number;
-  targetAspect: number;
-  contacts: EdgeContacts;
-}) => {
-  const boundsAspect = input.width / input.height;
-  let width: number;
-  let height: number;
-
-  if (boundsAspect < input.targetAspect) {
-    width = input.width;
-    height = Math.max(1, Math.round(width / input.targetAspect));
-  } else {
-    height = input.height;
-    width = Math.max(1, Math.round(height * input.targetAspect));
-  }
-
-  width = Math.min(width, input.sourceWidth);
-  height = Math.min(height, input.sourceHeight);
-
-  let left = Math.round(input.minX + (input.width - width) / 2);
-  let top = Math.round(input.minY + (input.height - height) / 2);
-
-  if (width < input.width) {
-    if (input.contacts.left && !input.contacts.right) left = input.sourceWidth - width;
-    if (input.contacts.right && !input.contacts.left) left = 0;
-  }
-  if (height < input.height) {
-    if (input.contacts.top && !input.contacts.bottom) top = input.sourceHeight - height;
-    if (input.contacts.bottom && !input.contacts.top) top = 0;
-  }
-
-  return {
-    left: clamp(left, 0, input.sourceWidth - width),
-    top: clamp(top, 0, input.sourceHeight - height),
-    width,
-    height,
-  };
-};
 
 export interface StandardizedProductImage {
   buffer: Buffer;
@@ -148,50 +94,16 @@ export async function standardizeProductImage(
     framingStrategy === "auto" && touchesEdge ? "preserve" : "recenter";
 
   if (framingStrategy === "auto") {
-    const minimumHorizontalGutter = Math.round(info.width * MIN_LETTERBOX_GUTTER_RATIO);
-    const minimumVerticalGutter = Math.round(info.height * MIN_LETTERBOX_GUTTER_RATIO);
-    const hasSideGutters =
-      minX >= minimumHorizontalGutter && info.width - 1 - maxX >= minimumHorizontalGutter;
-    const hasVerticalGutters =
-      minY >= minimumVerticalGutter && info.height - 1 - maxY >= minimumVerticalGutter;
-    const hasVerticalLetterbox = contacts.top && contacts.bottom && hasSideGutters;
-    const hasHorizontalLetterbox = contacts.left && contacts.right && hasVerticalGutters;
-
-    // GPT already composes its result on the requested 4:3 canvas. Preserve
-    // that composition unless the alpha mask proves that it merely added
-    // transparent gutters around a subject spanning two opposite edges.
-    if (!hasVerticalLetterbox && !hasHorizontalLetterbox) {
-      const buffer = await source
-        .clone()
-        .resize({
-          width: canvasWidth,
-          height: canvasHeight,
-          fit: "contain",
-          background: { r: 0, g: 0, b: 0, alpha: 0 },
-        })
-        .webp({ quality: 90, alphaQuality: 90, effort: 4 })
-        .toBuffer();
-
-      return { buffer, contentType: "image/webp", resolvedFramingMode };
-    }
-
-    const crop = getPreservedCrop({
-      sourceWidth: info.width,
-      sourceHeight: info.height,
-      minX,
-      minY,
-      width,
-      height,
-      targetAspect: canvasWidth / canvasHeight,
-      contacts,
-    });
+    // The provider already composes its output on the requested 4:3 canvas.
+    // Transparent space is part of that composition: trimming it can zoom a
+    // wide product (a bike, for example) and cut the edges it already touches.
     const buffer = await source
       .clone()
-      .extract(crop)
       .resize({
         width: canvasWidth,
         height: canvasHeight,
-        fit: "fill",
+        fit: "contain",
+        background: { r: 0, g: 0, b: 0, alpha: 0 },
       })
       .webp({ quality: 90, alphaQuality: 90, effort: 4 })
       .toBuffer();
