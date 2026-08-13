@@ -1,16 +1,17 @@
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { Suspense } from "react";
 
-export default async function LegalLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const messages = await getMessages();
+import { LegalLayoutContent } from "./legal-layout-content";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
+const LegalLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <NextIntlClientProvider messages={messages}>
-      <div className="dashboard min-h-screen bg-background">{children}</div>
-    </NextIntlClientProvider>
+    <Suspense fallback={<div className="min-h-screen bg-background" />}>
+      <LegalLayoutContent>{children}</LegalLayoutContent>
+    </Suspense>
   );
-}
+};
+
+export default LegalLayout;

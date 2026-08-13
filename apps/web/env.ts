@@ -1,12 +1,12 @@
-import { createEnv } from '@t3-oss/env-nextjs';
-import { z } from 'zod';
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
 
-import { env as authEnv } from '@louez/auth/env';
-import { env as dbEnv } from '@louez/db/env';
-import { env as emailEnv } from '@louez/email/env';
-import { env as validationsEnv } from '@louez/validations/env';
+import { env as authEnv } from "@louez/auth/env";
+import { env as dbEnv } from "@louez/db/env";
+import { env as emailEnv } from "@louez/email/env";
+import { env as validationsEnv } from "@louez/validations/env";
 
-import { payAsYouGoConfigSchema } from '@/lib/pay-as-you-go/config';
+import { payAsYouGoConfigSchema } from "@/lib/pay-as-you-go/config";
 
 // NEXT_PUBLIC_* references are inlined at build time, and the published
 // Docker image is built without them — server chunks would otherwise see
@@ -25,6 +25,13 @@ const runtimeAppDomain =
     }
   })();
 
+// Keep this lookup dynamic so Next.js does not bake the builder's
+// SKIP_ENV_VALIDATION=true into the standalone server bundle. The Docker build
+// may skip validation because runtime secrets are intentionally unavailable in
+// the builder stage; the final container must validate and coerce its own env.
+const readRuntimeEnv = (name: string): string | undefined => process.env[name];
+const skipEnvValidation = readRuntimeEnv("SKIP_ENV_VALIDATION") === "true";
+
 export const env = createEnv({
   extends: [dbEnv, validationsEnv, authEnv, emailEnv],
 
@@ -32,23 +39,21 @@ export const env = createEnv({
     // ===== Authentication =====
     AUTH_TRUST_HOST: z
       .string()
-      .default('false')
-      .transform((val) => val === 'true'),
+      .default("false")
+      .transform((val) => val === "true"),
 
     // ===== Storage / S3 (Required for image uploads) =====
-    S3_ENDPOINT: z.string().url('S3_ENDPOINT must be a valid URL'),
-    S3_REGION: z.string().min(1, 'S3_REGION is required'),
-    S3_BUCKET: z.string().min(1, 'S3_BUCKET is required'),
-    S3_ACCESS_KEY_ID: z.string().min(1, 'S3_ACCESS_KEY_ID is required'),
-    S3_SECRET_ACCESS_KEY: z.string().min(1, 'S3_SECRET_ACCESS_KEY is required'),
+    S3_ENDPOINT: z.string().url("S3_ENDPOINT must be a valid URL"),
+    S3_REGION: z.string().min(1, "S3_REGION is required"),
+    S3_BUCKET: z.string().min(1, "S3_BUCKET is required"),
+    S3_ACCESS_KEY_ID: z.string().min(1, "S3_ACCESS_KEY_ID is required"),
+    S3_SECRET_ACCESS_KEY: z.string().min(1, "S3_SECRET_ACCESS_KEY is required"),
     // Absolute URL of the public bucket, or an absolute path ("/files") when
     // assets are served same-origin through the app's /files route
     // (standalone deployments with a private object store).
-    S3_PUBLIC_URL: z
-      .string()
-      .refine((value) => value.startsWith('/') || URL.canParse(value), {
-        message: 'S3_PUBLIC_URL must be an absolute URL or an absolute path',
-      }),
+    S3_PUBLIC_URL: z.string().refine((value) => value.startsWith("/") || URL.canParse(value), {
+      message: "S3_PUBLIC_URL must be an absolute URL or an absolute path",
+    }),
 
     // ===== Stripe (Optional — payments & subscriptions) =====
     // Without Stripe the storefront degrades to request-mode reservations
@@ -71,33 +76,23 @@ export const env = createEnv({
     STRIPE_PRICE_ULTRA_YEARLY_USD: z.string().optional(),
 
     // ===== SMS (Required for SMS notifications) =====
-    SMS_PROVIDER: z
-      .enum(['smspartner', 'twilio', 'vonage'])
-      .default('smspartner'),
-    SMS_DEFAULT_SENDER: z.string().default('Louez'),
+    SMS_PROVIDER: z.enum(["smspartner", "twilio", "vonage"]).default("smspartner"),
+    SMS_DEFAULT_SENDER: z.string().default("Louez"),
     SMS_PARTNER_API_KEY: z.string().optional(),
 
     // ===== Google Places (Required for address search) =====
     // Optional: without it the address autocomplete degrades to plain input.
     GOOGLE_PLACES_API_KEY: z.string().optional(),
-    GOOGLE_PLACES_CACHE_TTL_HOURS: z.coerce
-      .number()
-      .int()
-      .positive()
-      .default(120),
+    GOOGLE_PLACES_CACHE_TTL_HOURS: z.coerce.number().int().positive().default(120),
 
     // ===== Platform Admin (Required) =====
     PLATFORM_ADMIN_EMAILS: z
       .string()
-      .default('')
-      .transform((val) =>
-        val ? val.split(',').map((email) => email.trim()) : [],
-      ),
+      .default("")
+      .transform((val) => (val ? val.split(",").map((email) => email.trim()) : [])),
 
     // ===== Discord Notifications (Required for platform notifications) =====
-    DISCORD_ADMIN_WEBHOOK_URL: z
-      .url('DISCORD_ADMIN_WEBHOOK_URL must be a valid URL')
-      .optional(),
+    DISCORD_ADMIN_WEBHOOK_URL: z.url("DISCORD_ADMIN_WEBHOOK_URL must be a valid URL").optional(),
 
     // ===== Web Push (Optional — VAPID keys for push notifications) =====
     // One app-wide keypair. Generate with `npx web-push generate-vapid-keys`.
@@ -110,19 +105,16 @@ export const env = createEnv({
     // ===== Tulip Integrations (Optional) =====
     TULIP_API_KEY: z.string().optional(),
     TULIP_API_BASE_URL: z
-      .url('TULIP_API_BASE_URL must be a valid URL')
-      .default('https://api.mytulip.io/v2'),
-    TULIP_CALENDLY_URL: z
-      .string()
-      .url('TULIP_CALENDLY_URL must be a valid URL')
-      .optional(),
+      .url("TULIP_API_BASE_URL must be a valid URL")
+      .default("https://api.mytulip.io/v2"),
+    TULIP_CALENDLY_URL: z.string().url("TULIP_CALENDLY_URL must be a valid URL").optional(),
 
     // ===== Integrations (Optional until a provider is configured) =====
     INTEGRATION_ENCRYPTION_KEY: z
       .string()
       .regex(
         /^[A-Za-z0-9_-]{43}=$|^[A-Za-z0-9_-]{43}$/,
-        'INTEGRATION_ENCRYPTION_KEY must be a base64url-encoded 32-byte key',
+        "INTEGRATION_ENCRYPTION_KEY must be a base64url-encoded 32-byte key",
       )
       .optional(),
     GOOGLE_CALENDAR_CLIENT_ID: z.string().optional(),
@@ -133,7 +125,7 @@ export const env = createEnv({
     CRON_SECRET: z.string().optional(),
 
     // ===== AI Chat Assistant (Optional) =====
-    AI_PROVIDER: z.enum(['anthropic', 'openai', 'google']).optional(),
+    AI_PROVIDER: z.enum(["anthropic", "openai", "google"]).optional(),
     AI_MODEL: z.string().optional(),
     AI_API_KEY: z.string().optional(),
     // Storefront AI advisor: optional cheaper model for public traffic
@@ -174,7 +166,7 @@ export const env = createEnv({
     // basis lives here, like the advisor token prices.
     AI_PHONE_ENABLED: z.string().optional(),
     // Telephony provider serving inbound calls. Only 'twilio' is implemented.
-    VOICE_PROVIDER: z.enum(['twilio']).optional(),
+    VOICE_PROVIDER: z.enum(["twilio"]).optional(),
     // Twilio credentials (used to validate inbound webhook signatures and, later,
     // to provision numbers). Shared with a future Twilio SMS provider.
     TWILIO_ACCOUNT_SID: z.string().optional(),
@@ -211,18 +203,13 @@ export const env = createEnv({
     // on each rental debit row for cost-vs-billed reporting. Never surfaced.
     AI_PHONE_NUMBER_COST_USD_PER_MONTH: z.coerce.number().min(0).optional(),
     // Hard cap on call duration (seconds) to bound cost / toll-fraud blast radius.
-    AI_PHONE_MAX_CALL_SECONDS: z.coerce
-      .number()
-      .int()
-      .min(30)
-      .max(3600)
-      .default(600),
+    AI_PHONE_MAX_CALL_SECONDS: z.coerce.number().int().min(30).max(3600).default(600),
     // ----- Streaming transport (Twilio ConversationRelay) -----
     // Phone transport. 'gather' (default) = turn-based Twilio <Gather>, robust and
     // serverless-friendly. 'relay' = Twilio ConversationRelay (streaming STT/TTS +
     // barge-in) through a self-hosted WebSocket worker — needs VOICE_RELAY_WS_URL
     // and VOICE_RELAY_SIGNING_SECRET, else it stays on <Gather>.
-    AI_PHONE_TRANSPORT: z.enum(['gather', 'relay']).optional(),
+    AI_PHONE_TRANSPORT: z.enum(["gather", "relay"]).optional(),
     // Public wss:// URL of the ConversationRelay worker (e.g. wss://voice-relay.example.com).
     VOICE_RELAY_WS_URL: z.string().optional(),
     // HMAC secret shared with the worker: authenticates the relay handshake and
@@ -250,6 +237,45 @@ export const env = createEnv({
     // comma-separated. Operator-curated, kept in env (never in the repo).
     AI_PHONE_RECOMMENDED_VOICES: z.string().optional(),
 
+    // ===== Product image processing (Optional — dashboard tools) =====
+    // Private rembg service used for direct background removal and after GPT
+    // Image enhancement. Keep it on the application network or configure the
+    // shared Bearer token below when exposing it publicly.
+    AI_IMAGE_BACKGROUND_REMOVAL_URL: z.url().optional(),
+    AI_IMAGE_BACKGROUND_REMOVAL_TOKEN: z.string().trim().min(32).optional(),
+    // GPT Image enhancement is inert unless an image API key resolves AND the
+    // background-removal service above is configured. The dedicated key takes
+    // precedence over AI_API_KEY when AI_PROVIDER === 'openai'.
+    AI_IMAGE_OPENAI_API_KEY: z.string().optional(),
+    // Image-edit model (defaults to gpt-image-2). Overrides must support the
+    // flexible 1600x1200 size and opaque output contract.
+    AI_IMAGE_MODEL: z.string().optional(),
+    // Render quality asked of GPT Image. Higher = slower and more expensive.
+    AI_IMAGE_QUALITY: z.enum(["low", "medium", "high"]).optional(),
+    // Flat credits billed per successfully enhanced image when the shared
+    // AI-credit layer is active. Explicitly set 0 to make enhancement free.
+    AI_IMAGE_ENHANCE_CREDITS: z.coerce.number().min(0).default(2),
+    // Flat credits billed per standalone background removal (no GPT Image
+    // step). Defaults to 0 = free, so metering it is an explicit operator
+    // decision rather than an accident of the shared credit layer.
+    AI_IMAGE_BG_REMOVAL_CREDITS: z.coerce.number().min(0).default(0),
+    // GPT Image token prices in USD per 1M tokens. Defaults match GPT Image 2
+    // standard pricing; override all three when using another model or tariff.
+    AI_IMAGE_TEXT_INPUT_USD_PER_MTOK: z.coerce.number().min(0).default(5),
+    AI_IMAGE_INPUT_USD_PER_MTOK: z.coerce.number().min(0).default(8),
+    AI_IMAGE_OUTPUT_USD_PER_MTOK: z.coerce.number().min(0).default(30),
+    // Fallback provider cost of ONE enhancement in USD when the provider does
+    // not return token usage. 0/unset ⇒ cost unavailable, not necessarily free.
+    AI_IMAGE_USD_PER_IMAGE: z.coerce.number().min(0).optional(),
+    // Optional conversion used only by the private diagnostics page to compare
+    // USD provider cost with EUR credit-pack revenue. No margin is inferred
+    // when it is unset, avoiding a stale hardcoded exchange rate.
+    AI_IMAGE_USD_TO_EUR_RATE: z.coerce.number().positive().optional(),
+    // Persist private originals/intermediate outputs and expose the protected
+    // /dev/image-processing comparison page. Always enabled in local development;
+    // production/pre-production deployments must explicitly set this to "true".
+    AI_IMAGE_DEBUG_ENABLED: z.enum(["true", "false"]).optional(),
+
     // ===== fromHello (Optional — engagement & growth) =====
     FROMHELLO_API_URL: z.url().optional(),
     FROMHELLO_API_KEY: z.string().optional(),
@@ -273,14 +299,14 @@ export const env = createEnv({
       .string()
       .optional()
       .transform((val, ctx) => {
-        if (!val || val.trim() === '') return undefined;
+        if (!val || val.trim() === "") return undefined;
         let parsed: unknown;
         try {
           parsed = JSON.parse(val);
         } catch {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: 'PAYG_DEFAULT_PRICING must be valid JSON',
+            message: "PAYG_DEFAULT_PRICING must be valid JSON",
           });
           return z.NEVER;
         }
@@ -290,7 +316,7 @@ export const env = createEnv({
             code: z.ZodIssueCode.custom,
             message: `PAYG_DEFAULT_PRICING is invalid: ${result.error.issues
               .map((i) => i.message)
-              .join('; ')}`,
+              .join("; ")}`,
           });
           return z.NEVER;
         }
@@ -300,26 +326,11 @@ export const env = createEnv({
     // ===== Referral program =====
     // Free reservations granted to the Referrer when a referral qualifies (PAYG referrer;
     // a subscribed referrer gets the equivalent euro invoice credit). Default 30.
-    REFERRAL_REFERRER_REWARD: z.coerce
-      .number()
-      .int()
-      .min(0)
-      .max(100_000)
-      .default(30),
+    REFERRAL_REFERRER_REWARD: z.coerce.number().int().min(0).max(100_000).default(30),
     // Free reservations gifted to a Referred Store at sign-up (instead of the welcome 15).
-    REFERRAL_REFERRED_REWARD: z.coerce
-      .number()
-      .int()
-      .min(0)
-      .max(100_000)
-      .default(30),
+    REFERRAL_REFERRED_REWARD: z.coerce.number().int().min(0).max(100_000).default(30),
     // Minimum online payment (in cents) a Referred Store must take to unlock the reward.
-    REFERRAL_MIN_QUALIFYING_CENTS: z.coerce
-      .number()
-      .int()
-      .min(0)
-      .max(10_000_000)
-      .default(2000),
+    REFERRAL_MIN_QUALIFYING_CENTS: z.coerce.number().int().min(0).max(10_000_000).default(2000),
     // Max rewards a single Referrer can earn per calendar month. 0 = unlimited (launch default).
     REFERRAL_MONTHLY_CAP: z.coerce.number().int().min(0).max(100_000).default(0),
     // Days after a grant during which a refunded/disputed qualifying payment claws it back.
@@ -330,23 +341,21 @@ export const env = createEnv({
     // the root, dashboard under /dashboard. platform: multi-tenant subdomain
     // routing (the cloud). Consumed through lib/deployment.ts, which reads
     // process.env directly so the prebuilt Docker image honors it at runtime.
-    LOUEZ_MODE: z.enum(['standalone', 'platform']).optional(),
+    LOUEZ_MODE: z.enum(["standalone", "platform"]).optional(),
 
     // ===== Development =====
     AUTO_DB_SETUP: z
       .string()
-      .default('false')
-      .transform((val) => val === 'true'),
-    PREVIEW_STORE_SLUG: z.string().default(''),
+      .default("false")
+      .transform((val) => val === "true"),
+    PREVIEW_STORE_SLUG: z.string().default(""),
   },
 
   client: {
     // ===== Application URLs (Required) =====
-    NEXT_PUBLIC_APP_URL: z.url('NEXT_PUBLIC_APP_URL must be a valid URL'),
-    NEXT_PUBLIC_APP_DOMAIN: z
-      .string()
-      .min(1, 'NEXT_PUBLIC_APP_DOMAIN is required'),
-    NEXT_PUBLIC_DASHBOARD_SUBDOMAIN: z.string().default('app'),
+    NEXT_PUBLIC_APP_URL: z.url("NEXT_PUBLIC_APP_URL must be a valid URL"),
+    NEXT_PUBLIC_APP_DOMAIN: z.string().min(1, "NEXT_PUBLIC_APP_DOMAIN is required"),
+    NEXT_PUBLIC_DASHBOARD_SUBDOMAIN: z.string().default("app"),
 
     // ===== Stripe (Optional — payments) =====
     // Optional to match its server-side Stripe siblings: without it Stripe.js
@@ -358,12 +367,12 @@ export const env = createEnv({
 
     // ===== PostHog Analytics (Optional — analytics disabled when unset) =====
     NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
-    NEXT_PUBLIC_POSTHOG_HOST: z.url().default('https://eu.i.posthog.com'),
+    NEXT_PUBLIC_POSTHOG_HOST: z.url().default("https://eu.i.posthog.com"),
     NEXT_PUBLIC_APP_VERSION: z.string().min(1).max(100).optional(),
 
     // ===== Umami Analytics (Required) =====
     NEXT_PUBLIC_UMAMI_SCRIPT_URL: z
-      .url('NEXT_PUBLIC_UMAMI_SCRIPT_URL must be a valid URL')
+      .url("NEXT_PUBLIC_UMAMI_SCRIPT_URL must be a valid URL")
       .optional(),
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: z.string().optional(),
 
@@ -374,7 +383,7 @@ export const env = createEnv({
     NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY: z.string().optional(),
     NEXT_PUBLIC_OPENREPLAY_STOREFRONT_PROJECT_KEY: z.string().optional(),
     NEXT_PUBLIC_OPENREPLAY_INGEST_POINT: z
-      .url('NEXT_PUBLIC_OPENREPLAY_INGEST_POINT must be a valid URL')
+      .url("NEXT_PUBLIC_OPENREPLAY_INGEST_POINT must be a valid URL")
       .optional(),
 
     // ===== fromHello (Optional — engagement & growth) =====
@@ -431,8 +440,7 @@ export const env = createEnv({
     AI_CREDITS_ENABLED: process.env.AI_CREDITS_ENABLED,
     AI_ADVISOR_INPUT_USD_PER_MTOK: process.env.AI_ADVISOR_INPUT_USD_PER_MTOK,
     AI_ADVISOR_OUTPUT_USD_PER_MTOK: process.env.AI_ADVISOR_OUTPUT_USD_PER_MTOK,
-    AI_ADVISOR_CACHED_INPUT_USD_PER_MTOK:
-      process.env.AI_ADVISOR_CACHED_INPUT_USD_PER_MTOK,
+    AI_ADVISOR_CACHED_INPUT_USD_PER_MTOK: process.env.AI_ADVISOR_CACHED_INPUT_USD_PER_MTOK,
     AI_CREDIT_COST_BASIS_USD: process.env.AI_CREDIT_COST_BASIS_USD,
     FREE_AI_CREDITS: process.env.FREE_AI_CREDITS,
     AI_CREDIT_MONTHLY_INCLUDED: process.env.AI_CREDIT_MONTHLY_INCLUDED,
@@ -448,8 +456,7 @@ export const env = createEnv({
     AI_PHONE_MAX_CREDITS_PER_CALL: process.env.AI_PHONE_MAX_CREDITS_PER_CALL,
     AI_PHONE_CREDITS_PER_MINUTE: process.env.AI_PHONE_CREDITS_PER_MINUTE,
     AI_PHONE_NUMBER_RENTAL_CREDITS: process.env.AI_PHONE_NUMBER_RENTAL_CREDITS,
-    AI_PHONE_NUMBER_COST_USD_PER_MONTH:
-      process.env.AI_PHONE_NUMBER_COST_USD_PER_MONTH,
+    AI_PHONE_NUMBER_COST_USD_PER_MONTH: process.env.AI_PHONE_NUMBER_COST_USD_PER_MONTH,
     AI_PHONE_MAX_CALL_SECONDS: process.env.AI_PHONE_MAX_CALL_SECONDS,
     AI_PHONE_TRANSPORT: process.env.AI_PHONE_TRANSPORT,
     VOICE_RELAY_WS_URL: process.env.VOICE_RELAY_WS_URL,
@@ -461,6 +468,19 @@ export const env = createEnv({
     AI_PHONE_VOICE_CATALOG: process.env.AI_PHONE_VOICE_CATALOG,
     ELEVENLABS_API_KEY: process.env.ELEVENLABS_API_KEY,
     AI_PHONE_RECOMMENDED_VOICES: process.env.AI_PHONE_RECOMMENDED_VOICES,
+    AI_IMAGE_BACKGROUND_REMOVAL_URL: process.env.AI_IMAGE_BACKGROUND_REMOVAL_URL,
+    AI_IMAGE_BACKGROUND_REMOVAL_TOKEN: process.env.AI_IMAGE_BACKGROUND_REMOVAL_TOKEN,
+    AI_IMAGE_OPENAI_API_KEY: process.env.AI_IMAGE_OPENAI_API_KEY,
+    AI_IMAGE_MODEL: process.env.AI_IMAGE_MODEL,
+    AI_IMAGE_QUALITY: process.env.AI_IMAGE_QUALITY,
+    AI_IMAGE_ENHANCE_CREDITS: process.env.AI_IMAGE_ENHANCE_CREDITS,
+    AI_IMAGE_BG_REMOVAL_CREDITS: process.env.AI_IMAGE_BG_REMOVAL_CREDITS,
+    AI_IMAGE_TEXT_INPUT_USD_PER_MTOK: process.env.AI_IMAGE_TEXT_INPUT_USD_PER_MTOK,
+    AI_IMAGE_INPUT_USD_PER_MTOK: process.env.AI_IMAGE_INPUT_USD_PER_MTOK,
+    AI_IMAGE_OUTPUT_USD_PER_MTOK: process.env.AI_IMAGE_OUTPUT_USD_PER_MTOK,
+    AI_IMAGE_USD_PER_IMAGE: process.env.AI_IMAGE_USD_PER_IMAGE,
+    AI_IMAGE_USD_TO_EUR_RATE: process.env.AI_IMAGE_USD_TO_EUR_RATE,
+    AI_IMAGE_DEBUG_ENABLED: process.env.AI_IMAGE_DEBUG_ENABLED,
     FROMHELLO_API_URL: process.env.FROMHELLO_API_URL,
     FROMHELLO_API_KEY: process.env.FROMHELLO_API_KEY,
     LOUEZ_MODE: process.env.LOUEZ_MODE,
@@ -477,10 +497,8 @@ export const env = createEnv({
     // Client
     NEXT_PUBLIC_APP_URL: runtimeAppUrl,
     NEXT_PUBLIC_APP_DOMAIN: runtimeAppDomain,
-    NEXT_PUBLIC_DASHBOARD_SUBDOMAIN:
-      process.env.NEXT_PUBLIC_DASHBOARD_SUBDOMAIN,
-    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_DASHBOARD_SUBDOMAIN: process.env.NEXT_PUBLIC_DASHBOARD_SUBDOMAIN,
+    NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
     NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
@@ -488,18 +506,15 @@ export const env = createEnv({
     NEXT_PUBLIC_UMAMI_SCRIPT_URL: process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL,
     NEXT_PUBLIC_UMAMI_WEBSITE_ID: process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID,
     NEXT_PUBLIC_GLEAP_API_KEY: process.env.NEXT_PUBLIC_GLEAP_API_KEY,
-    NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY:
-      process.env.NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY,
+    NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY: process.env.NEXT_PUBLIC_OPENREPLAY_PROJECT_KEY,
     NEXT_PUBLIC_OPENREPLAY_STOREFRONT_PROJECT_KEY:
       process.env.NEXT_PUBLIC_OPENREPLAY_STOREFRONT_PROJECT_KEY,
-    NEXT_PUBLIC_OPENREPLAY_INGEST_POINT:
-      process.env.NEXT_PUBLIC_OPENREPLAY_INGEST_POINT,
+    NEXT_PUBLIC_OPENREPLAY_INGEST_POINT: process.env.NEXT_PUBLIC_OPENREPLAY_INGEST_POINT,
     NEXT_PUBLIC_FROMHELLO_API_URL: process.env.NEXT_PUBLIC_FROMHELLO_API_URL,
     NEXT_PUBLIC_FROMHELLO_KEY: process.env.NEXT_PUBLIC_FROMHELLO_KEY,
-    NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN:
-      process.env.NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN,
+    NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN: process.env.NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN,
   },
 
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  skipValidation: skipEnvValidation,
   emptyStringAsUndefined: true,
 });

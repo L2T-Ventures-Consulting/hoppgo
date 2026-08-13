@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  type CSSProperties,
-  Children,
-  Fragment,
-  type ReactElement,
-  type ReactNode,
-  isValidElement,
-} from "react";
+import { Children, Fragment, type ReactElement, type ReactNode, isValidElement } from "react";
 
 import { Button as ButtonPrimitive } from "@base-ui/react/button";
 import { type VariantProps, cva } from "class-variance-authority";
@@ -27,8 +20,9 @@ const buttonVariants = cva(
     "border bg-clip-padding",
     // typography
     "text-xs font-medium whitespace-nowrap",
-    // transitions
-    "transition-[color,background-color,border-color,box-shadow,opacity,padding]",
+    // transitions — no padding: the only place a button's padding changes is
+    // the sidebar collapsing to icon mode, which is meant to be instant.
+    "transition-[color,background-color,border-color,box-shadow,opacity]",
     // outline / ring (focus)
     "focus-visible:border-ring focus-visible:ring-ring/50 outline-none focus-visible:ring-1",
     // state: disabled
@@ -137,22 +131,12 @@ function splitChildren(children: ReactNode): {
 
 const slotTransition = { type: "spring", duration: 0.3, bounce: 0 } as const;
 
-// Motion animates the button's own width (layout), so the primitive is
-// wrapped once at module level.
-const MotionButtonPrimitive = motion.create(ButtonPrimitive);
-
-// These props collide with motion's own props on the wrapped primitive, so
-// they are excluded from the public API (`style` is re-added below without
-// Base UI's state-callback form, which motion cannot handle).
-type MotionConflictingProps = "onAnimationStart" | "onDrag" | "onDragStart" | "onDragEnd" | "style";
-
-type ButtonProps = Omit<ButtonPrimitive.Props, MotionConflictingProps> &
+type ButtonProps = ButtonPrimitive.Props &
   VariantProps<typeof buttonVariants> & {
     isPending?: boolean;
     /** Replaces the label while `isPending` is true. */
     pendingContent?: ReactNode;
     pendingDisables?: boolean;
-    style?: CSSProperties;
   };
 
 function Button({
@@ -207,15 +191,10 @@ function Button({
       ? pendingContent
       : idleLabel;
   const hasLabel = Array.isArray(content) ? content.length > 0 : content != null;
-
-  const layout = shouldReduceMotion ? false : ("position" as const);
   const hidden = (x: number) => (shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x });
 
   return (
-    <MotionButtonPrimitive
-      layout={shouldReduceMotion ? false : true}
-      transition={slotTransition}
-      data-slot="button"
+    <ButtonPrimitive
       data-icon-start={startSlot ? true : undefined}
       data-icon-end={endSlot ? true : undefined}
       aria-busy={isPending || undefined}
@@ -224,12 +203,15 @@ function Button({
       nativeButton={usesNativeButton}
       render={render}
       {...props}
+      // Last so it survives: a Base UI part rendered as a Button (`render={<Button />}`)
+      // passes its own `data-slot` down, which would otherwise shadow this one and
+      // make every `[data-slot=button]` rule silently skip that button.
+      data-slot="button"
     >
       <AnimatePresence initial={false} mode="popLayout">
         {startSlot ? (
           <motion.span
             key="start"
-            layout={layout}
             initial={hidden(-6)}
             animate={{ opacity: 1, x: 0 }}
             exit={hidden(-6)}
@@ -242,7 +224,6 @@ function Button({
         {hasLabel ? (
           <motion.span
             key="label"
-            layout={layout}
             transition={slotTransition}
             className="flex items-center gap-[inherit]"
           >
@@ -252,7 +233,6 @@ function Button({
         {endSlot ? (
           <motion.span
             key="end"
-            layout={layout}
             initial={hidden(6)}
             animate={{ opacity: 1, x: 0 }}
             exit={hidden(6)}
@@ -263,7 +243,7 @@ function Button({
           </motion.span>
         ) : null}
       </AnimatePresence>
-    </MotionButtonPrimitive>
+    </ButtonPrimitive>
   );
 }
 

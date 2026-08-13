@@ -191,7 +191,7 @@ function DeliveryLegCard({
                 {t('distance')}: {leg.distance.toFixed(1)} km
               </span>
               {isIncluded ? (
-                <Badge variant="secondary" className="text-[10px]">
+                <Badge variant="success" className="text-[10px]">
                   {t('included')}
                 </Badge>
               ) : leg.fee > 0 ? (
@@ -199,7 +199,7 @@ function DeliveryLegCard({
                   {t('fee')}: {leg.fee.toFixed(2)}{currencySymbol}
                 </span>
               ) : (
-                <Badge variant="secondary" className="text-[10px]">
+                <Badge variant="success" className="text-[10px]">
                   {t('free')}
                 </Badge>
               )}
@@ -307,7 +307,7 @@ export function EditReservationDeliverySection({
           {hasDeliveryLegs && isDeliveryIncluded && (
             <div className="flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 dark:bg-emerald-950/20">
               <span className="text-sm font-medium">{t('totalFee')}</span>
-              <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300">
+              <Badge variant="success" className="">
                 {t('included')}
               </Badge>
             </div>

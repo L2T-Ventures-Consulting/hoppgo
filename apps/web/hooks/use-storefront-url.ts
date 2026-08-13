@@ -1,10 +1,43 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
-import { useInstanceConfig } from '@/components/instance-provider'
+import { useInstanceConfig } from "@/components/instance-provider";
 
-import { env } from '@/env'
+import { env } from "@/env";
+
+const subscribeToOrigin = () => () => undefined;
+const getBrowserOrigin = () => window.location.origin;
+const getServerOrigin = () => "";
+
+interface AbsoluteStorefrontUrlOptions {
+  domain?: string;
+  origin: string;
+  path?: string;
+  standalone: boolean;
+  storeSlug: string;
+}
+
+export function buildAbsoluteStorefrontUrl({
+  domain,
+  origin,
+  path = "/",
+  standalone,
+  storeSlug,
+}: AbsoluteStorefrontUrlOptions): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const suffix = normalizedPath === "/" ? "" : normalizedPath;
+
+  if (standalone) {
+    return `${origin}${suffix}` || "/";
+  }
+
+  if (!domain || domain.includes("localhost") || domain.includes("127.0.0.1")) {
+    return `${origin}/${storeSlug}${suffix}`;
+  }
+
+  return `https://${storeSlug}.${domain}${suffix}`;
+}
 
 /**
  * Hook to generate correct storefront URLs based on the routing context.
@@ -17,31 +50,35 @@ import { env } from '@/env'
  * localhost with PREVIEW_MODE or on the dashboard, we need to include it.
  */
 export function useStorefrontUrl(storeSlug: string) {
-  const { standalone } = useInstanceConfig()
-  const [isSubdomain, setIsSubdomain] = useState(false)
+  const { standalone } = useInstanceConfig();
+  const [isSubdomain, setIsSubdomain] = useState(false);
+  // React uses getServerOrigin() for both SSR and the first hydration pass,
+  // then refreshes to window.location.origin. Reading window during render
+  // made the server emit relative URLs while the client emitted absolute
+  // ones, regenerating the dashboard tree on every load in standalone mode.
+  const origin = useSyncExternalStore(subscribeToOrigin, getBrowserOrigin, getServerOrigin);
 
   useEffect(() => {
-    const hostname = window.location.hostname
+    const hostname = window.location.hostname;
 
     // On localhost, we're never on a true subdomain
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      setIsSubdomain(false)
-      return
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      setIsSubdomain(false);
+      return;
     }
 
     // Simple and reliable detection: if the hostname starts with the store slug,
     // we're on the store's subdomain (e.g., 'ddm.louez.io' starts with 'ddm')
-    const hostnamePrefix = hostname.split('.')[0]
+    const hostnamePrefix = hostname.split(".")[0];
 
     // We're on a subdomain if the first part of hostname matches the store slug
     // and is not 'www', 'app', or 'app-dev' (dashboard subdomains)
-    const dashboardPrefixes = ['www', 'app', 'app-dev', 'localhost']
+    const dashboardPrefixes = ["www", "app", "app-dev", "localhost"];
     const isStoreSubdomain =
-      hostnamePrefix === storeSlug &&
-      !dashboardPrefixes.includes(hostnamePrefix)
+      hostnamePrefix === storeSlug && !dashboardPrefixes.includes(hostnamePrefix);
 
-    setIsSubdomain(isStoreSubdomain)
-  }, [storeSlug])
+    setIsSubdomain(isStoreSubdomain);
+  }, [storeSlug]);
 
   /**
    * Generate a storefront URL path.
@@ -50,19 +87,19 @@ export function useStorefrontUrl(storeSlug: string) {
   const getUrl = useCallback(
     (path: string) => {
       // Ensure path starts with /
-      const normalizedPath = path.startsWith('/') ? path : `/${path}`
+      const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
       if (standalone || isSubdomain) {
         // The proxy injects the slug (root rewrite in standalone, subdomain
         // rewrite in platform), so generated URLs must not repeat it.
-        return normalizedPath
+        return normalizedPath;
       }
 
       // On localhost or dashboard, include slug
-      return `/${storeSlug}${normalizedPath}`
+      return `/${storeSlug}${normalizedPath}`;
     },
-    [storeSlug, isSubdomain, standalone]
-  )
+    [storeSlug, isSubdomain, standalone],
+  );
 
   /**
    * Absolute storefront URL for sharing/preview surfaces (copy buttons,
@@ -71,24 +108,17 @@ export function useStorefrontUrl(storeSlug: string) {
    * localhost development, where subdomains do not resolve.
    */
   const getAbsoluteUrl = useCallback(
-    (path: string = '/') => {
-      const normalizedPath = path.startsWith('/') ? path : `/${path}`
-      const suffix = normalizedPath === '/' ? '' : normalizedPath
-      const origin = typeof window === 'undefined' ? '' : window.location.origin
-
-      if (standalone) {
-        return `${origin}${suffix}` || '/'
-      }
-
-      const domain = env.NEXT_PUBLIC_APP_DOMAIN
-      if (!domain || domain.includes('localhost') || domain.includes('127.0.0.1')) {
-        return `${origin}/${storeSlug}${suffix}`
-      }
-
-      return `https://${storeSlug}.${domain}${suffix}`
+    (path: string = "/") => {
+      return buildAbsoluteStorefrontUrl({
+        domain: env.NEXT_PUBLIC_APP_DOMAIN,
+        origin,
+        path,
+        standalone,
+        storeSlug,
+      });
     },
-    [storeSlug, standalone]
-  )
+    [origin, standalone, storeSlug],
+  );
 
-  return { getUrl, getAbsoluteUrl, isSubdomain }
+  return { getUrl, getAbsoluteUrl, isSubdomain };
 }

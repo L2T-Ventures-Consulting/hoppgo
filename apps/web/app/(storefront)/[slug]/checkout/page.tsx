@@ -13,6 +13,7 @@ import { PageTracker } from '@/components/storefront/page-tracker';
 import { isAdvisorReachableForStore } from '@/lib/ai/advisor/eligibility';
 import { resolveTulipIntegrationForStore } from '@/lib/integrations/tulip/state';
 import { generateStoreMetadata } from '@/lib/seo';
+import { getMinRentalMinutes } from '@/lib/utils/rental-duration';
 
 import { BackButton } from './back-button';
 import { CheckoutForm } from './checkout-form';
@@ -20,6 +21,8 @@ import { CheckoutForm } from './checkout-form';
 interface CheckoutPageProps {
   params: Promise<{ slug: string }>;
 }
+
+export const instant = false;
 
 export async function generateMetadata({
   params,
@@ -178,6 +181,10 @@ export default async function CheckoutPage({ params }: CheckoutPageProps) {
           }}
           hasActivePromoCodes={hasActivePromoCodes}
           advisorMode={advisorMode}
+          businessHours={store.settings?.businessHours}
+          advanceNoticeMinutes={store.settings?.advanceNoticeMinutes ?? 0}
+          minRentalMinutes={getMinRentalMinutes(store.settings)}
+          timezone={store.settings?.timezone}
         />
       </div>
     </>

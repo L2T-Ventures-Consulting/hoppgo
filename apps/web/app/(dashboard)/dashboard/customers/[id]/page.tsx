@@ -35,17 +35,21 @@ import { EmailContactPopover } from '@/components/dashboard/email-contact-popove
 import { PhoneContactPopover } from '@/components/dashboard/phone-contact-popover'
 import { CustomerNotes } from './customer-notes'
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 interface CustomerPageProps {
   params: Promise<{ id: string }>
 }
 
-const statusVariants: Record<string, 'default' | 'secondary' | 'error' | 'outline'> = {
-  pending: 'outline',
-  confirmed: 'default',
-  ongoing: 'default',
-  completed: 'secondary',
-  cancelled: 'error',
-  rejected: 'error',
+const statusVariants: Record<string, 'pending' | 'progress' | 'success' | 'failed'> = {
+  pending: 'pending',
+  confirmed: 'success',
+  ongoing: 'progress',
+  completed: 'success',
+  cancelled: 'failed',
+  rejected: 'failed',
 }
 
 export default async function CustomerPage({ params }: CustomerPageProps) {
@@ -117,7 +121,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
                     <Building2 className="h-5 w-5 text-muted-foreground" />
                     {customer.companyName}
                   </h1>
-                  <Badge variant="secondary" className="font-normal">
+                  <Badge variant="expired" className="font-normal">
                     {t('customerType.business')}
                   </Badge>
                 </div>
@@ -131,7 +135,7 @@ export default async function CustomerPage({ params }: CustomerPageProps) {
                   <h1 className="text-2xl font-bold tracking-tight">
                     {customer.firstName} {customer.lastName}
                   </h1>
-                  <Badge variant="outline" className="font-normal">
+                  <Badge variant="expired" className="font-normal">
                     {t('customerType.individual')}
                   </Badge>
                 </div>

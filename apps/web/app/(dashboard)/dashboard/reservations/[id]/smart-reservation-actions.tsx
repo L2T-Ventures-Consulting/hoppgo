@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { toastManager } from '@louez/ui'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toastManager } from "@louez/ui";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertTriangle,
   ArrowDownRight,
@@ -15,10 +15,10 @@ import {
   Package,
   Shield,
   XCircle,
-} from 'lucide-react'
-import { useTranslations } from 'next-intl'
-import Link from 'next/link'
-import { useState } from 'react'
+} from "lucide-react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { useState } from "react";
 
 import {
   AlertDialog,
@@ -27,45 +27,73 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle, Button, Card, CardContent, Checkbox, Dialog, DialogDescription,
+  AlertDialogTitle,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Dialog,
+  DialogDescription,
   DialogFooter,
-  DialogHeader, DialogPanel, DialogPopup, DialogTitle, Label, Textarea
-} from '@louez/ui'
-import { cn, getCurrencySymbol } from '@louez/utils'
+  DialogHeader,
+  DialogPanel,
+  DialogPopup,
+  DialogTitle,
+  Label,
+  Textarea,
+} from "@louez/ui";
+import { cn, getCurrencySymbol } from "@louez/utils";
 
-import { useStoreTimezone } from '@/contexts/store-context'
-import { formatStoreDate } from '@/lib/utils/store-date'
+import { useStoreTimezone } from "@/contexts/store-context";
+import { formatStoreDate } from "@/lib/utils/store-date";
 
-import { invalidateReservationAll } from '@/lib/orpc/invalidation'
-import { orpc } from '@/lib/orpc/react'
+import { invalidateReservationAll } from "@/lib/orpc/invalidation";
+import { orpc } from "@/lib/orpc/react";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from "@/lib/product-analytics/reservation-analytics-client";
+import { getReservationStatusAnalyticsAction } from "@/lib/product-analytics/reservation-analytics";
 
-type ReservationStatus = 'pending' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled' | 'rejected' | 'quote' | 'declined'
-type InspectionMode = 'optional' | 'recommended' | 'required'
+import { MobileReservationQuickActions } from "./mobile-reservation-quick-actions";
+
+type ReservationStatus =
+  | "pending"
+  | "confirmed"
+  | "ongoing"
+  | "completed"
+  | "cancelled"
+  | "rejected"
+  | "quote"
+  | "declined";
+type InspectionMode = "optional" | "recommended" | "required";
 type ActionWarning = {
-  key: string
-  params?: Record<string, string | number>
-}
+  key: string;
+  params?: Record<string, string | number>;
+};
 
 interface SmartReservationActionsProps {
-  reservationId: string
-  status: ReservationStatus
-  startDate: Date
-  endDate: Date
+  reservationId: string;
+  status: ReservationStatus;
+  startDate: Date;
+  endDate: Date;
   // Payment info
-  rentalAmount: number
-  rentalPaid: number
-  depositAmount: number
-  depositCollected: number
-  depositReturned: number
+  rentalAmount: number;
+  rentalPaid: number;
+  depositAmount: number;
+  depositCollected: number;
+  depositReturned: number;
   // Flags
-  hasOnlinePaymentPending?: boolean
-  hasActiveAuthorization?: boolean
-  currency?: string
+  hasOnlinePaymentPending?: boolean;
+  hasActiveAuthorization?: boolean;
+  currency?: string;
   // Inspection info
-  inspectionEnabled?: boolean
-  inspectionMode?: InspectionMode
-  hasDepartureInspection?: boolean
-  hasReturnInspection?: boolean
+  inspectionEnabled?: boolean;
+  inspectionMode?: InspectionMode;
+  hasDepartureInspection?: boolean;
+  hasReturnInspection?: boolean;
+  onRecordPayment: () => void;
 }
 
 export function SmartReservationActions({
@@ -80,104 +108,109 @@ export function SmartReservationActions({
   depositReturned,
   hasOnlinePaymentPending = false,
   hasActiveAuthorization = false,
-  currency = 'EUR',
+  currency = "EUR",
   inspectionEnabled = false,
-  inspectionMode = 'optional',
+  inspectionMode = "optional",
   hasDepartureInspection = false,
   hasReturnInspection = false,
+  onRecordPayment,
 }: SmartReservationActionsProps) {
-  const t = useTranslations('dashboard.reservations')
-  const tInspection = useTranslations('dashboard.settings.inspection')
-  const tCommon = useTranslations('common')
-  const tErrors = useTranslations('errors')
-  const timezone = useStoreTimezone()
-  const currencySymbol = getCurrencySymbol(currency)
-  const queryClient = useQueryClient()
+  const t = useTranslations("dashboard.reservations");
+  const tInspection = useTranslations("dashboard.settings.inspection");
+  const tCommon = useTranslations("common");
+  const tErrors = useTranslations("errors");
+  const timezone = useStoreTimezone();
+  const currencySymbol = getCurrencySymbol(currency);
+  const queryClient = useQueryClient();
 
-  const [isLoading, setIsLoading] = useState(false)
-  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
-  const [rejectDialogOpen, setRejectDialogOpen] = useState(false)
-  const [pickupConfirmOpen, setPickupConfirmOpen] = useState(false)
-  const [returnConfirmOpen, setReturnConfirmOpen] = useState(false)
-  const [inspectionPromptOpen, setInspectionPromptOpen] = useState<'departure' | 'return' | null>(null)
-  const [rejectionReason, setRejectionReason] = useState('')
-  const [acknowledgeWarnings, setAcknowledgeWarnings] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [pickupConfirmOpen, setPickupConfirmOpen] = useState(false);
+  const [returnConfirmOpen, setReturnConfirmOpen] = useState(false);
+  const [inspectionPromptOpen, setInspectionPromptOpen] = useState<"departure" | "return" | null>(
+    null,
+  );
+  const [rejectionReason, setRejectionReason] = useState("");
+  const [acknowledgeWarnings, setAcknowledgeWarnings] = useState(false);
 
   const formatWarning = (warning: ActionWarning) => {
-    const key = warning.key.replace('errors.', '')
-    return tErrors(key, warning.params || {})
-  }
+    const key = warning.key.replace("errors.", "");
+    return tErrors(key, warning.params || {});
+  };
 
   const showWarnings = (warnings: unknown, newStatus: ReservationStatus) => {
     if (!Array.isArray(warnings) || warnings.length === 0) {
-      return
+      return;
     }
 
     const parsedWarnings: ActionWarning[] = warnings
       .filter(
         (warning): warning is ActionWarning =>
           Boolean(warning) &&
-          typeof warning === 'object' &&
-          'key' in warning &&
-          typeof (warning as { key?: unknown }).key === 'string',
+          typeof warning === "object" &&
+          "key" in warning &&
+          typeof (warning as { key?: unknown }).key === "string",
       )
       .map((warning) => ({
         key: warning.key,
         params: warning.params,
-      }))
+      }));
 
     if (parsedWarnings.length === 0) {
-      return
+      return;
     }
 
-    if (newStatus === 'confirmed') {
+    if (newStatus === "confirmed") {
       const tulipWarnings = parsedWarnings.filter((warning) =>
-        warning.key.startsWith('errors.tulip'),
-      )
+        warning.key.startsWith("errors.tulip"),
+      );
 
       if (tulipWarnings.length > 0) {
         toastManager.add({
-          title: tulipWarnings.map(formatWarning).join(' • '),
-          type: 'warning',
-        })
+          title: tulipWarnings.map(formatWarning).join(" • "),
+          type: "warning",
+        });
       }
 
       const otherWarnings = parsedWarnings.filter(
-        (warning) => !warning.key.startsWith('errors.tulip'),
-      )
+        (warning) => !warning.key.startsWith("errors.tulip"),
+      );
       if (otherWarnings.length > 0) {
         toastManager.add({
-          title: otherWarnings.map(formatWarning).join(' • '),
-          type: 'warning',
-        })
+          title: otherWarnings.map(formatWarning).join(" • "),
+          type: "warning",
+        });
       }
 
-      return
+      return;
     }
 
     toastManager.add({
-      title: parsedWarnings.map(formatWarning).join(' • '),
-      type: 'warning',
-    })
-  }
+      title: parsedWarnings.map(formatWarning).join(" • "),
+      type: "warning",
+    });
+  };
 
   // Inspection prompts logic
-  const shouldPromptDepartureInspection = inspectionEnabled && !hasDepartureInspection && inspectionMode !== 'optional'
-  const shouldPromptReturnInspection = inspectionEnabled && !hasReturnInspection && inspectionMode !== 'optional'
-  const inspectionRequired = inspectionMode === 'required'
+  const shouldPromptDepartureInspection =
+    inspectionEnabled && !hasDepartureInspection && inspectionMode !== "optional";
+  const shouldPromptReturnInspection =
+    inspectionEnabled && !hasReturnInspection && inspectionMode !== "optional";
+  const inspectionRequired = inspectionMode === "required";
 
   // Calculate payment states
-  const isRentalFullyPaid = rentalPaid >= rentalAmount
-  const isDepositFullyCollected = depositCollected >= depositAmount
-  const isDepositCovered = depositAmount === 0 || isDepositFullyCollected || hasActiveAuthorization
-  const rentalRemaining = Math.max(0, rentalAmount - rentalPaid)
-  const depositRemaining = Math.max(0, depositAmount - depositCollected)
-  const depositToReturn = depositCollected - depositReturned
+  const isRentalFullyPaid = rentalPaid >= rentalAmount;
+  const isDepositFullyCollected = depositCollected >= depositAmount;
+  const isDepositCovered = depositAmount === 0 || isDepositFullyCollected || hasActiveAuthorization;
+  const rentalRemaining = Math.max(0, rentalAmount - rentalPaid);
+  const depositRemaining = Math.max(0, depositAmount - depositCollected);
+  const depositToReturn = depositCollected - depositReturned;
 
   // Determine warnings
-  const hasPaymentWarning = !isRentalFullyPaid && status === 'confirmed'
-  const hasDepositWarning = !isDepositCovered && status === 'confirmed'
-  const hasWarnings = hasPaymentWarning || hasDepositWarning
+  const hasPaymentWarning = !isRentalFullyPaid && status === "confirmed";
+  const hasDepositWarning = !isDepositCovered && status === "confirmed";
+  const hasWarnings = hasPaymentWarning || hasDepositWarning;
 
   const updateStatusMutation = useMutation(
     orpc.dashboard.reservations.updateStatus.mutationOptions({
@@ -186,22 +219,22 @@ export function SmartReservationActions({
           queryKey: orpc.dashboard.reservations.getById.key({
             input: { reservationId: input.reservationId },
           }),
-        })
+        });
 
         const previous = queryClient.getQueryData(
           orpc.dashboard.reservations.getById.key({
             input: { reservationId: input.reservationId },
           }),
-        )
+        );
 
         queryClient.setQueryData(
           orpc.dashboard.reservations.getById.key({
             input: { reservationId: input.reservationId },
           }),
           (current: any) => (current ? { ...current, status: input.status } : current),
-        )
+        );
 
-        return { previous }
+        return { previous };
       },
       onError: (_error, input, ctx) => {
         if (ctx?.previous) {
@@ -210,11 +243,11 @@ export function SmartReservationActions({
               input: { reservationId: input.reservationId },
             }),
             ctx.previous,
-          )
+          );
         }
       },
     }),
-  )
+  );
 
   const cancelMutation = useMutation(
     orpc.dashboard.reservations.cancel.mutationOptions({
@@ -223,22 +256,22 @@ export function SmartReservationActions({
           queryKey: orpc.dashboard.reservations.getById.key({
             input: { reservationId: input.reservationId },
           }),
-        })
+        });
 
         const previous = queryClient.getQueryData(
           orpc.dashboard.reservations.getById.key({
             input: { reservationId: input.reservationId },
           }),
-        )
+        );
 
         queryClient.setQueryData(
           orpc.dashboard.reservations.getById.key({
             input: { reservationId: input.reservationId },
           }),
-          (current: any) => (current ? { ...current, status: 'cancelled' } : current),
-        )
+          (current: any) => (current ? { ...current, status: "cancelled" } : current),
+        );
 
-        return { previous }
+        return { previous };
       },
       onError: (_error, input, ctx) => {
         if (ctx?.previous) {
@@ -247,70 +280,120 @@ export function SmartReservationActions({
               input: { reservationId: input.reservationId },
             }),
             ctx.previous,
-          )
+          );
         }
       },
     }),
-  )
+  );
 
   const handleStatusChange = async (newStatus: ReservationStatus, reason?: string) => {
-    setIsLoading(true)
+    const analyticsAction = getReservationStatusAnalyticsAction(newStatus);
+    if (analyticsAction) {
+      captureReservationActionStarted({
+        reservationId,
+        reservationStatus: status,
+        action: analyticsAction,
+        properties: { status_after: newStatus },
+      });
+    }
+
+    setIsLoading(true);
     try {
       const result = await updateStatusMutation.mutateAsync({
         reservationId,
         status: newStatus,
         rejectionReason: reason,
-      })
+      });
 
-      const warnings = result && typeof result === 'object' && 'warnings' in result ? (result as any).warnings : undefined
-      showWarnings(warnings, newStatus)
+      const warnings =
+        result && typeof result === "object" && "warnings" in result
+          ? (result as any).warnings
+          : undefined;
+      showWarnings(warnings, newStatus);
 
-      toastManager.add({ title: t('statusUpdated'), type: 'success' })
-      await invalidateReservationAll(queryClient, reservationId)
+      toastManager.add({ title: t("statusUpdated"), type: "success" });
+      await invalidateReservationAll(queryClient, reservationId);
     } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
+      if (analyticsAction) {
+        captureReservationActionFailed({
+          reservationId,
+          reservationStatus: status,
+          action: analyticsAction,
+          properties: { error_code: "status_update_failed", status_after: newStatus },
+        });
+      }
+      toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
-      setIsLoading(false)
-      setAcknowledgeWarnings(false)
+      setIsLoading(false);
+      setAcknowledgeWarnings(false);
     }
-  }
+  };
 
   const handleReject = async () => {
-    await handleStatusChange('rejected', rejectionReason || undefined)
-    setRejectDialogOpen(false)
-    setRejectionReason('')
-  }
+    await handleStatusChange("rejected", rejectionReason || undefined);
+    setRejectDialogOpen(false);
+    setRejectionReason("");
+  };
 
   const handleCancel = async () => {
-    setIsLoading(true)
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.cancelReservation,
+    });
+    setIsLoading(true);
     try {
-      await cancelMutation.mutateAsync({ reservationId })
-      toastManager.add({ title: t('reservationCancelled'), type: 'success' })
-      await invalidateReservationAll(queryClient, reservationId)
+      await cancelMutation.mutateAsync({ reservationId });
+      toastManager.add({ title: t("reservationCancelled"), type: "success" });
+      await invalidateReservationAll(queryClient, reservationId);
     } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.cancelReservation,
+        properties: { error_code: "cancel_failed" },
+      });
+      toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
-      setIsLoading(false)
-      setCancelDialogOpen(false)
+      setIsLoading(false);
+      setCancelDialogOpen(false);
     }
-  }
+  };
 
   const handlePickup = async () => {
-    await handleStatusChange('ongoing')
-    setPickupConfirmOpen(false)
-  }
+    await handleStatusChange("ongoing");
+    setPickupConfirmOpen(false);
+  };
 
   const handleReturn = async () => {
-    await handleStatusChange('completed')
-    setReturnConfirmOpen(false)
-  }
+    await handleStatusChange("completed");
+    setReturnConfirmOpen(false);
+  };
 
-  const canCancel = !['cancelled', 'completed', 'rejected', 'declined'].includes(status)
+  const handlePickupIntent = () => {
+    if (shouldPromptDepartureInspection) {
+      setInspectionPromptOpen("departure");
+    } else if (hasWarnings) {
+      setPickupConfirmOpen(true);
+    } else {
+      void handlePickup();
+    }
+  };
+
+  const handleReturnIntent = () => {
+    if (shouldPromptReturnInspection) {
+      setInspectionPromptOpen("return");
+    } else {
+      setReturnConfirmOpen(true);
+    }
+  };
+
+  const canCancel = !["cancelled", "completed", "rejected", "declined"].includes(status);
 
   // Render based on status
   const renderContent = () => {
     switch (status) {
-      case 'pending':
+      case "pending":
         if (hasOnlinePaymentPending) {
           return (
             <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
@@ -320,11 +403,11 @@ export function SmartReservationActions({
                     <Loader2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 animate-spin" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">{t('paymentPendingCard.title')}</p>
+                    <p className="text-sm font-medium">{t("paymentPendingCard.title")}</p>
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {t('paymentPendingCard.description')}
+                  {t("paymentPendingCard.description")}
                 </p>
                 {canCancel && (
                   <button
@@ -332,12 +415,12 @@ export function SmartReservationActions({
                     onClick={() => setCancelDialogOpen(true)}
                     disabled={isLoading}
                   >
-                    {t('cancelReservation')}
+                    {t("cancelReservation")}
                   </button>
                 )}
               </CardContent>
             </Card>
-          )
+          );
         }
 
         return (
@@ -348,23 +431,19 @@ export function SmartReservationActions({
                   <Clock className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('pendingCard.title')}</p>
+                  <p className="text-sm font-medium">{t("pendingCard.title")}</p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">{t('pendingCard.description')}</p>
+              <p className="text-xs text-muted-foreground">{t("pendingCard.description")}</p>
               <div className="space-y-2">
                 <Button
                   variant="default"
                   className="w-full"
-                  onClick={() => handleStatusChange('confirmed')}
-                  disabled={isLoading}
+                  onClick={() => handleStatusChange("confirmed")}
+                  isPending={isLoading}
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-3.5 w-3.5" />
-                  )}
-                  {t('acceptRequest')}
+                  <CheckCircle data-slot="icon" />
+                  {t("acceptRequest")}
                 </Button>
                 <Button
                   variant="destructive"
@@ -373,7 +452,7 @@ export function SmartReservationActions({
                   disabled={isLoading}
                 >
                   <XCircle className="mr-2 h-3.5 w-3.5" />
-                  {t('rejectRequest')}
+                  {t("rejectRequest")}
                 </Button>
               </div>
               {canCancel && (
@@ -383,15 +462,15 @@ export function SmartReservationActions({
                     onClick={() => setCancelDialogOpen(true)}
                     disabled={isLoading}
                   >
-                    {t('cancelReservation')}
+                    {t("cancelReservation")}
                   </button>
                 </div>
               )}
             </CardContent>
           </Card>
-        )
+        );
 
-      case 'confirmed':
+      case "confirmed":
         return (
           <Card className="border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
             <CardContent className="p-4 space-y-3">
@@ -400,34 +479,18 @@ export function SmartReservationActions({
                   <CheckCircle className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('confirmedCard.title')}</p>
+                  <p className="text-sm font-medium">{t("confirmedCard.title")}</p>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                {t('confirmedCard.pickupOn', {
-                  date: formatStoreDate(startDate, timezone, 'SHORT_DATETIME'),
+                {t("confirmedCard.pickupOn", {
+                  date: formatStoreDate(startDate, timezone, "SHORT_DATETIME"),
                 })}
               </p>
 
-              <Button
-                className="w-full"
-                onClick={() => {
-                  if (shouldPromptDepartureInspection) {
-                    setInspectionPromptOpen('departure')
-                  } else if (hasWarnings) {
-                    setPickupConfirmOpen(true)
-                  } else {
-                    handlePickup()
-                  }
-                }}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ArrowUpRight className="mr-2 h-3.5 w-3.5" />
-                )}
-                {t('actions.markPickedUp')}
+              <Button className="w-full" onClick={handlePickupIntent} isPending={isLoading}>
+                <ArrowUpRight data-slot="icon" />
+                {t("actions.markPickedUp")}
               </Button>
 
               {/* Inline warnings */}
@@ -437,7 +500,7 @@ export function SmartReservationActions({
                     <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
                       <CreditCard className="h-3 w-3 shrink-0" />
                       <p className="text-[11px]">
-                        {t('smartActions.paymentIncomplete', {
+                        {t("smartActions.paymentIncomplete", {
                           remaining: `${rentalRemaining.toFixed(2)}${currencySymbol}`,
                         })}
                       </p>
@@ -447,7 +510,7 @@ export function SmartReservationActions({
                     <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
                       <Shield className="h-3 w-3 shrink-0" />
                       <p className="text-[11px]">
-                        {t('smartActions.depositNotCollected', {
+                        {t("smartActions.depositNotCollected", {
                           amount: `${depositRemaining.toFixed(2)}${currencySymbol}`,
                         })}
                       </p>
@@ -463,15 +526,15 @@ export function SmartReservationActions({
                     onClick={() => setCancelDialogOpen(true)}
                     disabled={isLoading}
                   >
-                    {t('cancelReservation')}
+                    {t("cancelReservation")}
                   </button>
                 </div>
               )}
             </CardContent>
           </Card>
-        )
+        );
 
-      case 'ongoing':
+      case "ongoing":
         return (
           <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20">
             <CardContent className="p-4 space-y-3">
@@ -480,32 +543,18 @@ export function SmartReservationActions({
                   <Package className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('ongoingCard.title')}</p>
+                  <p className="text-sm font-medium">{t("ongoingCard.title")}</p>
                 </div>
               </div>
               <p className="text-xs text-muted-foreground">
-                {t('ongoingCard.returnOn', {
-                  date: formatStoreDate(endDate, timezone, 'SHORT_DATETIME'),
+                {t("ongoingCard.returnOn", {
+                  date: formatStoreDate(endDate, timezone, "SHORT_DATETIME"),
                 })}
               </p>
 
-              <Button
-                className="w-full"
-                onClick={() => {
-                  if (shouldPromptReturnInspection) {
-                    setInspectionPromptOpen('return')
-                  } else {
-                    setReturnConfirmOpen(true)
-                  }
-                }}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ArrowDownRight className="mr-2 h-3.5 w-3.5" />
-                )}
-                {t('actions.markReturned')}
+              <Button className="w-full" onClick={handleReturnIntent} isPending={isLoading}>
+                <ArrowDownRight data-slot="icon" />
+                {t("actions.markReturned")}
               </Button>
 
               {canCancel && (
@@ -515,15 +564,15 @@ export function SmartReservationActions({
                     onClick={() => setCancelDialogOpen(true)}
                     disabled={isLoading}
                   >
-                    {t('cancelReservation')}
+                    {t("cancelReservation")}
                   </button>
                 </div>
               )}
             </CardContent>
           </Card>
-        )
+        );
 
-      case 'completed':
+      case "completed":
         return (
           <Card>
             <CardContent className="p-4">
@@ -532,15 +581,15 @@ export function SmartReservationActions({
                   <CheckCircle className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('completedCard.title')}</p>
-                  <p className="text-xs text-muted-foreground">{t('completedCard.description')}</p>
+                  <p className="text-sm font-medium">{t("completedCard.title")}</p>
+                  <p className="text-xs text-muted-foreground">{t("completedCard.description")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )
+        );
 
-      case 'cancelled':
+      case "cancelled":
         return (
           <Card>
             <CardContent className="p-4">
@@ -549,15 +598,15 @@ export function SmartReservationActions({
                   <Ban className="h-4 w-4 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('cancelledCard.title')}</p>
-                  <p className="text-xs text-muted-foreground">{t('cancelledCard.description')}</p>
+                  <p className="text-sm font-medium">{t("cancelledCard.title")}</p>
+                  <p className="text-xs text-muted-foreground">{t("cancelledCard.description")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )
+        );
 
-      case 'rejected':
+      case "rejected":
         return (
           <Card>
             <CardContent className="p-4">
@@ -566,15 +615,15 @@ export function SmartReservationActions({
                   <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('rejectedCard.title')}</p>
-                  <p className="text-xs text-muted-foreground">{t('rejectedCard.description')}</p>
+                  <p className="text-sm font-medium">{t("rejectedCard.title")}</p>
+                  <p className="text-xs text-muted-foreground">{t("rejectedCard.description")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )
+        );
 
-      case 'quote':
+      case "quote":
         return (
           <Card className="border-violet-200 dark:border-violet-800 bg-violet-50/50 dark:bg-violet-950/20">
             <CardContent className="p-4 space-y-3">
@@ -583,23 +632,19 @@ export function SmartReservationActions({
                   <Clock className="h-3.5 w-3.5 text-violet-600 dark:text-violet-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('quoteCard.title')}</p>
+                  <p className="text-sm font-medium">{t("quoteCard.title")}</p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">{t('quoteCard.description')}</p>
+              <p className="text-xs text-muted-foreground">{t("quoteCard.description")}</p>
               <div className="space-y-2">
                 <Button
                   variant="default"
                   className="w-full"
-                  onClick={() => handleStatusChange('confirmed')}
-                  disabled={isLoading}
+                  onClick={() => handleStatusChange("confirmed")}
+                  isPending={isLoading}
                 >
-                  {isLoading ? (
-                    <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  ) : (
-                    <CheckCircle className="mr-2 h-3.5 w-3.5" />
-                  )}
-                  {t('quoteCard.confirm')}
+                  <CheckCircle data-slot="icon" />
+                  {t("quoteCard.confirm")}
                 </Button>
               </div>
               {canCancel && (
@@ -609,15 +654,15 @@ export function SmartReservationActions({
                     onClick={() => setCancelDialogOpen(true)}
                     disabled={isLoading}
                   >
-                    {t('cancelReservation')}
+                    {t("cancelReservation")}
                   </button>
                 </div>
               )}
             </CardContent>
           </Card>
-        )
+        );
 
-      case 'declined':
+      case "declined":
         return (
           <Card>
             <CardContent className="p-4">
@@ -626,50 +671,66 @@ export function SmartReservationActions({
                   <XCircle className="h-4 w-4 text-slate-600 dark:text-slate-400" />
                 </div>
                 <div>
-                  <p className="text-sm font-medium">{t('declinedCard.title')}</p>
-                  <p className="text-xs text-muted-foreground">{t('declinedCard.description')}</p>
+                  <p className="text-sm font-medium">{t("declinedCard.title")}</p>
+                  <p className="text-xs text-muted-foreground">{t("declinedCard.description")}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <>
       {renderContent()}
 
+      <MobileReservationQuickActions
+        reservationId={reservationId}
+        status={status}
+        rentalRemaining={rentalRemaining}
+        hasOnlinePaymentPending={hasOnlinePaymentPending}
+        currency={currency}
+        disabled={isLoading}
+        onRecordPayment={onRecordPayment}
+        onStatusAction={
+          status === "confirmed"
+            ? handlePickupIntent
+            : status === "ongoing"
+              ? handleReturnIntent
+              : () => handleStatusChange("confirmed")
+        }
+      />
+
       {/* Reject Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogPopup>
           <DialogHeader>
-            <DialogTitle>{t('rejectDialog.title')}</DialogTitle>
-            <DialogDescription>{t('rejectDialog.description')}</DialogDescription>
+            <DialogTitle>{t("rejectDialog.title")}</DialogTitle>
+            <DialogDescription>{t("rejectDialog.description")}</DialogDescription>
           </DialogHeader>
           <DialogPanel>
-          <div className="space-y-2">
-            <Label htmlFor="rejection-reason">{t('rejectDialog.reasonLabel')}</Label>
-            <Textarea
-              id="rejection-reason"
-              value={rejectionReason}
-              onChange={(e) => setRejectionReason(e.target.value)}
-              placeholder={t('rejectDialog.reasonPlaceholder')}
-              rows={3}
-            />
-            <p className="text-xs text-muted-foreground">{t('rejectDialog.reasonHint')}</p>
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="rejection-reason">{t("rejectDialog.reasonLabel")}</Label>
+              <Textarea
+                id="rejection-reason"
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                placeholder={t("rejectDialog.reasonPlaceholder")}
+                rows={3}
+              />
+              <p className="text-xs text-muted-foreground">{t("rejectDialog.reasonHint")}</p>
+            </div>
           </DialogPanel>
           <DialogFooter>
             <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
-              {tCommon('cancel')}
+              {tCommon("cancel")}
             </Button>
-            <Button variant="destructive" onClick={handleReject} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('rejectRequest')}
+            <Button variant="destructive" onClick={handleReject} isPending={isLoading}>
+              {t("rejectRequest")}
             </Button>
           </DialogFooter>
         </DialogPopup>
@@ -679,17 +740,16 @@ export function SmartReservationActions({
       <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('cancelConfirmTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{t('cancelConfirmDescription')}</AlertDialogDescription>
+            <AlertDialogTitle>{t("cancelConfirmTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("cancelConfirmDescription")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>{tCommon('back')}</AlertDialogClose>
-            <AlertDialogClose
-              render={<Button variant="destructive" />}
-              onClick={handleCancel}
-            >
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {tCommon("back")}
+            </AlertDialogClose>
+            <AlertDialogClose render={<Button variant="destructive" />} onClick={handleCancel}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('cancelReservation')}
+              {t("cancelReservation")}
             </AlertDialogClose>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -701,88 +761,90 @@ export function SmartReservationActions({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-amber-500" />
-              {t('smartActions.pickupConfirmTitle')}
+              {t("smartActions.pickupConfirmTitle")}
             </DialogTitle>
-            <DialogDescription>{t('smartActions.pickupConfirmDescription')}</DialogDescription>
+            <DialogDescription>{t("smartActions.pickupConfirmDescription")}</DialogDescription>
           </DialogHeader>
 
           <DialogPanel>
-          <div className="space-y-4">
-            {/* Warnings Box */}
-            <div className="p-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 space-y-3">
-              {hasPaymentWarning && (
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 shrink-0">
-                    <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <div className="space-y-4">
+              {/* Warnings Box */}
+              <div className="p-4 rounded-lg border border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 space-y-3">
+                {hasPaymentWarning && (
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 shrink-0">
+                      <CreditCard className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                        {t("smartActions.warningPaymentTitle")}
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                        {t("smartActions.warningPaymentDescription", {
+                          paid: `${rentalPaid.toFixed(2)}${currencySymbol}`,
+                          total: `${rentalAmount.toFixed(2)}${currencySymbol}`,
+                          remaining: `${rentalRemaining.toFixed(2)}${currencySymbol}`,
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                      {t('smartActions.warningPaymentTitle')}
-                    </p>
-                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                      {t('smartActions.warningPaymentDescription', {
-                        paid: `${rentalPaid.toFixed(2)}${currencySymbol}`,
-                        total: `${rentalAmount.toFixed(2)}${currencySymbol}`,
-                        remaining: `${rentalRemaining.toFixed(2)}${currencySymbol}`,
-                      })}
-                    </p>
-                  </div>
-                </div>
-              )}
+                )}
 
-              {hasDepositWarning && (
-                <div className="flex items-start gap-3">
-                  <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 shrink-0">
-                    <Shield className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                {hasDepositWarning && (
+                  <div className="flex items-start gap-3">
+                    <div className="p-1.5 rounded-full bg-amber-100 dark:bg-amber-900/50 shrink-0">
+                      <Shield className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                        {t("smartActions.warningDepositTitle")}
+                      </p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                        {t("smartActions.warningDepositDescription", {
+                          amount: `${depositRemaining.toFixed(2)}${currencySymbol}`,
+                        })}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
-                      {t('smartActions.warningDepositTitle')}
-                    </p>
-                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                      {t('smartActions.warningDepositDescription', {
-                        amount: `${depositRemaining.toFixed(2)}${currencySymbol}`,
-                      })}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            {/* Acknowledgment checkbox */}
-            <div className="flex items-start space-x-3">
-              <Checkbox
-                id="acknowledge-pickup"
-                checked={acknowledgeWarnings}
-                onCheckedChange={(checked) => setAcknowledgeWarnings(checked === true)}
-              />
-              <label
-                htmlFor="acknowledge-pickup"
-                className="text-sm text-muted-foreground leading-tight cursor-pointer"
-              >
-                {t('smartActions.acknowledgePickupWarnings')}
-              </label>
+              {/* Acknowledgment checkbox */}
+              <div className="flex items-start space-x-3">
+                <Checkbox
+                  id="acknowledge-pickup"
+                  checked={acknowledgeWarnings}
+                  onCheckedChange={(checked) => setAcknowledgeWarnings(checked === true)}
+                />
+                <label
+                  htmlFor="acknowledge-pickup"
+                  className="text-sm text-muted-foreground leading-tight cursor-pointer"
+                >
+                  {t("smartActions.acknowledgePickupWarnings")}
+                </label>
+              </div>
             </div>
-          </div>
           </DialogPanel>
 
           <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={() => setPickupConfirmOpen(false)} className="sm:flex-1">
-              {tCommon('cancel')}
+            <Button
+              variant="outline"
+              onClick={() => setPickupConfirmOpen(false)}
+              className="sm:flex-1"
+            >
+              {tCommon("cancel")}
             </Button>
             <Button
               onClick={handlePickup}
-              disabled={isLoading || !acknowledgeWarnings}
+              isPending={isLoading}
+              disabled={!acknowledgeWarnings}
               className={cn(
-                'sm:flex-1',
-                acknowledgeWarnings
-                  ? 'bg-amber-600 hover:bg-amber-700 text-white'
-                  : ''
+                "sm:flex-1",
+                acknowledgeWarnings ? "bg-amber-600 hover:bg-amber-700 text-white" : "",
               )}
             >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <ArrowUpRight className="mr-2 h-4 w-4" />
-              {t('smartActions.confirmPickup')}
+              <ArrowUpRight data-slot="icon" />
+              {t("smartActions.confirmPickup")}
             </Button>
           </DialogFooter>
         </DialogPopup>
@@ -794,63 +856,78 @@ export function SmartReservationActions({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ArrowDownRight className="h-5 w-5 text-blue-500" />
-              {t('smartActions.returnConfirmTitle')}
+              {t("smartActions.returnConfirmTitle")}
             </DialogTitle>
-            <DialogDescription>{t('smartActions.returnConfirmDescription')}</DialogDescription>
+            <DialogDescription>{t("smartActions.returnConfirmDescription")}</DialogDescription>
           </DialogHeader>
 
           <DialogPanel>
-          <div className="space-y-4">
-            {/* Status summary */}
-            <div className="p-4 rounded-lg bg-muted/50 space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">{t('payment.rental')}</span>
-                <span className={cn('font-medium', isRentalFullyPaid ? 'text-emerald-600' : 'text-amber-600')}>
-                  {isRentalFullyPaid
-                    ? t('smartActions.fullyPaid')
-                    : t('smartActions.partiallyPaid', {
-                        paid: `${rentalPaid.toFixed(2)}${currencySymbol}`,
-                        total: `${rentalAmount.toFixed(2)}${currencySymbol}`,
-                      })}
-                </span>
+            <div className="space-y-4">
+              {/* Status summary */}
+              <div className="p-4 rounded-lg bg-muted/50 space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">{t("payment.rental")}</span>
+                  <span
+                    className={cn(
+                      "font-medium",
+                      isRentalFullyPaid ? "text-emerald-600" : "text-amber-600",
+                    )}
+                  >
+                    {isRentalFullyPaid
+                      ? t("smartActions.fullyPaid")
+                      : t("smartActions.partiallyPaid", {
+                          paid: `${rentalPaid.toFixed(2)}${currencySymbol}`,
+                          total: `${rentalAmount.toFixed(2)}${currencySymbol}`,
+                        })}
+                  </span>
+                </div>
+
+                {depositAmount > 0 && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">{t("payment.deposit")}</span>
+                    <span
+                      className={cn(
+                        "font-medium",
+                        isDepositCovered ? "text-emerald-600" : "text-amber-600",
+                      )}
+                    >
+                      {isDepositFullyCollected
+                        ? `${depositCollected.toFixed(2)}${currencySymbol} ${t("smartActions.collected")}`
+                        : hasActiveAuthorization
+                          ? t("smartActions.authorized")
+                          : t("smartActions.notCollected")}
+                    </span>
+                  </div>
+                )}
+
+                {depositToReturn > 0 && (
+                  <div className="flex items-center justify-between text-sm pt-2 border-t">
+                    <span className="text-muted-foreground">
+                      {t("smartActions.toReturnToCustomer")}
+                    </span>
+                    <span className="font-medium text-blue-600">
+                      {depositToReturn.toFixed(2)}
+                      {currencySymbol}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {depositAmount > 0 && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{t('payment.deposit')}</span>
-                  <span className={cn('font-medium', isDepositCovered ? 'text-emerald-600' : 'text-amber-600')}>
-                    {isDepositFullyCollected
-                      ? `${depositCollected.toFixed(2)}${currencySymbol} ${t('smartActions.collected')}`
-                      : hasActiveAuthorization
-                      ? t('smartActions.authorized')
-                      : t('smartActions.notCollected')}
-                  </span>
-                </div>
-              )}
-
-              {depositToReturn > 0 && (
-                <div className="flex items-center justify-between text-sm pt-2 border-t">
-                  <span className="text-muted-foreground">{t('smartActions.toReturnToCustomer')}</span>
-                  <span className="font-medium text-blue-600">
-                    {depositToReturn.toFixed(2)}
-                    {currencySymbol}
-                  </span>
-                </div>
-              )}
+              <p className="text-sm text-muted-foreground">{t("smartActions.returnQuestion")}</p>
             </div>
-
-            <p className="text-sm text-muted-foreground">{t('smartActions.returnQuestion')}</p>
-          </div>
           </DialogPanel>
 
           <DialogFooter className="flex-col sm:flex-row gap-2">
-            <Button variant="outline" onClick={() => setReturnConfirmOpen(false)} className="sm:flex-1">
-              {tCommon('cancel')}
+            <Button
+              variant="outline"
+              onClick={() => setReturnConfirmOpen(false)}
+              className="sm:flex-1"
+            >
+              {tCommon("cancel")}
             </Button>
-            <Button onClick={handleReturn} disabled={isLoading} className="sm:flex-1">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              <CheckCircle className="mr-2 h-4 w-4" />
-              {t('smartActions.confirmReturn')}
+            <Button onClick={handleReturn} isPending={isLoading} className="sm:flex-1">
+              <CheckCircle data-slot="icon" />
+              {t("smartActions.confirmReturn")}
             </Button>
           </DialogFooter>
         </DialogPopup>
@@ -862,35 +939,35 @@ export function SmartReservationActions({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <ClipboardCheck className="h-5 w-5 text-primary" />
-              {inspectionPromptOpen === 'departure'
-                ? tInspection('smartActions.departureInspectionTitle')
-                : tInspection('smartActions.returnInspectionTitle')}
+              {inspectionPromptOpen === "departure"
+                ? tInspection("smartActions.departureInspectionTitle")
+                : tInspection("smartActions.returnInspectionTitle")}
             </DialogTitle>
             <DialogDescription>
               {inspectionRequired
-                ? tInspection('smartActions.inspectionRequiredDescription')
-                : tInspection('smartActions.inspectionRecommendedDescription')}
+                ? tInspection("smartActions.inspectionRequiredDescription")
+                : tInspection("smartActions.inspectionRecommendedDescription")}
             </DialogDescription>
           </DialogHeader>
 
           <DialogPanel>
-          <div className="p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="p-1.5 rounded-full bg-primary/10 shrink-0">
-                <ClipboardCheck className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">
-                  {inspectionPromptOpen === 'departure'
-                    ? tInspection('smartActions.departureInspectionBenefit')
-                    : tInspection('smartActions.returnInspectionBenefit')}
-                </p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {tInspection('smartActions.inspectionDuration')}
-                </p>
+            <div className="p-4 rounded-lg border border-primary/20 bg-primary/5 space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="p-1.5 rounded-full bg-primary/10 shrink-0">
+                  <ClipboardCheck className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium">
+                    {inspectionPromptOpen === "departure"
+                      ? tInspection("smartActions.departureInspectionBenefit")
+                      : tInspection("smartActions.returnInspectionBenefit")}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {tInspection("smartActions.inspectionDuration")}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
           </DialogPanel>
 
           <DialogFooter className="flex-col sm:flex-row gap-2">
@@ -898,33 +975,38 @@ export function SmartReservationActions({
               <Button
                 variant="outline"
                 onClick={() => {
-                  setInspectionPromptOpen(null)
-                  if (inspectionPromptOpen === 'departure') {
+                  setInspectionPromptOpen(null);
+                  if (inspectionPromptOpen === "departure") {
                     if (hasWarnings) {
-                      setPickupConfirmOpen(true)
+                      setPickupConfirmOpen(true);
                     } else {
-                      handlePickup()
+                      handlePickup();
                     }
                   } else {
-                    setReturnConfirmOpen(true)
+                    setReturnConfirmOpen(true);
                   }
                 }}
                 className="sm:flex-1"
               >
-                {inspectionPromptOpen === 'departure'
-                  ? t('smartActions.skipInspectionPickup')
-                  : t('smartActions.skipInspectionReturn')}
+                {inspectionPromptOpen === "departure"
+                  ? t("smartActions.skipInspectionPickup")
+                  : t("smartActions.skipInspectionReturn")}
               </Button>
             )}
-            <Button render={<Link
-                href={`/dashboard/reservations/${reservationId}/inspection/${inspectionPromptOpen}`}
-              />} className="sm:flex-1">
+            <Button
+              render={
+                <Link
+                  href={`/dashboard/reservations/${reservationId}/inspection/${inspectionPromptOpen}`}
+                />
+              }
+              className="sm:flex-1"
+            >
               <ClipboardCheck className="mr-2 h-4 w-4" />
-              {tInspection('smartActions.startInspection')}
+              {tInspection("smartActions.startInspection")}
             </Button>
           </DialogFooter>
         </DialogPopup>
       </Dialog>
     </>
-  )
+  );
 }

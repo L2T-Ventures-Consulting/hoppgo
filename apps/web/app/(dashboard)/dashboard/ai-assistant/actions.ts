@@ -46,7 +46,7 @@ export async function updateAiAdvisorSettings(data: AiAdvisorSettingsInput) {
     })
     .where(eq(stores.id, store.id))
 
-  revalidatePath('/dashboard/ai-assistant')
+  revalidatePath('/dashboard/ai-assistant/advisor')
   revalidatePath(`/${store.slug}`) // Revalidate storefront
   return { success: true }
 }

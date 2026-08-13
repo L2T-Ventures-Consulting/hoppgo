@@ -1,6 +1,6 @@
 import type { StoreSettings } from '@louez/types'
 import { validateRentalPeriod } from '@/lib/utils/business-hours'
-import { getMinStartDateTime } from '@/lib/utils/duration'
+import { validateAdvanceNotice } from '@/lib/utils/duration'
 import {
   formatDurationFromMinutes,
   getMaxRentalMinutes,
@@ -55,15 +55,16 @@ export function evaluateReservationRules({
   }
 
   const advanceNoticeMinutes = storeSettings?.advanceNoticeMinutes || 0
-  if (advanceNoticeMinutes > 0) {
-    const minimumStartTime = getMinStartDateTime(advanceNoticeMinutes)
-    if (startDate < minimumStartTime) {
-      warnings.push({
-        code: 'advance_notice',
-        key: 'errors.advanceNoticeViolation',
-        params: { duration: formatDurationFromMinutes(advanceNoticeMinutes) },
-      })
-    }
+  const advanceNoticeValidation = validateAdvanceNotice(
+    startDate,
+    advanceNoticeMinutes
+  )
+  if (!advanceNoticeValidation.valid) {
+    warnings.push({
+      code: 'advance_notice',
+      key: 'errors.advanceNoticeViolation',
+      params: { duration: formatDurationFromMinutes(advanceNoticeMinutes) },
+    })
   }
 
   const minRentalMinutes = getMinRentalMinutes(storeSettings)

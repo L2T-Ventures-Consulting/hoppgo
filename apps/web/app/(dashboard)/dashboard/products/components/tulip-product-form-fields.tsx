@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
+import { format, isValid, parseISO } from 'date-fns'
 import { Info } from 'lucide-react'
 
 import {
@@ -19,6 +20,7 @@ import {
   TooltipTrigger,
 } from '@louez/ui'
 
+import { ReservationDatePickerControl } from '@/components/form/form-reservation-date-picker'
 import type {
   TulipCatalogItem,
   TulipComboboxOption,
@@ -100,6 +102,13 @@ export function TulipProductFormFields({
   const [brandInputValue, setBrandInputValue] = useState(draft.brand)
   const [modelInputValue, setModelInputValue] = useState(draft.model)
   const isMarginDisabled = disabled || disableMargin
+  const parsedPurchasedDate = draft.purchasedDate
+    ? parseISO(draft.purchasedDate)
+    : undefined
+  const purchasedDate =
+    parsedPurchasedDate && isValid(parsedPurchasedDate)
+      ? parsedPurchasedDate
+      : undefined
 
   const currentProductType = draft.productType ?? resolvedCatalog[0]?.type ?? 'event'
 
@@ -400,20 +409,24 @@ export function TulipProductFormFields({
       </div>
 
       {/* Purchase date */}
-      <div className="space-y-2">
-        <Label>{t('fields.purchasedDate')}</Label>
-        <Input
-          type="date"
-          value={draft.purchasedDate}
-          onChange={(event) =>
-            onDraftChange((prev) => ({ ...prev, purchasedDate: event.target.value }))
-          }
-          disabled={disabled}
-        />
-        {validation.hasInvalidPurchasedDate && (
-          <p className="text-destructive text-xs">{t('invalidPurchasedDate')}</p>
-        )}
-      </div>
+      <ReservationDatePickerControl
+        id="tulip-purchased-date"
+        value={purchasedDate}
+        onChange={(date) =>
+          onDraftChange((prev) => ({
+            ...prev,
+            purchasedDate: date ? format(date, 'yyyy-MM-dd') : '',
+          }))
+        }
+        label={t('fields.purchasedDate')}
+        showTime={false}
+        disabled={disabled}
+        error={
+          validation.hasInvalidPurchasedDate
+            ? t('invalidPurchasedDate')
+            : undefined
+        }
+      />
 
       {/* Purchase price */}
       <div className="space-y-2">

@@ -1,26 +1,129 @@
 "use client";
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
+import { Drawer as DrawerPrimitive } from "@base-ui/react/drawer";
 import { XIcon } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+
 import { cn } from "@louez/utils";
+
+import {
+  type DialogMobileVariant,
+  DialogModeContext,
+  useDialogMode,
+  useResolvedDialogMode,
+} from "@louez/ui/hooks/use-dialog-mode";
+
 import { Button } from "./button";
+import {
+  DrawerBackdrop,
+  DrawerPopup,
+  DrawerPortal,
+  DrawerViewport,
+  useDrawerKeyboardOpen,
+} from "./drawer";
 import { ScrollArea } from "./scroll-area";
+
+type DialogChangeEventDetails =
+  | DialogPrimitive.Root.ChangeEventDetails
+  | DrawerPrimitive.Root.ChangeEventDetails;
+type DialogProps<Payload = unknown> = Omit<DialogPrimitive.Root.Props<Payload>, "onOpenChange"> & {
+  mobileVariant?: DialogMobileVariant;
+  onOpenChange?: (open: boolean, eventDetails: DialogChangeEventDetails) => void;
+};
+
+const getDialogPopupState = (state: DrawerPrimitive.Popup.State): DialogPrimitive.Popup.State => ({
+  nested: state.nested,
+  nestedDialogOpen: state.nestedDrawerOpen,
+  open: state.open,
+  transitionStatus: state.transitionStatus,
+});
 
 const DialogCreateHandle = DialogPrimitive.createHandle;
 
-const Dialog = DialogPrimitive.Root;
+const Dialog = <Payload,>({
+  defaultOpen = false,
+  mobileVariant = "drawer",
+  onOpenChange,
+  open: openProp,
+  ...props
+}: DialogProps<Payload>) => {
+  const mode = useResolvedDialogMode(mobileVariant);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
+  const openProps = openProp === undefined ? { defaultOpen: uncontrolledOpen } : { open: openProp };
 
-const DialogPortal = DialogPrimitive.Portal;
+  const handleDialogOpenChange = (
+    open: boolean,
+    eventDetails: DialogPrimitive.Root.ChangeEventDetails,
+  ) => {
+    if (openProp === undefined) {
+      setUncontrolledOpen(open);
+    }
 
-function DialogTrigger(props: DialogPrimitive.Trigger.Props) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
-}
+    onOpenChange?.(open, eventDetails);
+  };
 
-function DialogClose(props: DialogPrimitive.Close.Props) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
-}
+  const handleDrawerOpenChange = (
+    open: boolean,
+    eventDetails: DrawerPrimitive.Root.ChangeEventDetails,
+  ) => {
+    if (openProp === undefined) {
+      setUncontrolledOpen(open);
+    }
 
-function DialogBackdrop({ className, ...props }: DialogPrimitive.Backdrop.Props) {
+    onOpenChange?.(open, eventDetails);
+  };
+
+  return (
+    <DialogModeContext.Provider value={mode}>
+      {mode === "drawer" ? (
+        <DrawerPrimitive.Root
+          {...props}
+          {...openProps}
+          onOpenChange={handleDrawerOpenChange}
+          swipeDirection="down"
+        />
+      ) : (
+        <DialogPrimitive.Root {...props} {...openProps} onOpenChange={handleDialogOpenChange} />
+      )}
+    </DialogModeContext.Provider>
+  );
+};
+
+const DialogPortal = (props: DialogPrimitive.Portal.Props) => {
+  const mode = useDialogMode();
+
+  return mode === "drawer" ? <DrawerPortal {...props} /> : <DialogPrimitive.Portal {...props} />;
+};
+
+const DialogTrigger = (props: DialogPrimitive.Trigger.Props) => {
+  const mode = useDialogMode();
+
+  return mode === "drawer" ? (
+    <DrawerPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+  ) : (
+    <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
+  );
+};
+
+const DialogClose = (props: DialogPrimitive.Close.Props) => {
+  const mode = useDialogMode();
+
+  return mode === "drawer" ? (
+    <DrawerPrimitive.Close data-slot="dialog-close" {...props} />
+  ) : (
+    <DialogPrimitive.Close data-slot="dialog-close" {...props} />
+  );
+};
+
+const DialogBackdrop = ({ className, ...props }: DialogPrimitive.Backdrop.Props) => {
+  const mode = useDialogMode();
+
+  if (mode === "drawer") {
+    return <DrawerBackdrop className={className} data-slot="dialog-backdrop" {...props} />;
+  }
+
   return (
     <DialogPrimitive.Backdrop
       className={cn(
@@ -31,9 +134,22 @@ function DialogBackdrop({ className, ...props }: DialogPrimitive.Backdrop.Props)
       {...props}
     />
   );
-}
+};
 
-function DialogViewport({ className, ...props }: DialogPrimitive.Viewport.Props) {
+const DialogViewport = ({ className, ...props }: DialogPrimitive.Viewport.Props) => {
+  const mode = useDialogMode();
+
+  if (mode === "drawer") {
+    return (
+      <DrawerViewport
+        className={className}
+        data-slot="dialog-viewport"
+        position="bottom"
+        {...props}
+      />
+    );
+  }
+
   return (
     <DialogPrimitive.Viewport
       className={cn(
@@ -44,18 +160,51 @@ function DialogViewport({ className, ...props }: DialogPrimitive.Viewport.Props)
       {...props}
     />
   );
-}
+};
 
-function DialogPopup({
+const DialogPopup = ({
   className,
   children,
   showCloseButton = true,
+  showHandle = true,
   bottomStickOnMobile = true,
+  render,
+  style,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean;
+  showHandle?: boolean;
   bottomStickOnMobile?: boolean;
-}) {
+}) => {
+  const mode = useDialogMode();
+
+  if (mode === "drawer") {
+    return (
+      <DrawerPopup
+        {...props}
+        // A bottom sheet always spans the full width: a `max-w-*` meant for the
+        // desktop dialog would otherwise leave it hanging off to one side.
+        className={
+          typeof className === "function"
+            ? (state) => cn("max-sm:max-w-none", className(getDialogPopupState(state)))
+            : cn("max-sm:max-w-none", className)
+        }
+        data-slot="dialog-popup"
+        position="bottom"
+        render={
+          typeof render === "function"
+            ? (renderProps, state) => render(renderProps, getDialogPopupState(state))
+            : render
+        }
+        showCloseButton={showCloseButton}
+        showHandle={showHandle}
+        style={typeof style === "function" ? (state) => style(getDialogPopupState(state)) : style}
+      >
+        {children}
+      </DrawerPopup>
+    );
+  }
+
   return (
     <DialogPortal>
       <DialogBackdrop />
@@ -70,6 +219,8 @@ function DialogPopup({
             className,
           )}
           data-slot="dialog-popup"
+          render={render}
+          style={style}
           {...props}
         >
           {children}
@@ -77,7 +228,13 @@ function DialogPopup({
             <DialogPrimitive.Close
               aria-label="Close"
               className="absolute end-2 top-2"
-              render={<Button size="icon" variant="ghost" />}
+              render={
+                <Button
+                  className="max-sm:size-11 max-sm:bg-muted max-sm:text-muted-foreground"
+                  size="icon"
+                  variant="ghost"
+                />
+              }
             >
               <XIcon />
             </DialogPrimitive.Close>
@@ -86,70 +243,104 @@ function DialogPopup({
       </DialogViewport>
     </DialogPortal>
   );
-}
+};
 
-function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-2 p-6 in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pb-3 max-sm:pb-4",
-        className,
-      )}
-      data-slot="dialog-header"
-      {...props}
-    />
-  );
-}
+const DialogHeader = ({ className, ...props }: React.ComponentProps<"div">) => (
+  <div
+    className={cn(
+      "flex flex-col gap-2 p-6 in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pb-3 max-sm:pb-4",
+      className,
+    )}
+    data-slot="dialog-header"
+    {...props}
+  />
+);
 
-function DialogFooter({
+const DialogFooter = ({
   className,
   variant = "default",
   ...props
 }: React.ComponentProps<"div"> & {
   variant?: "default" | "bare";
-}) {
+}) => {
+  const mode = useDialogMode();
+
   return (
     <div
       className={cn(
-        "flex flex-col-reverse gap-2 px-6 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)]",
-        variant === "default" && "border-t bg-muted/72 py-2",
+        "flex flex-col-reverse gap-2 px-4 sm:flex-row sm:justify-end sm:rounded-b-[calc(var(--radius-2xl)-1px)] sm:px-6",
+        // Mobile actions read as a native bottom sheet: full-width stacked
+        // buttons on the same inset as the header, ending just above the home
+        // indicator instead of a safe area stacked on top of a padding.
+        "max-sm:gap-1 max-sm:px-6 max-sm:pt-4 max-sm:pb-[max(calc(env(safe-area-inset-bottom,0px)+--spacing(2)),--spacing(6))]",
+        // Scrolling above the keyboard, the safe area is covered anyway — a
+        // plain padding keeps the end of the scroll from feeling hollow.
+        "max-sm:in-data-virtual-keyboard-open:pb-4!",
+        "max-sm:**:data-[slot=button]:h-12 max-sm:**:data-[slot=button]:w-full max-sm:**:data-[slot=button]:rounded-xl",
+        "max-sm:**:data-[slot=button]:text-sm max-sm:**:data-[slot=button]:font-semibold",
+        variant === "default" &&
+          // The toolbar band is a desktop affordance; as a sheet the actions
+          // sit directly on the surface, as native sheets do. No `border-t`
+          // here also gives the panel its bare (tight) bottom padding.
+          (mode === "drawer" ? "pt-3" : "border-t bg-muted/72 py-3"),
         variant === "bare" &&
-          "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-4 pb-6",
+          (mode === "drawer"
+            ? "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+--spacing(4))]"
+            : "in-[[data-slot=dialog-popup]:has([data-slot=dialog-panel])]:pt-3 pt-3 pb-4 sm:pt-4 sm:pb-6"),
         className,
       )}
       data-slot="dialog-footer"
       {...props}
     />
   );
-}
+};
 
-function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
-  return (
-    <DialogPrimitive.Title
-      className={cn("font-heading font-semibold text-xl leading-none", className)}
-      data-slot="dialog-title"
+const DialogTitle = ({ className, ...props }: DialogPrimitive.Title.Props) => {
+  const mode = useDialogMode();
+  const titleClassName = cn("font-heading font-semibold text-xl leading-none", className);
+
+  return mode === "drawer" ? (
+    <DrawerPrimitive.Title className={titleClassName} data-slot="dialog-title" {...props} />
+  ) : (
+    <DialogPrimitive.Title className={titleClassName} data-slot="dialog-title" {...props} />
+  );
+};
+
+const DialogDescription = ({ className, ...props }: DialogPrimitive.Description.Props) => {
+  const mode = useDialogMode();
+  const descriptionClassName = cn("text-muted-foreground text-sm", className);
+
+  return mode === "drawer" ? (
+    <DrawerPrimitive.Description
+      className={descriptionClassName}
+      data-slot="dialog-description"
       {...props}
     />
-  );
-}
-
-function DialogDescription({ className, ...props }: DialogPrimitive.Description.Props) {
-  return (
+  ) : (
     <DialogPrimitive.Description
-      className={cn("text-muted-foreground text-sm", className)}
+      className={descriptionClassName}
       data-slot="dialog-description"
       {...props}
     />
   );
-}
+};
 
-function DialogPanel({
+const DialogPanel = ({
   className,
   scrollFade = true,
   ...props
-}: React.ComponentProps<"div"> & { scrollFade?: boolean }) {
+}: React.ComponentProps<"div"> & { scrollFade?: boolean }) => {
+  const mode = useDialogMode();
+  const keyboardOpen = useDrawerKeyboardOpen();
+  const useKeyboardLayout = mode === "drawer" && keyboardOpen;
+
   return (
-    <ScrollArea scrollFade={scrollFade}>
+    <ScrollArea
+      className={cn(mode === "drawer" && "touch-auto", useKeyboardLayout && "!contents")}
+      scrollFade={!useKeyboardLayout && scrollFade}
+      scrollbarClassName={cn(useKeyboardLayout && "!hidden")}
+      viewportClassName={cn(useKeyboardLayout && "!contents !mask-none")}
+    >
       <div
         className={cn(
           "p-6 in-[[data-slot=dialog-popup]:has([data-slot=dialog-header])]:pt-1 in-[[data-slot=dialog-popup]:has([data-slot=dialog-footer]:not(.border-t))]:pb-1",
@@ -160,7 +351,7 @@ function DialogPanel({
       />
     </ScrollArea>
   );
-}
+};
 
 export {
   DialogCreateHandle,

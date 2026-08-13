@@ -1,9 +1,18 @@
 'use client';
 
-import { ChevronLeft, CreditCard, Loader2, Send } from 'lucide-react';
+import { ChevronLeft, CreditCard, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import { Button, Card, CardContent, Checkbox, Label } from '@louez/ui';
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+  Button,
+  Card,
+  CardContent,
+  Checkbox,
+  Label,
+} from '@louez/ui';
 import { formatCurrency } from '@louez/utils';
 
 
@@ -32,6 +41,11 @@ interface CheckoutConfirmStepProps {
   discountAmount?: number;
   onBack: () => void;
   onEditContact: () => void;
+  advanceNoticeIssue?: {
+    duration: string;
+    minimumStart: string;
+  };
+  onEditDates: () => void;
 }
 
 export function CheckoutConfirmStep({
@@ -50,6 +64,8 @@ export function CheckoutConfirmStep({
   discountAmount = 0,
   onBack,
   onEditContact,
+  advanceNoticeIssue,
+  onEditDates,
 }: CheckoutConfirmStepProps) {
   const t = useTranslations('storefront.checkout');
   const showInsuranceUi =
@@ -98,6 +114,24 @@ export function CheckoutConfirmStep({
         </div>
 
         <div className="space-y-3">
+          {advanceNoticeIssue && (
+            <Alert variant="error">
+              <AlertTitle>{t('advanceNotice.title')}</AlertTitle>
+              <AlertDescription className="space-y-3">
+                <p>
+                  {t('advanceNotice.guidance', {
+                    duration: advanceNoticeIssue.duration,
+                    minimum: advanceNoticeIssue.minimumStart,
+                  })}
+                </p>
+                <p>{t('advanceNotice.preserved')}</p>
+                <Button type="button" size="sm" onClick={onEditDates}>
+                  {t('advanceNotice.editDates')}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {showInsuranceUi && tulipInsurance.mode === 'required' && (
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
               {t('insuranceRequiredNotice')}
@@ -175,16 +209,13 @@ export function CheckoutConfirmStep({
                 id={CHECKOUT_SUBMIT_ID}
                 size="lg"
                 className="flex-1"
-                disabled={isSubmitting || !canSubmitCheckout}
+                isPending={isSubmitting}
+                pendingContent={t('processing')}
+                disabled={!canSubmitCheckout}
               >
-                {isSubmitting ? (
+                {reservationMode === 'payment' ? (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('processing')}
-                  </>
-                ) : reservationMode === 'payment' ? (
-                  <>
-                    <CreditCard className="mr-2 h-4 w-4" />
+                    <CreditCard data-slot="icon" />
                     {depositPercentage < 100
                       ? t('payDeposit', {
                           amount: formatCurrency(
@@ -196,7 +227,7 @@ export function CheckoutConfirmStep({
                   </>
                 ) : (
                   <>
-                    <Send className="mr-2 h-4 w-4" />
+                    <Send data-slot="icon" />
                     {t('submitRequest')}
                   </>
                 )}

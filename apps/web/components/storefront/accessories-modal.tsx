@@ -242,7 +242,7 @@ export function AccessoriesModal({
 
                       {/* Stock badge */}
                       <Badge
-                        variant="secondary"
+                        variant="success"
                         className="absolute bottom-2 left-2 text-[10px] px-1.5 py-0.5"
                       >
                         {t('available', { count: accessory.quantity })}

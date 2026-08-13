@@ -4,6 +4,8 @@
     "description": "Einfache und moderne Plattform für Gerätevermietung"
   },
   "common": {
+    "duration": "Dauer",
+    "price": "Preis",
     "save": "Speichern",
     "unsavedChanges": "Nicht gespeicherte Änderungen",
     "cancel": "Abbrechen",
@@ -22,7 +24,11 @@
     "error": "Fehler",
     "success": "Erfolg",
     "confirm": "Bestätigen",
+    "done": "Fertig",
     "close": "Schließen",
+    "play": "Abspielen",
+    "pause": "Pause",
+    "seek": "Position ändern",
     "yes": "Ja",
     "no": "Nein",
     "view": "Ansehen",
@@ -114,14 +120,20 @@
     },
     "dateTimePicker": {
       "select": "Auswählen",
+      "chooseDate": "Datum wählen",
+      "choosePeriod": "Zeitraum wählen",
       "naturalPlaceholder": "z. B. morgen um 14 Uhr oder 12. Mai um 13 Uhr",
       "time": "Uhrzeit",
+      "startTime": "Beginn",
+      "endTime": "Ende",
       "confirm": "Bestätigen"
     },
     "customerSearch": {
       "placeholder": "Kunde suchen...",
       "noResults": "Kein Kunde gefunden",
-      "selectCustomer": "Kunde auswählen"
+      "selectCustomer": "Kunde auswählen",
+      "createCustomer": "Kunde anlegen",
+      "createNamed": "„{query}“ anlegen"
     }
   },
   "auth": {
@@ -224,20 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "KI-Assistent",
-        "subtitle": "Ihr Shop berät, antwortet und reserviert — automatisch",
-        "credits": "{count} Credits",
-        "creditsUnlimited": "Unbegrenzte Credits",
-        "recharge": "Aufladen"
-      },
       "hero": {
         "eyebrow": "KI-Assistent",
-        "title": "Ihr Shop antwortet, berät und reserviert — auch wenn Sie nicht da sind",
-        "subtitle": "Aktivieren Sie den Online-Berater und den Sprachagenten: Ihre Kunden erhalten sofort Antworten, Sie erhalten qualifizierte Reservierungen.",
         "activate": "Aktivieren",
         "upgrade": "Plan upgraden",
-        "upgradeHint": "Der KI-Assistent ist ab dem Pro-Plan enthalten.",
         "advisor": {
           "title": "Online-Berater",
           "b1": "Beantwortet Kundenfragen zu Ihrem Shop rund um die Uhr",
@@ -249,6 +251,20 @@
           "b1": "Nimmt jeden Anruf entgegen, zu jeder Uhrzeit",
           "b2": "Nennt Öffnungszeiten, Preise und Verfügbarkeiten am Telefon",
           "b3": "Nimmt Reservierungen auf und übermittelt Nachrichten"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Online-Berater",
+          "description": "Lassen Sie einen KI-Assistenten Ihre Kunden im Shop begrüßen, ihre Fragen beantworten und sie zur passenden Vermietung führen"
+        },
+        "voice": {
+          "title": "Sprachagent",
+          "description": "Ein KI-Sprachagent, der Ihre Telefonleitung beantwortet — er informiert Ihre Kunden und nimmt Reservierungen entgegen, in der Sprache Ihrer Wahl."
+        },
+        "conversations": {
+          "title": "Kundengespräche",
+          "description": "Sehen Sie, was Kunden den Berater gefragt haben und welche Gespräche zu einer Reservierung geführt haben"
         }
       }
     },
@@ -267,7 +283,13 @@
         "step1Other": "Öffnen Sie das Menü und dann „Teilen“",
         "step2": "Wählen Sie „Zum Home-Bildschirm“",
         "step3": "Tippen Sie auf „Hinzufügen“"
-      }
+      },
+      "benefits": {
+        "home": "Symbol auf dem Startbildschirm",
+        "fullscreen": "Vollbild, ohne Browserleiste",
+        "push": "Buchungsbenachrichtigungen"
+      },
+      "sidebarLabel": "App installieren"
     },
     "title": "Dashboard",
     "notifications": {
@@ -318,7 +340,21 @@
       "newReservation": "Neue Reservierung",
       "reservationLimitReached": "Limit erreicht",
       "help": "Hilfe",
-      "feedback": "Hilfe und Feedback"
+      "feedback": "Hilfe und Feedback",
+      "aiCreditsLow": "Guthaben wird knapp"
+    },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Befehlspalette öffnen",
+        "aiAssistant": "KI-Assistenten öffnen",
+        "toggleTheme": "Zwischen hellem und dunklem Design wechseln",
+        "sidebar": "Seitenleiste ein- oder ausblenden",
+        "search": "Suche fokussieren",
+        "createReservation": "Reservierung erstellen",
+        "goToReservations": "Zu Reservierungen wechseln",
+        "goToCalendar": "Zum Kalender wechseln",
+        "save": "Aktives Formular speichern"
+      }
     },
     "storeSwitcher": {
       "selectStore": "Shop auswählen",
@@ -553,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "KI-Assistent",
+      "aiConversations": "Kundengespräche",
+      "aiAdvisor": "Online-Berater",
+      "aiVoice": "Sprachagent",
       "home": "Startseite",
       "products": "Produkte",
       "inventory": "Inventar",
@@ -568,7 +607,10 @@
       "settings": "Einstellungen",
       "store": "Mein Shop",
       "analytics": "Analysen",
-      "multiStore": "Multi-Shop"
+      "analyticsSales": "Verkäufe",
+      "analyticsTraffic": "Traffic",
+      "multiStore": "Multi-Shop",
+      "aiCredits": "KI-Guthaben"
     },
     "multiStore": {
       "title": "Multi-Shop",
@@ -689,7 +731,8 @@
         "noDepartures": "Keine Übergaben heute geplant",
         "noReturns": "Keine Rückgaben heute geplant",
         "noActivityTitle": "Ruhiger Tag",
-        "noActivityDescription": "Heute keine Vorgänge geplant"
+        "noActivityDescription": "Heute keine Vorgänge geplant",
+        "overdue": "Überfällig"
       },
       "pending": {
         "title": "Ausstehende Anfragen",
@@ -797,16 +840,6 @@
         "archived": "Archiviert"
       },
       "form": {
-        "steps": {
-          "photos": "Fotos",
-          "photosDescription": "Produktbilder",
-          "info": "Informationen",
-          "infoDescription": "Name und Beschreibung",
-          "pricing": "Preise",
-          "pricingDescription": "Preis und Tarife",
-          "preview": "Veröffentlichen",
-          "previewDescription": "Überprüfen und veröffentlichen"
-        },
         "photos": "Fotos",
         "photosDescription": "Fügen Sie bis zu 5 Fotos Ihres Produkts hinzu",
         "addImage": "Hinzufügen",
@@ -818,6 +851,22 @@
         "uploading": "Hochladen...",
         "imageUploadError": "Upload fehlgeschlagen",
         "recropImage": "Erneut zuschneiden",
+        "openImageViewer": "Foto ansehen",
+        "imageHistoryAction": "Verlauf anzeigen",
+        "imageHistoryTitle": "Fotoverlauf",
+        "imageHistoryDescription": "Sehen Sie jede Version dieses Fotos und wählen Sie die gewünschte aus. Frühere Versionen bleiben erhalten.",
+        "imageHistoryOriginal": "Originalfoto",
+        "imageHistoryCropped": "Nach dem Zuschneiden",
+        "imageHistoryAiEnhanced": "Nach KI-Optimierung",
+        "imageHistoryBackgroundRemoved": "Nach Hintergrundentfernung",
+        "imageHistoryCurrent": "Verwendet",
+        "imageHistoryInitialVersion": "Ursprüngliche Version",
+        "imageHistoryUseVersion": "Diese Version verwenden",
+        "imageHistoryDeleteVersion": "Diese Version löschen",
+        "imageHistoryDeleteTitle": "Diese Version löschen?",
+        "imageHistoryDeleteDescription": "Diese Version wird aus dem Verlauf entfernt. Die anderen Versionen bleiben verfügbar.",
+        "imageHistoryDeleteCancel": "Abbrechen",
+        "imageHistoryDeleteConfirm": "Löschen",
         "cropUnsupportedFormat": "Dieses Bildformat kann nicht erneut zugeschnitten werden",
         "cropDialogTitle": "Fotos anpassen",
         "cropDialogDescription": "Verwenden Sie ein 4:3-Zuschnitt für ein einheitliches Storefront-Ergebnis",
@@ -836,6 +885,129 @@
         "cropPreviewTitle": "Vorschau",
         "cropPreviewDescription": "So wird Ihr Foto im Shop angezeigt",
         "cropUploadSelected": "Auswahl hochladen",
+        "aiEnhanceAction": "Mit KI verbessern",
+        "removeBackgroundAction": "Hintergrund entfernen",
+        "aiEnhanceLoading": "Verarbeitung…",
+        "aiEnhanceReadyBadge": "Zu prüfen",
+        "aiEnhanceQueuedBadge": "In Warteschlange",
+        "aiEnhancedBadge": "KI-optimiert",
+        "backgroundRemovedBadge": "Hintergrund entfernt",
+        "aiEnhanceErrorAlreadyProcessed": "Dieses Foto wurde bereits verarbeitet",
+        "aiEnhanceBatchAction": "Fotos vereinheitlichen",
+        "aiEnhanceBatchHint": "Stellt Ihre Produkte frei und zentriert sie in einem 4:3-Format",
+        "aiEnhanceBatchProgress": "Foto {current} von {total}…",
+        "aiEnhanceDialogTitle": "Vorher / Nachher",
+        "removeBackgroundDialogTitle": "Hintergrund entfernt",
+        "aiEnhanceDialogDescription": "Vergleichen Sie das Ergebnis, bevor Sie Ihr Foto ersetzen.",
+        "aiEnhanceRemaining": "{count, plural, one {# Foto zu prüfen} other {# Fotos zu prüfen}}",
+        "aiEnhanceBefore": "Vorher",
+        "aiEnhanceAfter": "Nachher",
+        "aiEnhanceAccept": "Diese Version verwenden",
+        "aiEnhanceReject": "Original behalten",
+        "aiEnhanceTransparencyHint": "Transparenter Hintergrund, Produkt zentriert in einem 4:3-Format",
+        "aiEnhanceTransparencyHintPreserve": "Transparenter Hintergrund, ursprünglicher Bildausschnitt im 4:3-Format beibehalten",
+        "aiEnhanceBackgroundCheckerboard": "Schachbrett",
+        "aiEnhanceBackgroundWhite": "Weiß",
+        "aiEnhanceError": "Fotoverbesserung fehlgeschlagen",
+        "aiEnhanceErrorCredits": "Ihre KI-Credits sind aufgebraucht. Laden Sie sie auf, um Ihre Fotos weiter zu verbessern.",
+        "aiEnhanceErrorDisabled": "Die KI-Verbesserung ist derzeit nicht verfügbar.",
+        "removeBackgroundErrorDisabled": "Die Hintergrundentfernung ist derzeit nicht verfügbar.",
+        "aiEnhanceErrorInvalidImage": "Dieses Bild kann nicht verbessert werden",
+        "aiEnhanceErrorEmptyImage": "Auf diesem Foto wurde kein Produkt erkannt",
+        "aiEnhanceErrorProvider": "Der Verbesserungsdienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.",
+        "removeBackgroundErrorProvider": "Der Dienst zur Hintergrundentfernung ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in Kürze erneut.",
+        "aiEnhanceOriginalMissing": "Das Originalfoto ist nicht mehr im Formular vorhanden",
+        "aiEnhanceSavedToHistory": "Die KI-Version wurde im Verlauf gespeichert",
+        "aiEnhanceCropAction": "Mit KI verbessern",
+        "aiEnhancePromoTitle": "Verbessern Sie Ihre Fotos mit KI",
+        "aiEnhancePromoDescription": "Klare, einheitliche Shop-Bilder mit einem Klick.",
+        "aiEnhancePromoBenefitBackground": "Der Hintergrund wird entfernt und durch Transparenz ersetzt",
+        "aiEnhancePromoBenefitFraming": "Ihr Produkt wird perfekt im 4:3-Format zentriert",
+        "aiEnhancePromoBenefitConsistency": "Ein einheitlicher Look in Ihrem gesamten Shop",
+        "aiEnhancePromoNote": "Für diese Funktion muss die KI in Ihrem Konto aktiviert sein.",
+        "aiEnhancePromoCta": "KI aktivieren",
+        "aiEnhancePromoClose": "Später",
+        "video": "Video",
+        "aiCreditsPerImage": "{count, plural, one {# Credit} other {# Credits}} / Foto",
+        "aiCreditsBgRemoval": "Nur Freistellen: {count, plural, one {# Credit} other {# Credits}}",
+        "aiCreditsBgRemovalFree": "Freistellen allein inklusive",
+        "aiCreditsBalance": "Guthaben: {count, plural, one {# Credit} other {# Credits}}",
+        "aiCreditsBalanceUnlimited": "Unbegrenzte Credits",
+        "aiCreditsBatchEstimate": "Etwa {credits, plural, one {# Credit} other {# Credits}} für {images, plural, one {# Foto} other {# Fotos}}",
+        "aiCreditsLearnMore": "Mehr erfahren",
+        "aiCreditsLearnMoreTitle": "Fotos, die verkaufen",
+        "aiCreditsLearnMoreValue": "Die KI stellt Ihr Produkt frei, vereinheitlicht den Hintergrund und richtet den Bildausschnitt aus: professionelle Bilder, die Vertrauen schaffen und die Conversion steigern.",
+        "aiCreditsLearnMoreCost": "Jedes verbesserte Foto kostet {count, plural, one {# Credit} other {# Credits}} – zuerst von Ihrem monatlichen Kontingent, danach von Ihrem Prepaid-Guthaben.",
+        "aiCreditsLearnMoreLink": "Meine KI-Credits ansehen",
+        "aiCreditsExhaustedTitle": "Nicht genügend KI-Credits",
+        "aiCreditsExhaustedDescription": "Die Fotoverbesserung pausiert: Ihr Guthaben reicht nicht mehr für ein Foto. Laden Sie Credits auf, um fortzufahren.",
+        "aiCreditsRecharge": "Aufladen",
+        "aiChoiceTitle": "Was soll mit diesem Foto passieren?",
+        "aiChoiceDescription": "Wählen Sie das Ergebnis — ändern können Sie es jederzeit.",
+        "aiChoiceEnhanceDescription": "Profi-Look: sauberer Hintergrund, Produkt freigestellt und zentriert",
+        "aiChoiceRemoveBackgroundDescription": "Behält Ihr Foto und ersetzt nur den Hintergrund",
+        "aiChoiceCrop": "Selbst zuschneiden",
+        "aiChoiceCropDescription": "Den 4:3-Ausschnitt von Hand festlegen",
+        "aiChoiceUseAsIs": "Unverändert verwenden",
+        "aiChoiceBatchEnhance": "{count, plural, one {# Foto verbessern} other {Alle # Fotos verbessern}}",
+        "cropBackToChoice": "Zurück zu den Optionen",
+        "aiCreditsChip": "{count, plural, one {# Credit} other {# Credits}}",
+        "aiCreditsChipIncluded": "Inklusive",
+        "aiCreditsTooltipTitle": "KI-Verbesserung",
+        "aiCreditsTooltipWhat": "Ihr Produkt wird freigestellt, der Hintergrund vereinheitlicht und das Bild auf 4:3 ausgerichtet — wie im Studio.",
+        "aiCreditsTooltipCost": "{count, plural, one {# Credit} other {# Credits}} pro Foto",
+        "aiCreditsTooltipBgTitle": "Hintergrund entfernen",
+        "aiCreditsTooltipBgWhat": "Ihr Foto bleibt genau so, wie es ist: Nur der Hintergrund wird entfernt.",
+        "aiCreditsTooltipFree": "In Ihrem Tarif enthalten",
+        "aiProcessingTitle": "Foto wird verbessert",
+        "aiProcessingTitleBackground": "Hintergrund wird entfernt",
+        "aiProcessingDescription": "Sie müssen nicht warten — die Verarbeitung läuft auch nach dem Schließen weiter.",
+        "aiProcessingContinueBackground": "Im Hintergrund fortsetzen",
+        "aiProcessingFailedTitle": "Die Verarbeitung wurde nicht abgeschlossen",
+        "aiProcessingFailedDescription": "Ihre Fotos wurden trotzdem hinzugefügt. Sie können die Verarbeitung jederzeit erneut starten.",
+        "aiProcessingRetry": "Erneut versuchen",
+        "aiProcessingClose": "Schließen",
+        "aiStepPrepareLabel": "Vorbereitung",
+        "aiStepPrepareMessage1": "Ihr Foto wird analysiert…",
+        "aiStepPrepareMessage2": "Das Produkt wird im Bild gesucht.",
+        "aiStepPrepareMessage3": "Licht und Farben werden vermessen.",
+        "aiStepEnhanceLabel": "KI-Verbesserung",
+        "aiStepEnhanceMessage1": "Die KI arbeitet an Licht und Schärfe.",
+        "aiStepEnhanceMessage2": "Die Farben werden für ein natürliches Ergebnis abgestimmt.",
+        "aiStepEnhanceMessage3": "Das ist der längste Schritt — er lohnt sich.",
+        "aiStepEnhanceMessage4": "Ihr Bild kommt einer Studioaufnahme immer näher.",
+        "aiStepCutoutLabel": "Freistellen",
+        "aiStepCutoutMessage1": "Produkt und Hintergrund werden getrennt.",
+        "aiStepCutoutMessage2": "Die Konturen werden pixelgenau nachgezogen.",
+        "aiStepCutoutMessage3": "Ein sauberer Hintergrund rückt Ihr Produkt in den Mittelpunkt.",
+        "aiStepFinishLabel": "Feinschliff",
+        "aiStepFinishMessage1": "4:3-Ausschnitt und Zentrierung des Produkts.",
+        "aiStepFinishMessage2": "Letzte Anpassungen, bevor wir Ihnen das Ergebnis zeigen.",
+        "aiStepFinishMessage3": "Nur noch einen kurzen Moment…",
+        "aiEnhanceLearnMoreTitle": "Fotos, die zum Mieten einladen",
+        "aiEnhanceLearnMoreDescription": "Die KI macht aus einem schnellen Handyfoto ein Katalogbild.",
+        "aiEnhanceLearnMoreBenefit1": "Profi-Look ohne Studio und ohne Ausrüstung: Ihr Produkt wirkt scharf und gut ausgeleuchtet.",
+        "aiEnhanceLearnMoreBenefit2": "Ein einheitlicher Katalog: Alle Anzeigen teilen denselben Bildausschnitt und Hintergrund.",
+        "aiEnhanceLearnMoreBenefit3": "Gepflegte Bilder schaffen Vertrauen — und Kunden buchen leichter.",
+        "aiEnhanceLearnMoreGalleryTitle": "Beispiele aus anderen Shops",
+        "aiEnhanceLearnMoreHeroAlt": "Beispiel für ein von der KI verbessertes Foto",
+        "aiEnhanceLearnMoreExampleAlt": "Beispiel {index}: Foto vor und nach der Verbesserung",
+        "removeBackgroundLearnMoreTitle": "Ein Hintergrund, der Ihrem Produkt den Vortritt lässt",
+        "removeBackgroundLearnMoreDescription": "Wir lassen Ihr Foto unverändert und entfernen nur den Hintergrund.",
+        "removeBackgroundLearnMoreBenefit1": "Der Hintergrund Ihres Shops übernimmt: Das Produkt fügt sich überall ein, ohne weißen Rand.",
+        "removeBackgroundLearnMoreBenefit2": "Schluss mit Garagen- oder Wohnzimmerkulissen, die vom Produkt ablenken.",
+        "removeBackgroundLearnMoreBenefit3": "Ideal, wenn Ihr Foto schon gut ist und nur die Umgebung stört.",
+        "removeBackgroundLearnMoreThemeTitle": "Passt zum hellen wie zum dunklen Design",
+        "removeBackgroundLearnMoreThemeDescription": "Das freigestellte Produkt liegt auf dem Hintergrund Ihres Shops und sieht in jedem Design gut aus, das Ihre Besucher wählen.",
+        "removeBackgroundLearnMoreThemeLight": "Helles Design",
+        "removeBackgroundLearnMoreThemeDark": "Dunkles Design",
+        "removeBackgroundLearnMoreAlt": "Beispiel für ein freigestelltes Produkt",
+        "removeImage": "Foto entfernen",
+        "aiActionWithCost": "{action} — {cost}",
+        "aiEnhanceCancelled": "Erzeugung abgebrochen",
+        "aiCancelGeneration": "Erzeugung abbrechen",
+        "aiCancelledTitle": "Erzeugung abgebrochen",
+        "aiCancelledDescription": "Es wurden keine Credits abgebucht. Ihre Fotos wurden hinzugefügt — starten Sie die Verarbeitung jederzeit neu.",
         "information": "Informationen",
         "name": "Produktname",
         "namePlaceholder": "z.B. Mountainbike XC 500",
@@ -931,7 +1103,9 @@
             "strictLine": "Feste Stufen",
             "progressiveLine": "Progressiv",
             "savings": "Kundenersparnis",
-            "basePricing": "Basistarife"
+            "basePricing": "Basistarife",
+            "title": "Preissimulation",
+            "subtitle": "Gesamtpreis nach Mietdauer"
           }
         },
         "unitTracking": {
@@ -950,7 +1124,7 @@
           "bookingAttributesEmpty": "Keine Buchungsattribute konfiguriert. Alle verfolgten Einheiten teilen die Standardkombination.",
           "bookingAttributeValuePlaceholder": "{label} Wert",
           "combinationKey": "Kombination",
-          "missingAttributesWarning": "{count, plural, one {# aktive Einheit hat mindestens einen fehlenden Attributwert} other {# aktive Einheiten haben mindestens einen fehlenden Attributwert}}",
+          "missingAttributesWarning": "{count, plural, one {# Einheit hat nicht alle Variantenwerte} other {# Einheiten haben nicht alle Variantenwerte}}",
           "manageAttributes": "Attribute verwalten",
           "manageAttributesDescription": "Definieren Sie bis zu 3 Attributachsen (z.B. Größe, Farbe) für Einheitenkombinationen.",
           "pressEnterToCreate": "Enter drücken, um \"{value}\" zu erstellen",
@@ -987,7 +1161,89 @@
           "purchaseDetails": "Kaufdetails",
           "unitDetails": "Details",
           "existingUnitDetailsHint": "Kaufdetails, Notizen und Lebenszyklus werden im Inventar verwaltet.",
-          "openInventoryDetails": "Inventar öffnen"
+          "openInventoryDetails": "Inventar öffnen",
+          "benefitIdentify": "Kennzeichnen Sie jedes Exemplar mit Seriennummer oder Referenz",
+          "benefitAvailability": "Verfolgen Sie Verfügbarkeit und Vermietungen jedes Exemplars",
+          "benefitInventory": "Erfassen Sie Kaufpreis und Kaufdatum für Ihr Inventar",
+          "modeQuantity": "Einfache Menge",
+          "modeQuantityDescription": "Geben Sie einfach an, wie viele Exemplare zur Vermietung verfügbar sind.",
+          "modeUnits": "Einzelverfolgung",
+          "modeUnitsDescription": "Jedes Exemplar erhält eine eigene Kennung.",
+          "variantsTitle": "Varianten",
+          "variantsHelp": "Bis zu 3 Varianten (Größe, Farbe…). Jede Einheit trägt ihren Wert und Kunden wählen bei der Buchung.",
+          "variantsEmptyHint": "Sie legen pro Größe ein Produkt an? Fügen Sie stattdessen eine Variante „Größe“ hinzu: Jede Einheit trägt ihre eigene und Kunden wählen bei der Buchung.",
+          "variantPlaceholder": "z. B. Größe",
+          "addVariant": "Variante hinzufügen",
+          "variantsMaxReached": "Maximal 3 Varianten",
+          "defaultBadge": "Standard",
+          "advancedBadge": "Erweitert",
+          "learnMore": "Mehr erfahren",
+          "addRefPlaceholder": "Referenz eingeben und Enter drücken",
+          "generateSeries": "Serie generieren",
+          "changeMode": "Modus ändern",
+          "createVariantValue": "„{value}“ erstellen ({axis})",
+          "chooseColor": "Farbe auswählen",
+          "colorPickerDescription": "Passen Sie die Farbe an oder geben Sie einen Hexadezimalwert ein.",
+          "colorHue": "Farbton",
+          "hexColor": "Hex-Farbe",
+          "presetSuggestions": "Vorschläge",
+          "valuesCount": "{count, plural, one {# Wert} other {# Werte}}",
+          "presets": {
+            "size": {
+              "label": "Größe"
+            },
+            "shoeSize": {
+              "label": "Schuhgröße"
+            },
+            "color": {
+              "label": "Farbe",
+              "values": {
+                "black": "Schwarz",
+                "white": "Weiß",
+                "gray": "Grau",
+                "red": "Rot",
+                "orange": "Orange",
+                "yellow": "Gelb",
+                "green": "Grün",
+                "blue": "Blau",
+                "purple": "Lila",
+                "pink": "Rosa",
+                "brown": "Braun",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Material",
+              "values": {
+                "cotton": "Baumwolle",
+                "leather": "Leder",
+                "wood": "Holz",
+                "metal": "Metall",
+                "plastic": "Kunststoff",
+                "aluminum": "Aluminium",
+                "carbon": "Carbon"
+              }
+            }
+          },
+          "manageVariants": "Varianten verwalten",
+          "managerTitle": "Varianten",
+          "managerDescription": "Definitionen, die alle Ihre Produkte teilen (Größe, Farbe…).",
+          "activeVariantsCount": "{active} von {total} aktiv",
+          "variantActive": "Aktiv",
+          "variantInactive": "Inaktiv",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Neue Variante",
+          "newVariantDescription": "Erstellen Sie eine produktübergreifende Variante (z. B. Größe).",
+          "editVariant": "Variante umbenennen",
+          "editVariantDescription": "Der Name wird im gemeinsamen Katalog aktualisiert.",
+          "editValue": "Wert bearbeiten",
+          "editValueDescription": "Die Bezeichnung wird im gemeinsamen Katalog aktualisiert.",
+          "deleteVariantTitle": "Variante löschen?",
+          "deleteVariantDescription": "„{name}“ und ihre Werte werden aus dem Katalog entfernt. Produkte, die sie verwenden, behalten ihre aktuellen Werte.",
+          "addValuePlaceholder": "Neuer Wert…",
+          "noVariants": "Keine Varianten",
+          "variantsCount": "{count, plural, one {# Variante} other {# Varianten}}",
+          "unitImages": "Fotos der Einheit"
         },
         "previewTitle": "Vorschau",
         "previewDescription": "So wird Ihr Produkt im Katalog erscheinen",
@@ -995,8 +1251,6 @@
         "noName": "Kein Name",
         "units": "Einheit(en)",
         "recommended": "Empfohlen",
-        "previous": "Zurück",
-        "next": "Weiter",
         "videoUrl": "YouTube-Video",
         "videoUrlPlaceholder": "https://www.youtube.com/watch?v=...",
         "videoUrlHelp": "Optional - Fügen Sie ein Präsentationsvideo für Ihr Produkt hinzu",
@@ -1116,12 +1370,35 @@
         },
         "aiContext": "Kontext für den KI-Berater",
         "aiContextPlaceholder": "z. B. Führerschein Klasse B erforderlich, nicht geeignet für Kinder unter 12 Jahren, fragen Sie immer nach Veranstaltungsdatum und Gruppengröße…",
-        "aiContextHint": "Zusätzliche Angaben, die nur der KI-Berater sieht — er nutzt sie, um Kunden zu beraten und Voraussetzungen zu prüfen. Werden nie im Shop angezeigt."
+        "aiContextHint": "Zusätzliche Angaben, die nur der KI-Berater sieht — er nutzt sie, um Kunden zu beraten und Voraussetzungen zu prüfen. Werden nie im Shop angezeigt.",
+        "createAndDuplicate": "Erstellen und duplizieren",
+        "productCreatedCopyReady": "Die vorausgefüllte Kopie kann jetzt bearbeitet werden.",
+        "copySuffix": "(Kopie)",
+        "productSection": "Produkt",
+        "productSectionDescription": "Name, Fotos und Beschreibung Ihres Produkts",
+        "addVideo": "YouTube-Video hinzufügen",
+        "categories": "Kategorien",
+        "categorySearchPlaceholder": "Suchen oder erstellen…",
+        "categoryCreateOption": "„{name}“ erstellen",
+        "categoryNoResults": "Keine Kategorie gefunden",
+        "manageCategories": "Kategorien verwalten",
+        "summary": {
+          "checklistTitle": "Fortschritt",
+          "required": "Erforderlich"
+        },
+        "videoTileLabel": "Video",
+        "videoInvalid": "Ungültiger YouTube-Link",
+        "editVideo": "Video bearbeiten",
+        "removeVideo": "Video entfernen"
       },
       "deleteConfirm": {
         "title": "Dieses Produkt löschen?",
         "description": "Diese Aktion ist unwiderruflich. Das Produkt wird dauerhaft gelöscht."
-      }
+      },
+      "categoriesSelected": "{count} Kategorien",
+      "filterByCategory": "Nach Kategorie filtern",
+      "searchCategories": "Kategorie suchen...",
+      "noCategoriesFound": "Keine Kategorie gefunden"
     },
     "inventory": {
       "title": "Inventar",
@@ -1322,6 +1599,7 @@
       "clearSearch": "Suche löschen",
       "allStatuses": "Alle Status",
       "allPeriods": "Alle Zeiträume",
+      "allPaymentMethods": "Alle Zahlungsarten",
       "number": "Nummer",
       "customer": "Kunde",
       "period": "Zeitraum",
@@ -1546,11 +1824,7 @@
       "manualForm": {
         "title": "Neue manuelle Reservierung",
         "selectCustomer": "Kunde auswählen",
-        "newCustomer": "Neuer Kunde",
-        "newCustomerDescription": "Neuen Kunden für diese Reservierung erstellen",
         "newCustomerBadge": "Neuer Kunde",
-        "existingCustomer": "Bestehender Kunde",
-        "existingCustomerDescription": "Kunde aus Ihrer Datenbank auswählen",
         "selectProducts": "Produkte auswählen",
         "selectPeriod": "Zeitraum auswählen",
         "addProduct": "Produkt hinzufügen",
@@ -1558,15 +1832,6 @@
         "sendConfirmationEmail": "Bestätigung an Kunden senden",
         "customer": "Kunde",
         "customerStepDescription": "Wählen Sie einen bestehenden Kunden oder erstellen Sie einen neuen",
-        "chooseCustomer": "Kunde auswählen",
-        "email": "E-Mail",
-        "emailPlaceholder": "kunde@email.de",
-        "firstName": "Vorname",
-        "firstNamePlaceholder": "Max",
-        "lastName": "Nachname",
-        "lastNamePlaceholder": "Mustermann",
-        "phone": "Telefon (optional)",
-        "phonePlaceholder": "+49 123 456 7890",
         "period": "Zeitraum",
         "periodStepDescription": "Legen Sie Start- und Enddatum für die Miete fest",
         "startDate": "Startdatum",
@@ -1579,7 +1844,7 @@
         "noProductsFound": "Keine Produkte gefunden",
         "noProductsFoundHint": "Keine Produkte passen zu \"{search}\".",
         "noProducts": "Keine Produkte ausgewählt",
-        "noProductsHint": "Verwenden Sie das Menü oben, um Produkte hinzuzufügen",
+        "noProductsHint": "Fügen Sie dieser Reservierung ein Produkt hinzu, um zu beginnen",
         "perHour": "Std",
         "perDay": "Tag",
         "available": "verfügbar",
@@ -1606,13 +1871,28 @@
           "shortfall": "Angefragt: {requested} · Verfügbar: {available}",
           "createAnyway": "Trotzdem erstellen"
         },
+        "addUnavailable": {
+          "title": "Produkt nicht verfügbar",
+          "description": "„{name}“ ist im gewählten Zeitraum nicht mehr verfügbar. Das Hinzufügen kann zu Überbuchung führen.",
+          "confirm": "Trotzdem hinzufügen"
+        },
         "reservationCreated": "Reservierung erstellt",
         "selectDatesError": "Bitte wählen Sie Daten aus",
         "addProductError": "Bitte fügen Sie mindestens ein Produkt hinzu",
         "selectCustomerError": "Bitte wählen Sie einen Kunden aus",
-        "fillCustomerInfoError": "Bitte füllen Sie die Kundeninformationen aus",
         "confirmTitle": "Zusammenfassung",
         "confirmDescription": "Überprüfen Sie die Informationen vor dem Erstellen der Reservierung",
+        "confirmDrawer": {
+          "title": "Reservierung bestätigen",
+          "titleQuote": "Angebot bestätigen",
+          "description": "Überprüfen Sie die Zusammenfassung vor dem Erstellen der Reservierung.",
+          "descriptionQuote": "Überprüfen Sie die Zusammenfassung vor dem Senden des Angebots.",
+          "warningsTitle": "Zu beachten",
+          "emailOn": "Eine Bestätigungs-E-Mail wird an den Kunden gesendet.",
+          "emailOff": "Es wird keine E-Mail an den Kunden gesendet."
+        },
+        "adjustmentsTitle": "Beträge und Optionen",
+        "adjustmentsDescription": "Passen Sie Rabatt, Kaution und Bestätigungsversand an.",
         "steps": {
           "customer": "Kunde",
           "customerDescription": "Kunde auswählen",
@@ -1668,7 +1948,7 @@
         "customItem": {
           "title": "Benutzerdefinierte Artikel",
           "add": "Hinzufügen",
-          "button": "Individuell",
+          "button": "Sonderartikel",
           "units": "Einheit(en)",
           "badge": "Benutzerdefiniert",
           "empty": "Keine benutzerdefinierten Artikel hinzugefügt",
@@ -1700,7 +1980,11 @@
           "apply": "Anwenden",
           "modified": "Preis geändert",
           "priceUpdated": "Preis aktualisiert",
-          "priceReset": "Preis zurückgesetzt"
+          "priceReset": "Preis zurückgesetzt",
+          "modeUnit": "Einzelpreis",
+          "modeTotal": "Gesamtpreis",
+          "modePercent": "Rabatt %",
+          "resultingUnitPrice": "Resultierender Einzelpreis"
         },
         "warnings": {
           "advanceNotice": "Startdatum liegt vor der Vorlaufzeit",
@@ -1740,6 +2024,11 @@
           "optionalLabel": "Versicherungsschutz für diese Reservierung aktivieren",
           "insurableProduct": "Versicherbar",
           "assuredProduct": "Versichert"
+        },
+        "globalDiscount": {
+          "label": "Rabatt",
+          "add": "Rabatt hinzufügen",
+          "remove": "Rabatt entfernen"
         }
       },
       "rejectDialog": {
@@ -1751,8 +2040,6 @@
       },
       "awaitingResponse": "Warten auf Antwort",
       "itemsCount": "{count, plural, one {# Artikel} other {# Artikel}}",
-      "viewTable": "Tabellenansicht",
-      "viewCards": "Kartenansicht",
       "pagination": {
         "showing": "Zeige {start} bis {end} von {total}",
         "perPage": "Pro Seite",
@@ -2072,11 +2359,17 @@
         "customMessageRequired": "Bitte schreiben Sie eine Nachricht",
         "additionalMessage": "Zusätzliche Nachricht",
         "additionalMessagePlaceholder": "Benutzerdefinierte Nachricht hinzufügen (optional)...",
-        "emailWillBeSentTo": "Die E-Mail wird gesendet an {email}",
         "selectTemplateError": "Bitte wählen Sie einen E-Mail-Typ",
         "sendError": "Beim Senden ist ein Fehler aufgetreten",
         "sendSuccess": "E-Mail erfolgreich gesendet",
         "send": "E-Mail senden",
+        "preview": "E-Mail ansehen",
+        "previewTitle": "E-Mail-Vorschau",
+        "previewDescription": "Was {name} erhalten wird",
+        "previewPlaceholder": "Wählen Sie einen E-Mail-Typ, um die Vorschau zu sehen",
+        "previewSubject": "Betreff",
+        "previewLinkNotice": "Die persönlichen Links des Kunden werden beim Versand erzeugt.",
+        "previewError": "Vorschau konnte nicht erstellt werden",
         "templates": {
           "contract": {
             "name": "Mietvertrag",
@@ -2123,6 +2416,12 @@
         "viewConversation": "Gespräch ansehen",
         "sheetTitle": "Gespräch mit dem Berater",
         "sheetDescription": "Chat zwischen dem Kunden und dem KI-Berater für diese Reservierung."
+      },
+      "views": {
+        "label": "Ansichtsmodus",
+        "list": "Liste",
+        "calendar": "Kalender",
+        "planning": "Planning"
       }
     },
     "customers": {
@@ -2231,6 +2530,10 @@
         "CA": "Kanada",
         "US": "Vereinigte Staaten",
         "GB": "Vereinigtes Königreich"
+      },
+      "quickCreate": {
+        "title": "Neuer Kunde",
+        "description": "Der Kunde wird erstellt und automatisch ausgewählt."
       }
     },
     "calendar": {
@@ -2304,44 +2607,82 @@
         "reservationsCount": "{count, plural, one {# Reservierung} other {# Reservierungen}}"
       },
       "timeline": {
-        "products": "Produkte",
-        "quantity": "{count, plural, one {# Einheit} other {# Einheiten}}",
-        "available": "Verfügbar",
-        "noProducts": "Keine Produkte anzuzeigen"
+        "previous": "Vorheriger Zeitraum",
+        "next": "Nächster Zeitraum",
+        "statusFilter": "Nach Status filtern",
+        "operationFilter": "Nach heutigem Vorgang filtern",
+        "allOperations": "Alle Vorgänge",
+        "todaysDepartures": "Heutige Abholungen",
+        "todaysReturns": "Heutige Rückgaben",
+        "showAll": "Alle anzeigen",
+        "retry": "Erneut versuchen",
+        "loadingReservations": "Reservierungen werden geladen…",
+        "loadError": "Die Kalenderreservierungen konnten nicht geladen werden.",
+        "emptyPeriodTitle": "Keine Reservierungen in diesem Zeitraum",
+        "emptyPeriodDescription": "Geladene Reservierungen können vor oder nach den angezeigten Daten liegen.",
+        "emptyStoreTitle": "Noch keine Reservierungen",
+        "emptyStoreDescription": "Erstellen Sie Ihre erste Reservierung, um mit der Planung zu beginnen.",
+        "createFirstReservation": "Erste Reservierung erstellen",
+        "viewPreviousReservation": "Vorherige Reservierung anzeigen",
+        "viewNextReservation": "Nächste Reservierung anzeigen",
+        "reservationAbove": "Reservierung weiter oben",
+        "reservationBelow": "Reservierung weiter unten",
+        "resetFilters": "Filter zurücksetzen",
+        "dragHint": "Tipp: Klicken und ziehen Sie über einen leeren Bereich, um eine vorausgefüllte Reservierung zu erstellen.",
+        "searchProductsPlaceholder": "In {count} Produkten suchen...",
+        "noProductsFound": "Keine Produkte gefunden",
+        "productsSelected": "{count} Produkte",
+        "filters": "Filter",
+        "filtersDescription": "Grenze die im Kalender angezeigten Reservierungen ein.",
+        "applyFilters": "Übernehmen",
+        "sectionOperation": "Tagesvorgang",
+        "sectionStatus": "Status",
+        "sectionProducts": "Produkte",
+        "goToDate": "Zu einem Datum springen",
+        "currentlyViewing": "Aktuell angezeigt: {date}",
+        "dateSearchPlaceholder": "15, morgen, nächsten Freitag…",
+        "noDateFound": "Kein Datum erkannt",
+        "clearSearch": "Löschen",
+        "quickDates": "Schnellauswahl",
+        "today": "Heute",
+        "tomorrow": "Morgen",
+        "nextWeek": "Nächste Woche",
+        "chooseDate": "Datum auswählen"
       },
       "export": {
-        "button": "Kalender exportieren",
-        "title": "In Kalender exportieren",
-        "description": "Synchronisieren Sie Ihre Reservierungen mit Ihrem Lieblingskalender, indem Sie den Link unten kopieren.",
-        "urlLabel": "ICS-Kalender-Link",
-        "loading": "Laden...",
-        "instructions": {
-          "title": "Wie fuege ich diesen Kalender hinzu?",
-          "google": {
-            "step1": "Oeffnen Sie Google Kalender",
-            "step2": "Klicken Sie auf das + neben \"Weitere Kalender\" und dann auf \"Per URL\"",
-            "step3": "Fuegen Sie den Link ein und klicken Sie auf \"Kalender hinzufuegen\"",
-            "openLink": "Google Kalender oeffnen",
-            "freshnessNote": "Louez veroeffentlicht Aenderungen sofort und fordert eine Aktualisierung alle 5 Minuten an. Google kann trotzdem eine eigene Synchronisierungsverzoegerung anwenden."
-          },
-          "apple": {
-            "step1": "Oeffnen Sie die Kalender-App auf Mac oder iPhone",
-            "step2": "Ablage > Neues Kalenderabonnement (Mac) oder Konto hinzufuegen > Andere > Kalenderabonnement hinzufuegen (iOS)",
-            "step3": "Fuegen Sie den Link ein und bestaetigen Sie"
-          },
-          "outlook": {
-            "step1": "Oeffnen Sie Outlook Kalender",
-            "step2": "Klicken Sie auf \"Kalender hinzufuegen\" und dann auf \"Aus dem Web abonnieren\"",
-            "step3": "Fuegen Sie den Link ein und geben Sie dem Kalender einen Namen"
-          }
+        "button": "Kalender synchronisieren",
+        "title": "Kalender synchronisieren",
+        "description": "Fügen Sie Ihre Reservierungen dem Kalender hinzu, den Sie bereits nutzen.",
+        "loading": "Wird geladen...",
+        "done": "Fertig",
+        "cancel": "Abbrechen",
+        "google": {
+          "title": "Google Kalender",
+          "recommended": "Empfohlen",
+          "connected": "Verbunden",
+          "connect": "Verbinden",
+          "manage": "Verwalten",
+          "help": "Automatische Synchronisierung: Farben, private Sichtbarkeit, Verfügbarkeit und automatische Wiederholungen. Die zuverlässigste Option."
         },
-        "regenerate": "Link neu generieren",
-        "regenerateHint": "Das Neugenerieren des Links macht zuvor geteilte Links ungueltig."
+        "subscribe": {
+          "title": "Mit einem Link abonnieren",
+          "help": "Abonnement mit Lesezugriff. Louez veröffentlicht Änderungen sofort, aber jede Kalender-App bestimmt selbst, wie oft sie aktualisiert.",
+          "apple": "Apple Kalender",
+          "outlook": "Outlook",
+          "google": "Google Kalender",
+          "copy": "Link kopieren",
+          "copied": "Kopiert"
+        },
+        "regenerate": {
+          "action": "Link neu erzeugen",
+          "confirmTitle": "Link neu erzeugen?",
+          "hint": "Bereits geteilte Links funktionieren nicht mehr und jeder abonnierte Kalender muss erneut hinzugefügt werden."
+        }
       }
     },
     "statistics": {
       "title": "Statistiken",
-      "description": "Analysieren Sie Stripe-Verkäufe und Traffic Ihres Shops",
+      "description": "Analysieren Sie Verkäufe und Traffic Ihres Shops",
       "period": "Zeitraum",
       "periods": {
         "today": "Heute",
@@ -2353,55 +2694,63 @@
         "custom": "Benutzerdefiniert"
       },
       "revenue": "Umsatz",
-      "revenueThisMonth": "Stripe-Eingänge diesen Monat",
-      "revenueThisMonthWithManual": "Eingänge diesen Monat",
-      "reservationsThisMonth": "Stripe-Zahlungen diesen Monat",
-      "reservationsThisMonthWithManual": "Zahlungen diesen Monat",
-      "totalRevenue": "Gesamte Stripe-Eingänge",
-      "totalRevenueWithManual": "Gesamte Eingänge",
+      "totalRevenue": "Gesamte Eingänge",
       "reservations": "Reservierungen",
-      "averageCart": "Durchschnittliche Zahlung",
+      "avgPaymentInline": "durchschnittliche Zahlung {amount}",
       "occupancyRate": "Auslastungsrate",
-      "salesScopeTitle": "Online-Verkäufe über Stripe",
-      "salesScopeDescription": "Über Stripe eingegangene Mietbeträge, nicht in Netto-Umsatz umgerechnet. Manuelle Zahlungen, Kautionen und Rückerstattungen sind nicht enthalten.",
-      "salesScopeWithManualTitle": "Stripe + manuelle Zahlungen",
-      "salesScopeWithManualDescription": "Über Stripe eingegangene Mietbeträge und erfasste manuelle Zahlungen, nicht in Netto-Umsatz umgerechnet. Kautionen und Rückerstattungen sind nicht enthalten.",
-      "includeManualPayments": "Manuelle Zahlungen einbeziehen",
-      "includeManualPaymentsDescription": "Ergänzt erfasste Bar-, Karten-, Überweisungs-, Scheck- und sonstige Zahlungen.",
+      "upcomingRevenue": "Zukünftiger Umsatz",
+      "avgRentalDuration": "Durchschnittliche Mietdauer",
+      "rentalActivity": "Vermietungsaktivität",
       "topProducts": {
         "title": "Meistgemietete Produkte",
-        "description": "Top 10 Produkte im ausgewählten Zeitraum",
-        "descriptionWithManual": "Top 10 Produkte mit Stripe- oder manuellen Zahlungen im ausgewählten Zeitraum",
+        "description": "Top 10 Produkte nach Eingängen im ausgewählten Zeitraum",
         "product": "Produkt",
         "rentals": "Vermietungen",
         "totalQuantity": "Gesamtmenge",
         "revenue": "Umsatz",
-        "units": "{count, plural, one {# Einheit} other {# Einheiten}}"
+        "units": "{count, plural, one {# Einheit} other {# Einheiten}}",
+        "othersRow": "{count, plural, one {+ # weiteres Produkt} other {+ # weitere Produkte}}",
+        "totalRow": "Gesamt"
       },
-      "revenueChart": "Entwicklung der Stripe-Eingänge",
-      "revenueChartDescription": "Im ausgewählten Zeitraum eingegangene Stripe-Zahlungen",
-      "revenueChartWithManual": "Entwicklung der Eingänge",
-      "revenueChartWithManualDescription": "Im ausgewählten Zeitraum eingegangene Stripe- und manuelle Zahlungen",
-      "revenueAbbrev": "Stripe",
-      "revenueAbbrevWithManual": "Eingänge",
+      "topCustomers": {
+        "title": "Beste Kunden",
+        "description": "Top 10 Kunden nach Eingängen im ausgewählten Zeitraum",
+        "customer": "Kunde",
+        "reservations": "Reservierungen",
+        "payments": "Zahlungen",
+        "revenue": "Eingänge"
+      },
+      "paymentMethods": {
+        "title": "Zahlungsmethoden",
+        "description": "Verteilung der Eingänge im Zeitraum",
+        "stripe": "Stripe (online)",
+        "cash": "Bar",
+        "card": "Karte (vor Ort)",
+        "transfer": "Überweisung",
+        "check": "Scheck",
+        "other": "Sonstige"
+      },
+      "revenueChart": "Entwicklung der Eingänge",
+      "revenueChartDescription": "Stripe-Eingänge und manuelle Zahlungen für Vermietungen — Kautionen und Rückerstattungen ausgenommen",
+      "revenueAbbrev": "Eingänge",
       "reservationsCount": "{count, plural, one {# Reservierung} other {# Reservierungen}}",
-      "paymentsCount": "{count, plural, one {# Stripe-Zahlung} other {# Stripe-Zahlungen}}",
-      "paymentsCountWithManual": "{count, plural, one {# Zahlung} other {# Zahlungen}}",
+      "paymentsCount": "{count, plural, one {# Zahlung} other {# Zahlungen}}",
       "vsLastMonth": "vs Vormonat",
       "lastMonth": "letzter Monat",
       "onReservations": "bei {count} Reservierungen",
-      "onPayments": "bei {count} Stripe-Zahlungen",
-      "onPaymentsWithManual": "bei {count} Zahlungen",
       "sinceBeginning": "seit Beginn",
       "vsLastPeriod": "vs vorheriger Zeitraum",
+      "occupancySubtitle": "{count, plural, =0 {keine aktive Einheit} one {von # verfügbaren Einheit} other {von # verfügbaren Einheiten}}",
+      "upcomingRevenueCount": "{count, plural, =0 {keine bestätigte Reservierung} one {# bestätigte Reservierung} other {# bestätigte Reservierungen}}",
+      "durationDays": "{days, plural, one {{days, number, ::.0} Tag} other {{days, number, ::.0} Tage}}",
+      "durationHours": "{hours, plural, one {# Stunde} other {# Stunden}}",
       "noData": "Nicht genügend Daten",
       "noRentalData": "Noch keine Mietdaten",
-      "noRevenueData": "Noch keine Stripe-Eingänge",
-      "noRevenueDataWithManual": "Noch keine Eingänge"
+      "noRevenueData": "Noch keine Eingänge"
     },
     "analytics": {
       "title": "Analytics",
-      "description": "Verfolgen Sie Stripe-Verkäufe, Traffic und Conversions Ihres Shops",
+      "description": "Verfolgen Sie Verkäufe, Traffic und Conversions Ihres Shops",
       "visitors": "Besucher",
       "productViews": "Produktansichten",
       "conversions": "Bestellungen",
@@ -2414,10 +2763,6 @@
         "90d": "90 Tage",
         "6m": "6 Monate",
         "12m": "12 Monate"
-      },
-      "tabs": {
-        "traffic": "Traffic",
-        "sales": "Verkäufe"
       },
       "refresh": "Aktualisieren",
       "trafficTrend": "Traffic-Trend",
@@ -2893,7 +3238,13 @@
           "iosNeedsInstall": "Fügen Sie die App auf dem iPhone zuerst zum Home-Bildschirm hinzu, um Benachrichtigungen zu aktivieren.",
           "denied": "Benachrichtigungen sind blockiert. Erlauben Sie sie in den Browsereinstellungen.",
           "confirmTitle": "Benachrichtigungen aktiviert",
-          "confirmBody": "Sie werden über jede neue Reservierung informiert."
+          "confirmBody": "Sie werden über jede neue Reservierung informiert.",
+          "sidebarLabel": "Push-Nachrichten",
+          "benefits": {
+            "instant": "Hinweis, sobald eine Buchung eingeht",
+            "closed": "Funktioniert auch bei geschlossener App",
+            "device": "Nur auf diesem Gerät"
+          }
         },
         "title": "Benachrichtigungen",
         "description": "Konfigurieren Sie, wie Sie über Shop-Ereignisse benachrichtigt werden",
@@ -3961,7 +4312,18 @@
         "deleteAccountWarning": "Diese Aktion ist unwiderruflich. Alle Ihre Daten werden gelöscht.",
         "signOut": "Abmelden",
         "comingSoon": "Demnächst",
-        "administration": "Verwaltung"
+        "administration": "Verwaltung",
+        "keyboardShortcuts": {
+          "title": "Tastenkürzel",
+          "description": "Passe die Tastenkürzel für deinen Arbeitsbereich an.",
+          "recording": "Tasten drücken…",
+          "recordingSequence": "Sequenz eingeben und dann Enter drücken…",
+          "sequenceTooShort": "Eine Sequenz muss aus mindestens zwei Tastenkürzeln bestehen.",
+          "hint": "Wähle ein Tastenkürzel. Gib bei einer Sequenz die Tasten der Reihe nach ein und drücke dann Enter.",
+          "saved": "Tastenkürzel gespeichert",
+          "conflict": "Dieses Tastenkürzel wird bereits für „{action}“ verwendet.",
+          "resetAction": "„{action}“ zurücksetzen"
+        }
       },
       "admin": {
         "title": "Plattform-Admin",
@@ -4202,8 +4564,6 @@
         "title": "KI-Berater",
         "description": "Lassen Sie einen KI-Assistenten Ihre Kunden im Shop begrüßen, ihre Fragen beantworten und sie zur passenden Vermietung führen",
         "saved": "KI-Berater-Einstellungen gespeichert",
-        "enableSection": "KI-Berater",
-        "enableSectionDescription": "Konfigurieren Sie den Assistenten, der in Ihrem Shop mit Ihren Kunden chattet",
         "enabled": "KI-Berater aktivieren",
         "enabledDescription": "Zeigt das Chat-Widget in Ihrem Shop an",
         "mode": "Modus bei der Reservierung",
@@ -4229,17 +4589,12 @@
           "description": "Der Plattformbetreiber muss die Umgebungsvariablen AI_PROVIDER und AI_API_KEY setzen, damit der Berater Kunden antworten kann. Sie können Ihre Einstellungen unten trotzdem vorbereiten."
         },
         "locked": {
-          "title": "KI-Berater freischalten",
-          "description": "Verwandeln Sie Shop-Besucher mit einem KI-Assistenten in Reservierungen",
           "upgrade": "Auf Pro upgraden",
-          "featureLocked": "Funktion gesperrt",
-          "upgradeToUnlock": "Upgraden Sie auf Pro, um diese Funktion zu aktivieren"
+          "featureLocked": "Funktion gesperrt"
         },
         "conversations": {
           "columnCredits": "Credits",
           "creditsUsed": "{count} Cr.",
-          "title": "Gespräche",
-          "description": "Sehen Sie, was Kunden den Berater gefragt haben und welche Gespräche zu einer Reservierung geführt haben",
           "filterAll": "Alle",
           "filterConverted": "Konvertiert",
           "filterNotConverted": "Nicht konvertiert",
@@ -4298,9 +4653,6 @@
           "confirm": "Deaktivieren und trennen"
         },
         "numberReleaseFailed": "Die Nummer konnte nicht getrennt werden — sie bleibt verbunden, automatischer Wiederholungsversuch geplant",
-        "description": "Ein KI-Sprachagent, der Ihre Telefonleitung beantwortet — er informiert Ihre Kunden und nimmt Reservierungen entgegen, in der Sprache Ihrer Wahl.",
-        "enableSection": "KI-Sprachagent",
-        "enableSectionDescription": "Konfigurieren Sie den Sprachagenten, der antwortet, wenn Ihre Kunden anrufen",
         "enabled": "KI-Sprachagent aktivieren",
         "enabledDescription": "Die KI nimmt eingehende Anrufe auf Ihrer Nummer entgegen",
         "number": {
@@ -4330,9 +4682,13 @@
           "unlinkConfirmBody": "Die Nummer {number} wird von Ihrem Sprachagenten getrennt. Die Nummer bleibt bei Ihrem Anbieter.",
           "searching": "Verfügbare Nummern werden gesucht…",
           "searchHint": "Wählen Sie ein Land und suchen Sie eine verfügbare Nummer zur Bereitstellung.",
-          "areaCodePlaceholder": "z. B. 30",
+          "areaCodePlaceholder": "z. B. 415",
           "manualSetup": "Eine vorhandene Nummer verknüpfen",
-          "copy": "Kopieren"
+          "copy": "Kopieren",
+          "areaCodeHint": "Filtert Nummern nach regionaler Vorwahl (z. B. 415 für San Francisco).",
+          "contains": "Gewünschte Ziffern (optional)",
+          "containsPlaceholder": "z. B. 06",
+          "containsHint": "Zeigt nur Nummern, die diese Ziffernfolge enthalten."
         },
         "notConfigured": {
           "title": "Telefonie nicht konfiguriert",
@@ -4367,6 +4723,21 @@
         },
         "voicePreview": "Anhören",
         "voiceRecommended": "Empfohlen"
+      },
+      "settingsNavigation": {
+        "label": "Einstellungsnavigation",
+        "mobileLabel": "Einstellungsseite auswählen",
+        "search": {
+          "label": "Einstellungen durchsuchen",
+          "placeholder": "Einstellungen suchen…",
+          "noResults": "Keine passenden Einstellungen gefunden."
+        },
+        "groups": {
+          "store": "Shop",
+          "rental": "Vermietung",
+          "communication": "Kommunikation",
+          "accountData": "Konto und Daten"
+        }
       }
     },
     "commandPalette": {
@@ -4395,7 +4766,10 @@
       "emptyState": "Wie kann ich Ihnen helfen?",
       "emptyStateHint": "Probieren Sie einen Vorschlag oder stellen Sie Ihre eigene Frage.",
       "placeholder": "Was möchten Sie wissen oder tun?",
+      "send": "Senden",
+      "disclaimer": "Der KI-Assistent kann Fehler machen. Überprüfen Sie wichtige Informationen.",
       "newConversation": "Neues Gespräch",
+      "openFullPage": "Als ganze Seite öffnen",
       "history": {
         "title": "Verlauf",
         "empty": "Keine Gespräche",
@@ -4416,11 +4790,17 @@
         "reservations": "Gibt es heute Abholungen oder Rückgaben?",
         "stats": "Zeig mir den Umsatz und die Top-Produkte dieses Monats",
         "products": "Welche Produkte werden am meisten vermietet?",
-        "customers": "Wie viele neue Kunden diesen Monat?"
+        "customers": "Wie viele neue Kunden diesen Monat?",
+        "overdue": "Gibt es überfällige Rückgaben?",
+        "pending": "Zeig mir Reservierungen, die auf Bestätigung warten"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "KI-Assistent",
+      "aiConversations": "Kundengespräche",
+      "aiAdvisor": "Online-Berater",
+      "aiVoice": "Sprachagent",
+      "aiCredits": "KI-Guthaben",
       "label": "Breadcrumb",
       "home": "Startseite",
       "products": "Produkte",
@@ -4431,11 +4811,14 @@
       "customersNew": "Neuer Kunde",
       "calendar": "Kalender",
       "analytics": "Analysen",
+      "analyticsSales": "Verkäufe",
+      "analyticsTraffic": "Traffic",
       "team": "Team",
       "referrals": "Empfehlungen",
       "sms": "SMS",
       "subscription": "Abonnement",
       "account": "Konto",
+      "whatsNew": "Neuigkeiten",
       "settings": "Einstellungen",
       "settingsAdmin": "Administration",
       "settingsApi": "API",
@@ -4451,7 +4834,9 @@
       "settingsPayments": "Zahlungen",
       "settingsPromoCodes": "Promo-Codes",
       "settingsReviewBooster": "Bewertungs-Booster",
-      "settingsTaxes": "Steuern"
+      "settingsTaxes": "Steuern",
+      "productsEdit": "Bearbeiten",
+      "reservationsEdit": "Bearbeiten"
     },
     "notificationsCenter": {
       "title": "Benachrichtigungen",
@@ -4460,6 +4845,69 @@
       "emptyTitle": "Nichts zu prüfen",
       "emptyDescription": "Neue Anfragen erscheinen hier.",
       "viewAllPending": "Alle offenen Anfragen ansehen"
+    },
+    "whatsNew": {
+      "title": "Neuigkeiten",
+      "description": "Die neuesten Verbesserungen von Louez",
+      "pageDescription": "Alles, was wir in Louez veröffentlicht haben – das Neueste zuerst und warum wir es gebaut haben.",
+      "newLabel": "Neu",
+      "newFeatureLabel": "Neue Funktion",
+      "unread": "Ungelesen",
+      "markAsRead": "Als gelesen markieren",
+      "markAllAsRead": "Alle als gelesen markieren",
+      "watchDemo": "Demo zu {title} ansehen",
+      "tryIt": "Ausprobieren",
+      "viewAll": "Alle Neuigkeiten ansehen",
+      "backToList": "Alle Neuigkeiten",
+      "emptyTitle": "Noch nichts hier",
+      "empty": "Noch keine Neuigkeiten.",
+      "filterEmpty": "In dieser Kategorie gibt es noch nichts.",
+      "filters": {
+        "all": "Alle"
+      },
+      "categories": {
+        "feature": "Neu",
+        "improvement": "Verbessert",
+        "fix": "Behoben"
+      },
+      "announcements": {
+        "product-image-ai": {
+          "title": "Ihre Produktfotos bekommen den Studio-Look",
+          "description": "Beim Hochladen stellt die KI Ihr Produkt frei, säubert den Hintergrund und zentriert es — oder entfernt nur den Hintergrund, wenn Sie Ihren Bildausschnitt behalten möchten. Und jede Version bleibt im Verlauf des Fotos erhalten: vergleichen, umentscheiden, zum Original zurückkehren."
+        },
+        "sidebar-simplified": {
+          "title": "Ein kürzeres Menü, klar einsortierte Seiten",
+          "description": "Der Kalender wandert zu den Reservierungen, das Inventar auf die Produktseite, Abonnement und Empfehlungen in die Einstellungen: vier Einträge weniger im Menü — und nichts geht verloren."
+        },
+        "product-variants": {
+          "title": "Varianten, ganz einfach",
+          "description": "Die früher von Hand eingetippten Merkmale sind jetzt echte Varianten, die im ganzen Shop gelten. Größe und Farbe stehen bereit, sobald Sie die Verfolgung je Exemplar einschalten, Schuhgröße und Material sind einen Klick entfernt — und Sie brauchen keine Produktseite je Größe mehr."
+        },
+        "product-detail-hub": {
+          "title": "Jedes Produkt hat jetzt seine eigene Seite",
+          "description": "Ein Produkt zu öffnen hieß bisher, sein Formular zu öffnen. Jetzt hat es eine echte Seite: was es einbringt, wie oft es rausgeht, wie der Bestand steht, wer es reserviert hat und was mit jedem Exemplar passiert ist."
+        },
+        "reservations-unified-views": {
+          "title": "Ihre Reservierungen öffnen im Kalender",
+          "description": "Die Seite Reservierungen öffnet jetzt im Kalender. Er scrollt durchgehend von Woche zu Woche, ohne Seitenwechsel, und ein Mouseover zeigt die komplette Reservierung. Liste und Belegungsplan bleiben einen Klick entfernt."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Zwei Abschnitte, und Ihr Produkt ist online",
+          "description": "Der vierstufige Assistent weicht einer einzigen Seite. Zubehör und Versicherung werden beim Anlegen nicht mehr abgefragt — die ergänzen Sie später, wenn Sie sie brauchen. Rechts: eine Vorschau der Seite und die Liste der offenen Angaben."
+        },
+        "keyboard-shortcuts": {
+          "title": "Für alle, die die Tastatur nicht loslassen",
+          "description": "Acht tägliche Aktionen lassen sich über die Tastatur öffnen, und jede davon können Sie in Ihrem Konto neu belegen — auch die Tastenfolgen. Wer den Tag in Louez verbringt, wird es lieben. Alle anderen arbeiten weiter mit der Maus."
+        },
+        "navigation-refresh": {
+          "title": "⌘K bringt Sie überallhin",
+          "description": "Die Befehlspalette öffnet jede Seite, jede Einstellung, jedes Produkt, jede Kundin und jede Reservierung. In den Einstellungen führt Sie eine Suche genau zur richtigen Option und hebt sie hervor. Und der Pfad zeigt Ihnen immer, wo Sie sind."
+        },
+        "reservation-creation-simplified": {
+          "title": "Eine Reservierung, eine Seite",
+          "description": "Keine Schritte mehr abzuarbeiten: Kunde, Zeitraum, Produkte und Lieferung passen auf eine Seite, die Zusammenfassung immer daneben. Und alles, wofür man die Reservierung sonst erneut öffnen musste — Rabatt, ausgehandelter Preis, Kaution, Laufkundschaft — erledigen Sie direkt hier."
+        }
+      }
     },
     "aiCredits": {
       "title": "KI-Guthaben",
@@ -4518,6 +4966,60 @@
         "errors": {
           "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
         }
+      },
+      "page": {
+        "title": "KI-Guthaben",
+        "subtitle": "Das Guthaben hinter allen KI-Funktionen Ihres Shops",
+        "totalTitle": "Gesamtguthaben",
+        "totalUnlimitedHint": "Ihr Tarif begrenzt die Nutzung nicht",
+        "monthlyTitle": "Diesen Monat inklusive",
+        "monthlyUsedHint": "{used} von {included} verbraucht",
+        "monthlyUnlimitedHint": "Unbegrenzt in Ihrem Tarif",
+        "monthlyNoneHint": "Ihr Tarif enthält kein Guthaben",
+        "prepaidTitle": "Aufgeladenes Guthaben",
+        "prepaidHint": "Verfällt nie",
+        "pitchTitle": "Das leistet Ihr Guthaben",
+        "perkAdvisorTitle": "Ein Berater rund um die Uhr",
+        "perkAdvisorDescription": "Kundinnen und Kunden fragen nach Ihrem Sortiment und bekommen sofort eine Antwort – auch nachts.",
+        "perkVoiceTitle": "Ein Agent, der abnimmt",
+        "perkVoiceDescription": "Aus verpassten Anrufen werden qualifizierte Anfragen – auf Wunsch mit eigener Rufnummer.",
+        "perkImagesTitle": "Bessere Produktfotos",
+        "perkImagesDescription": "Hintergrund entfernen und Aufnahmen aufwerten – mit einem Klick direkt im Produkt.",
+        "pitchSecondaryCta": "KI-Assistent entdecken",
+        "pitchFootnote": "Sie zahlen nur, was Sie verbrauchen. Guthaben verfällt nicht.",
+        "recapTitle": "Ihr Guthaben diesen Monat",
+        "recapDescription": "Was Ihr Guthaben seit Monatsbeginn für den Shop geleistet hat.",
+        "recapConversations": "Gespräche",
+        "recapCalls": "Angenommene Anrufe",
+        "recapImages": "Optimierte Bilder",
+        "recapCredits": "Verbrauchtes Guthaben",
+        "recapCallTime": "Das sind insgesamt {minutes} Min. Gesprächszeit.",
+        "historyTitle": "Verlauf",
+        "historyDescription": "Alles, was Sie verbraucht und gekauft haben.",
+        "tabUsage": "Verbrauch",
+        "tabPurchases": "Käufe",
+        "usageEmpty": "Noch nichts verbraucht",
+        "usageEmptyDescription": "Sobald die KI für Sie arbeitet, erscheint hier jede Buchung.",
+        "purchasesEmpty": "Noch keine Käufe",
+        "purchasesEmptyDescription": "Aufladungen und Gratisguthaben werden hier aufgelistet.",
+        "usageConversation": "Beratungsgespräch",
+        "usageVoiceCall": "Sprachanruf",
+        "usageCallDuration": "{minutes} Min. berechnet",
+        "usageNumberRental": "Rufnummernmiete",
+        "usageImageEnhancement": "Bildoptimierung",
+        "columnDate": "Datum",
+        "columnDetail": "Details",
+        "columnCredits": "Guthaben",
+        "columnAmount": "Betrag",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Abgeschlossen",
+          "pending": "Ausstehend",
+          "failed": "Fehlgeschlagen"
+        },
+        "pagination": "Seite {page} von {totalPages}",
+        "previousPage": "Vorherige Seite",
+        "nextPage": "Nächste Seite"
       }
     }
   },
@@ -4902,6 +5404,12 @@
       "contactDescription": "Wir benötigen diese Informationen, um Sie zu kontaktieren",
       "addressDescription": "Optional - Geben Sie Ihre Adresse ein, falls erforderlich",
       "confirmDescription": "Überprüfen Sie Ihre Informationen vor der Bestätigung",
+      "advanceNotice": {
+        "title": "Startdatum ändern",
+        "guidance": "Dieser Shop benötigt mindestens {duration} Vorlaufzeit. Wählen Sie einen Beginn ab {minimum}.",
+        "preserved": "Ihre Kontaktdaten und Auswahlen bleiben während der Änderung erhalten.",
+        "editDates": "Daten ändern"
+      },
       "continue": "Fortfahren",
       "back": "Zurück",
       "modify": "Bearbeiten",
@@ -5549,6 +6057,10 @@
     "noCategories": "Keine Kategorien",
     "noCategoriesDescription": "Erstellen Sie Ihre erste Kategorie, um Ihre Produkte zu organisieren",
     "emptyDescription": "Kategorien helfen Ihnen, Ihre Produkte zu organisieren und erleichtern Kunden das Durchsuchen.",
+    "searchPlaceholder": "Kategorien suchen…",
+    "noSearchResults": "Keine Kategorie entspricht Ihrer Suche.",
+    "totalCount": "{count, plural, =0 {Keine Kategorien} one {# Kategorie} other {# Kategorien}}",
+    "actionsFor": "Aktionen für {name}",
     "newCategoryDescription": "Erstellen Sie eine neue Kategorie, um Ihre Produkte zu organisieren",
     "editCategoryDescription": "Bearbeiten Sie den Kategorienamen",
     "namePlaceholder": "Kategoriename",
@@ -5563,282 +6075,9 @@
       "title": "Diese Kategorie löschen?",
       "description": "Diese Aktion ist unwiderruflich. Produkte in dieser Kategorie werden nicht gelöscht.",
       "descriptionWithName": "Diese Aktion ist unwiderruflich. Die Kategorie \"{name}\" wird gelöscht.",
-      "productsWarning": "{count, plural, one {Das Produkt in dieser Kategorie wird zu \"Ohne Kategorie\" verschoben.} other {Die # Produkte in dieser Kategorie werden zu \"Ohne Kategorie\" verschoben.}}"
-    }
-  },
-  "emails": {
-    "common": {
-      "greeting": "Hallo {name},",
-      "regards": "Mit freundlichen Grüßen,",
-      "team": "Das {storeName}-Team",
-      "viewReservation": "Meine Reservierung ansehen",
-      "contactUs": "Kontaktieren Sie uns",
-      "reservationNumber": "Reservierung #{number}",
-      "period": "Zeitraum",
-      "periodFrom": "Von {startDate}",
-      "periodTo": "Bis {endDate}",
-      "address": "Adresse",
-      "pickupAddress": "Abholadresse",
-      "returnAddress": "Rückgabeadresse",
-      "subtotal": "Zwischensumme",
-      "subtotalExclTax": "Zwischensumme netto",
-      "taxAmount": "MwSt ({rate}%)",
-      "subtotalInclTax": "Zwischensumme brutto",
-      "deposit": "Kaution",
-      "total": "Gesamt",
-      "totalToPay": "Zu zahlender Betrag",
-      "question": "Fragen? Kontaktieren Sie uns:",
-      "summary": "Zusammenfassung",
-      "timezone": "Zeitzone: {timezone}"
-    },
-    "verificationCode": {
-      "subject": "Ihr Anmeldecode: {code}",
-      "title": "Anmeldecode",
-      "body": "Hier ist Ihr Anmeldecode für den Zugang zu Ihrem Konto bei {storeName}:",
-      "expiry": "Dieser Code läuft in 10 Minuten ab. Wenn Sie diesen Code nicht angefordert haben, können Sie diese E-Mail ignorieren."
-    },
-    "confirmReservation": {
-      "subject": "Ihre Reservierung #{number} ist bestätigt",
-      "title": "Reservierung bestätigt!",
-      "body": "Ihre Reservierung #{number} ist bestätigt. Hier ist die Zusammenfassung:",
-      "summary": "Zusammenfassung"
-    },
-    "requestReceived": {
-      "subject": "Reservierungsanfrage #{number} erhalten",
-      "title": "Anfrage erhalten",
-      "body": "Wir haben Ihre Reservierungsanfrage erhalten.",
-      "review": "Unser Team prüft Ihre Anfrage und wird sich in Kürze bei Ihnen melden.",
-      "confirmation": "Sie erhalten eine Bestätigungs-E-Mail, sobald Ihre Reservierung validiert ist.",
-      "seeYouSoon": "Bis bald,"
-    },
-    "requestAccepted": {
-      "subject": "Ihre Anfrage #{number} wurde angenommen!",
-      "title": "Anfrage angenommen!",
-      "body": "Gute Neuigkeiten! Ihre Reservierungsanfrage #{number} wurde angenommen.",
-      "rentalPeriod": "Mietzeitraum",
-      "yourReservation": "Ihre Reservierung",
-      "proceedPayment": "Zur Zahlung",
-      "signContract": "Vergessen Sie nicht, Ihren Mietvertrag zu unterschreiben, bevor Sie Ihre Ausrüstung abholen."
-    },
-    "requestRejected": {
-      "subject": "Reservierungsanfrage #{number}",
-      "title": "Anfrage nicht angenommen",
-      "body": "Es tut uns leid, Ihre Reservierungsanfrage #{number} konnte nicht angenommen werden.",
-      "contactForAlternative": "Bitte kontaktieren Sie uns für weitere Informationen oder um eine Alternative zu finden."
-    },
-    "reminderPickup": {
-      "subject": "Erinnerung: Ihre Miete beginnt morgen!",
-      "title": "Ihre Miete beginnt morgen!",
-      "body": "Dies ist eine Erinnerung für Ihre Reservierung #{number}.",
-      "scheduledPickup": "Geplante Abholung",
-      "dontForget": "Vergessen Sie nicht:",
-      "bringId": "Einen gültigen Ausweis",
-      "bringConfirmation": "Ihre Reservierungsbestätigung",
-      "seeTomorrow": "Bis morgen!"
-    },
-    "reminderReturn": {
-      "subject": "Erinnerung: Ausrüstungsrückgabe am {date}",
-      "title": "Denken Sie an die Rückgabe Ihrer Ausrüstung",
-      "body": "Dies ist eine Erinnerung für Ihre Reservierung #{number}. Die Rückgabe der Ausrüstung ist für den {date} geplant.",
-      "scheduledReturn": "Geplante Rückgabe",
-      "returnInfo": "Bitte geben Sie die Ausrüstung in gutem Zustand zurück. Die Kaution wird nach Prüfung zurückgegeben.",
-      "thanks": "Vielen Dank für Ihr Vertrauen!"
-    },
-    "reminderPickupAdmin": {
-      "subject": "Bevorstehende Abholung: Reservierung #{number}",
-      "title": "Bevorstehende Geräteabholung",
-      "body": "Für die Reservierung #{number} steht eine Abholung an. Hier sind die Details, damit Sie die Ausrüstung bereitstellen können.",
-      "scheduledPickup": "Geplante Abholung",
-      "customer": "Kunde:",
-      "email": "E-Mail:",
-      "phone": "Telefon:",
-      "amount": "Betrag:",
-      "viewReservation": "Reservierung ansehen",
-      "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um diese Reservierung zu verwalten."
-    },
-    "reminderReturnAdmin": {
-      "subject": "Bevorstehende Rückgabe: Reservierung #{number}",
-      "title": "Bevorstehende Geräterückgabe",
-      "body": "Für die Reservierung #{number} steht eine Rückgabe an. Hier sind die Details, damit Sie sich auf die Annahme der Ausrüstung vorbereiten können.",
-      "scheduledReturn": "Geplante Rückgabe",
-      "customer": "Kunde:",
-      "email": "E-Mail:",
-      "phone": "Telefon:",
-      "amount": "Betrag:",
-      "viewReservation": "Reservierung ansehen",
-      "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um diese Reservierung zu verwalten."
-    },
-    "reminderDigestAdmin": {
-      "subject": "Ihr Tagesplan für {date}",
-      "title": "Tagesplan",
-      "body": "Das steht heute bei {storeName} an.",
-      "pickupsTitle": "Abholungen ({count})",
-      "returnsTitle": "Rückgaben ({count})",
-      "viewCalendar": "Kalender ansehen",
-      "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um Ihren Tag zu verwalten."
-    },
-    "thankYouReview": {
-      "subject": "Vielen Dank für Ihre Miete!",
-      "title": "Vielen Dank für Ihr Vertrauen!",
-      "body": "Wir hoffen, dass Ihre Miete gut verlaufen ist. Ihre Bewertung hilft uns, uns zu verbessern und anderen Kunden bei ihrer Entscheidung.",
-      "cta": "Bewertung abgeben",
-      "disclaimer": "Es dauert nur eine Minute und wäre uns eine große Hilfe!",
-      "smsThankYou": "Danke fur Ihre Miete!",
-      "smsReview": "Ihre Bewertung zahlt:"
-    },
-    "newRequestLandlord": {
-      "subject": "Neue Reservierungsanfrage #{number}",
-      "title": "Neue Reservierungsanfrage",
-      "body": "Sie haben eine neue Anfrage bei {storeName} erhalten.",
-      "customer": "Kunde:",
-      "email": "E-Mail:",
-      "period": "Zeitraum:",
-      "amount": "Betrag:",
-      "viewRequest": "Anfrage ansehen",
-      "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um diese Anfrage anzunehmen oder abzulehnen."
-    },
-    "phoneCallbackLandlord": {
-      "subject": "Ein Anrufer zum Zurückrufen — {store}",
-      "title": "Ein Anrufer zum Zurückrufen",
-      "body": "Ihr Sprachassistent konnte eine Anfrage auf {storeName} nicht abschließen und leitet Ihnen diese Nachricht weiter.",
-      "phone": "Rückrufnummer:",
-      "message": "Nachricht:",
-      "listen": "Anruf öffnen",
-      "footer": "Öffnen Sie die Konversation, um den Verlauf zu lesen und die Aufnahme des Anrufs anzuhören."
-    },
-    "voiceNumberBilling": {
-      "numberLabel": "Nummer:",
-      "rentalLabel": "Monatliche Miete:",
-      "rentalValue": "{credits} KI-Guthaben / Monat",
-      "deadlineLabel": "Frist:",
-      "ctaRecharge": "Guthaben aufladen",
-      "ctaOpen": "Meinen KI-Assistenten öffnen",
-      "footer": "Die Nummernmiete wird jeden Monat automatisch mit KI-Guthaben bezahlt.",
-      "warning": {
-        "subject": "Bitte aufladen — Verlängerung der Nummer {number}",
-        "title": "Ihr Guthaben deckt die nächste Verlängerung nicht",
-        "body": "Die Nummer {number} von {storeName} wird am {date} für {credits} KI-Guthaben verlängert, aber Ihr aktuelles Guthaben reicht nicht aus. Laden Sie vor diesem Datum auf, um Ihre Nummer zu behalten."
-      },
-      "failed": {
-        "subject": "Handlung erforderlich — {number} droht getrennt zu werden",
-        "title": "Verlängerung fehlgeschlagen",
-        "body": "Die Verlängerung der Nummer {number} ({credits} KI-Guthaben) konnte nicht durchgeführt werden: Guthaben unzureichend. Laden Sie vor dem {date} auf, sonst wird die Nummer automatisch getrennt. Wir versuchen die Abbuchung täglich erneut, sobald Sie aufladen."
-      },
-      "released": {
-        "subject": "Die Nummer {number} wurde getrennt",
-        "title": "Nummer getrennt",
-        "body": "Die Nummer {number} von {storeName} wurde getrennt und ist nicht mehr aktiv. Sie können jederzeit über Ihren KI-Assistenten eine neue Nummer wählen."
-      }
-    },
-    "teamInvitation": {
-      "subject": "{inviterName} lädt Sie ein, {storeName} beizutreten",
-      "title": "Team-Einladung",
-      "greeting": "Hallo,",
-      "body": "{inviterName} lädt Sie ein, dem {storeName}-Team auf Louez.io beizutreten.",
-      "accessDescription": "Durch Annahme dieser Einladung erhalten Sie Zugriff auf das Shop-Dashboard zur Verwaltung von Reservierungen, Produkten und Kunden.",
-      "acceptButton": "Einladung annehmen",
-      "expiry": "Diese Einladung läuft in 7 Tagen ab. Wenn Sie nicht darum gebeten haben, diesem Team beizutreten, können Sie diese E-Mail ignorieren."
-    },
-    "baseLayout": {
-      "sentBy": "Diese E-Mail wurde von {storeName} gesendet",
-      "ignoreIfNotYou": "Wenn Sie diese Aktion nicht initiiert haben, ignorieren Sie diese E-Mail bitte.",
-      "poweredBy": "Bereitgestellt von"
-    },
-    "instantAccess": {
-      "subject": "Zugriff auf Ihre Reservierung #{number}",
-      "title": "Zugriff auf Ihre Reservierung",
-      "body": "Klicken Sie hier, um auf Ihre Reservierung #{number} zuzugreifen.",
-      "paymentPending": "Eine Zahlung für diese Reservierung steht noch aus.",
-      "viewAndPay": "Anzeigen und bezahlen",
-      "linkValid": "Dieser Link ist 30 Tage gültig."
-    },
-    "reservationCancelled": {
-      "subject": "Reservierung #{number} storniert",
-      "title": "Reservierung storniert",
-      "body": "Ihre Reservierung #{number} wurde storniert.",
-      "cancelledPeriod": "Stornierter Zeitraum",
-      "reasonLabel": "Grund",
-      "contactForQuestions": "Bei Fragen kontaktieren Sie uns gerne.",
-      "browseEquipment": "Katalog durchsuchen",
-      "thankYou": "Vielen Dank für Ihr Verständnis."
-    },
-    "reservationCompleted": {
-      "subject": "Reservierung #{number} abgeschlossen",
-      "title": "Vermietung abgeschlossen!",
-      "body": "Ihre Reservierung #{number} ist nun abgeschlossen.",
-      "rentalPeriod": "Mietzeitraum",
-      "depositReturned": "Ihre Kaution von {amount} wird erstattet.",
-      "depositPending": "Ihre Kaution von {amount} wird geprüft und in Kürze erstattet.",
-      "thankYouMessage": "Vielen Dank für Ihr Vertrauen!",
-      "rentAgain": "Erneut mieten",
-      "seeYouSoon": "Bis bald!"
-    },
-    "paymentConfirmation": {
-      "subject": "Zahlung bestätigt - Reservierung #{number}",
-      "title": "Zahlung erhalten!",
-      "body": "Wir haben Ihre Zahlung für Reservierung #{number} erhalten.",
-      "paymentDetails": "Zahlungsdetails",
-      "amount": "Betrag",
-      "date": "Datum",
-      "method": "Methode",
-      "reservation": "Reservierung",
-      "confirmation": "Ihre Zahlung wurde erfolgreich verarbeitet.",
-      "keepEmail": "Bewahren Sie diese E-Mail als Zahlungsbeleg auf."
-    },
-    "paymentFailed": {
-      "subject": "Zahlung fehlgeschlagen - Reservierung #{number}",
-      "title": "Zahlung fehlgeschlagen",
-      "body": "Die Zahlung von {amount} für Ihre Reservierung #{number} konnte nicht verarbeitet werden.",
-      "whatToDo": "Was tun?",
-      "tip1": "Überprüfen Sie, ob Ihre Karte gültig ist und ausreichend Guthaben hat",
-      "tip2": "Versuchen Sie es mit einer anderen Karte",
-      "tip3": "Kontaktieren Sie Ihre Bank, wenn das Problem weiterhin besteht",
-      "retryPayment": "Zahlung erneut versuchen",
-      "contactSupport": "Hilfe benötigt? Kontaktieren Sie uns."
-    },
-    "paymentRequest": {
-      "subject": "Zahlungsanforderung für Reservierung #{number}",
-      "title": "Zahlungsanforderung",
-      "body": "{storeName} fordert eine Zahlung von {amount} für Ihre Reservierung #{number} an.",
-      "paymentDetails": "Zahlungsdetails",
-      "reservation": "Reservierung",
-      "description": "Beschreibung",
-      "amountDue": "Fälliger Betrag",
-      "payNow": "{amount} bezahlen",
-      "linkFallback": "Oder kopieren Sie diesen Link in Ihren Browser:",
-      "securePayment": "Diese Zahlung wird durch Stripe gesichert. Ihre Zahlungsdaten werden niemals mit dem Vermieter geteilt."
-    },
-    "depositAuthorizationRequest": {
-      "subject": "Kautionsautorisierung für Reservierung #{number}",
-      "title": "Kautionsautorisierung erforderlich",
-      "body": "{storeName} fordert eine Kautionsautorisierung von {amount} für Ihre Reservierung #{number} an.",
-      "howItWorks": "So funktioniert es",
-      "step1": "Sie autorisieren den Kautionsbetrag auf Ihrer Karte",
-      "step2": "Der Betrag wird vorübergehend reserviert (nicht belastet)",
-      "step3": "Am Ende der Miete wird die Autorisierung automatisch freigegeben",
-      "step4": "Bei Schäden kann ein Teil oder der gesamte Betrag belastet werden",
-      "authorizeNow": "Kaution autorisieren",
-      "linkFallback": "Oder kopieren Sie diesen Link in Ihren Browser:",
-      "securePayment": "Diese Autorisierung wird durch Stripe gesichert. Der Betrag wird nicht sofort belastet."
-    },
-    "quoteSent": {
-      "subject": "Angebot #{number}",
-      "title": "Sie haben ein Angebot erhalten",
-      "body": "{store} hat Ihnen ein Angebot für die Reservierung #{number} gesendet.",
-      "rentalPeriod": "Mietzeitraum",
-      "yourQuote": "Ihr Angebot",
-      "viewQuote": "Angebot ansehen",
-      "expiry": "Sie können dieses Angebot in Ihrem Kundenkonto annehmen oder ablehnen."
-    },
-    "rewardUnlocked": {
-      "subject": "Sie haben Gratis-Reservierungen verdient 🎉",
-      "title": "Ihre Empfehlung hat sich gelohnt!",
-      "greeting": "Hallo,",
-      "body": "{referredStoreName} hat gerade den ersten Online-Verkauf getätigt. Sie erhalten {freeReservations} Gratis-Reservierungen im Wert von ≈ {rewardValue}.",
-      "cta": "Meine Prämien ansehen",
-      "footer": "Danke, dass Sie die Louez-Community wachsen lassen.",
-      "subjectCredit": "Sie haben ein Louez-Guthaben verdient 🎉",
-      "bodyCredit": "{referredStoreName} hat gerade den ersten Online-Verkauf getätigt. Sie erhalten ein Guthaben von {rewardValue} auf Ihrer nächsten Louez-Rechnung."
+      "productsWarning": "{count, plural, one {Diese Kategorie wird von # Produkt entfernt.} other {Diese Kategorie wird von # Produkten entfernt.}}",
+      "reassignLabel": "Produkte neu zuordnen zu",
+      "keepExisting": "Andere Kategorien beibehalten"
     }
   },
   "contract": {

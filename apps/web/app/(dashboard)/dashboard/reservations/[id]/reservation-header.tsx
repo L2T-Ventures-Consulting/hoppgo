@@ -27,12 +27,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@louez/ui";
-import { cn } from "@louez/utils";
 
 import { PaymentStatusBadge } from "./payment-status-badge";
 import { SendEmailModal } from "./send-email-modal";
+import { STATUS_CONFIG } from "../reservations-utils";
 import { generateAccessUrl } from "@/app/(dashboard)/dashboard/reservations/actions";
 import { getDashboardReservationBackHref } from "@/lib/dashboard/util.reservation-navigation";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+  captureReservationActionSucceeded,
+} from "@/lib/product-analytics/reservation-analytics-client";
 
 type ReservationStatus =
   | "pending"
@@ -72,25 +78,6 @@ interface ReservationHeaderProps {
   currency?: string;
 }
 
-const STATUS_CLASSES: Record<ReservationStatus, string> = {
-  pending:
-    "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800",
-  confirmed:
-    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-  ongoing:
-    "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800",
-  completed:
-    "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400 border-gray-200 dark:border-gray-700",
-  cancelled:
-    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
-  rejected:
-    "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800",
-  quote:
-    "bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400 border-violet-200 dark:border-violet-800",
-  declined:
-    "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700",
-};
-
 export function ReservationHeader({
   reservationId,
   reservationNumber,
@@ -124,16 +111,32 @@ export function ReservationHeader({
     rentalPaid >= rentalAmount && (depositAmount === 0 || depositCollected >= depositAmount);
   const canEdit = !["completed", "cancelled", "rejected", "declined"].includes(status);
 
-  const handleGenerateAccessUrl = async () => {
+  const handleGenerateAccessUrl = async (
+    action:
+      | typeof reservationAnalyticsActions.copyAccessLink
+      | typeof reservationAnalyticsActions.viewAsCustomer,
+  ) => {
     setIsGeneratingLink(true);
     try {
       const result = await generateAccessUrl(reservationId);
       if ("error" in result) {
+        captureReservationActionFailed({
+          reservationId,
+          reservationStatus: status,
+          action,
+          properties: { error_code: "access_url_failed" },
+        });
         toastManager.add({ title: t("accessLink.sendError"), type: "error" });
         return null;
       }
       return result.url;
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action,
+        properties: { error_code: "access_url_failed" },
+      });
       toastManager.add({ title: t("accessLink.sendError"), type: "error" });
       return null;
     } finally {
@@ -142,22 +145,69 @@ export function ReservationHeader({
   };
 
   const handleViewAsCustomer = async () => {
-    const url = await handleGenerateAccessUrl();
-    if (url) window.open(url, "_blank");
+    const action = reservationAnalyticsActions.viewAsCustomer;
+    captureReservationActionStarted({ reservationId, reservationStatus: status, action });
+    const url = await handleGenerateAccessUrl(action);
+    if (!url) return;
+
+    const openedWindow = window.open(url, "_blank");
+    if (openedWindow) {
+      captureReservationActionSucceeded({ reservationId, reservationStatus: status, action });
+    } else {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action,
+        properties: { error_code: "popup_blocked" },
+      });
+    }
   };
 
   const handleCopyLink = async () => {
-    const url = await handleGenerateAccessUrl();
-    if (url) {
-      navigator.clipboard.writeText(url);
+    const action = reservationAnalyticsActions.copyAccessLink;
+    captureReservationActionStarted({ reservationId, reservationStatus: status, action });
+    const url = await handleGenerateAccessUrl(action);
+    if (!url) return;
+
+    try {
+      await navigator.clipboard.writeText(url);
       setCopiedLink(true);
       toastManager.add({ title: t("linkCopied"), type: "success" });
       setTimeout(() => setCopiedLink(false), 2000);
+      captureReservationActionSucceeded({ reservationId, reservationStatus: status, action });
+    } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action,
+        properties: { error_code: "clipboard_failed" },
+      });
     }
   };
 
   const handleDownloadContract = () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.downloadContract,
+    });
     window.open(`/api/reservations/${reservationId}/contract`, "_blank");
+  };
+
+  const handleEdit = () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.editReservation,
+    });
+    router.push(`/dashboard/reservations/${reservationId}/edit`);
+  };
+
+  const handlePrint = () => {
+    const action = reservationAnalyticsActions.printReservation;
+    captureReservationActionStarted({ reservationId, reservationStatus: status, action });
+    window.print();
+    captureReservationActionSucceeded({ reservationId, reservationStatus: status, action });
   };
 
   return (
@@ -180,7 +230,7 @@ export function ReservationHeader({
               {/* Reservation number + Status badges */}
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold tracking-tight">#{reservationNumber}</h1>
-                <Badge variant="outline" className={cn("font-medium", STATUS_CLASSES[status])}>
+                <Badge variant={STATUS_CONFIG[status].badgeVariant} className="font-medium">
                   {t(`status.${status}`)}
                 </Badge>
                 <PaymentStatusBadge
@@ -234,9 +284,7 @@ export function ReservationHeader({
 
                 {/* Edit reservation */}
                 {canEdit && (
-                  <DropdownMenuItem
-                    onClick={() => router.push(`/dashboard/reservations/${reservationId}/edit`)}
-                  >
+                  <DropdownMenuItem onClick={handleEdit}>
                     <Pencil className="h-4 w-4 mr-2" />
                     {t("edit.button")}
                   </DropdownMenuItem>
@@ -244,7 +292,7 @@ export function ReservationHeader({
                 {canEdit && <DropdownMenuSeparator />}
 
                 {/* Common items */}
-                <DropdownMenuItem onClick={() => window.print()}>
+                <DropdownMenuItem onClick={handlePrint}>
                   <Printer className="h-4 w-4 mr-2" />
                   {t("actions.print")}
                 </DropdownMenuItem>

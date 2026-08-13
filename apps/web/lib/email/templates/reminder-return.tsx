@@ -1,5 +1,13 @@
-import { Heading, Section, Text } from '@react-email/components'
 import { BaseLayout } from './base-layout'
+import {
+  EmailHeading,
+  EmailText,
+  InfoCard,
+  InfoCardItem,
+  Signature,
+  StoreNote,
+  resolveCustomContent,
+} from './components'
 import {
   getEmailTranslator,
   getEmailTranslations,
@@ -7,10 +15,7 @@ import {
   type EmailLocale,
 } from '../i18n'
 import type { EmailCustomContent } from '@louez/types'
-import {
-  formatEmailDateInStoreTimezone,
-  getStoreTimezoneLabel,
-} from '../date-time'
+import { formatEmailDateInStoreTimezone, getStoreTimezoneLabel } from '../date-time'
 
 interface ReminderReturnEmailProps {
   storeName: string
@@ -25,13 +30,15 @@ interface ReminderReturnEmailProps {
   reservationNumber: string
   endDate: Date
   customContent?: EmailCustomContent
+  /** Free text the store owner added when sending this reminder by hand. */
+  additionalMessage?: string | null
   locale?: EmailLocale
 }
 
 export function ReminderReturnEmail({
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   storeAddress,
   storeEmail,
   storePhone,
@@ -41,6 +48,7 @@ export function ReminderReturnEmail({
   reservationNumber,
   endDate,
   customContent,
+  additionalMessage,
   locale = 'fr',
 }: ReminderReturnEmailProps) {
   const t = getEmailTranslations(locale)
@@ -53,7 +61,7 @@ export function ReminderReturnEmail({
     locale,
     datePatterns.full,
     storeTimezone,
-    storeCountry
+    storeCountry,
   )
   const timezoneLabel = getStoreTimezoneLabel(endDate, storeTimezone, storeCountry)
   const timezoneLine =
@@ -61,24 +69,19 @@ export function ReminderReturnEmail({
       ? tc.timezone.replace('{timezone}', timezoneLabel)
       : `Timezone: ${timezoneLabel}`
 
-  // Use custom content or defaults
-  const greeting = customContent?.greeting
-    ? customContent.greeting.replace('{name}', customerFirstName)
-    : tc.greeting.replace('{name}', customerFirstName)
-
-  const customMessage = customContent?.message
-    ? customContent.message
-        .replace('{number}', reservationNumber)
-        .replace('{name}', customerFirstName)
-    : null
-
-  const signatureText = customContent?.signature || `${messages.thanks}\n${tc.team.replace('{storeName}', storeName)}`
+  const { greeting, message, signature } = resolveCustomContent(
+    customContent,
+    {
+      greeting: tc.greeting,
+      signature: `${messages.thanks}\n${tc.team.replace('{storeName}', storeName)}`,
+    },
+    { name: customerFirstName, number: reservationNumber },
+  )
 
   return (
     <BaseLayout
       preview={
-        customContent?.subject ||
-        translate('reminderReturn.subject', { date: formattedEndDate })
+        customContent?.subject || translate('reminderReturn.subject', { date: formattedEndDate })
       }
       storeName={storeName}
       logoUrl={logoUrl}
@@ -88,102 +91,42 @@ export function ReminderReturnEmail({
       storeAddress={storeAddress}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      <Text style={paragraph}>{greeting}</Text>
+      <EmailText>{greeting}</EmailText>
 
-      <Text style={paragraph}>
+      <EmailText>
         {translate('reminderReturn.body', {
           number: reservationNumber,
           date: formattedEndDate,
         })}
-      </Text>
+      </EmailText>
 
       {/* Custom message from store settings */}
-      {customMessage && (
-        <Text style={paragraph}>{customMessage}</Text>
-      )}
+      {message && <EmailText>{message}</EmailText>}
 
-      <Section style={infoBox}>
-        <Text style={infoTitle}>{messages.scheduledReturn}</Text>
-        <Text style={infoDate}>{formattedEndDate}</Text>
-        <Text style={timezoneText}>{timezoneLine}</Text>
+      <StoreNote message={additionalMessage} />
+
+      <InfoCard label={messages.scheduledReturn} value={formattedEndDate} footnote={timezoneLine}>
         {storeAddress && (
-          <>
-            <Text style={infoTitle}>{tc.returnAddress}</Text>
-            <Text style={infoText}>
-              {storeName}
-              <br />
-              {storeAddress}
-            </Text>
-          </>
+          <InfoCardItem
+            label={tc.returnAddress}
+            value={
+              <>
+                {storeName}
+                <br />
+                {storeAddress}
+              </>
+            }
+          />
         )}
-      </Section>
+      </InfoCard>
 
-      <Text style={paragraph}>
-        {messages.returnInfo}
-      </Text>
+      <EmailText>{messages.returnInfo}</EmailText>
 
-      <Text style={{ ...signature, whiteSpace: 'pre-line' }}>
-        {signatureText}
-      </Text>
+      <Signature text={signature} />
     </BaseLayout>
   )
-}
-
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold' as const,
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '14px',
-  lineHeight: '24px',
-  color: '#525f7f',
-  margin: '0 0 16px 0',
-}
-
-const infoBox = {
-  backgroundColor: '#fef3c7',
-  borderRadius: '8px',
-  padding: '20px',
-  margin: '24px 0',
-}
-
-const infoTitle = {
-  fontSize: '12px',
-  fontWeight: 'bold' as const,
-  textTransform: 'uppercase' as const,
-  color: '#d97706',
-  marginBottom: '4px',
-  marginTop: '12px',
-}
-
-const infoDate = {
-  fontSize: '18px',
-  fontWeight: 'bold' as const,
-  color: '#92400e',
-  margin: '0',
-}
-
-const infoText = {
-  fontSize: '14px',
-  color: '#92400e',
-  margin: '0',
-}
-
-const timezoneText = {
-  fontSize: '12px',
-  color: '#d97706',
-  margin: '6px 0 0 0',
-}
-
-const signature = {
-  fontSize: '14px',
-  color: '#525f7f',
-  marginTop: '32px',
 }
 
 export default ReminderReturnEmail

@@ -84,7 +84,7 @@ import { resolveReservationLocationSnapshot } from '@/lib/reservations/location-
 import { normalizePhoneNumber } from '@/lib/sms/phone';
 import { createCheckoutSession, toStripeCents } from '@/lib/stripe';
 import { validateRentalPeriod } from '@/lib/utils/business-hours';
-import { getMinStartDateTime } from '@/lib/utils/duration';
+import { validateAdvanceNotice } from '@/lib/utils/duration';
 import {
   calculateTotalDeliveryFee,
   isDeliveryOrderAmountEligible,
@@ -636,16 +636,20 @@ export async function createReservation(input: CreateReservationInput) {
 
     // Validate advance notice
     const advanceNoticeMinutes = store.settings?.advanceNoticeMinutes || 0;
-    if (advanceNoticeMinutes > 0) {
-      const minimumStartTime = getMinStartDateTime(advanceNoticeMinutes);
-      if (rentalStartDate < minimumStartTime) {
-        return {
-          error: 'errors.advanceNoticeViolation',
-          errorParams: {
-            duration: formatDurationFromMinutes(advanceNoticeMinutes),
-          },
-        };
-      }
+    const advanceNoticeValidation = validateAdvanceNotice(
+      rentalStartDate,
+      advanceNoticeMinutes,
+    );
+    if (!advanceNoticeValidation.valid) {
+      return {
+        error: 'errors.advanceNoticeViolation',
+        errorParams: {
+          duration: formatDurationFromMinutes(advanceNoticeMinutes),
+          advanceNoticeMinutes,
+          minimumStartTime:
+            advanceNoticeValidation.minimumStartTime.toISOString(),
+        },
+      };
     }
 
     // Validate minimum rental duration

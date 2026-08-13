@@ -151,12 +151,26 @@
   --animate-skeleton: skeleton 2s -1s infinite linear;
 
   /* badges */
-  --color-badge-gray-background: var(--badge-gray-background);
-  --color-badge-gray-foreground: var(--badge-gray-foreground);
+  --color-badge-pending-background: var(--badge-pending-background);
+  --color-badge-pending-foreground: var(--badge-pending-foreground);
+  --color-badge-progress-background: var(--badge-progress-background);
+  --color-badge-progress-foreground: var(--badge-progress-foreground);
+  --color-badge-submitted-background: var(--badge-submitted-background);
+  --color-badge-submitted-foreground: var(--badge-submitted-foreground);
+  --color-badge-review-background: var(--badge-review-background);
+  --color-badge-review-foreground: var(--badge-review-foreground);
+  --color-badge-success-background: var(--badge-success-background);
+  --color-badge-success-foreground: var(--badge-success-foreground);
+  --color-badge-failed-background: var(--badge-failed-background);
+  --color-badge-failed-foreground: var(--badge-failed-foreground);
+  --color-badge-expired-background: var(--badge-expired-background);
+  --color-badge-expired-foreground: var(--badge-expired-foreground);
   --color-badge-warning-background: var(--badge-warning-background);
   --color-badge-warning-foreground: var(--badge-warning-foreground);
+  --color-badge-gray-background: var(--badge-gray-background);
+  --color-badge-gray-foreground: var(--badge-gray-foreground);
 
-  --thumb-size: var(--spacing)*5;
+  --thumb-size: var(--spacing) * 5;
 
   @keyframes skeleton {
     to {
@@ -165,7 +179,13 @@
   }
 }
 
-:root {
+/* `.light` mirrors `.dark`: it re-declares the light palette on a subtree, so a
+   surface can opt out of the ambient theme — a storefront preview showing both
+   themes side by side, for instance. Note that Tailwind's `dark:` variant keys
+   off `.dark *`, so inside a `.light` nested in a `.dark` page the tokens flip
+   but `dark:` utilities still match — style such subtrees with tokens only. */
+:root,
+.light {
   --radius: 0.625rem;
   --shadow-border: 0px 0px 0px 1px rgba(0, 0, 0, 0.15);
   --background: oklch(1 0 0);
@@ -265,12 +285,33 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  /* Hovered nav row: the light a glass card catches. There is no room above
+     white on the light sidebar, so there the "light" is the card surface plus
+     the shadow the icon casts once it lifts; the dark sidebar really glows. */
+  --sidebar-hover-light: oklch(1 0 0);
+  --sidebar-hover-ring: oklch(0 0 0 / 10%);
+  --sidebar-hover-glow: oklch(0 0 0 / 22%);
+  --sidebar-hover-shadow: oklch(0 0 0 / 10%);
 
   /* badges */
-  --badge-gray-background: oklch(95.8% 0 0deg);
-  --badge-gray-foreground: oklch(56.9% 0 0deg);
-  --badge-warning-background: oklch(97.4% 0.0143 50.8deg);
-  --badge-warning-foreground: oklch(76.1% 0.127 64.2deg);
+  --badge-pending-background: rgb(255 244 238);
+  --badge-pending-foreground: rgb(247 158 87);
+  --badge-progress-background: rgb(229 243 254);
+  --badge-progress-foreground: rgb(0 140 255);
+  --badge-submitted-background: rgb(239 234 255);
+  --badge-submitted-foreground: rgb(103 54 254);
+  --badge-review-background: rgb(255 248 229);
+  --badge-review-foreground: rgb(245 184 59);
+  --badge-success-background: rgb(236 247 239);
+  --badge-success-foreground: rgb(78 191 110);
+  --badge-failed-background: rgb(253 239 238);
+  --badge-failed-foreground: rgb(231 102 80);
+  --badge-expired-background: rgb(241 241 241);
+  --badge-expired-foreground: rgb(120 120 120);
+  --badge-warning-background: rgb(255 245 231);
+  --badge-warning-foreground: rgb(235 148 44);
+  --badge-gray-background: rgb(241 241 241);
+  --badge-gray-foreground: rgb(120 120 120);
 }
 
 .dark {
@@ -300,49 +341,49 @@
   --reservation-pending: var(--louez-yellow);
   --reservation-pending-hover: oklch(0.902 0.145 85.568);
   --reservation-pending-foreground: oklch(0.145 0 0);
-  --reservation-pending-soft: oklch(0.304 0.052 85.568 / 50%);
+  --reservation-pending-soft: oklch(0.33 0.062 85.568 / 65%);
   --reservation-pending-border: oklch(0.572 0.114 85.568);
   --reservation-pending-text: oklch(0.858 0.143 85.568);
   --reservation-confirmed: oklch(0.704 0.133 157.68);
   --reservation-confirmed-hover: oklch(0.764 0.122 157.68);
   --reservation-confirmed-foreground: oklch(0.145 0 0);
-  --reservation-confirmed-soft: oklch(0.288 0.046 157.68 / 50%);
+  --reservation-confirmed-soft: oklch(0.32 0.082 157.68 / 65%);
   --reservation-confirmed-border: oklch(0.526 0.096 157.68);
   --reservation-confirmed-text: oklch(0.782 0.116 157.68);
   --reservation-ongoing: oklch(0.714 0.174 251.78);
   --reservation-ongoing-hover: oklch(0.774 0.158 251.78);
   --reservation-ongoing-foreground: oklch(0.145 0 0);
-  --reservation-ongoing-soft: oklch(0.296 0.062 251.78 / 50%);
+  --reservation-ongoing-soft: oklch(0.32 0.105 251.78 / 65%);
   --reservation-ongoing-border: oklch(0.535 0.137 251.78);
   --reservation-ongoing-text: oklch(0.786 0.147 251.78);
   --reservation-completed: oklch(0.704 0 89.876);
   --reservation-completed-hover: oklch(0.764 0 89.876);
   --reservation-completed-foreground: oklch(0.145 0 0);
-  --reservation-completed-soft: oklch(0.3 0 89.876 / 52%);
+  --reservation-completed-soft: oklch(0.32 0 89.876 / 60%);
   --reservation-completed-border: oklch(0.535 0 89.876);
   --reservation-completed-text: oklch(0.772 0 89.876);
   --reservation-cancelled: oklch(0.749 0.171 44.745);
   --reservation-cancelled-hover: oklch(0.809 0.154 44.745);
   --reservation-cancelled-foreground: oklch(0.145 0 0);
-  --reservation-cancelled-soft: oklch(0.301 0.063 44.745 / 50%);
+  --reservation-cancelled-soft: oklch(0.33 0.082 44.745 / 65%);
   --reservation-cancelled-border: oklch(0.55 0.128 44.745);
   --reservation-cancelled-text: oklch(0.813 0.132 44.745);
   --reservation-rejected: oklch(0.702 0.178 23.026);
   --reservation-rejected-hover: oklch(0.761 0.163 23.026);
   --reservation-rejected-foreground: oklch(0.145 0 0);
-  --reservation-rejected-soft: oklch(0.292 0.063 23.026 / 50%);
+  --reservation-rejected-soft: oklch(0.32 0.1 23.026 / 65%);
   --reservation-rejected-border: oklch(0.532 0.134 23.026);
   --reservation-rejected-text: oklch(0.786 0.143 23.026);
   --reservation-quote: oklch(0.694 0.174 305.86);
   --reservation-quote-hover: oklch(0.754 0.159 305.86);
   --reservation-quote-foreground: oklch(0.145 0 0);
-  --reservation-quote-soft: oklch(0.291 0.065 305.86 / 50%);
+  --reservation-quote-soft: oklch(0.32 0.105 305.86 / 65%);
   --reservation-quote-border: oklch(0.526 0.128 305.86);
   --reservation-quote-text: oklch(0.779 0.139 305.86);
   --reservation-declined: oklch(0.704 0.184 346.003);
   --reservation-declined-hover: oklch(0.764 0.166 346.003);
   --reservation-declined-foreground: oklch(0.145 0 0);
-  --reservation-declined-soft: oklch(0.292 0.068 346.003 / 50%);
+  --reservation-declined-soft: oklch(0.32 0.1 346.003 / 65%);
   --reservation-declined-border: oklch(0.533 0.139 346.003);
   --reservation-declined-text: oklch(0.787 0.145 346.003);
   --border: oklch(1 0 0 / 10%);
@@ -361,6 +402,34 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+  --sidebar-hover-light: oklch(1 0 0 / 14%);
+  --sidebar-hover-ring: oklch(1 0 0 / 12%);
+  --sidebar-hover-glow: oklch(1 0 0 / 30%);
+  --sidebar-hover-shadow: oklch(0 0 0 / 40%);
+  --badge-pending-background: rgb(247 158 87 / 18%);
+  --badge-pending-foreground: rgb(253 186 116);
+  --badge-progress-background: rgb(0 140 255 / 18%);
+  --badge-progress-foreground: rgb(125 211 252);
+  --badge-submitted-background: rgb(103 54 254 / 18%);
+  --badge-submitted-foreground: rgb(196 181 253);
+  --badge-review-background: rgb(245 184 59 / 18%);
+  --badge-review-foreground: rgb(253 224 71);
+  --badge-success-background: rgb(78 191 110 / 18%);
+  --badge-success-foreground: rgb(134 239 172);
+  --badge-failed-background: rgb(231 102 80 / 18%);
+  --badge-failed-foreground: rgb(252 165 165);
+  --badge-expired-background: rgb(120 120 120 / 22%);
+  --badge-expired-foreground: rgb(212 212 216);
+  --badge-warning-background: rgb(235 148 44 / 18%);
+  --badge-warning-foreground: rgb(252 202 128);
+  --badge-gray-background: rgb(120 120 120 / 22%);
+  --badge-gray-foreground: rgb(212 212 216);
+
+  /* Nucleo Glass icons: the solid "origin" layer flips to light so it stays
+     readable on the dark sidebar; the frosted pane keeps its translucent
+     defaults. */
+  --nc-gradient-1-color-1: #fafafa;
+  --nc-gradient-1-color-2: #a1a1aa;
 }
 
 @layer base {

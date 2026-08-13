@@ -1,23 +1,27 @@
-import type { Metadata } from 'next';
-import Script from 'next/script';
+import type { Metadata } from "next";
+import { connection } from "next/server";
+import Script from "next/script";
 
-import { Agentation } from 'agentation';
-import { NuqsAdapter } from 'nuqs/adapters/next/app';
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
-import { AnchoredToastProvider, ToastProvider } from '@louez/ui';
+import { AnchoredToastProvider, ToastProvider } from "@louez/ui";
 
-import { EvlogProvider } from '@/components/evlog-provider';
-import { InstanceProvider } from '@/components/instance-provider';
-import { UmamiAnalytics } from '@/components/umami-analytics';
+import { EvlogProvider } from "@/components/evlog-provider";
+import { InstanceProvider } from "@/components/instance-provider";
+import { UmamiAnalytics } from "@/components/umami-analytics";
 
-import { env } from '@/env';
-import { getInstanceConfig } from '@/lib/deployment';
-import { ORPCProvider } from '@/lib/orpc/provider';
+import { env } from "@/env";
+import { getInstanceConfig } from "@/lib/deployment";
+import { ORPCProvider } from "@/lib/orpc/provider";
 
 // Import translations directly since this is a root layout without NextIntlProvider
-import messages from '@/messages/fr.json';
+import messages from "@/messages/fr.json";
 
-import './globals.css';
+import "./globals.css";
+
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export const metadata: Metadata = {
   title: {
@@ -27,30 +31,37 @@ export const metadata: Metadata = {
   description: messages.app.description,
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: '/apple-touch-icon.png',
-    shortcut: '/favicon.svg',
+    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon.svg",
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Instance capabilities are injected into the prebuilt Docker image at
+  // runtime. Without this request boundary, Cache Components can freeze the
+  // build host's default LOUEZ_MODE into the static shell and hydrate the
+  // client with the wrong deployment mode.
+  await connection();
+  const instanceConfig = getInstanceConfig();
+
   return (
     <>
-      {process.env.NODE_ENV === 'development' && <Agentation />}
+      {/* {process.env.NODE_ENV === 'development' && <Agentation />} */}
 
       <html lang="fr" suppressHydrationWarning className="overscroll-none">
         <UmamiAnalytics />
 
         {env.NEXT_PUBLIC_FROMHELLO_KEY && env.NEXT_PUBLIC_FROMHELLO_API_URL && (
           <Script
-            src={`${env.NEXT_PUBLIC_FROMHELLO_API_URL.replace(/\/$/, '')}/api/t.js`}
+            src={`${env.NEXT_PUBLIC_FROMHELLO_API_URL.replace(/\/$/, "")}/api/t.js`}
             data-key={env.NEXT_PUBLIC_FROMHELLO_KEY}
             data-cookie-domain={env.NEXT_PUBLIC_FROMHELLO_COOKIE_DOMAIN || undefined}
             strategy="afterInteractive"
@@ -67,7 +78,7 @@ export default function RootLayout({
           />
         </head>
         <body className="font-sans antialiased">
-          <InstanceProvider config={getInstanceConfig()}>
+          <InstanceProvider config={instanceConfig}>
             <NuqsAdapter>
               <EvlogProvider>
                 <ORPCProvider>

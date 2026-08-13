@@ -1,96 +1,129 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Package } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import Link from "next/link";
+
+import { useTranslations } from "next-intl";
 
 import {
+  Badge,
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
-} from '@louez/ui'
-import { Badge } from '@louez/ui'
-import { formatCurrency } from '@louez/utils'
+} from "@louez/ui";
+import { ProductSolidIcon } from "@louez/ui/icons";
+import { formatCurrency } from "@louez/utils";
+
+import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 
 interface TopProduct {
-  productId: string | null
-  productName: string
-  totalQuantity: number
-  totalRevenue: string
-  reservationCount: number
+  productId: string | null;
+  productName: string;
+  totalQuantity: number;
+  totalRevenue: string;
+  reservationCount: number;
 }
 
 interface TopProductsTableProps {
-  products: TopProduct[]
+  products: TopProduct[];
+  /** Allocated receipts of every product over the period, top 10 or not. */
+  allProductsRevenue: number;
+  /** Distinct products that brought receipts over the period. */
+  productCount: number;
 }
 
-export function TopProductsTable({ products }: TopProductsTableProps) {
-  const t = useTranslations('dashboard.statistics')
+/** Gold / silver / bronze for the podium, muted numbers below. */
+const RANK_VARIANTS = ["review", "expired", "pending"] as const;
+
+export const TopProductsTable = ({
+  products,
+  allProductsRevenue,
+  productCount,
+}: TopProductsTableProps) => {
+  const t = useTranslations("dashboard.statistics");
 
   if (products.length === 0) {
-    return (
-      <div className="flex h-[200px] flex-col items-center justify-center text-muted-foreground">
-        <Package className="mb-2 h-8 w-8" />
-        <p>{t('noRentalData')}</p>
-      </div>
-    )
+    return <DashboardEmptyState icon={ProductSolidIcon} description={t("noRentalData")} />;
   }
 
+  // What the ten rows leave out, so the footer adds up to the receipts KPI.
+  const othersCount = Math.max(productCount - products.length, 0);
+  const othersRevenue =
+    allProductsRevenue -
+    products.reduce((sum, product) => sum + parseFloat(product.totalRevenue), 0);
+
   return (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[50px]">#</TableHead>
-          <TableHead>{t('topProducts.product')}</TableHead>
-          <TableHead className="text-center">{t('topProducts.rentals')}</TableHead>
-          <TableHead className="text-center">{t('topProducts.totalQuantity')}</TableHead>
-          <TableHead className="text-right">{t('topProducts.revenue')}</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {products.map((product, index) => (
-          <TableRow key={product.productId}>
-            <TableCell className="font-medium">
-              {index < 3 ? (
-                <Badge
-                  variant={index === 0 ? 'default' : 'secondary'}
-                  className={
-                    index === 0
-                      ? 'bg-yellow-500 dark:bg-yellow-600 text-yellow-950'
-                      : index === 1
-                        ? 'bg-gray-300 dark:bg-gray-500 text-gray-800 dark:text-gray-100'
-                        : 'bg-amber-600 dark:bg-amber-700 text-amber-50'
-                  }
+    <div className="-mx-1 overflow-x-auto px-1">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-12.5">#</TableHead>
+            <TableHead>{t("topProducts.product")}</TableHead>
+            <TableHead className="text-center">{t("topProducts.rentals")}</TableHead>
+            <TableHead className="hidden text-center md:table-cell">
+              {t("topProducts.totalQuantity")}
+            </TableHead>
+            <TableHead className="text-right">{t("topProducts.revenue")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {products.map((product, index) => (
+            <TableRow key={product.productId}>
+              <TableCell className="font-medium">
+                {index < RANK_VARIANTS.length ? (
+                  <Badge variant={RANK_VARIANTS[index]} className="tabular-nums">
+                    {index + 1}
+                  </Badge>
+                ) : (
+                  <span className="text-muted-foreground tabular-nums">{index + 1}</span>
+                )}
+              </TableCell>
+              <TableCell className="max-w-55">
+                <Link
+                  href={`/dashboard/products/${product.productId}`}
+                  className="block truncate font-medium hover:underline"
                 >
-                  {index + 1}
+                  {product.productName}
+                </Link>
+              </TableCell>
+              <TableCell className="text-center">
+                <Badge variant="expired" className="tabular-nums">
+                  {product.reservationCount}
                 </Badge>
-              ) : (
-                <span className="text-muted-foreground">{index + 1}</span>
-              )}
-            </TableCell>
-            <TableCell>
-              <Link
-                href={`/dashboard/products/${product.productId}`}
-                className="font-medium hover:underline"
-              >
-                {product.productName}
-              </Link>
-            </TableCell>
-            <TableCell className="text-center">
-              <Badge variant="outline">{product.reservationCount}</Badge>
-            </TableCell>
-            <TableCell className="text-center text-muted-foreground">
-              {t('topProducts.units', { count: product.totalQuantity })}
-            </TableCell>
-            <TableCell className="text-right font-medium">
-              {formatCurrency(parseFloat(product.totalRevenue))}
+              </TableCell>
+              <TableCell className="text-muted-foreground hidden text-center md:table-cell">
+                {t("topProducts.units", { count: product.totalQuantity })}
+              </TableCell>
+              <TableCell className="text-right font-medium tabular-nums whitespace-nowrap">
+                {formatCurrency(parseFloat(product.totalRevenue))}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+        <TableFooter>
+          {othersCount > 0 && (
+            <TableRow>
+              <TableCell colSpan={3} className="text-muted-foreground font-normal">
+                {t("topProducts.othersRow", { count: othersCount })}
+              </TableCell>
+              <TableCell className="hidden md:table-cell" />
+              <TableCell className="text-muted-foreground text-right font-normal tabular-nums whitespace-nowrap">
+                {formatCurrency(othersRevenue)}
+              </TableCell>
+            </TableRow>
+          )}
+          <TableRow>
+            <TableCell colSpan={3}>{t("topProducts.totalRow")}</TableCell>
+            <TableCell className="hidden md:table-cell" />
+            <TableCell className="text-right tabular-nums whitespace-nowrap">
+              {formatCurrency(allProductsRevenue)}
             </TableCell>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  )
-}
+        </TableFooter>
+      </Table>
+    </div>
+  );
+};

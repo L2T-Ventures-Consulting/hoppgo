@@ -7,7 +7,8 @@
 @import "./styles/dashboard-theme.css";
 
 @keyframes ai-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px -5px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
   50% {
@@ -15,93 +16,9 @@
   }
 }
 
-/* ── AI Chat – animated gradient mesh ── */
-
-@keyframes ai-mesh-drift {
-  0% {
-    transform: translate(0, 0) scale(1);
-  }
-  25% {
-    transform: translate(8%, -6%) scale(1.08);
-  }
-  50% {
-    transform: translate(-4%, 8%) scale(0.95);
-  }
-  75% {
-    transform: translate(-8%, -4%) scale(1.05);
-  }
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-}
-
-@keyframes ai-mesh-pulse {
-  0%, 100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 0.8;
-  }
-}
-
-.ai-mesh-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(60px);
-  will-change: transform, opacity;
-  animation:
-    ai-mesh-drift 8s ease-in-out infinite,
-    ai-mesh-pulse 6s ease-in-out infinite;
-}
-
-/* Top-left – bright blue */
-.ai-mesh-orb--1 {
-  width: 65%;
-  height: 55%;
-  top: -10%;
-  left: -15%;
-  background: radial-gradient(circle at 40% 40%, oklch(0.55 0.22 264 / 0.18), oklch(0.55 0.22 264 / 0.06) 50%, transparent 75%);
-  animation-duration: 8s, 5s;
-}
-
-/* Bottom-right – deeper blue */
-.ai-mesh-orb--2 {
-  width: 55%;
-  height: 50%;
-  bottom: -8%;
-  right: -12%;
-  background: radial-gradient(circle at 60% 60%, oklch(0.48 0.22 264 / 0.14), oklch(0.48 0.22 264 / 0.04) 50%, transparent 75%);
-  animation-duration: 10s, 7s;
-  animation-delay: -3s, -2s;
-  animation-direction: reverse, normal;
-}
-
-/* Center – lighter blue */
-.ai-mesh-orb--3 {
-  width: 40%;
-  height: 35%;
-  top: 35%;
-  left: 30%;
-  background: radial-gradient(circle, oklch(0.62 0.20 264 / 0.12), transparent 65%);
-  animation-duration: 12s, 8s;
-  animation-delay: -5s, -3s;
-}
-
-/* Dark mode – boost brightness */
-.dark .ai-mesh-orb--1 {
-  background: radial-gradient(circle at 40% 40%, oklch(0.60 0.22 264 / 0.22), oklch(0.60 0.22 264 / 0.08) 50%, transparent 75%);
-}
-
-.dark .ai-mesh-orb--2 {
-  background: radial-gradient(circle at 60% 60%, oklch(0.52 0.22 264 / 0.18), oklch(0.52 0.22 264 / 0.06) 50%, transparent 75%);
-}
-
-.dark .ai-mesh-orb--3 {
-  background: radial-gradient(circle, oklch(0.65 0.18 264 / 0.15), transparent 65%);
-}
-
 @keyframes timeline-dot-pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.45;
   }
@@ -167,10 +84,31 @@
   animation: none;
 }
 
+/* Periodic revolving-door turn on the "What's new" sidebar icon while entries
+   are unread — the badge alone is easy to scroll past. `perspective()` sits in
+   the transform list rather than on the parent so the icon needs no wrapper and
+   the button keeps its stacking context (its hover glow is a `-z-10` pseudo
+   element). The hover zoom uses the standalone `scale` property, which composes
+   with `transform` instead of fighting it. */
+@keyframes whats-new-flip {
+  from {
+    transform: perspective(100px) rotateY(0deg);
+  }
+  to {
+    transform: perspective(100px) rotateY(360deg);
+  }
+}
+
+/* Pure rotation reads best accelerating and decelerating, hence in-out. */
+.animate-whats-new-flip {
+  animation: whats-new-flip 0.9s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .timeline-dot-pulse,
   .timeline-dash-flow,
-  .animate-attention-pulse {
+  .animate-attention-pulse,
+  .animate-whats-new-flip {
     animation: none;
   }
 }

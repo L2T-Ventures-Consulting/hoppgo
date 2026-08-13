@@ -15,6 +15,10 @@ import {
   getRecentPlatformFees,
 } from '@/lib/pay-as-you-go'
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 function formatMoney(cents: number, currency: string, locale: string): string {
   return new Intl.NumberFormat(locale, {
     style: 'currency',

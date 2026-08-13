@@ -1,8 +1,10 @@
 import { getReservationPollData } from '@louez/api/services'
-import { NextResponse } from 'next/server'
+import { connection, NextResponse } from 'next/server'
 import { getCurrentStore } from '@/lib/store-context'
 
 export async function GET() {
+  await connection()
+
   try {
     const store = await getCurrentStore()
     if (!store) {

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState } from "react";
 
-import { Pencil, RefreshCw, Search } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+import { Pencil, RefreshCw } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
 import {
   Badge,
@@ -13,8 +13,10 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
-} from '@louez/ui';
+  Tabs,
+  TabsList,
+  TabsTab,
+} from "@louez/ui";
 import {
   Combobox,
   ComboboxEmpty,
@@ -22,7 +24,7 @@ import {
   ComboboxItem,
   ComboboxList,
   ComboboxPopup,
-} from '@louez/ui';
+} from "@louez/ui";
 import {
   Sheet,
   SheetDescription,
@@ -31,29 +33,23 @@ import {
   SheetPanel,
   SheetPopup,
   SheetTitle,
-} from '@louez/ui';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@louez/ui';
-import { cn } from '@louez/utils';
+} from "@louez/ui";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@louez/ui";
+import { LinkIcon } from "@louez/ui/icons";
 
 import type {
   TulipCatalogItem,
   TulipProductDraft,
-} from '@/lib/integrations/tulip/product-form-utils';
+} from "@/lib/integrations/tulip/product-form-utils";
+import { SearchInput } from "@/components/ui/search-input";
 import {
   buildActionInput,
   initDraftFromTulipProduct,
   resolveTulipCatalog,
   validateDraft,
-} from '@/lib/integrations/tulip/product-form-utils';
+} from "@/lib/integrations/tulip/product-form-utils";
 
-import { TulipProductFormFields } from '../../../products/components/tulip-product-form-fields';
+import { TulipProductFormFields } from "../../../products/components/tulip-product-form-fields";
 
 interface TulipProductMappingSectionProps {
   disabled: boolean;
@@ -84,10 +80,7 @@ interface TulipProductMappingSectionProps {
   isCreatePending: boolean;
   createProductId: string | null;
   isRefreshing: boolean;
-  onMappingChange: (
-    productId: string,
-    tulipProductId: string | null,
-  ) => Promise<void>;
+  onMappingChange: (productId: string, tulipProductId: string | null) => Promise<void>;
   onPushProduct: (input: ReturnType<typeof buildActionInput>) => Promise<void>;
   onCreateProduct: (input: ReturnType<typeof buildActionInput>) => Promise<void>;
   onRefresh: () => Promise<void>;
@@ -111,26 +104,19 @@ export function TulipProductMappingSection({
   onCreateProduct,
   onRefresh,
 }: TulipProductMappingSectionProps) {
-  const t = useTranslations(
-    'dashboard.settings.integrationsPage.assurance.mapping',
-  );
+  const t = useTranslations("dashboard.settings.integrationsPage.assurance.mapping");
   const locale = useLocale();
 
   // Filter state
-  const [statusFilter, setStatusFilter] = useState<
-    'all' | 'mapped' | 'unmapped'
-  >('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<"all" | "mapped" | "unmapped">("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Sheet state
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [sheetDraft, setSheetDraft] = useState<TulipProductDraft | null>(null);
 
-  const resolvedCatalog = useMemo(
-    () => resolveTulipCatalog(tulipCatalog),
-    [tulipCatalog],
-  );
+  const resolvedCatalog = useMemo(() => resolveTulipCatalog(tulipCatalog), [tulipCatalog]);
   const tulipItems = useMemo(
     () =>
       tulipProducts.map((tp) => ({
@@ -151,20 +137,14 @@ export function TulipProductMappingSection({
     Boolean(tulipProductId && tulipProductById.has(tulipProductId));
 
   let filteredProducts = products;
-  if (statusFilter === 'mapped') {
-    filteredProducts = filteredProducts.filter((p) =>
-      hasValidMapping(p.tulipProductId),
-    );
-  } else if (statusFilter === 'unmapped') {
-    filteredProducts = filteredProducts.filter(
-      (p) => !hasValidMapping(p.tulipProductId),
-    );
+  if (statusFilter === "mapped") {
+    filteredProducts = filteredProducts.filter((p) => hasValidMapping(p.tulipProductId));
+  } else if (statusFilter === "unmapped") {
+    filteredProducts = filteredProducts.filter((p) => !hasValidMapping(p.tulipProductId));
   }
   if (searchQuery.trim()) {
     const q = searchQuery.toLowerCase();
-    filteredProducts = filteredProducts.filter((p) =>
-      p.name.toLowerCase().includes(q),
-    );
+    filteredProducts = filteredProducts.filter((p) => p.name.toLowerCase().includes(q));
   }
 
   const statusCounts = {
@@ -176,13 +156,11 @@ export function TulipProductMappingSection({
   const editingProduct = editingProductId
     ? (products.find((p) => p.id === editingProductId) ?? null)
     : null;
-  const editingProductHasValidMapping = hasValidMapping(
-    editingProduct?.tulipProductId ?? null,
-  );
+  const editingProductHasValidMapping = hasValidMapping(editingProduct?.tulipProductId ?? null);
   const editingTulipProduct = editingProduct
-    ? (editingProduct.tulipProductId
-        ? (tulipProductById.get(editingProduct.tulipProductId) ?? null)
-        : null)
+    ? editingProduct.tulipProductId
+      ? (tulipProductById.get(editingProduct.tulipProductId) ?? null)
+      : null
     : null;
 
   const validation = validateDraft(sheetDraft);
@@ -231,13 +209,13 @@ export function TulipProductMappingSection({
     ? editingTulipProduct.louezManaged
       ? `${editingTulipProduct.title} (Louez)`
       : editingTulipProduct.title
-    : (editingProduct?.name ?? '');
+    : (editingProduct?.name ?? "");
 
   const currencyFormatter = useMemo(
     () =>
       new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: 'EUR',
+        style: "currency",
+        currency: "EUR",
       }),
     [locale],
   );
@@ -253,13 +231,13 @@ export function TulipProductMappingSection({
       item.brand?.trim(),
       item.model?.trim(),
       item.valueExcl != null
-        ? t('dropdownValueExclTax', {
+        ? t("dropdownValueExclTax", {
             value: currencyFormatter.format(item.valueExcl),
           })
-        : '—',
+        : "—",
     ].filter((part): part is string => Boolean(part && part.length > 0));
 
-    return parts.join(' • ');
+    return parts.join(" • ");
   };
 
   return (
@@ -267,66 +245,64 @@ export function TulipProductMappingSection({
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div className="space-y-1">
-            <CardTitle>{t('title')}</CardTitle>
-            <CardDescription>{t('description')}</CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <LinkIcon className="h-5 w-5 shrink-0" />
+              {t("title")}
+            </CardTitle>
+            <CardDescription>{t("description")}</CardDescription>
           </div>
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={() => void onRefresh()}
-            disabled={disabled || isRefreshing}
+            isPending={isRefreshing}
+            pendingContent={t("refreshingButton")}
+            disabled={disabled}
           >
-            <RefreshCw
-              className={cn('h-4 w-4', isRefreshing && 'animate-spin')}
-            />
-            {isRefreshing ? t('refreshingButton') : t('refreshButton')}
+            <RefreshCw data-slot="icon" />
+            {t("refreshButton")}
           </Button>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {disabled && (
           <p className="text-muted-foreground rounded-md border border-dashed p-3 text-sm">
-            {t('disabledMessage')}
+            {t("disabledMessage")}
           </p>
         )}
 
         {/* Filter bar */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="bg-muted/50 flex items-center gap-1 rounded-lg border p-1">
-            {(['all', 'mapped', 'unmapped'] as const).map((status) => (
-              <Button
-                key={status}
-                type="button"
-                variant={statusFilter === status ? 'secondary' : 'ghost'}
-                size="sm"
-                onClick={() => setStatusFilter(status)}
-              >
-                {t(`filters.${status}`)}
-                <Badge
-                  variant={statusFilter === status ? 'default' : 'secondary'}
-                  className="ml-1.5 h-5 min-w-5 px-1.5"
-                  size="sm"
-                >
-                  {statusCounts[status]}
-                </Badge>
-              </Button>
-            ))}
-          </div>
-          <div className="relative">
-            <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
-            <Input
-              placeholder={t('searchPlaceholder')}
-              className="w-full pl-9 sm:w-[250px]"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <Tabs
+            value={statusFilter}
+            onValueChange={(value) => setStatusFilter(value as "all" | "mapped" | "unmapped")}
+          >
+            <TabsList variant="underline">
+              {(["all", "mapped", "unmapped"] as const).map((status) => (
+                <TabsTab key={status} value={status}>
+                  {t(`filters.${status}`)}
+                  <Badge variant={statusFilter === status ? "progress" : "expired"} size="sm">
+                    {statusCounts[status]}
+                  </Badge>
+                </TabsTab>
+              ))}
+            </TabsList>
+          </Tabs>
+          <SearchInput
+            placeholder={t("searchPlaceholder")}
+            clearLabel={t("searchPlaceholder")}
+            groupClassName="w-full sm:w-[250px]"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onClear={() => setSearchQuery("")}
+            enableShortcut={false}
+          />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border p-3">
           <p className="text-muted-foreground text-sm">
-            {t('coverageSummary', {
+            {t("coverageSummary", {
               insured: statusCounts.mapped,
               total: statusCounts.all,
             })}
@@ -336,9 +312,9 @@ export function TulipProductMappingSection({
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setStatusFilter('unmapped')}
+              onClick={() => setStatusFilter("unmapped")}
             >
-              {t('viewUnmappedCta', { count: statusCounts.unmapped })}
+              {t("viewUnmappedCta", { count: statusCounts.unmapped })}
             </Button>
           )}
         </div>
@@ -348,33 +324,25 @@ export function TulipProductMappingSection({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>{t('columns.product')}</TableHead>
-                <TableHead>{t('columns.tulipProduct')}</TableHead>
-                <TableHead>{t('statusBadge.label')}</TableHead>
-                <TableHead className="w-[80px] text-right">
-                  {t('columns.actions')}
-                </TableHead>
+                <TableHead>{t("columns.product")}</TableHead>
+                <TableHead>{t("columns.tulipProduct")}</TableHead>
+                <TableHead>{t("statusBadge.label")}</TableHead>
+                <TableHead className="w-[80px] text-right">{t("columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {products.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-muted-foreground py-8 text-center"
-                  >
-                    {t('emptyState')}
+                  <TableCell colSpan={4} className="text-muted-foreground py-8 text-center">
+                    {t("emptyState")}
                   </TableCell>
                 </TableRow>
               )}
 
               {products.length > 0 && filteredProducts.length === 0 && (
                 <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-muted-foreground py-8 text-center"
-                  >
-                    {t('noFilterResults')}
+                  <TableCell colSpan={4} className="text-muted-foreground py-8 text-center">
+                    {t("noFilterResults")}
                   </TableCell>
                 </TableRow>
               )}
@@ -384,13 +352,9 @@ export function TulipProductMappingSection({
                   <TableCell className="font-medium">{product.name}</TableCell>
                   <TableCell>
                     {(() => {
-                      const hasMappedStatus = hasValidMapping(
-                        product.tulipProductId,
-                      );
+                      const hasMappedStatus = hasValidMapping(product.tulipProductId);
                       const selectedTulipItem = hasMappedStatus
-                        ? (tulipItems.find(
-                            (i) => i.value === product.tulipProductId,
-                          ) ?? null)
+                        ? (tulipItems.find((i) => i.value === product.tulipProductId) ?? null)
                         : null;
 
                       return (
@@ -399,16 +363,13 @@ export function TulipProductMappingSection({
                             items={tulipItems}
                             value={selectedTulipItem}
                             onValueChange={(item) => {
-                              void onMappingChange(
-                                product.id,
-                                item?.value ?? null,
-                              );
+                              void onMappingChange(product.id, item?.value ?? null);
                             }}
                           >
                             <ComboboxInput
                               showTrigger
                               showClear={!!product.tulipProductId}
-                              placeholder={t('notMapped')}
+                              placeholder={t("notMapped")}
                               size="sm"
                               disabled={
                                 disabled ||
@@ -418,17 +379,12 @@ export function TulipProductMappingSection({
                               }
                             />
                             <ComboboxPopup>
-                              <ComboboxEmpty>{t('noResults')}</ComboboxEmpty>
+                              <ComboboxEmpty>{t("noResults")}</ComboboxEmpty>
                               <ComboboxList>
                                 {(item) => (
-                                  <ComboboxItem
-                                    key={item.value}
-                                    value={item}
-                                  >
+                                  <ComboboxItem key={item.value} value={item}>
                                     <div className="min-w-0">
-                                      <div className="truncate font-medium">
-                                        {item.label}
-                                      </div>
+                                      <div className="truncate font-medium">{item.label}</div>
                                       <div className="text-muted-foreground truncate text-xs">
                                         {formatTulipProductMeta(item)}
                                       </div>
@@ -440,7 +396,7 @@ export function TulipProductMappingSection({
                           </Combobox>
                           {isMappingPending && mappingProductId === product.id && (
                             <p className="text-muted-foreground mt-1 text-xs">
-                              {t('savingMapping')}
+                              {t("savingMapping")}
                             </p>
                           )}
                         </div>
@@ -449,16 +405,12 @@ export function TulipProductMappingSection({
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        hasValidMapping(product.tulipProductId)
-                          ? 'success'
-                          : 'secondary'
-                      }
+                      variant={hasValidMapping(product.tulipProductId) ? "success" : "expired"}
                       size="sm"
                     >
                       {hasValidMapping(product.tulipProductId)
-                        ? t('statusBadge.mapped')
-                        : t('statusBadge.notMapped')}
+                        ? t("statusBadge.mapped")
+                        : t("statusBadge.notMapped")}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
@@ -483,7 +435,7 @@ export function TulipProductMappingSection({
           <SheetPopup side="right">
             <SheetHeader>
               <SheetTitle>{editingProduct?.name}</SheetTitle>
-              <SheetDescription>{t('sheet.description')}</SheetDescription>
+              <SheetDescription>{t("sheet.description")}</SheetDescription>
             </SheetHeader>
             <SheetPanel>
               {editingProduct && sheetDraft && (
@@ -491,16 +443,12 @@ export function TulipProductMappingSection({
                   {/* Current mapping status */}
                   <div className="flex items-center gap-2">
                     <Badge
-                      variant={
-                        editingProductHasValidMapping
-                          ? 'success'
-                          : 'secondary'
-                      }
+                      variant={editingProductHasValidMapping ? "success" : "expired"}
                       size="sm"
                     >
                       {editingProductHasValidMapping
-                        ? t('statusBadge.mapped')
-                        : t('statusBadge.notMapped')}
+                        ? t("statusBadge.mapped")
+                        : t("statusBadge.notMapped")}
                     </Badge>
                     {editingProductHasValidMapping && editingTulipProduct && (
                       <span className="text-muted-foreground text-sm">
@@ -528,12 +476,8 @@ export function TulipProductMappingSection({
               )}
             </SheetPanel>
             <SheetFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setSheetOpen(false)}
-              >
-                {t('sheet.cancel')}
+              <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>
+                {t("sheet.cancel")}
               </Button>
               <Button
                 type="button"
@@ -542,11 +486,11 @@ export function TulipProductMappingSection({
               >
                 {editingProductHasValidMapping
                   ? isPushPending && pushProductId === editingProductId
-                    ? t('updatingButton')
-                    : t('updateButton')
+                    ? t("updatingButton")
+                    : t("updateButton")
                   : isCreatePending && createProductId === editingProductId
-                    ? t('creatingButton')
-                    : t('createButton')}
+                    ? t("creatingButton")
+                    : t("createButton")}
               </Button>
             </SheetFooter>
           </SheetPopup>

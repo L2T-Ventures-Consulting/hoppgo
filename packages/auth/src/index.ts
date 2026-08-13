@@ -69,11 +69,18 @@ const otpSubjectTranslations: Record<string, string> = {
 // ============================================================================
 
 let _sessionHook: ((session: { userId: string }) => Promise<void>) | null = null
+let _userCreatedHook: ((user: { userId: string }) => Promise<void>) | null = null
 
 export function setSessionHook(
   hook: (session: { userId: string }) => Promise<void>,
 ) {
   _sessionHook = hook
+}
+
+export function setUserCreatedHook(
+  hook: (user: { userId: string }) => Promise<void>,
+) {
+  _userCreatedHook = hook
 }
 
 const SESSION_DURATION_SECONDS = 60 * 60 * 24 * 90
@@ -197,6 +204,11 @@ export const authInstance = betterAuth({
               message: 'Registration is closed on this instance',
               code: 'REGISTRATION_CLOSED',
             })
+          }
+        },
+        after: async (user) => {
+          if (_userCreatedHook) {
+            await _userCreatedHook({ userId: user.id })
           }
         },
       },

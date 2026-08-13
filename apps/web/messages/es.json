@@ -4,6 +4,8 @@
     "description": "Plataforma de alquiler de equipos simple y moderna"
   },
   "common": {
+    "duration": "Duración",
+    "price": "Precio",
     "save": "Guardar",
     "unsavedChanges": "Cambios sin guardar",
     "cancel": "Cancelar",
@@ -22,7 +24,11 @@
     "error": "Error",
     "success": "Exitoso",
     "confirm": "Confirmar",
+    "done": "Listo",
     "close": "Cerrar",
+    "play": "Reproducir",
+    "pause": "Pausa",
+    "seek": "Buscar",
     "yes": "Si",
     "no": "No",
     "view": "Ver",
@@ -114,14 +120,20 @@
     },
     "dateTimePicker": {
       "select": "Seleccionar",
+      "chooseDate": "Elegir una fecha",
+      "choosePeriod": "Elegir un periodo",
       "naturalPlaceholder": "p. ej. mañana a las 14 o 12 de mayo a las 13",
       "time": "Hora",
+      "startTime": "Inicio",
+      "endTime": "Fin",
       "confirm": "Confirmar"
     },
     "customerSearch": {
       "placeholder": "Buscar cliente...",
       "noResults": "No se encontro ningun cliente",
-      "selectCustomer": "Seleccionar un cliente"
+      "selectCustomer": "Seleccionar un cliente",
+      "createCustomer": "Crear un cliente",
+      "createNamed": "Crear «{query}»"
     }
   },
   "auth": {
@@ -224,20 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "Asistente IA",
-        "subtitle": "Tu tienda aconseja, responde y reserva — automáticamente",
-        "credits": "{count} créditos",
-        "creditsUnlimited": "Créditos ilimitados",
-        "recharge": "Recargar"
-      },
       "hero": {
         "eyebrow": "Asistente IA",
-        "title": "Tu tienda responde, aconseja y reserva, incluso cuando no estás",
-        "subtitle": "Activa el asesor en línea y el agente de voz: tus clientes obtienen respuestas inmediatas y tú consigues reservas cualificadas.",
         "activate": "Activar",
         "upgrade": "Mejorar plan",
-        "upgradeHint": "El Asistente IA está incluido a partir del plan Pro.",
         "advisor": {
           "title": "Asesor en línea",
           "b1": "Responde a las preguntas de tus clientes sobre tu tienda 24/7",
@@ -249,6 +251,20 @@
           "b1": "Atiende todas tus llamadas, a cualquier hora",
           "b2": "Informa de horarios, tarifas y disponibilidad de viva voz",
           "b3": "Toma reservas y te transmite mensajes"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Asesor en línea",
+          "description": "Deje que un asistente de IA reciba a sus clientes en su tienda, responda sus preguntas y les guíe hacia el alquiler adecuado"
+        },
+        "voice": {
+          "title": "Agente de voz",
+          "description": "Un agente de voz con IA que responde tu línea telefónica — informa a tus clientes y registra reservas, en el idioma que elijas."
+        },
+        "conversations": {
+          "title": "Conversaciones de clientes",
+          "description": "Consulte qué preguntaron los clientes al asesor y qué conversaciones terminaron en una reserva"
         }
       }
     },
@@ -267,7 +283,13 @@
         "step1Other": "Abre el menú y toca «Compartir»",
         "step2": "Elige «Añadir a pantalla de inicio»",
         "step3": "Toca «Añadir»"
-      }
+      },
+      "benefits": {
+        "home": "Icono en la pantalla de inicio",
+        "fullscreen": "Pantalla completa, sin navegador",
+        "push": "Notificaciones de reservas"
+      },
+      "sidebarLabel": "Instalar la app"
     },
     "title": "Panel de control",
     "notifications": {
@@ -318,7 +340,21 @@
       "newReservation": "Nueva reserva",
       "reservationLimitReached": "Limite alcanzado",
       "help": "Ayuda",
-      "feedback": "Ayuda y feedback"
+      "feedback": "Ayuda y feedback",
+      "aiCreditsLow": "Saldo de créditos bajo"
+    },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Abrir la paleta de comandos",
+        "aiAssistant": "Abrir el asistente de IA",
+        "toggleTheme": "Alternar entre el tema claro y oscuro",
+        "sidebar": "Mostrar u ocultar la barra lateral",
+        "search": "Enfocar la búsqueda",
+        "createReservation": "Crear una reserva",
+        "goToReservations": "Ir a reservas",
+        "goToCalendar": "Ir al calendario",
+        "save": "Guardar el formulario activo"
+      }
     },
     "storeSwitcher": {
       "selectStore": "Seleccionar una tienda",
@@ -553,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "Asistente IA",
+      "aiConversations": "Conversaciones de clientes",
+      "aiAdvisor": "Asesor en línea",
+      "aiVoice": "Agente de voz",
       "home": "Inicio",
       "products": "Productos",
       "inventory": "Inventario",
@@ -568,7 +607,10 @@
       "settings": "Configuracion",
       "store": "Mi tienda",
       "analytics": "Análisis",
-      "multiStore": "Multi-tienda"
+      "analyticsSales": "Ventas",
+      "analyticsTraffic": "Tráfico",
+      "multiStore": "Multi-tienda",
+      "aiCredits": "Créditos IA"
     },
     "multiStore": {
       "title": "Multi-tienda",
@@ -689,7 +731,8 @@
         "noDepartures": "No hay entregas programadas hoy",
         "noReturns": "No hay devoluciones programadas hoy",
         "noActivityTitle": "Dia tranquilo",
-        "noActivityDescription": "No hay operaciones programadas hoy"
+        "noActivityDescription": "No hay operaciones programadas hoy",
+        "overdue": "Vencido"
       },
       "pending": {
         "title": "Solicitudes pendientes",
@@ -797,16 +840,6 @@
         "archived": "Archivados"
       },
       "form": {
-        "steps": {
-          "photos": "Fotos",
-          "photosDescription": "Imagenes del producto",
-          "info": "Informacion",
-          "infoDescription": "Nombre y descripcion",
-          "pricing": "Precios",
-          "pricingDescription": "Precio y tarifas",
-          "preview": "Publicar",
-          "previewDescription": "Revisar y publicar"
-        },
         "photos": "Fotos",
         "photosDescription": "Agregue hasta 5 fotos de su producto",
         "addImage": "Agregar",
@@ -818,6 +851,22 @@
         "uploading": "Subiendo...",
         "imageUploadError": "Error al subir",
         "recropImage": "Recortar de nuevo",
+        "openImageViewer": "Ver la foto",
+        "imageHistoryAction": "Ver historial",
+        "imageHistoryTitle": "Historial de la foto",
+        "imageHistoryDescription": "Consulta todas las versiones de esta foto y elige cuál usar. Las versiones anteriores se conservan.",
+        "imageHistoryOriginal": "Foto original",
+        "imageHistoryCropped": "Después del recorte",
+        "imageHistoryAiEnhanced": "Después de la mejora con IA",
+        "imageHistoryBackgroundRemoved": "Después de eliminar el fondo",
+        "imageHistoryCurrent": "En uso",
+        "imageHistoryInitialVersion": "Versión inicial",
+        "imageHistoryUseVersion": "Usar esta versión",
+        "imageHistoryDeleteVersion": "Eliminar esta versión",
+        "imageHistoryDeleteTitle": "¿Eliminar esta versión?",
+        "imageHistoryDeleteDescription": "Esta versión se eliminará del historial. Las demás versiones seguirán disponibles.",
+        "imageHistoryDeleteCancel": "Cancelar",
+        "imageHistoryDeleteConfirm": "Eliminar",
         "cropUnsupportedFormat": "Este formato de imagen no se puede recortar de nuevo",
         "cropDialogTitle": "Ajusta tus fotos",
         "cropDialogDescription": "Usa un recorte 4:3 para una presentación consistente en la tienda",
@@ -836,6 +885,129 @@
         "cropPreviewTitle": "Vista previa",
         "cropPreviewDescription": "Así se verá tu foto en la tienda",
         "cropUploadSelected": "Subir seleccionadas",
+        "aiEnhanceAction": "Mejorar con IA",
+        "removeBackgroundAction": "Eliminar el fondo",
+        "aiEnhanceLoading": "Procesando…",
+        "aiEnhanceReadyBadge": "Por revisar",
+        "aiEnhanceQueuedBadge": "En espera",
+        "aiEnhancedBadge": "Mejorada con IA",
+        "backgroundRemovedBadge": "Fondo eliminado",
+        "aiEnhanceErrorAlreadyProcessed": "Esta foto ya ha sido procesada",
+        "aiEnhanceBatchAction": "Uniformizar las fotos",
+        "aiEnhanceBatchHint": "Recorta sus productos y los centra en un encuadre 4:3",
+        "aiEnhanceBatchProgress": "Foto {current} de {total}…",
+        "aiEnhanceDialogTitle": "Antes / Después",
+        "removeBackgroundDialogTitle": "Fondo eliminado",
+        "aiEnhanceDialogDescription": "Compare el resultado antes de reemplazar su foto.",
+        "aiEnhanceRemaining": "{count, plural, one {# foto por revisar} other {# fotos por revisar}}",
+        "aiEnhanceBefore": "Antes",
+        "aiEnhanceAfter": "Después",
+        "aiEnhanceAccept": "Usar esta versión",
+        "aiEnhanceReject": "Mantener original",
+        "aiEnhanceTransparencyHint": "Fondo transparente, producto centrado en un encuadre 4:3",
+        "aiEnhanceTransparencyHintPreserve": "Fondo transparente, encuadre original conservado en formato 4:3",
+        "aiEnhanceBackgroundCheckerboard": "Cuadrícula",
+        "aiEnhanceBackgroundWhite": "Blanco",
+        "aiEnhanceError": "No se pudo mejorar la foto",
+        "aiEnhanceErrorCredits": "Sus créditos de IA se han agotado. Recárguelos para seguir mejorando sus fotos.",
+        "aiEnhanceErrorDisabled": "La mejora con IA no está disponible en este momento.",
+        "removeBackgroundErrorDisabled": "La eliminación de fondo no está disponible en este momento.",
+        "aiEnhanceErrorInvalidImage": "Esta imagen no se puede mejorar",
+        "aiEnhanceErrorEmptyImage": "No se ha detectado ningún producto en esta foto",
+        "aiEnhanceErrorProvider": "El servicio de mejora no está disponible temporalmente. Inténtelo de nuevo en unos instantes.",
+        "removeBackgroundErrorProvider": "El servicio de eliminación de fondo no está disponible temporalmente. Inténtelo de nuevo en unos instantes.",
+        "aiEnhanceOriginalMissing": "La foto original ya no está en el formulario",
+        "aiEnhanceSavedToHistory": "La versión de IA se guardó en el historial",
+        "aiEnhanceCropAction": "Mejorar con IA",
+        "aiEnhancePromoTitle": "Mejore sus fotos con IA",
+        "aiEnhancePromoDescription": "Imágenes de tienda nítidas y coherentes con un solo clic.",
+        "aiEnhancePromoBenefitBackground": "El fondo se elimina y se sustituye por transparencia",
+        "aiEnhancePromoBenefitFraming": "Su producto queda perfectamente centrado en un encuadre 4:3",
+        "aiEnhancePromoBenefitConsistency": "Un aspecto uniforme en toda su tienda",
+        "aiEnhancePromoNote": "Esta función requiere que active la IA en su cuenta.",
+        "aiEnhancePromoCta": "Activar la IA",
+        "aiEnhancePromoClose": "Más tarde",
+        "video": "Vídeo",
+        "aiCreditsPerImage": "{count, plural, one {# crédito} other {# créditos}} / foto",
+        "aiCreditsBgRemoval": "Solo recorte de fondo: {count, plural, one {# crédito} other {# créditos}}",
+        "aiCreditsBgRemovalFree": "Recorte de fondo incluido",
+        "aiCreditsBalance": "Saldo: {count, plural, one {# crédito} other {# créditos}}",
+        "aiCreditsBalanceUnlimited": "Créditos ilimitados",
+        "aiCreditsBatchEstimate": "Unos {credits, plural, one {# crédito} other {# créditos}} para {images, plural, one {# foto} other {# fotos}}",
+        "aiCreditsLearnMore": "Más información",
+        "aiCreditsLearnMoreTitle": "Fotos que venden",
+        "aiCreditsLearnMoreValue": "La IA recorta tu producto, unifica el fondo y reencuadra la imagen: fotos de calidad profesional que dan confianza y mejoran la conversión.",
+        "aiCreditsLearnMoreCost": "Cada foto mejorada cuesta {count, plural, one {# crédito} other {# créditos}}, que se descuentan primero de tus créditos mensuales y luego de los de prepago.",
+        "aiCreditsLearnMoreLink": "Ver mis créditos de IA",
+        "aiCreditsExhaustedTitle": "Créditos de IA insuficientes",
+        "aiCreditsExhaustedDescription": "La mejora de fotos está en pausa: tu saldo ya no cubre una foto. Recarga tus créditos para continuar.",
+        "aiCreditsRecharge": "Recargar",
+        "aiChoiceTitle": "¿Qué hacemos con esta foto?",
+        "aiChoiceDescription": "Elige el resultado — siempre podrás cambiarlo después.",
+        "aiChoiceEnhanceDescription": "Calidad profesional: fondo limpio, producto recortado y centrado",
+        "aiChoiceRemoveBackgroundDescription": "Conserva tu foto y solo sustituye el fondo",
+        "aiChoiceCrop": "Recortar yo mismo",
+        "aiChoiceCropDescription": "Ajusta el encuadre 4:3 a mano",
+        "aiChoiceUseAsIs": "Usar tal cual",
+        "aiChoiceBatchEnhance": "{count, plural, one {Mejorar la # foto} other {Mejorar las # fotos}}",
+        "cropBackToChoice": "Volver a las opciones",
+        "aiCreditsChip": "{count, plural, one {# crédito} other {# créditos}}",
+        "aiCreditsChipIncluded": "Incluido",
+        "aiCreditsTooltipTitle": "Mejora con IA",
+        "aiCreditsTooltipWhat": "Tu producto se recorta, el fondo se unifica y la imagen se reencuadra en 4:3: un resultado de estudio.",
+        "aiCreditsTooltipCost": "{count, plural, one {# crédito} other {# créditos}} por foto",
+        "aiCreditsTooltipBgTitle": "Quitar el fondo",
+        "aiCreditsTooltipBgWhat": "Tu foto se mantiene tal cual: solo se elimina el fondo.",
+        "aiCreditsTooltipFree": "Incluido en tu plan",
+        "aiProcessingTitle": "Mejorando tu foto",
+        "aiProcessingTitleBackground": "Quitando el fondo",
+        "aiProcessingDescription": "No hace falta esperar aquí: el proceso continúa si cierras.",
+        "aiProcessingContinueBackground": "Continuar en segundo plano",
+        "aiProcessingFailedTitle": "El proceso no se completó",
+        "aiProcessingFailedDescription": "Tus fotos se añadieron correctamente. Puedes volver a lanzar el proceso cuando quieras.",
+        "aiProcessingRetry": "Reintentar",
+        "aiProcessingClose": "Cerrar",
+        "aiStepPrepareLabel": "Preparación",
+        "aiStepPrepareMessage1": "Analizando tu foto…",
+        "aiStepPrepareMessage2": "Localizando el producto en la imagen.",
+        "aiStepPrepareMessage3": "Midiendo la luz y los colores.",
+        "aiStepEnhanceLabel": "Mejora con IA",
+        "aiStepEnhanceMessage1": "La IA trabaja la luz y la nitidez.",
+        "aiStepEnhanceMessage2": "Los colores se ajustan para un resultado fiel.",
+        "aiStepEnhanceMessage3": "Es el paso más largo, pero merece la espera.",
+        "aiStepEnhanceMessage4": "Tu imagen se acerca cada vez más a una foto de estudio.",
+        "aiStepCutoutLabel": "Recorte",
+        "aiStepCutoutMessage1": "Separando el producto del fondo.",
+        "aiStepCutoutMessage2": "Afinando los contornos píxel a píxel.",
+        "aiStepCutoutMessage3": "Un fondo limpio pone tu producto en primer plano.",
+        "aiStepFinishLabel": "Acabado",
+        "aiStepFinishMessage1": "Encuadre 4:3 y centrado del producto.",
+        "aiStepFinishMessage2": "Últimos ajustes antes de mostrarte el resultado.",
+        "aiStepFinishMessage3": "Solo unos instantes más…",
+        "aiEnhanceLearnMoreTitle": "Fotos que dan ganas de alquilar",
+        "aiEnhanceLearnMoreDescription": "La IA convierte una foto rápida de móvil en una imagen de catálogo.",
+        "aiEnhanceLearnMoreBenefit1": "Un acabado profesional sin estudio ni equipo: tu producto se ve nítido y bien iluminado.",
+        "aiEnhanceLearnMoreBenefit2": "Un catálogo homogéneo: todos tus anuncios comparten el mismo encuadre y el mismo fondo.",
+        "aiEnhanceLearnMoreBenefit3": "Unas imágenes cuidadas dan confianza y tus clientes reservan con más facilidad.",
+        "aiEnhanceLearnMoreGalleryTitle": "Ejemplos de otras tiendas",
+        "aiEnhanceLearnMoreHeroAlt": "Ejemplo de foto mejorada con IA",
+        "aiEnhanceLearnMoreExampleAlt": "Ejemplo {index}: foto antes y después de la mejora",
+        "removeBackgroundLearnMoreTitle": "Un fondo que se aparta para lucir tu producto",
+        "removeBackgroundLearnMoreDescription": "Conservamos tu foto tal cual y quitamos solo el fondo.",
+        "removeBackgroundLearnMoreBenefit1": "El fondo de tu tienda toma el relevo: el producto encaja en cualquier sitio, sin bordes blancos.",
+        "removeBackgroundLearnMoreBenefit2": "Se acabaron los garajes o salones de fondo que distraen la atención del producto.",
+        "removeBackgroundLearnMoreBenefit3": "Ideal cuando tu foto ya es buena y solo el entorno la estropea.",
+        "removeBackgroundLearnMoreThemeTitle": "Se adapta al tema claro y al tema oscuro",
+        "removeBackgroundLearnMoreThemeDescription": "El producto recortado se apoya en el fondo de tu tienda, así que se ve bien elija el tema que elija tu visitante.",
+        "removeBackgroundLearnMoreThemeLight": "Tema claro",
+        "removeBackgroundLearnMoreThemeDark": "Tema oscuro",
+        "removeBackgroundLearnMoreAlt": "Ejemplo de producto recortado",
+        "removeImage": "Quitar la foto",
+        "aiActionWithCost": "{action} — {cost}",
+        "aiEnhanceCancelled": "Generación cancelada",
+        "aiCancelGeneration": "Cancelar la generación",
+        "aiCancelledTitle": "Generación cancelada",
+        "aiCancelledDescription": "No se ha cobrado ningún crédito. Tus fotos se añadieron correctamente: vuelve a lanzar el proceso cuando quieras.",
         "information": "Informacion",
         "name": "Nombre del producto",
         "namePlaceholder": "Ej: Bicicleta de montana XC 500",
@@ -931,7 +1103,9 @@
             "strictLine": "Niveles fijos",
             "progressiveLine": "Progresivo",
             "savings": "Ahorro del cliente",
-            "basePricing": "Tarifas base"
+            "basePricing": "Tarifas base",
+            "title": "Simulación de precio",
+            "subtitle": "Precio total según la duración del alquiler"
           }
         },
         "unitTracking": {
@@ -950,7 +1124,7 @@
           "bookingAttributesEmpty": "No hay atributos de reserva configurados. Todas las unidades rastreadas comparten la combinación predeterminada.",
           "bookingAttributeValuePlaceholder": "Valor de {label}",
           "combinationKey": "Combinación",
-          "missingAttributesWarning": "{count, plural, one {# unidad activa tiene al menos un valor de atributo faltante} other {# unidades activas tienen al menos un valor de atributo faltante}}",
+          "missingAttributesWarning": "{count, plural, one {# unidad no tiene todos los valores de variantes} other {# unidades no tienen todos los valores de variantes}}",
           "manageAttributes": "Gestionar atributos",
           "manageAttributesDescription": "Defina hasta 3 ejes de atributo (ej., Talla, Color) para combinaciones de unidades.",
           "pressEnterToCreate": "Pulse Enter para crear \"{value}\"",
@@ -987,7 +1161,89 @@
           "purchaseDetails": "Detalles de compra",
           "unitDetails": "Detalles",
           "existingUnitDetailsHint": "Los detalles de compra, las notas y el ciclo de vida se gestionan desde el inventario.",
-          "openInventoryDetails": "Abrir inventario"
+          "openInventoryDetails": "Abrir inventario",
+          "benefitIdentify": "Identifica cada unidad con un número de serie o referencia",
+          "benefitAvailability": "Sigue la disponibilidad y los alquileres de cada unidad",
+          "benefitInventory": "Registra el precio y la fecha de compra para tu inventario",
+          "modeQuantity": "Cantidad simple",
+          "modeQuantityDescription": "Indica simplemente cuántos ejemplares están disponibles para alquilar.",
+          "modeUnits": "Seguimiento por unidad",
+          "modeUnitsDescription": "Cada ejemplar tiene su propio identificador.",
+          "variantsTitle": "Variantes",
+          "variantsHelp": "Hasta 3 variantes (talla, color…). Cada unidad indica su valor y el cliente elige al reservar.",
+          "variantsEmptyHint": "¿Creas un producto por talla? Añade mejor una variante «Talla»: cada unidad lleva la suya y el cliente elige al reservar.",
+          "variantPlaceholder": "ej.: Talla",
+          "addVariant": "Añadir una variante",
+          "variantsMaxReached": "Máximo 3 variantes",
+          "defaultBadge": "Por defecto",
+          "advancedBadge": "Avanzado",
+          "learnMore": "Más información",
+          "addRefPlaceholder": "Escribe una referencia y pulsa Intro",
+          "generateSeries": "Generar una serie",
+          "changeMode": "Cambiar de modo",
+          "createVariantValue": "Crear «{value}» ({axis})",
+          "chooseColor": "Elegir un color",
+          "colorPickerDescription": "Ajusta el color o introduce un valor hexadecimal.",
+          "colorHue": "Tono",
+          "hexColor": "Color hexadecimal",
+          "presetSuggestions": "Sugerencias",
+          "valuesCount": "{count, plural, one {# valor} other {# valores}}",
+          "presets": {
+            "size": {
+              "label": "Talla"
+            },
+            "shoeSize": {
+              "label": "Número de calzado"
+            },
+            "color": {
+              "label": "Color",
+              "values": {
+                "black": "Negro",
+                "white": "Blanco",
+                "gray": "Gris",
+                "red": "Rojo",
+                "orange": "Naranja",
+                "yellow": "Amarillo",
+                "green": "Verde",
+                "blue": "Azul",
+                "purple": "Morado",
+                "pink": "Rosa",
+                "brown": "Marrón",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Material",
+              "values": {
+                "cotton": "Algodón",
+                "leather": "Cuero",
+                "wood": "Madera",
+                "metal": "Metal",
+                "plastic": "Plástico",
+                "aluminum": "Aluminio",
+                "carbon": "Carbono"
+              }
+            }
+          },
+          "manageVariants": "Gestionar variantes",
+          "managerTitle": "Variantes",
+          "managerDescription": "Definiciones compartidas entre todos tus productos (talla, color…).",
+          "activeVariantsCount": "{active} activas de {total}",
+          "variantActive": "Activa",
+          "variantInactive": "Inactiva",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Nueva variante",
+          "newVariantDescription": "Crea una variante compartida entre tus productos (ej.: Talla).",
+          "editVariant": "Renombrar variante",
+          "editVariantDescription": "El nombre se actualiza en el catálogo compartido.",
+          "editValue": "Editar valor",
+          "editValueDescription": "La etiqueta se actualiza en el catálogo compartido.",
+          "deleteVariantTitle": "¿Eliminar la variante?",
+          "deleteVariantDescription": "«{name}» y sus valores se eliminarán del catálogo. Los productos que la usan conservan sus valores actuales.",
+          "addValuePlaceholder": "Nuevo valor…",
+          "noVariants": "Sin variantes",
+          "variantsCount": "{count, plural, one {# variante} other {# variantes}}",
+          "unitImages": "Fotos de la unidad"
         },
         "previewTitle": "Vista previa",
         "previewDescription": "Asi es como aparecera su producto en el catalogo",
@@ -995,8 +1251,6 @@
         "noName": "Sin nombre",
         "units": "unidad(es)",
         "recommended": "Recomendado",
-        "previous": "Anterior",
-        "next": "Siguiente",
         "videoUrl": "Video de YouTube",
         "videoUrlPlaceholder": "https://www.youtube.com/watch?v=...",
         "videoUrlHelp": "Opcional - Agregue un video de presentacion para su producto",
@@ -1116,12 +1370,35 @@
         },
         "aiContext": "Contexto para el asesor IA",
         "aiContextPlaceholder": "Ej: requiere permiso de conducir B, no apto para menores de 12 años, pregunte siempre la fecha del evento y el tamaño del grupo…",
-        "aiContextHint": "Información adicional que solo ve el asesor IA — la usa para asesorar a los clientes y comprobar requisitos. Nunca se muestra en la tienda."
+        "aiContextHint": "Información adicional que solo ve el asesor IA — la usa para asesorar a los clientes y comprobar requisitos. Nunca se muestra en la tienda.",
+        "createAndDuplicate": "Crear y duplicar",
+        "productCreatedCopyReady": "La copia precargada está lista para editar.",
+        "copySuffix": "(copia)",
+        "productSection": "Producto",
+        "productSectionDescription": "Nombre, fotos y descripción de tu producto",
+        "addVideo": "Añadir un vídeo de YouTube",
+        "categories": "Categorías",
+        "categorySearchPlaceholder": "Buscar o crear…",
+        "categoryCreateOption": "Crear «{name}»",
+        "categoryNoResults": "No se encontró ninguna categoría",
+        "manageCategories": "Gestionar categorías",
+        "summary": {
+          "checklistTitle": "Progreso",
+          "required": "Obligatorio"
+        },
+        "videoTileLabel": "Vídeo",
+        "videoInvalid": "Enlace de YouTube no válido",
+        "editVideo": "Editar el vídeo",
+        "removeVideo": "Quitar el vídeo"
       },
       "deleteConfirm": {
         "title": "Eliminar este producto?",
         "description": "Esta accion es irreversible. El producto sera eliminado permanentemente."
-      }
+      },
+      "categoriesSelected": "{count} categorías",
+      "filterByCategory": "Filtrar por categoría",
+      "searchCategories": "Buscar una categoría...",
+      "noCategoriesFound": "No se encontró ninguna categoría"
     },
     "inventory": {
       "title": "Inventario",
@@ -1322,6 +1599,7 @@
       "clearSearch": "Borrar búsqueda",
       "allStatuses": "Todos los estados",
       "allPeriods": "Todos los periodos",
+      "allPaymentMethods": "Todos los métodos de pago",
       "number": "Numero",
       "customer": "Cliente",
       "period": "Periodo",
@@ -1546,11 +1824,7 @@
       "manualForm": {
         "title": "Nueva reserva manual",
         "selectCustomer": "Seleccionar un cliente",
-        "newCustomer": "Nuevo cliente",
-        "newCustomerDescription": "Crear un nuevo cliente para esta reserva",
         "newCustomerBadge": "Nuevo cliente",
-        "existingCustomer": "Cliente existente",
-        "existingCustomerDescription": "Seleccionar un cliente de su base de datos",
         "selectProducts": "Seleccionar productos",
         "selectPeriod": "Seleccionar periodo",
         "addProduct": "Agregar un producto",
@@ -1558,15 +1832,6 @@
         "sendConfirmationEmail": "Enviar confirmacion al cliente",
         "customer": "Cliente",
         "customerStepDescription": "Seleccione un cliente existente o cree uno nuevo",
-        "chooseCustomer": "Elegir un cliente",
-        "email": "Correo",
-        "emailPlaceholder": "cliente@correo.com",
-        "firstName": "Nombre",
-        "firstNamePlaceholder": "Juan",
-        "lastName": "Apellido",
-        "lastNamePlaceholder": "Garcia",
-        "phone": "Telefono (opcional)",
-        "phonePlaceholder": "+34 612 345 678",
         "period": "Periodo",
         "periodStepDescription": "Establezca las fechas de inicio y fin del alquiler",
         "startDate": "Fecha de inicio",
@@ -1579,7 +1844,7 @@
         "noProductsFound": "No se encontraron productos",
         "noProductsFoundHint": "Ningun producto coincide con \"{search}\".",
         "noProducts": "No hay productos seleccionados",
-        "noProductsHint": "Use el menu de arriba para agregar productos",
+        "noProductsHint": "Agrega un producto a esta reserva para comenzar",
         "perHour": "h",
         "perDay": "d",
         "pricingMode": "Unidad de precio",
@@ -1608,12 +1873,27 @@
           "shortfall": "Solicitado: {requested} · Disponible: {available}",
           "createAnyway": "Crear de todos modos"
         },
+        "addUnavailable": {
+          "title": "Producto no disponible",
+          "description": "«{name}» ya no tiene disponibilidad en el período seleccionado. Añadirlo puede provocar una sobrerreserva.",
+          "confirm": "Añadir de todos modos"
+        },
         "selectDatesError": "Por favor seleccione fechas",
         "addProductError": "Por favor agregue al menos un producto",
         "selectCustomerError": "Por favor seleccione un cliente",
-        "fillCustomerInfoError": "Por favor complete la informacion del cliente",
         "confirmTitle": "Resumen",
         "confirmDescription": "Revise la informacion antes de crear la reserva",
+        "confirmDrawer": {
+          "title": "Confirmar la reserva",
+          "titleQuote": "Confirmar el presupuesto",
+          "description": "Revise el resumen antes de crear la reserva.",
+          "descriptionQuote": "Revise el resumen antes de enviar el presupuesto.",
+          "warningsTitle": "Puntos a revisar",
+          "emailOn": "Se enviará un email de confirmación al cliente.",
+          "emailOff": "No se enviará ningún email al cliente."
+        },
+        "adjustmentsTitle": "Importes y opciones",
+        "adjustmentsDescription": "Ajuste el descuento, el depósito y el envío de la confirmación.",
         "steps": {
           "customer": "Cliente",
           "customerDescription": "Seleccionar cliente",
@@ -1701,7 +1981,11 @@
           "apply": "Aplicar",
           "modified": "Precio modificado",
           "priceUpdated": "Precio actualizado",
-          "priceReset": "Precio restablecido"
+          "priceReset": "Precio restablecido",
+          "modeUnit": "Precio unitario",
+          "modeTotal": "Precio total",
+          "modePercent": "Descuento %",
+          "resultingUnitPrice": "Precio unitario resultante"
         },
         "warnings": {
           "advanceNotice": "La fecha de inicio es anterior al periodo de preaviso",
@@ -1746,6 +2030,11 @@
           "calculating": "Calculando la cobertura...",
           "estimatedAmount": "Cobertura estimada: {amount}",
           "previewUnavailable": "No se pudo recalcular el importe de Tulip."
+        },
+        "globalDiscount": {
+          "label": "Descuento",
+          "add": "Añadir un descuento",
+          "remove": "Quitar el descuento"
         }
       },
       "rejectDialog": {
@@ -1757,8 +2046,6 @@
       },
       "awaitingResponse": "Esperando respuesta",
       "itemsCount": "{count, plural, one {# articulo} other {# articulos}}",
-      "viewTable": "Vista tabla",
-      "viewCards": "Vista tarjetas",
       "pagination": {
         "showing": "Mostrando {start} a {end} de {total}",
         "perPage": "Por página",
@@ -2078,11 +2365,17 @@
         "customMessageRequired": "Por favor escriba un mensaje",
         "additionalMessage": "Mensaje adicional",
         "additionalMessagePlaceholder": "Agregue un mensaje personalizado (opcional)...",
-        "emailWillBeSentTo": "El correo sera enviado a {email}",
         "selectTemplateError": "Por favor seleccione un tipo de correo",
         "sendError": "Ocurrio un error al enviar",
         "sendSuccess": "Correo enviado con exito",
         "send": "Enviar correo",
+        "preview": "Ver el correo",
+        "previewTitle": "Vista previa del correo",
+        "previewDescription": "Lo que recibirá {name}",
+        "previewPlaceholder": "Elige un tipo de correo para ver la vista previa",
+        "previewSubject": "Asunto",
+        "previewLinkNotice": "Los enlaces personales del cliente se generan al enviar el correo.",
+        "previewError": "No se pudo generar la vista previa",
         "templates": {
           "contract": {
             "name": "Contrato de alquiler",
@@ -2129,6 +2422,12 @@
         "viewConversation": "Ver conversación",
         "sheetTitle": "Conversación con el asesor",
         "sheetDescription": "Conversación entre el cliente y el asesor IA para esta reserva."
+      },
+      "views": {
+        "label": "Modo de vista",
+        "list": "Lista",
+        "calendar": "Calendario",
+        "planning": "Planning"
       }
     },
     "customers": {
@@ -2237,6 +2536,10 @@
         "CA": "Canada",
         "US": "Estados Unidos",
         "GB": "Reino Unido"
+      },
+      "quickCreate": {
+        "title": "Nuevo cliente",
+        "description": "El cliente se creará y se seleccionará automáticamente."
       }
     },
     "calendar": {
@@ -2310,44 +2613,82 @@
         "reservationsCount": "{count, plural, one {# reserva} other {# reservas}}"
       },
       "timeline": {
-        "products": "Productos",
-        "quantity": "{count, plural, one {# unidad} other {# unidades}}",
-        "available": "Disponible",
-        "noProducts": "No hay productos que mostrar"
+        "previous": "Período anterior",
+        "next": "Período siguiente",
+        "statusFilter": "Filtrar por estado",
+        "operationFilter": "Filtrar por operación de hoy",
+        "allOperations": "Todas las operaciones",
+        "todaysDepartures": "Salidas de hoy",
+        "todaysReturns": "Devoluciones de hoy",
+        "showAll": "Mostrar todo",
+        "retry": "Reintentar",
+        "loadingReservations": "Cargando reservas…",
+        "loadError": "No se pudieron cargar las reservas del calendario.",
+        "emptyPeriodTitle": "No hay reservas en este período",
+        "emptyPeriodDescription": "Las reservas cargadas pueden estar antes o después de las fechas mostradas.",
+        "emptyStoreTitle": "Aún no hay reservas",
+        "emptyStoreDescription": "Crea tu primera reserva para empezar a planificar tu actividad.",
+        "createFirstReservation": "Crear tu primera reserva",
+        "viewPreviousReservation": "Ver la reserva anterior",
+        "viewNextReservation": "Ver la próxima reserva",
+        "reservationAbove": "Reserva más arriba",
+        "reservationBelow": "Reserva más abajo",
+        "resetFilters": "Restablecer filtros",
+        "dragHint": "Consejo: haz clic y arrastra sobre un rango vacío para crear una reserva prellenada.",
+        "searchProductsPlaceholder": "Buscar en {count} productos...",
+        "noProductsFound": "No se encontraron productos",
+        "productsSelected": "{count} productos",
+        "filters": "Filtros",
+        "filtersDescription": "Acota las reservas que se muestran en el calendario.",
+        "applyFilters": "Aplicar",
+        "sectionOperation": "Operación del día",
+        "sectionStatus": "Estados",
+        "sectionProducts": "Productos",
+        "goToDate": "Ir a una fecha",
+        "currentlyViewing": "Mostrando actualmente: {date}",
+        "dateSearchPlaceholder": "15, mañana, el próximo viernes…",
+        "noDateFound": "No se ha reconocido ninguna fecha",
+        "clearSearch": "Borrar",
+        "quickDates": "Accesos rápidos",
+        "today": "Hoy",
+        "tomorrow": "Mañana",
+        "nextWeek": "Próxima semana",
+        "chooseDate": "Elegir una fecha"
       },
       "export": {
-        "button": "Exportar calendario",
-        "title": "Exportar a calendario",
-        "description": "Sincroniza tus reservas con tu calendario favorito copiando el enlace de abajo.",
-        "urlLabel": "Enlace del calendario ICS",
+        "button": "Sincronizar el calendario",
+        "title": "Sincronizar el calendario",
+        "description": "Añade tus reservas al calendario que ya utilizas.",
         "loading": "Cargando...",
-        "instructions": {
-          "title": "Como anadir este calendario?",
-          "google": {
-            "step1": "Abre Google Calendar",
-            "step2": "Haz clic en el + junto a \"Otros calendarios\" y luego en \"Desde URL\"",
-            "step3": "Pega el enlace y haz clic en \"Anadir calendario\"",
-            "openLink": "Abrir Google Calendar",
-            "freshnessNote": "Louez publica los cambios inmediatamente y solicita una actualizacion cada 5 minutos. Google puede aplicar su propio retraso de sincronizacion."
-          },
-          "apple": {
-            "step1": "Abre la app Calendario en Mac o iPhone",
-            "step2": "Archivo > Nueva suscripcion a calendario (Mac) o Anadir cuenta > Otra > Anadir calendario suscrito (iOS)",
-            "step3": "Pega el enlace y confirma"
-          },
-          "outlook": {
-            "step1": "Abre Outlook Calendar",
-            "step2": "Haz clic en \"Agregar calendario\" y luego en \"Suscribirse desde la web\"",
-            "step3": "Pega el enlace y dale un nombre al calendario"
-          }
+        "done": "Listo",
+        "cancel": "Cancelar",
+        "google": {
+          "title": "Google Calendar",
+          "recommended": "Recomendado",
+          "connected": "Conectado",
+          "connect": "Conectar",
+          "manage": "Gestionar",
+          "help": "Sincronización automática: colores, visibilidad privada, disponibilidad y reintentos automáticos. La opción más fiable."
         },
-        "regenerate": "Regenerar enlace",
-        "regenerateHint": "Regenerar el enlace invalidara los enlaces compartidos anteriormente."
+        "subscribe": {
+          "title": "Suscribirse con un enlace",
+          "help": "Suscripción de solo lectura. Louez publica los cambios de inmediato, pero cada aplicación de calendario decide con qué frecuencia se actualiza.",
+          "apple": "Calendario de Apple",
+          "outlook": "Outlook",
+          "google": "Google Calendar",
+          "copy": "Copiar enlace",
+          "copied": "Copiado"
+        },
+        "regenerate": {
+          "action": "Regenerar el enlace",
+          "confirmTitle": "¿Regenerar el enlace?",
+          "hint": "Los enlaces ya compartidos dejarán de funcionar y habrá que volver a añadir cada calendario suscrito."
+        }
       }
     },
     "statistics": {
       "title": "Estadisticas",
-      "description": "Analice las ventas Stripe y el trafico de su tienda",
+      "description": "Analice las ventas y el trafico de su tienda",
       "period": "Periodo",
       "periods": {
         "today": "Hoy",
@@ -2359,55 +2700,63 @@
         "custom": "Personalizado"
       },
       "revenue": "Ingresos",
-      "revenueThisMonth": "Cobros Stripe este mes",
-      "revenueThisMonthWithManual": "Cobros este mes",
-      "reservationsThisMonth": "Pagos Stripe este mes",
-      "reservationsThisMonthWithManual": "Pagos este mes",
-      "totalRevenue": "Cobros Stripe totales",
-      "totalRevenueWithManual": "Cobros totales",
+      "totalRevenue": "Cobros totales",
       "reservations": "Reservas",
-      "averageCart": "Pago promedio",
+      "avgPaymentInline": "pago promedio {amount}",
       "occupancyRate": "Tasa de ocupacion",
-      "salesScopeTitle": "Ventas online Stripe",
-      "salesScopeDescription": "Importes de alquiler recibidos por Stripe, sin convertir a ingresos antes de impuestos. Pagos manuales, depositos y reembolsos no estan incluidos.",
-      "salesScopeWithManualTitle": "Stripe + pagos manuales",
-      "salesScopeWithManualDescription": "Importes de alquiler recibidos por Stripe y pagos manuales registrados, sin convertir a ingresos antes de impuestos. Depositos y reembolsos no estan incluidos.",
-      "includeManualPayments": "Incluir pagos manuales",
-      "includeManualPaymentsDescription": "Añade pagos registrados en efectivo, tarjeta, transferencia, cheque y otros medios.",
+      "upcomingRevenue": "Ingresos futuros",
+      "avgRentalDuration": "Duracion media del alquiler",
+      "rentalActivity": "Actividad de alquiler",
       "topProducts": {
         "title": "Productos mas alquilados",
-        "description": "Top 10 productos en el periodo seleccionado",
-        "descriptionWithManual": "Top 10 productos con pagos Stripe o manuales en el periodo seleccionado",
+        "description": "Top 10 productos por cobros en el periodo seleccionado",
         "product": "Producto",
         "rentals": "Alquileres",
         "totalQuantity": "Cantidad total",
         "revenue": "Ingresos",
-        "units": "{count, plural, one {# unidad} other {# unidades}}"
+        "units": "{count, plural, one {# unidad} other {# unidades}}",
+        "othersRow": "{count, plural, one {+ # producto mas} other {+ # productos mas}}",
+        "totalRow": "Total"
       },
-      "revenueChart": "Tendencia de cobros Stripe",
-      "revenueChartDescription": "Pagos Stripe recibidos en el periodo seleccionado",
-      "revenueChartWithManual": "Tendencia de cobros",
-      "revenueChartWithManualDescription": "Pagos Stripe y manuales recibidos en el periodo seleccionado",
-      "revenueAbbrev": "Stripe",
-      "revenueAbbrevWithManual": "Cobros",
+      "topCustomers": {
+        "title": "Mejores clientes",
+        "description": "Top 10 clientes por cobros en el periodo seleccionado",
+        "customer": "Cliente",
+        "reservations": "Reservas",
+        "payments": "Pagos",
+        "revenue": "Cobros"
+      },
+      "paymentMethods": {
+        "title": "Medios de pago",
+        "description": "Reparto de los cobros en el periodo",
+        "stripe": "Stripe (online)",
+        "cash": "Efectivo",
+        "card": "Tarjeta (presencial)",
+        "transfer": "Transferencia",
+        "check": "Cheque",
+        "other": "Otro"
+      },
+      "revenueChart": "Evolucion de los cobros",
+      "revenueChartDescription": "Cobros Stripe y pagos manuales de los alquileres — depositos y reembolsos excluidos",
+      "revenueAbbrev": "Cobros",
       "reservationsCount": "{count, plural, one {# reserva} other {# reservas}}",
-      "paymentsCount": "{count, plural, one {# pago Stripe} other {# pagos Stripe}}",
-      "paymentsCountWithManual": "{count, plural, one {# pago} other {# pagos}}",
+      "paymentsCount": "{count, plural, one {# pago} other {# pagos}}",
       "vsLastMonth": "vs mes pasado",
       "lastMonth": "el mes pasado",
       "onReservations": "en {count} reservas",
-      "onPayments": "en {count} pagos Stripe",
-      "onPaymentsWithManual": "en {count} pagos",
       "sinceBeginning": "desde el inicio",
       "vsLastPeriod": "vs periodo anterior",
+      "occupancySubtitle": "{count, plural, =0 {ninguna unidad activa} one {de # unidad disponible} other {de # unidades disponibles}}",
+      "upcomingRevenueCount": "{count, plural, =0 {ninguna reserva confirmada} one {# reserva confirmada} other {# reservas confirmadas}}",
+      "durationDays": "{days, plural, one {{days, number, ::.0} dia} other {{days, number, ::.0} dias}}",
+      "durationHours": "{hours, plural, one {# hora} other {# horas}}",
       "noData": "No hay suficientes datos",
       "noRentalData": "Aun no hay datos de alquiler",
-      "noRevenueData": "Aun no hay cobros Stripe",
-      "noRevenueDataWithManual": "Aun no hay cobros"
+      "noRevenueData": "Aun no hay cobros"
     },
     "analytics": {
       "title": "Analíticas",
-      "description": "Seguimiento de ventas Stripe, tráfico y conversiones de tu tienda",
+      "description": "Seguimiento de ventas, tráfico y conversiones de tu tienda",
       "visitors": "Visitantes",
       "productViews": "Vistas de productos",
       "conversions": "Pedidos",
@@ -2420,10 +2769,6 @@
         "90d": "90 días",
         "6m": "6 meses",
         "12m": "12 meses"
-      },
-      "tabs": {
-        "traffic": "Tráfico",
-        "sales": "Ventas"
       },
       "refresh": "Actualizar",
       "trafficTrend": "Tendencia de tráfico",
@@ -2899,7 +3244,13 @@
           "iosNeedsInstall": "En iPhone, añade primero la aplicación a la pantalla de inicio para activar las notificaciones.",
           "denied": "Las notificaciones están bloqueadas. Actívalas en los ajustes de tu navegador.",
           "confirmTitle": "Notificaciones activadas",
-          "confirmBody": "Recibirás un aviso de cada nueva reserva."
+          "confirmBody": "Recibirás un aviso de cada nueva reserva.",
+          "sidebarLabel": "Notificaciones push",
+          "benefits": {
+            "instant": "Aviso en cuanto llega una reserva",
+            "closed": "Funciona con la app cerrada",
+            "device": "Solo en este dispositivo"
+          }
         },
         "title": "Notificaciones",
         "description": "Configure como recibe notificaciones de eventos de su tienda",
@@ -3967,7 +4318,18 @@
         "deleteAccountWarning": "Esta accion es irreversible. Todos sus datos seran eliminados.",
         "signOut": "Cerrar sesion",
         "comingSoon": "Proximamente",
-        "administration": "Administración"
+        "administration": "Administración",
+        "keyboardShortcuts": {
+          "title": "Atajos de teclado",
+          "description": "Personaliza los atajos utilizados en tu espacio de trabajo.",
+          "recording": "Pulsa las teclas…",
+          "recordingSequence": "Introduce la secuencia y pulsa Intro…",
+          "sequenceTooShort": "Una secuencia debe contener al menos dos atajos.",
+          "hint": "Selecciona un atajo. Para una secuencia, pulsa las teclas en orden y luego Intro.",
+          "saved": "Atajos guardados",
+          "conflict": "Este atajo ya se usa para «{action}».",
+          "resetAction": "Restablecer «{action}»"
+        }
       },
       "admin": {
         "title": "Admin plataforma",
@@ -4208,8 +4570,6 @@
         "title": "Asesor IA",
         "description": "Deje que un asistente de IA reciba a sus clientes en su tienda, responda sus preguntas y les guíe hacia el alquiler adecuado",
         "saved": "Configuración del asesor IA guardada",
-        "enableSection": "Asesor IA",
-        "enableSectionDescription": "Configure el asistente que conversa con sus clientes en su tienda",
         "enabled": "Activar el asesor IA",
         "enabledDescription": "Muestra el widget de chat en su tienda",
         "mode": "Modo en el momento de la reserva",
@@ -4235,17 +4595,12 @@
           "description": "El operador de la plataforma debe definir las variables de entorno AI_PROVIDER y AI_API_KEY para que el asesor pueda responder a los clientes. Aun así, puede preparar su configuración a continuación."
         },
         "locked": {
-          "title": "Desbloquear el asesor IA",
-          "description": "Convierta a los visitantes de su tienda en reservas con un asistente de IA",
           "upgrade": "Actualizar a Pro",
-          "featureLocked": "Función bloqueada",
-          "upgradeToUnlock": "Actualice a Pro para habilitar esta función"
+          "featureLocked": "Función bloqueada"
         },
         "conversations": {
           "columnCredits": "Créditos",
           "creditsUsed": "{count} cr",
-          "title": "Conversaciones",
-          "description": "Consulte qué preguntaron los clientes al asesor y qué conversaciones terminaron en una reserva",
           "filterAll": "Todas",
           "filterConverted": "Convertidas",
           "filterNotConverted": "No convertidas",
@@ -4304,9 +4659,6 @@
           "confirm": "Desactivar y desvincular"
         },
         "numberReleaseFailed": "No se pudo desvincular el número — sigue vinculado, reintento automático programado",
-        "description": "Un agente de voz con IA que responde tu línea telefónica — informa a tus clientes y registra reservas, en el idioma que elijas.",
-        "enableSection": "Agente de voz IA",
-        "enableSectionDescription": "Configura el agente de voz que responde cuando tus clientes llaman",
         "enabled": "Activar el agente de voz IA",
         "enabledDescription": "La IA atiende las llamadas entrantes a tu número",
         "number": {
@@ -4336,9 +4688,13 @@
           "unlinkConfirmBody": "El número {number} se desvinculará de tu agente de voz. Conservas el número con tu proveedor.",
           "searching": "Buscando números disponibles…",
           "searchHint": "Elige un país y busca un número disponible para aprovisionar.",
-          "areaCodePlaceholder": "ej. 91",
+          "areaCodePlaceholder": "p. ej. 415",
           "manualSetup": "Cómo vincular un número existente",
-          "copy": "Copiar"
+          "copy": "Copiar",
+          "areaCodeHint": "Filtra los números por código de área (p. ej. 415 para San Francisco).",
+          "contains": "Dígitos deseados (opcional)",
+          "containsPlaceholder": "p. ej. 06",
+          "containsHint": "Solo muestra los números que contienen esta secuencia de dígitos."
         },
         "notConfigured": {
           "title": "Telefonía no configurada",
@@ -4373,6 +4729,21 @@
         },
         "voicePreview": "Escuchar",
         "voiceRecommended": "Recomendada"
+      },
+      "settingsNavigation": {
+        "label": "Navegación de configuración",
+        "mobileLabel": "Elegir una página de configuración",
+        "search": {
+          "label": "Buscar en la configuración",
+          "placeholder": "Buscar ajustes…",
+          "noResults": "Ningún ajuste coincide con tu búsqueda."
+        },
+        "groups": {
+          "store": "Tienda",
+          "rental": "Alquileres",
+          "communication": "Comunicación",
+          "accountData": "Cuenta y datos"
+        }
       }
     },
     "commandPalette": {
@@ -4401,7 +4772,10 @@
       "emptyState": "¿Cómo puedo ayudarte?",
       "emptyStateHint": "Prueba una de estas sugerencias o haz tu propia pregunta.",
       "placeholder": "¿Qué quieres saber o hacer?",
+      "send": "Enviar",
+      "disclaimer": "El asistente de IA puede cometer errores. Comprueba la información importante.",
       "newConversation": "Nueva conversación",
+      "openFullPage": "Abrir en página completa",
       "history": {
         "title": "Historial",
         "empty": "Sin conversaciones",
@@ -4422,11 +4796,17 @@
         "reservations": "¿Hay recogidas o devoluciones programadas para hoy?",
         "stats": "Muéstrame los ingresos y los mejores productos del mes",
         "products": "¿Cuáles son los productos más alquilados?",
-        "customers": "¿Cuántos clientes nuevos este mes?"
+        "customers": "¿Cuántos clientes nuevos este mes?",
+        "overdue": "¿Hay devoluciones atrasadas?",
+        "pending": "Muéstrame las reservas pendientes de confirmación"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "Asistente IA",
+      "aiConversations": "Conversaciones de clientes",
+      "aiAdvisor": "Asesor en línea",
+      "aiVoice": "Agente de voz",
+      "aiCredits": "Créditos IA",
       "label": "Miga de pan",
       "home": "Inicio",
       "products": "Productos",
@@ -4437,11 +4817,14 @@
       "customersNew": "Nuevo cliente",
       "calendar": "Calendario",
       "analytics": "Analíticas",
+      "analyticsSales": "Ventas",
+      "analyticsTraffic": "Tráfico",
       "team": "Equipo",
       "referrals": "Referidos",
       "sms": "SMS",
       "subscription": "Suscripción",
       "account": "Cuenta",
+      "whatsNew": "Novedades",
       "settings": "Ajustes",
       "settingsAdmin": "Administración",
       "settingsApi": "API",
@@ -4457,7 +4840,9 @@
       "settingsPayments": "Pagos",
       "settingsPromoCodes": "Códigos promocionales",
       "settingsReviewBooster": "Impulso de reseñas",
-      "settingsTaxes": "Impuestos"
+      "settingsTaxes": "Impuestos",
+      "productsEdit": "Editar",
+      "reservationsEdit": "Editar"
     },
     "notificationsCenter": {
       "title": "Notificaciones",
@@ -4466,6 +4851,69 @@
       "emptyTitle": "Nada que revisar",
       "emptyDescription": "Las nuevas solicitudes aparecerán aquí.",
       "viewAllPending": "Ver todas las solicitudes pendientes"
+    },
+    "whatsNew": {
+      "title": "Novedades",
+      "description": "Las últimas mejoras de Louez",
+      "pageDescription": "Todo lo que hemos lanzado en Louez, lo más reciente primero, y por qué lo hicimos.",
+      "newLabel": "Nuevo",
+      "newFeatureLabel": "Nueva función",
+      "unread": "Sin leer",
+      "markAsRead": "Marcar como leída",
+      "markAllAsRead": "Marcar todo como leído",
+      "watchDemo": "Ver la demostración de {title}",
+      "tryIt": "Probar",
+      "viewAll": "Ver todas las novedades",
+      "backToList": "Todas las novedades",
+      "emptyTitle": "Aquí no hay nada todavía",
+      "empty": "Aún no hay novedades.",
+      "filterEmpty": "Aún no hay novedades en esta categoría.",
+      "filters": {
+        "all": "Todo"
+      },
+      "categories": {
+        "feature": "Novedad",
+        "improvement": "Mejora",
+        "fix": "Corrección"
+      },
+      "announcements": {
+        "product-image-ai": {
+          "title": "Sus fotos de producto pasan por el estudio",
+          "description": "Al subirla, la IA recorta su producto, limpia el fondo y lo centra — o solo elimina el fondo si prefiere conservar su encuadre. Y cada versión se guarda en el historial de la foto: compare, cambie de opinión, vuelva a la original."
+        },
+        "sidebar-simplified": {
+          "title": "Un menú más corto, páginas mejor ordenadas",
+          "description": "El calendario se une a las reservas, el inventario a la ficha de producto, y la suscripción y las recomendaciones a los ajustes: cuatro entradas menos en el menú, sin perder nada."
+        },
+        "product-variants": {
+          "title": "Variantes, así de simple",
+          "description": "Los atributos que escribía a mano se convierten en variantes de verdad, compartidas por toda su tienda. Talla y Color están listas en cuanto activa el seguimiento por unidad, y Número de calzado y Material se añaden con un clic: ya no necesita una ficha de producto por talla."
+        },
+        "product-detail-hub": {
+          "title": "Cada producto tiene ahora su ficha",
+          "description": "Abrir un producto era abrir su formulario. Ahora tiene una ficha de verdad: lo que factura, con qué frecuencia sale, cómo está su stock, quién lo ha reservado y qué le ha pasado a cada ejemplar."
+        },
+        "reservations-unified-views": {
+          "title": "Sus reservas se abren en el calendario",
+          "description": "La página Reservas se abre ahora en el calendario. Se desplaza de forma continua, de una semana a otra sin cambiar de página, y basta pasar el ratón para ver la reserva completa. La lista y el planning por producto siguen a un clic."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Dos secciones y su producto está en línea",
+          "description": "El asistente de cuatro pasos da paso a una sola página. Los accesorios y el seguro ya no se piden al crear: los añadirá más tarde si los necesita. A la derecha, una vista previa de la ficha y la lista de lo que falta por rellenar."
+        },
+        "keyboard-shortcuts": {
+          "title": "Para quienes no sueltan el teclado",
+          "description": "Ocho acciones del día a día se abren con el teclado, y cada una se puede reasignar en su cuenta, incluidas las secuencias de dos teclas. Si pasa el día en Louez, esto es para usted. Si no, todo sigue funcionando con el ratón."
+        },
+        "navigation-refresh": {
+          "title": "⌘K le lleva a cualquier parte",
+          "description": "La paleta de comandos abre cualquier página, cualquier ajuste, cualquier producto, cliente o reserva. En los ajustes, un buscador le lleva al ajuste exacto y lo resalta. Y la ruta de navegación siempre le dice dónde está."
+        },
+        "reservation-creation-simplified": {
+          "title": "Una reserva, una sola página",
+          "description": "Se acabaron los pasos encadenados: cliente, periodo, productos y entrega caben en una página, con el resumen siempre al lado. Y todo lo que obligaba a reabrir la reserva después — un descuento, un precio negociado, la fianza, un cliente de paso — se resuelve ahora sobre la marcha."
+        }
+      }
     },
     "aiCredits": {
       "title": "Créditos IA",
@@ -4524,6 +4972,60 @@
         "errors": {
           "generic": "Algo salió mal. Inténtalo de nuevo."
         }
+      },
+      "page": {
+        "title": "Créditos IA",
+        "subtitle": "El monedero que impulsa todas las funciones de IA de tu tienda",
+        "totalTitle": "Saldo total",
+        "totalUnlimitedHint": "Tu plan no limita el uso",
+        "monthlyTitle": "Incluidos este mes",
+        "monthlyUsedHint": "{used} de {included} usados",
+        "monthlyUnlimitedHint": "Sin límite en tu plan",
+        "monthlyNoneHint": "Tu plan no incluye créditos",
+        "prepaidTitle": "Créditos prepago",
+        "prepaidHint": "Nunca caducan",
+        "pitchTitle": "Lo que desbloquean tus créditos",
+        "perkAdvisorTitle": "Un asesor 24/7",
+        "perkAdvisorDescription": "Tus clientes preguntan por el catálogo y reciben respuesta al instante, incluso de noche.",
+        "perkVoiceTitle": "Un agente que contesta",
+        "perkVoiceDescription": "Las llamadas perdidas se convierten en solicitudes cualificadas, con número propio si lo deseas.",
+        "perkImagesTitle": "Fotos de producto impecables",
+        "perkImagesDescription": "Quita el fondo y mejora tus imágenes con un clic, desde la propia ficha de producto.",
+        "pitchSecondaryCta": "Descubrir el asistente IA",
+        "pitchFootnote": "Solo pagas lo que consumes y los créditos no caducan.",
+        "recapTitle": "Tus créditos este mes",
+        "recapDescription": "Lo que tus créditos han hecho por la tienda desde principios de mes.",
+        "recapConversations": "Conversaciones",
+        "recapCalls": "Llamadas atendidas",
+        "recapImages": "Imágenes mejoradas",
+        "recapCredits": "Créditos gastados",
+        "recapCallTime": "En total, {minutes} min de llamadas.",
+        "historyTitle": "Historial",
+        "historyDescription": "El detalle de lo que has consumido y comprado.",
+        "tabUsage": "Uso",
+        "tabPurchases": "Compras",
+        "usageEmpty": "Sin consumo",
+        "usageEmptyDescription": "En cuanto la IA trabaje para ti, cada gasto aparecerá aquí.",
+        "purchasesEmpty": "Sin compras",
+        "purchasesEmptyDescription": "Aquí verás tus recargas y los créditos de regalo.",
+        "usageConversation": "Conversación del asesor",
+        "usageVoiceCall": "Llamada de voz",
+        "usageCallDuration": "{minutes} min facturados",
+        "usageNumberRental": "Alquiler del número",
+        "usageImageEnhancement": "Mejora de imagen",
+        "columnDate": "Fecha",
+        "columnDetail": "Detalle",
+        "columnCredits": "Créditos",
+        "columnAmount": "Importe",
+        "columnStatus": "Estado",
+        "status": {
+          "completed": "Completado",
+          "pending": "Pendiente",
+          "failed": "Fallido"
+        },
+        "pagination": "Página {page} de {totalPages}",
+        "previousPage": "Página anterior",
+        "nextPage": "Página siguiente"
       }
     }
   },
@@ -4908,6 +5410,12 @@
       "contactDescription": "Necesitamos esta información para contactarle",
       "addressDescription": "Opcional - Ingrese su dirección si es necesario",
       "confirmDescription": "Revise su información antes de confirmar",
+      "advanceNotice": {
+        "title": "Cambiar la fecha de inicio",
+        "guidance": "Esta tienda requiere al menos {duration} de antelación. Elija un inicio a partir del {minimum}.",
+        "preserved": "Sus datos de contacto y selecciones se conservan durante el cambio.",
+        "editDates": "Cambiar fechas"
+      },
       "continue": "Continuar",
       "back": "Volver",
       "modify": "Editar",
@@ -5555,6 +6063,10 @@
     "noCategories": "No hay categorias",
     "noCategoriesDescription": "Cree su primera categoria para organizar sus productos",
     "emptyDescription": "Las categorias le ayudan a organizar sus productos y facilitan la navegacion para los clientes.",
+    "searchPlaceholder": "Buscar categorías…",
+    "noSearchResults": "Ninguna categoría coincide con su búsqueda.",
+    "totalCount": "{count, plural, =0 {Sin categorías} one {# categoría} other {# categorías}}",
+    "actionsFor": "Acciones para {name}",
     "newCategoryDescription": "Cree una nueva categoria para organizar sus productos",
     "editCategoryDescription": "Edite el nombre de la categoria",
     "namePlaceholder": "Nombre de la categoria",
@@ -5569,282 +6081,9 @@
       "title": "Eliminar esta categoria?",
       "description": "Esta accion es irreversible. Los productos de esta categoria no seran eliminados.",
       "descriptionWithName": "Esta accion es irreversible. La categoria \"{name}\" sera eliminada.",
-      "productsWarning": "{count, plural, one {El producto de esta categoria sera movido a \"Sin categoria\".} other {Los # productos de esta categoria seran movidos a \"Sin categoria\".}}"
-    }
-  },
-  "emails": {
-    "common": {
-      "greeting": "Hola {name},",
-      "regards": "Saludos cordiales,",
-      "team": "El equipo de {storeName}",
-      "viewReservation": "Ver mi reserva",
-      "contactUs": "Contactenos",
-      "reservationNumber": "Reserva #{number}",
-      "period": "Periodo",
-      "periodFrom": "Del {startDate}",
-      "periodTo": "Al {endDate}",
-      "address": "Direccion",
-      "pickupAddress": "Direccion de recogida",
-      "returnAddress": "Direccion de devolucion",
-      "subtotal": "Subtotal",
-      "subtotalExclTax": "Subtotal sin IVA",
-      "taxAmount": "IVA ({rate}%)",
-      "subtotalInclTax": "Subtotal con IVA",
-      "deposit": "Deposito",
-      "total": "Total",
-      "totalToPay": "Total a pagar",
-      "question": "Preguntas? Contactenos:",
-      "summary": "Resumen",
-      "timezone": "Zona horaria: {timezone}"
-    },
-    "verificationCode": {
-      "subject": "Su codigo de acceso: {code}",
-      "title": "Codigo de acceso",
-      "body": "Aqui esta su codigo de acceso para acceder a su cuenta en {storeName}:",
-      "expiry": "Este codigo expira en 10 minutos. Si no solicito este codigo, puede ignorar este correo."
-    },
-    "confirmReservation": {
-      "subject": "Su reserva #{number} esta confirmada",
-      "title": "Reserva confirmada!",
-      "body": "Su reserva #{number} esta confirmada. Aqui esta el resumen:",
-      "summary": "Resumen"
-    },
-    "requestReceived": {
-      "subject": "Solicitud de reserva #{number} recibida",
-      "title": "Solicitud recibida",
-      "body": "Hemos recibido su solicitud de reserva.",
-      "review": "Nuestro equipo esta revisando su solicitud y le responderemos pronto.",
-      "confirmation": "Recibira un correo de confirmacion una vez que su reserva sea validada.",
-      "seeYouSoon": "Hasta pronto,"
-    },
-    "requestAccepted": {
-      "subject": "Su solicitud #{number} ha sido aceptada!",
-      "title": "Solicitud aceptada!",
-      "body": "Buenas noticias! Su solicitud de reserva #{number} ha sido aceptada.",
-      "rentalPeriod": "Periodo de alquiler",
-      "yourReservation": "Su reserva",
-      "proceedPayment": "Proceder al pago",
-      "signContract": "No olvide firmar su contrato de alquiler antes de recoger su equipo."
-    },
-    "requestRejected": {
-      "subject": "Solicitud de reserva #{number}",
-      "title": "Solicitud no aceptada",
-      "body": "Lo sentimos, su solicitud de reserva #{number} no pudo ser aceptada.",
-      "contactForAlternative": "Por favor contactenos para mas informacion o para encontrar una alternativa que pueda convenirle."
-    },
-    "quoteSent": {
-      "subject": "Presupuesto #{number}",
-      "title": "Ha recibido un presupuesto",
-      "body": "{store} le ha enviado un presupuesto para la reserva #{number}.",
-      "rentalPeriod": "Período de alquiler",
-      "yourQuote": "Su presupuesto",
-      "viewQuote": "Ver presupuesto",
-      "expiry": "Puede aceptar o rechazar este presupuesto desde su cuenta."
-    },
-    "reminderPickup": {
-      "subject": "Recordatorio: su alquiler comienza manana!",
-      "title": "Su alquiler comienza manana!",
-      "body": "Este es un recordatorio para su reserva #{number}.",
-      "scheduledPickup": "Recogida programada",
-      "dontForget": "No olvide:",
-      "bringId": "Una identificacion valida",
-      "bringConfirmation": "Su confirmacion de reserva",
-      "seeTomorrow": "Hasta manana!"
-    },
-    "reminderReturn": {
-      "subject": "Recordatorio: devolucion de equipo el {date}",
-      "title": "Recuerde devolver su equipo",
-      "body": "Este es un recordatorio para su reserva #{number}. La devolucion del equipo esta programada para el {date}.",
-      "scheduledReturn": "Devolucion programada",
-      "returnInfo": "Por favor devuelva el equipo en buenas condiciones. El deposito sera devuelto despues de la verificacion.",
-      "thanks": "Gracias por su confianza!"
-    },
-    "reminderPickupAdmin": {
-      "subject": "Proxima recogida: reserva #{number}",
-      "title": "Proxima recogida de equipo",
-      "body": "Se acerca una recogida para la reserva #{number}. Aqui estan los detalles para que pueda preparar el equipo.",
-      "scheduledPickup": "Recogida programada",
-      "customer": "Cliente:",
-      "email": "Correo:",
-      "phone": "Telefono:",
-      "amount": "Monto:",
-      "viewReservation": "Ver reserva",
-      "connectToManage": "Inicie sesion en su panel para gestionar esta reserva."
-    },
-    "reminderReturnAdmin": {
-      "subject": "Proxima devolucion: reserva #{number}",
-      "title": "Proxima devolucion de equipo",
-      "body": "Se acerca una devolucion para la reserva #{number}. Aqui estan los detalles para que pueda preparar la recepcion del equipo.",
-      "scheduledReturn": "Devolucion programada",
-      "customer": "Cliente:",
-      "email": "Correo:",
-      "phone": "Telefono:",
-      "amount": "Monto:",
-      "viewReservation": "Ver reserva",
-      "connectToManage": "Inicie sesion en su panel para gestionar esta reserva."
-    },
-    "reminderDigestAdmin": {
-      "subject": "Su agenda para el {date}",
-      "title": "Agenda de hoy",
-      "body": "Esto es lo que ocurre hoy en {storeName}.",
-      "pickupsTitle": "Recogidas ({count})",
-      "returnsTitle": "Devoluciones ({count})",
-      "viewCalendar": "Ver calendario",
-      "connectToManage": "Inicie sesion en su panel para gestionar su jornada."
-    },
-    "thankYouReview": {
-      "subject": "Gracias por su alquiler!",
-      "title": "Gracias por su confianza!",
-      "body": "Esperamos que su alquiler haya ido bien. Su resena nos ayuda a mejorar y ayuda a otros clientes a tomar su decision.",
-      "cta": "Dejar una resena",
-      "disclaimer": "Solo toma un minuto y seria de gran ayuda!",
-      "smsThankYou": "Gracias por su alquiler!",
-      "smsReview": "Su opinion cuenta:"
-    },
-    "newRequestLandlord": {
-      "subject": "Nueva solicitud de reserva #{number}",
-      "title": "Nueva solicitud de reserva",
-      "body": "Ha recibido una nueva solicitud en {storeName}.",
-      "customer": "Cliente:",
-      "email": "Correo:",
-      "period": "Periodo:",
-      "amount": "Monto:",
-      "viewRequest": "Ver solicitud",
-      "connectToManage": "Inicie sesion en su panel para aceptar o rechazar esta solicitud."
-    },
-    "phoneCallbackLandlord": {
-      "subject": "Un cliente al que llamar — {store}",
-      "title": "Un cliente al que llamar",
-      "body": "Tu asistente de voz no pudo completar una solicitud en {storeName} y te transmite este mensaje.",
-      "phone": "Número para devolver la llamada:",
-      "message": "Mensaje:",
-      "listen": "Abrir la llamada",
-      "footer": "Abre la conversación para leer el intercambio y volver a escuchar la grabación de la llamada."
-    },
-    "voiceNumberBilling": {
-      "numberLabel": "Número:",
-      "rentalLabel": "Alquiler mensual:",
-      "rentalValue": "{credits} créditos de IA / mes",
-      "deadlineLabel": "Fecha límite:",
-      "ctaRecharge": "Recargar mis créditos",
-      "ctaOpen": "Abrir mi Asistente IA",
-      "footer": "El alquiler del número se paga automáticamente con créditos de IA cada mes.",
-      "warning": {
-        "subject": "Recarga pendiente — renovación del número {number}",
-        "title": "Tu saldo no cubre la próxima renovación",
-        "body": "El número {number} de {storeName} se renovará el {date} por {credits} créditos de IA, pero tu saldo actual no es suficiente. Recarga antes de esa fecha para conservar tu número."
-      },
-      "failed": {
-        "subject": "Acción requerida — el número {number} podría ser desvinculado",
-        "title": "Renovación fallida",
-        "body": "La renovación del número {number} ({credits} créditos de IA) no pudo completarse: saldo insuficiente. Recarga antes del {date}; de lo contrario, el número será desvinculado automáticamente. Reintentamos el cobro cada día en cuanto recargues."
-      },
-      "released": {
-        "subject": "El número {number} ha sido desvinculado",
-        "title": "Número desvinculado",
-        "body": "El número {number} de {storeName} ha sido desvinculado y ya no está activo. Puedes elegir un nuevo número en cualquier momento desde tu Asistente IA."
-      }
-    },
-    "teamInvitation": {
-      "subject": "{inviterName} le invita a unirse a {storeName}",
-      "title": "Invitacion al equipo",
-      "greeting": "Hola,",
-      "body": "{inviterName} le invita a unirse al equipo de {storeName} en Louez.io.",
-      "accessDescription": "Al aceptar esta invitacion, tendra acceso al panel de la tienda para gestionar reservas, productos y clientes.",
-      "acceptButton": "Aceptar invitacion",
-      "expiry": "Esta invitacion expira en 7 dias. Si no solicito unirse a este equipo, puede ignorar este correo."
-    },
-    "baseLayout": {
-      "sentBy": "Este correo fue enviado por {storeName}",
-      "ignoreIfNotYou": "Si usted no inicio esta accion, por favor ignore este correo.",
-      "poweredBy": "Impulsado por"
-    },
-    "instantAccess": {
-      "subject": "Acceda a su reserva #{number}",
-      "title": "Acceda a su reserva",
-      "body": "Haga clic para acceder a su reserva #{number}.",
-      "paymentPending": "El pago de esta reserva esta pendiente.",
-      "viewAndPay": "Ver y pagar",
-      "linkValid": "Este enlace es valido por 30 dias."
-    },
-    "reservationCancelled": {
-      "subject": "Reserva #{number} cancelada",
-      "title": "Reserva cancelada",
-      "body": "Su reserva #{number} ha sido cancelada.",
-      "cancelledPeriod": "Período cancelado",
-      "reasonLabel": "Motivo",
-      "contactForQuestions": "Si tiene alguna pregunta, no dude en contactarnos.",
-      "browseEquipment": "Ver nuestro catálogo",
-      "thankYou": "Gracias por su comprensión."
-    },
-    "reservationCompleted": {
-      "subject": "Reserva #{number} completada",
-      "title": "¡Alquiler completado!",
-      "body": "Su reserva #{number} ha sido completada.",
-      "rentalPeriod": "Período de alquiler",
-      "depositReturned": "Su depósito de {amount} será reembolsado.",
-      "depositPending": "Su depósito de {amount} será verificado y reembolsado en breve.",
-      "thankYouMessage": "¡Gracias por elegir nuestros servicios!",
-      "rentAgain": "Alquilar de nuevo",
-      "seeYouSoon": "¡Hasta pronto!"
-    },
-    "paymentConfirmation": {
-      "subject": "Pago confirmado - Reserva #{number}",
-      "title": "¡Pago recibido!",
-      "body": "Hemos recibido su pago para la reserva #{number}.",
-      "paymentDetails": "Detalles del pago",
-      "amount": "Importe",
-      "date": "Fecha",
-      "method": "Método",
-      "reservation": "Reserva",
-      "confirmation": "Su pago ha sido procesado correctamente.",
-      "keepEmail": "Guarde este correo como comprobante de pago."
-    },
-    "paymentFailed": {
-      "subject": "Pago fallido - Reserva #{number}",
-      "title": "Pago fallido",
-      "body": "El pago de {amount} para su reserva #{number} no pudo ser procesado.",
-      "whatToDo": "¿Qué hacer?",
-      "tip1": "Verifique que su tarjeta es válida y tiene fondos suficientes",
-      "tip2": "Intente con otra tarjeta",
-      "tip3": "Contacte a su banco si el problema persiste",
-      "retryPayment": "Reintentar pago",
-      "contactSupport": "¿Necesita ayuda? Contáctenos."
-    },
-    "paymentRequest": {
-      "subject": "Solicitud de pago para reserva #{number}",
-      "title": "Solicitud de pago",
-      "body": "{storeName} solicita un pago de {amount} para su reserva #{number}.",
-      "paymentDetails": "Detalles del pago",
-      "reservation": "Reserva",
-      "description": "Descripción",
-      "amountDue": "Monto a pagar",
-      "payNow": "Pagar {amount}",
-      "linkFallback": "O copie este enlace en su navegador:",
-      "securePayment": "Este pago está asegurado por Stripe. Su información de pago nunca se comparte con el arrendador."
-    },
-    "depositAuthorizationRequest": {
-      "subject": "Autorización de depósito para reserva #{number}",
-      "title": "Autorización de depósito requerida",
-      "body": "{storeName} solicita una autorización de depósito de {amount} para su reserva #{number}.",
-      "howItWorks": "Cómo funciona",
-      "step1": "Autoriza el monto del depósito en su tarjeta",
-      "step2": "El monto se retiene temporalmente (no se cobra)",
-      "step3": "Al final del alquiler, la autorización se libera automáticamente",
-      "step4": "En caso de daños, se puede cobrar parte o todo",
-      "authorizeNow": "Autorizar depósito",
-      "linkFallback": "O copie este enlace en su navegador:",
-      "securePayment": "Esta autorización está asegurada por Stripe. El monto no se cobrará inmediatamente."
-    },
-    "rewardUnlocked": {
-      "subject": "Has ganado reservas gratis 🎉",
-      "title": "¡Tu recomendación dio sus frutos!",
-      "greeting": "Hola,",
-      "body": "{referredStoreName} acaba de realizar su primera venta online. Ganas {freeReservations} reservas gratis, por un valor de ≈ {rewardValue}.",
-      "cta": "Ver mis recompensas",
-      "footer": "Gracias por hacer crecer la comunidad Louez.",
-      "subjectCredit": "Has ganado un crédito Louez 🎉",
-      "bodyCredit": "{referredStoreName} acaba de realizar su primera venta online. Ganas un crédito de {rewardValue} en tu próxima factura de Louez."
+      "productsWarning": "{count, plural, one {Esta categoría se eliminará de # producto.} other {Esta categoría se eliminará de # productos.}}",
+      "reassignLabel": "Reasignar productos a",
+      "keepExisting": "Conservar sus otras categorías"
     }
   },
   "contract": {

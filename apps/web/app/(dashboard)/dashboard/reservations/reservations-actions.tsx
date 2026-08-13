@@ -19,6 +19,12 @@ import {
 
 import { invalidateReservationAll } from "@/lib/orpc/invalidation";
 import { orpc } from "@/lib/orpc/react";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from "@/lib/product-analytics/reservation-analytics-client";
+import { getReservationStatusAnalyticsAction } from "@/lib/product-analytics/reservation-analytics";
 import type { Reservation, ReservationStatus } from "./reservations-types";
 
 interface UseReservationActionsReturn {
@@ -196,6 +202,17 @@ export function useReservationActions(): UseReservationActionsReturn {
     e.preventDefault();
     e.stopPropagation();
 
+    const analyticsAction = getReservationStatusAnalyticsAction(newStatus);
+    if (analyticsAction) {
+      captureReservationActionStarted({
+        reservationId: reservation.id,
+        reservationStatus: reservation.status,
+        source: "reservations_list",
+        action: analyticsAction,
+        properties: { status_after: newStatus },
+      });
+    }
+
     setLoadingAction(`${reservation.id}-${newStatus}`);
     try {
       const result = await updateStatusMutation.mutateAsync({
@@ -212,6 +229,15 @@ export function useReservationActions(): UseReservationActionsReturn {
       toastManager.add({ title: t("statusUpdated"), type: "success" });
       await invalidateReservationAll(queryClient, reservation.id);
     } catch {
+      if (analyticsAction) {
+        captureReservationActionFailed({
+          reservationId: reservation.id,
+          reservationStatus: reservation.status,
+          source: "reservations_list",
+          action: analyticsAction,
+          properties: { error_code: "status_update_failed", status_after: newStatus },
+        });
+      }
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setLoadingAction(null);
@@ -220,6 +246,14 @@ export function useReservationActions(): UseReservationActionsReturn {
 
   const handleReject = async () => {
     if (!selectedReservation) return;
+
+    captureReservationActionStarted({
+      reservationId: selectedReservation.id,
+      reservationStatus: selectedReservation.status,
+      source: "reservations_list",
+      action: reservationAnalyticsActions.rejectRequest,
+      properties: { status_after: "rejected" },
+    });
 
     setLoadingAction(`${selectedReservation.id}-reject`);
     try {
@@ -237,6 +271,13 @@ export function useReservationActions(): UseReservationActionsReturn {
       toastManager.add({ title: t("reservationRejected"), type: "success" });
       await invalidateReservationAll(queryClient, selectedReservation.id);
     } catch {
+      captureReservationActionFailed({
+        reservationId: selectedReservation.id,
+        reservationStatus: selectedReservation.status,
+        source: "reservations_list",
+        action: reservationAnalyticsActions.rejectRequest,
+        properties: { error_code: "status_update_failed", status_after: "rejected" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setLoadingAction(null);
@@ -248,12 +289,26 @@ export function useReservationActions(): UseReservationActionsReturn {
   const handleCancel = async () => {
     if (!selectedReservation) return;
 
+    captureReservationActionStarted({
+      reservationId: selectedReservation.id,
+      reservationStatus: selectedReservation.status,
+      source: "reservations_list",
+      action: reservationAnalyticsActions.cancelReservation,
+    });
+
     setLoadingAction(`${selectedReservation.id}-cancel`);
     try {
       await cancelMutation.mutateAsync({ reservationId: selectedReservation.id });
       toastManager.add({ title: t("reservationCancelled"), type: "success" });
       await invalidateReservationAll(queryClient, selectedReservation.id);
     } catch {
+      captureReservationActionFailed({
+        reservationId: selectedReservation.id,
+        reservationStatus: selectedReservation.status,
+        source: "reservations_list",
+        action: reservationAnalyticsActions.cancelReservation,
+        properties: { error_code: "cancel_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setLoadingAction(null);

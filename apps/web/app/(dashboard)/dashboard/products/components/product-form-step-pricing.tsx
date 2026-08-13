@@ -1,31 +1,22 @@
-'use client';
+"use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
-import { format } from 'date-fns';
-import { enUS, fr } from 'date-fns/locale';
+import { format } from "date-fns";
+import { enUS, fr } from "date-fns/locale";
 import {
   CalendarRange,
   Check,
   Copy,
   Info,
-  Link2,
   Loader2,
   MoreHorizontal,
   Pencil,
-  Puzzle,
   Trash2,
-} from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
+} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 
-import type { PricingMode, Rate, TaxSettings } from '@louez/types';
+import type { PricingMode, Rate, TaxSettings } from "@louez/types";
 import {
   AlertDialog,
   AlertDialogClose,
@@ -54,10 +45,11 @@ import {
   SelectValue,
   Separator,
   toastManager,
-} from '@louez/ui';
-import { minutesToPriceDuration, priceDurationToMinutes } from '@louez/utils';
+} from "@louez/ui";
+import { ArrowLeftIcon, DatabaseIcon, LinkIcon, PricingIcon, PuzzleIcon } from "@louez/ui/icons";
+import { minutesToPriceDuration, priceDurationToMinutes } from "@louez/utils";
 
-import { AccessoriesSelector } from '@/components/dashboard/accessories-selector';
+import { AccessoriesSelector } from "@/components/dashboard/accessories-selector";
 import {
   CHART_RANGE_PRESETS,
   type ChartRangePreset,
@@ -67,29 +59,29 @@ import {
   buildChartData,
   buildChartTicks,
   resolveChartMaxMinutes,
-} from '@/components/dashboard/rates-editor';
-import { UnitTrackingEditor } from '@/components/dashboard/unit-tracking-editor';
+} from "@/components/dashboard/rates-editor";
 import {
-  PriceDurationInput,
-  type PriceDurationValue,
-} from '@/components/ui/price-duration-input';
+  StockModeIndicator,
+  UnitTrackingEditor,
+} from "@/components/dashboard/unit-tracking-editor";
+import { PriceDurationInput, type PriceDurationValue } from "@/components/ui/price-duration-input";
 
-import { getFieldError } from '@/hooks/form/form-context';
+import { getFieldError } from "@/hooks/form/form-context";
 
 import {
   deleteSeasonalPricing,
   duplicateSeasonalPricing,
   updateSeasonalPricing,
-} from '../seasonal-actions';
+} from "../seasonal-actions";
 import type {
   AvailableAccessory,
   ProductFormComponentApi,
   ProductFormValues,
   RateTierInput,
   SeasonalPricingData,
-} from '../types';
-import { PricingPeriodSelector } from './pricing-period-selector';
-import { SeasonalPeriodFormDialog } from './seasonal-period-form-dialog';
+} from "../types";
+import { PricingPeriodSelector } from "./pricing-period-selector";
+import { SeasonalPeriodFormDialog } from "./seasonal-period-form-dialog";
 
 interface ProductFormStepPricingProps {
   form: ProductFormComponentApi;
@@ -103,6 +95,7 @@ interface ProductFormStepPricingProps {
   availableAccessories: AvailableAccessory[];
   showAccessories: boolean;
   showStock?: boolean;
+  showValidationErrors?: boolean;
   showUnitValidationErrors?: boolean;
   // Seasonal pricing props (optional - only passed in edit mode)
   productId?: string;
@@ -113,21 +106,21 @@ interface ProductFormStepPricingProps {
   isLoadingSeasonalPricings?: boolean;
 }
 
-function toLegacyPricingMode(unit: PriceDurationValue['unit']): PricingMode {
-  if (unit === 'week') return 'week';
-  if (unit === 'day') return 'day';
-  return 'hour';
+function toLegacyPricingMode(unit: PriceDurationValue["unit"]): PricingMode {
+  if (unit === "week") return "week";
+  if (unit === "day") return "day";
+  return "hour";
 }
 
 function hasValidBaseRate(value: PriceDurationValue | undefined): boolean {
   if (!value) return false;
   if (value.duration < 1) return false;
-  const normalizedPrice = value.price.trim().replace(',', '.');
+  const normalizedPrice = value.price.trim().replace(",", ".");
   if (!/^\d+(\.\d{1,2})?$/.test(normalizedPrice)) return false;
   return Number.parseFloat(normalizedPrice) > 0;
 }
 
-function toFormTiers(tiers: SeasonalPricingData['tiers']): RateTierInput[] {
+function toFormTiers(tiers: SeasonalPricingData["tiers"]): RateTierInput[] {
   return tiers
     .filter((t) => t.period !== null && t.price !== null)
     .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
@@ -154,6 +147,7 @@ export function ProductFormStepPricing({
   availableAccessories,
   showAccessories,
   showStock = true,
+  showValidationErrors = false,
   showUnitValidationErrors = false,
   // Seasonal props
   productId,
@@ -163,22 +157,33 @@ export function ProductFormStepPricing({
   onSeasonalPricingsChange,
   isLoadingSeasonalPricings = false,
 }: ProductFormStepPricingProps) {
-  const t = useTranslations('dashboard.products.form');
+  const t = useTranslations("dashboard.products.form");
+  const tUnitTracking = useTranslations("dashboard.products.form.unitTracking");
+  const tValidation = useTranslations("validation");
   const locale = useLocale();
-  const calendarLocale = locale === 'fr' ? fr : enUS;
+  const calendarLocale = locale === "fr" ? fr : enUS;
   const [highlightBaseRate, setHighlightBaseRate] = useState(false);
+
+  // Stock mode stepper: the mode-choice screen only shows while no mode is
+  // established (fresh creation). Editing an existing product lands directly
+  // on the second step.
+  const [stockModeChosen, setStockModeChosen] = useState(
+    () =>
+      Boolean(productId) ||
+      Boolean(watchedValues.trackUnits) ||
+      (watchedValues.units?.length ?? 0) > 0 ||
+      (parseInt(watchedValues.quantity || "1", 10) || 1) > 1,
+  );
 
   // Seasonal inline editing state
   const [seasonalPriceDuration, setSeasonalPriceDuration] = useState<
     PriceDurationValue | undefined
   >();
-  const [seasonalRateTiers, setSeasonalRateTiers] = useState<RateTierInput[]>(
-    [],
-  );
+  const [seasonalRateTiers, setSeasonalRateTiers] = useState<RateTierInput[]>([]);
   const [seasonalDirty, setSeasonalDirty] = useState(false);
   const [isSavingSeasonal, startSeasonalTransition] = useTransition();
   const [seasonalChartRangePreset, setSeasonalChartRangePreset] =
-    useState<ChartRangePreset>('auto');
+    useState<ChartRangePreset>("auto");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMetadata, setEditingMetadata] = useState<{
     id: string;
@@ -188,15 +193,12 @@ export function ProductFormStepPricing({
   } | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<
-    'idle' | 'saving' | 'saved'
-  >('idle');
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
 
   // Track the previous period id to detect changes and auto-save
   const isSeasonalMode = selectedSeasonalPeriodId !== null;
   const selectedPeriod = isSeasonalMode
-    ? (seasonalPricings.find((sp) => sp.id === selectedSeasonalPeriodId) ??
-      null)
+    ? (seasonalPricings.find((sp) => sp.id === selectedSeasonalPeriodId) ?? null)
     : null;
 
   // Load seasonal data into local state when period changes
@@ -205,7 +207,7 @@ export function ProductFormStepPricing({
     setSeasonalPriceDuration({
       price: selectedPeriod.price,
       duration: watchedValues.basePriceDuration?.duration ?? 1,
-      unit: watchedValues.basePriceDuration?.unit ?? 'day',
+      unit: watchedValues.basePriceDuration?.unit ?? "day",
     });
     setSeasonalRateTiers(toFormTiers(selectedPeriod.tiers));
     setSeasonalDirty(false);
@@ -221,19 +223,19 @@ export function ProductFormStepPricing({
         name: period.name,
         startDate: period.startDate,
         endDate: period.endDate,
-        price: seasonalPriceDuration.price.replace(',', '.'),
+        price: seasonalPriceDuration.price.replace(",", "."),
         rateTiers: seasonalRateTiers.map((tier) => ({
-          price: tier.price.replace(',', '.'),
+          price: tier.price.replace(",", "."),
           duration: tier.duration,
           unit: tier.unit,
         })),
       };
 
       const result = await updateSeasonalPricing(periodId, payload);
-      if (result && 'error' in result) {
+      if (result && "error" in result) {
         toastManager.add({
           title: t(result.error as any) || result.error,
-          type: 'error',
+          type: "error",
         });
         return false;
       }
@@ -251,27 +253,25 @@ export function ProductFormStepPricing({
     }
 
     autoSaveTimerRef.current = setTimeout(async () => {
-      setAutoSaveStatus('saving');
-      const success = await saveCurrentSeasonalPricing(
-        selectedSeasonalPeriodId,
-      );
+      setAutoSaveStatus("saving");
+      const success = await saveCurrentSeasonalPricing(selectedSeasonalPeriodId);
       if (success) {
         setSeasonalDirty(false);
-        setAutoSaveStatus('saved');
+        setAutoSaveStatus("saved");
         // Update the price in the list (for the period selector badge)
         if (onSeasonalPricingsChange && seasonalPriceDuration) {
           const updated = seasonalPricings.map((sp) => {
             if (sp.id !== selectedSeasonalPeriodId) return sp;
             return {
               ...sp,
-              price: seasonalPriceDuration.price.replace(',', '.'),
+              price: seasonalPriceDuration.price.replace(",", "."),
             };
           });
           onSeasonalPricingsChange(updated);
         }
-        setTimeout(() => setAutoSaveStatus('idle'), 2000);
+        setTimeout(() => setAutoSaveStatus("idle"), 2000);
       } else {
-        setAutoSaveStatus('idle');
+        setAutoSaveStatus("idle");
       }
     }, 1500);
 
@@ -298,13 +298,13 @@ export function ProductFormStepPricing({
             if (sp.id !== selectedSeasonalPeriodId) return sp;
             return {
               ...sp,
-              price: seasonalPriceDuration.price.replace(',', '.'),
+              price: seasonalPriceDuration.price.replace(",", "."),
             };
           });
           onSeasonalPricingsChange(updated);
         }
       }
-      setAutoSaveStatus('idle');
+      setAutoSaveStatus("idle");
       onSelectSeasonalPeriod?.(newPeriodId);
     },
     [
@@ -355,12 +355,10 @@ export function ProductFormStepPricing({
     // Use local state values if this is the currently selected period, otherwise use stored values
     const currentPrice =
       id === selectedSeasonalPeriodId && seasonalPriceDuration
-        ? seasonalPriceDuration.price.replace(',', '.')
+        ? seasonalPriceDuration.price.replace(",", ".")
         : period.price;
     const currentTiers =
-      id === selectedSeasonalPeriodId
-        ? seasonalRateTiers
-        : toFormTiers(period.tiers);
+      id === selectedSeasonalPeriodId ? seasonalRateTiers : toFormTiers(period.tiers);
 
     const payload = {
       name,
@@ -368,22 +366,22 @@ export function ProductFormStepPricing({
       endDate,
       price: currentPrice,
       rateTiers: currentTiers.map((tier) => ({
-        price: tier.price.replace(',', '.'),
+        price: tier.price.replace(",", "."),
         duration: tier.duration,
         unit: tier.unit,
       })),
     };
 
     const result = await updateSeasonalPricing(id, payload);
-    if (result && 'error' in result) {
+    if (result && "error" in result) {
       toastManager.add({
         title: t(result.error as any) || result.error,
-        type: 'error',
+        type: "error",
       });
       return;
     }
 
-    toastManager.add({ title: t('periodSaved'), type: 'success' });
+    toastManager.add({ title: t("periodSaved"), type: "success" });
     const updated = seasonalPricings
       .map((sp) => {
         if (sp.id !== id) return sp;
@@ -398,16 +396,14 @@ export function ProductFormStepPricing({
     if (!selectedPeriod) return;
     startSeasonalTransition(async () => {
       const result = await deleteSeasonalPricing(selectedPeriod.id);
-      if (result && 'error' in result) {
+      if (result && "error" in result) {
         toastManager.add({
           title: t(result.error as any) || result.error,
-          type: 'error',
+          type: "error",
         });
         return;
       }
-      const updated = seasonalPricings.filter(
-        (sp) => sp.id !== selectedPeriod.id,
-      );
+      const updated = seasonalPricings.filter((sp) => sp.id !== selectedPeriod.id);
       onSeasonalPricingsChange?.(updated);
       onSelectSeasonalPeriod?.(null);
       setDeleteDialogOpen(false);
@@ -422,17 +418,17 @@ export function ProductFormStepPricing({
     }
     startSeasonalTransition(async () => {
       const result = await duplicateSeasonalPricing(selectedPeriod.id);
-      if (result && 'error' in result) {
+      if (result && "error" in result) {
         toastManager.add({
           title: t(result.error as any) || result.error,
-          type: 'error',
+          type: "error",
         });
         return;
       }
-      if (result && 'id' in result) {
+      if (result && "id" in result) {
         // Reload by refetching - parent will handle this
         // For now, add a placeholder and select it
-        toastManager.add({ title: t('seasonDuplicated'), type: 'success' });
+        toastManager.add({ title: t("seasonDuplicated"), type: "success" });
         // We need to reload the full list since we don't have the duplicated data
         // Signal the parent to reload
         onSeasonalPricingsChange?.([]);
@@ -442,13 +438,13 @@ export function ProductFormStepPricing({
   };
 
   // Chart data for the currently edited seasonal period
-  const tCommon = useTranslations('common');
+  const tCommon = useTranslations("common");
   const seasonalValidRates: Rate[] = useMemo(
     () =>
       seasonalRateTiers
         .map((tier, index) => ({
           id: tier.id ?? `seasonal-${index}`,
-          price: Number.parseFloat(tier.price.replace(',', '.')) || 0,
+          price: Number.parseFloat(tier.price.replace(",", ".")) || 0,
           period: priceDurationToMinutes(tier.duration, tier.unit),
           displayOrder: index,
         }))
@@ -457,13 +453,10 @@ export function ProductFormStepPricing({
   );
 
   const seasonalBasePeriod = seasonalPriceDuration
-    ? priceDurationToMinutes(
-        seasonalPriceDuration.duration,
-        seasonalPriceDuration.unit,
-      )
+    ? priceDurationToMinutes(seasonalPriceDuration.duration, seasonalPriceDuration.unit)
     : 0;
   const seasonalBasePrice = seasonalPriceDuration
-    ? Number.parseFloat(seasonalPriceDuration.price.replace(',', '.')) || 0
+    ? Number.parseFloat(seasonalPriceDuration.price.replace(",", ".")) || 0
     : 0;
   const seasonalChartMaxMinutes = useMemo(
     () => resolveChartMaxMinutes(seasonalChartRangePreset),
@@ -479,13 +472,7 @@ export function ProductFormStepPricing({
         tCommon,
         seasonalChartMaxMinutes,
       ),
-    [
-      seasonalBasePrice,
-      seasonalBasePeriod,
-      seasonalValidRates,
-      tCommon,
-      seasonalChartMaxMinutes,
-    ],
+    [seasonalBasePrice, seasonalBasePeriod, seasonalValidRates, tCommon, seasonalChartMaxMinutes],
   );
 
   const seasonalChartAnchorTicks = useMemo(
@@ -500,35 +487,27 @@ export function ProductFormStepPricing({
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium">{selectedPeriod.name}</p>
         <p className="text-muted-foreground mt-0.5 text-xs">
-          {format(
-            new Date(selectedPeriod.startDate + 'T00:00:00'),
-            'd MMM yyyy',
-            { locale: calendarLocale },
-          )}
-          {' → '}
-          {format(
-            new Date(selectedPeriod.endDate + 'T00:00:00'),
-            'd MMM yyyy',
-            { locale: calendarLocale },
-          )}
+          {format(new Date(selectedPeriod.startDate + "T00:00:00"), "d MMM yyyy", {
+            locale: calendarLocale,
+          })}
+          {" → "}
+          {format(new Date(selectedPeriod.endDate + "T00:00:00"), "d MMM yyyy", {
+            locale: calendarLocale,
+          })}
         </p>
       </div>
-      {autoSaveStatus !== 'idle' && (
+      {autoSaveStatus !== "idle" && (
         <div className="flex shrink-0 items-center gap-1.5 self-center">
-          {autoSaveStatus === 'saving' && (
+          {autoSaveStatus === "saving" && (
             <>
               <Loader2 className="text-muted-foreground h-3 w-3 animate-spin" />
-              <span className="text-muted-foreground text-xs">
-                {t('savingPeriod')}
-              </span>
+              <span className="text-muted-foreground text-xs">{t("savingPeriod")}</span>
             </>
           )}
-          {autoSaveStatus === 'saved' && (
+          {autoSaveStatus === "saved" && (
             <>
               <Check className="h-3 w-3 text-emerald-600" />
-              <span className="text-xs text-emerald-600">
-                {t('periodSaved')}
-              </span>
+              <span className="text-xs text-emerald-600">{t("periodSaved")}</span>
             </>
           )}
         </div>
@@ -541,18 +520,16 @@ export function ProductFormStepPricing({
           onClick={handleEditMetadata}
         >
           <Pencil className="h-3 w-3" />
-          {t('editPeriodMetadata')}
+          {t("editPeriodMetadata")}
         </Button>
         <DropdownMenu>
-          <DropdownMenuTrigger
-            render={<Button variant="ghost" size="icon" className="h-7 w-7" />}
-          >
+          <DropdownMenuTrigger render={<Button variant="ghost" size="icon" className="h-7 w-7" />}>
             <MoreHorizontal className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={handleDuplicatePeriod}>
               <Copy className="mr-2 h-4 w-4" />
-              {t('duplicateSeason')}
+              {t("duplicateSeason")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -560,7 +537,7 @@ export function ProductFormStepPricing({
               onClick={() => setDeleteDialogOpen(true)}
             >
               <Trash2 className="mr-2 h-4 w-4" />
-              {t('deleteSeason')}
+              {t("deleteSeason")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -573,10 +550,11 @@ export function ProductFormStepPricing({
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           <div>
-            <CardTitle>{t('pricing')}</CardTitle>
-            <CardDescription className="mt-1.5">
-              {t('pricingDescription')}
-            </CardDescription>
+            <CardTitle className="flex items-center gap-2">
+              <PricingIcon className="h-5 w-5 shrink-0" />
+              {t("pricing")}
+            </CardTitle>
+            <CardDescription className="mt-1.5">{t("pricingDescription")}</CardDescription>
           </div>
           {productId && (
             <PricingPeriodSelector
@@ -597,13 +575,13 @@ export function ProductFormStepPricing({
             {seasonalBanner}
             {/* Seasonal base price */}
             <div className="space-y-2">
-              <Label>{t('seasonBasePrice')}</Label>
+              <Label>{t("seasonBasePrice")}</Label>
               <PriceDurationInput
                 value={
                   seasonalPriceDuration ?? {
-                    price: '',
+                    price: "",
                     duration: 1,
-                    unit: 'day',
+                    unit: "day",
                   }
                 }
                 onChange={(next) => {
@@ -613,9 +591,7 @@ export function ProductFormStepPricing({
                 currency={currency}
                 disabled={isSaving || isSavingSeasonal}
               />
-              <p className="text-muted-foreground text-xs">
-                {t('seasonBasePriceHint')}
-              </p>
+              <p className="text-muted-foreground text-xs">{t("seasonBasePriceHint")}</p>
             </div>
             {/* Seasonal rate tiers */}
             <RatesEditor
@@ -631,30 +607,9 @@ export function ProductFormStepPricing({
               disabled={isSaving || isSavingSeasonal}
               hideProgressiveToggle
             />
-            {/* Seasonal pricing curve preview */}
-            {seasonalChartData.length > 0 && (
+            {/* Seasonal pricing curve preview (only meaningful with at least one tier) */}
+            {seasonalValidRates.length > 0 && seasonalChartData.length > 0 && (
               <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-                {SHOW_DEV_CHART_RANGE_SELECTOR && (
-                  <div className="mb-3 flex justify-end">
-                    <Select
-                      value={seasonalChartRangePreset}
-                      onValueChange={(value) =>
-                        setSeasonalChartRangePreset(value as ChartRangePreset)
-                      }
-                    >
-                      <SelectTrigger className="w-[110px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {CHART_RANGE_PRESETS.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
                 <PricingChart
                   data={seasonalChartData}
                   anchorTicks={seasonalChartAnchorTicks}
@@ -663,6 +618,27 @@ export function ProductFormStepPricing({
                   currency={currency}
                   tCommon={tCommon}
                   t={t}
+                  headerAddon={
+                    SHOW_DEV_CHART_RANGE_SELECTOR ? (
+                      <Select
+                        value={seasonalChartRangePreset}
+                        onValueChange={(value) =>
+                          setSeasonalChartRangePreset(value as ChartRangePreset)
+                        }
+                      >
+                        <SelectTrigger className="h-8 w-[90px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CHART_RANGE_PRESETS.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : null
+                  }
                 />
               </div>
             )}
@@ -670,13 +646,13 @@ export function ProductFormStepPricing({
             <div className="border-muted bg-muted/30 flex items-start gap-2.5 rounded-lg border px-3.5 py-3">
               <Info className="text-muted-foreground mt-0.5 h-4 w-4 shrink-0" />
               <div className="text-muted-foreground flex-1 text-sm">
-                <span>{t('seasonalSettingsHint')}</span>{' '}
+                <span>{t("seasonalSettingsHint")}</span>{" "}
                 <button
                   type="button"
                   className="text-primary inline font-medium underline-offset-2 hover:underline"
                   onClick={() => onSelectSeasonalPeriod?.(null)}
                 >
-                  {t('switchToBasePricing')}
+                  {t("switchToBasePricing")}
                 </button>
               </div>
             </div>
@@ -687,31 +663,37 @@ export function ProductFormStepPricing({
             <form.Field name="basePriceDuration">
               {(field) => {
                 const fallbackBaseRate: PriceDurationValue = {
-                  price: watchedValues.price || '',
+                  price: watchedValues.price || "",
                   duration: 1,
                   unit:
-                    watchedValues.pricingMode === 'week'
-                      ? 'week'
-                      : watchedValues.pricingMode === 'hour'
-                        ? 'hour'
-                        : 'day',
+                    watchedValues.pricingMode === "week"
+                      ? "week"
+                      : watchedValues.pricingMode === "hour"
+                        ? "hour"
+                        : "day",
                 };
                 const baseRateValue = field.state.value ?? fallbackBaseRate;
                 const showBaseRateHighlight =
-                  highlightBaseRate && !hasValidBaseRate(baseRateValue);
+                  (highlightBaseRate ||
+                    showValidationErrors ||
+                    field.state.meta.errors.length > 0) &&
+                  !hasValidBaseRate(baseRateValue);
+                const baseRateError =
+                  field.state.meta.errors.length > 0
+                    ? getFieldError(field.state.meta.errors[0])
+                    : showBaseRateHighlight
+                      ? tValidation("positive")
+                      : null;
 
                 return (
                   <div className="space-y-2">
-                    <Label>{t('baseRate')}</Label>
+                    <Label helper={t("baseRateDescription")}>{t("baseRate")}</Label>
                     <PriceDurationInput
                       value={baseRateValue}
                       onChange={(next) => {
                         field.handleChange(next);
-                        form.setFieldValue('price', next.price);
-                        form.setFieldValue(
-                          'pricingMode',
-                          toLegacyPricingMode(next.unit),
-                        );
+                        form.setFieldValue("price", next.price);
+                        form.setFieldValue("pricingMode", toLegacyPricingMode(next.unit));
                         if (highlightBaseRate && hasValidBaseRate(next)) {
                           setHighlightBaseRate(false);
                         }
@@ -720,14 +702,9 @@ export function ProductFormStepPricing({
                       disabled={isSaving}
                       invalid={showBaseRateHighlight}
                     />
-                    <p className="text-muted-foreground text-sm">
-                      {t('baseRateDescription')}
-                    </p>
-                    {field.state.meta.errors.length > 0 && (
-                      <p className="text-destructive text-sm font-medium">
-                        {getFieldError(field.state.meta.errors[0])}
-                      </p>
-                    )}
+                    {baseRateError ? (
+                      <p className="text-destructive text-sm font-medium">{baseRateError}</p>
+                    ) : null}
                   </div>
                 );
               }}
@@ -742,11 +719,9 @@ export function ProductFormStepPricing({
                       field.handleChange(next);
                       onRateTiersEdit?.();
                     }}
-                    enforceStrictTiers={
-                      watchedValues.enforceStrictTiers ?? true
-                    }
+                    enforceStrictTiers={watchedValues.enforceStrictTiers ?? true}
                     onEnforceStrictTiersChange={(value) =>
-                      form.setFieldValue('enforceStrictTiers', value)
+                      form.setFieldValue("enforceStrictTiers", value)
                     }
                     onRequireBaseRate={() => setHighlightBaseRate(true)}
                     invalidRateIndexes={duplicateRateTierIndexes}
@@ -768,8 +743,8 @@ export function ProductFormStepPricing({
                   <form.AppField name="taxSettings.inheritFromStore">
                     {(field) => (
                       <field.Switch
-                        label={t('inheritTax')}
-                        description={t('inheritTaxDescription', {
+                        label={t("inheritTax")}
+                        description={t("inheritTaxDescription", {
                           rate: storeTaxSettings.defaultRate,
                         })}
                       />
@@ -780,7 +755,7 @@ export function ProductFormStepPricing({
                     <form.Field name="taxSettings.customRate">
                       {(field) => (
                         <div className="space-y-2">
-                          <Label>{t('customTaxRate')}</Label>
+                          <Label>{t("customTaxRate")}</Label>
                           <div className="relative w-32">
                             <Input
                               type="number"
@@ -789,12 +764,10 @@ export function ProductFormStepPricing({
                               step="any"
                               placeholder="20"
                               className="pr-8"
-                              value={field.state.value ?? ''}
+                              value={field.state.value ?? ""}
                               onChange={(event) =>
                                 field.handleChange(
-                                  event.target.value
-                                    ? parseFloat(event.target.value)
-                                    : undefined,
+                                  event.target.value ? parseFloat(event.target.value) : undefined,
                                 )
                               }
                               onBlur={field.handleBlur}
@@ -804,7 +777,7 @@ export function ProductFormStepPricing({
                             </span>
                           </div>
                           <p className="text-muted-foreground text-sm">
-                            {t('customTaxRateDescription')}
+                            {t("customTaxRateDescription")}
                           </p>
                           {field.state.meta.errors.length > 0 && (
                             <p className="text-destructive text-sm font-medium">
@@ -819,17 +792,17 @@ export function ProductFormStepPricing({
               </>
             )}
             <Separator />
-            <div className="grid items-start gap-4 sm:grid-cols-2">
-              <form.AppField name="deposit">
-                {(field) => (
-                  <field.Input
-                    label={t('deposit')}
-                    suffix={currencySymbol}
-                    placeholder={t('depositPlaceholder')}
-                    description={t('depositHelp')}
-                  />
-                )}
-              </form.AppField>
+            <div className="space-y-2">
+              <Label htmlFor="deposit" helper={t("depositHelp")}>
+                {t("deposit")}
+              </Label>
+              <div className="w-44">
+                <form.AppField name="deposit">
+                  {(field) => (
+                    <field.Input suffix={currencySymbol} placeholder={t("depositPlaceholder")} />
+                  )}
+                </form.AppField>
+              </div>
             </div>
           </>
         )}
@@ -853,17 +826,15 @@ export function ProductFormStepPricing({
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteSeasonTitle')}</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteSeasonTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('deleteSeasonDescription', {
-                name: selectedPeriod?.name || '',
+              {t("deleteSeasonDescription", {
+                name: selectedPeriod?.name || "",
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>
-              {t('cancel')}
-            </AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>{t("cancel")}</AlertDialogClose>
             <AlertDialogClose
               render={
                 <Button
@@ -873,7 +844,7 @@ export function ProductFormStepPricing({
                 />
               }
             >
-              {t('deleteSeason')}
+              {t("deleteSeason")}
             </AlertDialogClose>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -884,29 +855,53 @@ export function ProductFormStepPricing({
   const stockCard = (
     <Card>
       <CardHeader>
-        <CardTitle>{t('stock')}</CardTitle>
-        <CardDescription>{t('quantityHelp')}</CardDescription>
+        <div className="flex items-center gap-2">
+          {stockModeChosen ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-foreground h-6 w-6"
+              onClick={() => setStockModeChosen(false)}
+              aria-label={tUnitTracking("changeMode")}
+            >
+              <ArrowLeftIcon data-slot="icon" />
+            </Button>
+          ) : null}
+
+          <CardTitle className="flex items-center gap-2">
+            {" "}
+            <DatabaseIcon className="text-primary h-5 w-5 shrink-0 stroke-2" />
+            {t("stock")}
+          </CardTitle>
+          <StockModeIndicator
+            modeChosen={stockModeChosen}
+            trackUnits={watchedValues.trackUnits || false}
+            onBack={() => setStockModeChosen(false)}
+            disabled={isSaving}
+          />
+        </div>
+        <CardDescription>{t("quantityHelp")}</CardDescription>
       </CardHeader>
       <CardContent>
         <UnitTrackingEditor
+          currency={currency}
           trackUnits={watchedValues.trackUnits || false}
-          onTrackUnitsChange={(value) =>
-            form.setFieldValue('trackUnits', value)
-          }
+          onTrackUnitsChange={(value) => form.setFieldValue("trackUnits", value)}
           bookingAttributeAxes={watchedValues.bookingAttributeAxes || []}
-          onBookingAttributeAxesChange={(axes) =>
-            form.setFieldValue('bookingAttributeAxes', axes)
-          }
+          onBookingAttributeAxesChange={(axes) => form.setFieldValue("bookingAttributeAxes", axes)}
           units={watchedValues.units || []}
-          onChange={(units) => form.setFieldValue('units', units)}
-          quantity={watchedValues.quantity || '1'}
+          onChange={(units) => form.setFieldValue("units", units)}
+          quantity={watchedValues.quantity || "1"}
           onQuantityChange={(value) => {
-            form.setFieldMeta('quantity', (prev: any) => ({
+            form.setFieldMeta("quantity", (prev: any) => ({
               ...prev,
               errorMap: { ...prev?.errorMap, onSubmit: undefined },
             }));
-            form.setFieldValue('quantity', value);
+            form.setFieldValue("quantity", value);
           }}
+          modeChosen={stockModeChosen}
+          onModeChosenChange={setStockModeChosen}
           disabled={isSaving}
           showValidationErrors={showUnitValidationErrors}
           productId={productId}
@@ -919,10 +914,10 @@ export function ProductFormStepPricing({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Link2 className="h-5 w-5" />
-          {t('accessories')}
+          <LinkIcon className="h-5 w-5 shrink-0" />
+          {t("accessories")}
         </CardTitle>
-        <CardDescription>{t('accessoriesDescription')}</CardDescription>
+        <CardDescription>{t("accessoriesDescription")}</CardDescription>
       </CardHeader>
       <CardContent>
         {availableAccessories.length > 0 ? (
@@ -947,11 +942,11 @@ export function ProductFormStepPricing({
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <div className="bg-muted mb-3 rounded-full p-3">
-              <Puzzle className="text-muted-foreground h-6 w-6" />
+              <PuzzleIcon className="text-muted-foreground h-6 w-6" />
             </div>
-            <p className="text-sm font-medium">{t('noAccessoriesAvailable')}</p>
+            <p className="text-sm font-medium">{t("noAccessoriesAvailable")}</p>
             <p className="text-muted-foreground mt-1 max-w-[260px] text-sm">
-              {t('noAccessoriesHint')}
+              {t("noAccessoriesHint")}
             </p>
           </div>
         )}

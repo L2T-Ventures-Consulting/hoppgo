@@ -1,31 +1,13 @@
 'use client'
 
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
-import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import {
-  MoreHorizontal,
-  Pencil,
-  Copy,
-  Archive,
-  Trash2,
-  Eye,
-  EyeOff,
-  Package,
-} from 'lucide-react'
-import { toastManager } from '@louez/ui'
+import { MoreHorizontal, Pencil, Copy, Archive, Trash2, Eye, EyeOff, Package } from 'lucide-react'
 
 import { Button } from '@louez/ui'
 import { Badge } from '@louez/ui'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@louez/ui'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@louez/ui'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,8 +25,11 @@ import {
   AlertDialogTitle,
 } from '@louez/ui'
 
-import { updateProductStatus, deleteProduct, duplicateProduct } from './actions'
-import { getCurrencySymbol } from '@louez/utils'
+import { cn, getCurrencySymbol } from '@louez/utils'
+
+import { ProductImage } from '@/components/product/product-image'
+
+import { useProductActions } from './[id]/hooks/use-product-actions'
 
 interface Product {
   id: string
@@ -65,145 +50,70 @@ interface ProductsTableProps {
   currency?: string
 }
 
-type ProductActionResult = {
-  error?: string
-  failedUnitIdentifiers?: string[]
-}
-
-const STATUS_STYLES = {
-  active: 'bg-green-500/10 text-green-600 hover:bg-green-500/20',
-  draft: 'bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20',
-  archived: 'bg-muted text-muted-foreground',
-}
-
-function ProductImage({ src, alt }: { src?: string; alt: string }) {
-  if (!src) {
-    return (
-      <div className="flex h-12 w-16 items-center justify-center rounded-lg bg-muted">
-        <Package className="h-5 w-5 text-muted-foreground" />
-      </div>
-    )
-  }
-
-  return (
-    <div className="relative aspect-4/3 h-12 overflow-hidden rounded-lg bg-muted">
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover"
-        sizes="64px"
-      />
-    </div>
-  )
-}
+const STATUS_VARIANTS = {
+  active: 'success',
+  draft: 'pending',
+  archived: 'expired',
+} as const
 
 export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps) {
   const t = useTranslations('dashboard.products')
   const tCommon = useTranslations('common')
-  const tErrors = useTranslations('errors')
   const currencySymbol = getCurrencySymbol(currency)
+  const tableRef = useRef<HTMLTableElement>(null)
+  const [hasHorizontalOverflow, setHasHorizontalOverflow] = useState(false)
+  const [showActionsFade, setShowActionsFade] = useState(false)
 
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [productToDelete, setProductToDelete] = useState<Product | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const {
+    isLoading,
+    deleteDialogOpen,
+    setDeleteDialogOpen,
+    handleStatusToggle,
+    handleArchive,
+    handleDuplicate,
+    requestDelete,
+    handleDelete,
+  } = useProductActions()
 
-  const getActionErrorMessage = (result: ProductActionResult) => {
-    const errorKey = result.error?.startsWith('errors.')
-      ? result.error.replace('errors.', '')
-      : null
-    const message = errorKey && result.error ? tErrors(errorKey) : result.error
-    const identifiers = result.failedUnitIdentifiers?.filter(Boolean)
+  useEffect(() => {
+    const table = tableRef.current
+    const scrollContainer = table?.parentElement
 
-    if (identifiers && identifiers.length > 0) {
-      return `${message || tErrors('generic')} (${identifiers.join(', ')})`
+    if (!table || !scrollContainer) return
+
+    const updateActionsFade = () => {
+      const maxScrollLeft = scrollContainer.scrollWidth - scrollContainer.clientWidth
+      const isOverflowing = maxScrollLeft > 1
+
+      setHasHorizontalOverflow(isOverflowing)
+      setShowActionsFade(isOverflowing && scrollContainer.scrollLeft < maxScrollLeft - 1)
     }
 
-    return message || tErrors('generic')
-  }
+    updateActionsFade()
 
-  const handleStatusToggle = async (product: Product) => {
-    const newStatus = product.status === 'active' ? 'draft' : 'active'
-    setIsLoading(true)
-    try {
-      const result = await updateProductStatus(product.id, newStatus)
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({
-          title: newStatus === 'active'
-            ? t('productPublished')
-            : t('productUnpublished'),
-          type: 'success',
-        })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
+    const resizeObserver =
+      typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updateActionsFade)
+    resizeObserver?.observe(table)
+    resizeObserver?.observe(scrollContainer)
+    scrollContainer.addEventListener('scroll', updateActionsFade, { passive: true })
+
+    return () => {
+      resizeObserver?.disconnect()
+      scrollContainer.removeEventListener('scroll', updateActionsFade)
     }
-  }
+  }, [products])
 
-  const handleArchive = async (product: Product) => {
-    setIsLoading(true)
-    try {
-      const result = await updateProductStatus(product.id, 'archived')
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({ title: t('productArchived'), type: 'success' })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleDuplicate = async (product: Product) => {
-    setIsLoading(true)
-    try {
-      const result = await duplicateProduct(product.id)
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({ title: t('productDuplicated'), type: 'success' })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const handleDelete = async () => {
-    if (!productToDelete) return
-
-    setIsLoading(true)
-    try {
-      const result = await deleteProduct(productToDelete.id)
-      if (result.error) {
-        toastManager.add({ title: getActionErrorMessage(result), type: 'error' })
-      } else {
-        toastManager.add({ title: t('productDeleted'), type: 'success' })
-      }
-    } catch {
-      toastManager.add({ title: tErrors('generic'), type: 'error' })
-    } finally {
-      setIsLoading(false)
-      setDeleteDialogOpen(false)
-      setProductToDelete(null)
-    }
-  }
+  const actionsFadeClassName = cn(
+    showActionsFade &&
+      "before:pointer-events-none before:absolute before:inset-y-0 before:-left-6 before:w-6 before:bg-linear-to-r before:from-transparent before:via-background/70 before:to-background before:backdrop-blur-[1px] before:content-['']",
+  )
 
   if (products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-12">
         <Package className="h-12 w-12 text-muted-foreground" />
         <h3 className="mt-4 text-lg font-semibold">{t('noProducts')}</h3>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t('noProductsDescription')}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t('noProductsDescription')}</p>
         <Button render={<Link href="/dashboard/products/new" />} className="mt-4">
           {t('addProduct')}
         </Button>
@@ -213,8 +123,8 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
 
   return (
     <>
-      <div className="rounded-md border">
-        <Table>
+      <div className="overflow-hidden rounded-md border">
+        <Table ref={tableRef}>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[80px]">{t('images')}</TableHead>
@@ -223,12 +133,20 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
               <TableHead className="text-right">{t('price')}</TableHead>
               <TableHead className="text-center">{t('quantity')}</TableHead>
               <TableHead>{tCommon('status')}</TableHead>
-              <TableHead className="w-[70px]"></TableHead>
+              <TableHead
+                className={cn(
+                  'sticky right-0 z-20 w-[70px] bg-background',
+                  hasHorizontalOverflow && 'border-l',
+                  actionsFadeClassName,
+                )}
+              >
+                <span className="sr-only">{tCommon('actions')}</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.map((product) => {
-              const statusStyle = STATUS_STYLES[product.status || 'draft']
+              const statusVariant = STATUS_VARIANTS[product.status || 'draft']
 
               return (
                 <TableRow key={product.id}>
@@ -236,6 +154,8 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                     <ProductImage
                       src={product.images?.[0]}
                       alt={product.name}
+                      sizes="64px"
+                      containerClassName="h-12 shrink-0"
                     />
                   </TableCell>
                   <TableCell>
@@ -252,39 +172,39 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                   <TableCell className="text-right font-medium">
                     {parseFloat(product.price).toFixed(2)} {currencySymbol}
                   </TableCell>
-                  <TableCell className="text-center">
-                    {product.quantity}
-                  </TableCell>
+                  <TableCell className="text-center">{product.quantity}</TableCell>
                   <TableCell>
-                    <Badge className={statusStyle}>
+                    <Badge variant={statusVariant}>
                       {t(`status.${product.status || 'draft'}`)}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell
+                    className={cn(
+                      'sticky right-0 z-10 bg-background',
+                      hasHorizontalOverflow && 'border-l',
+                      actionsFadeClassName,
+                    )}
+                  >
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={<Button
-                          variant="ghost"
-                          size="icon"
-                          disabled={isLoading}
-                        />}>
-                          <MoreHorizontal className="h-4 w-4" />
-                          <span className="sr-only">{tCommon('actions')}</span>
+                      <DropdownMenuTrigger
+                        render={<Button variant="ghost" size="icon" disabled={isLoading} />}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">{tCommon('actions')}</span>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem render={<Link href={`/dashboard/products/${product.id}`} />}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            {tCommon('edit')}
-                        </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDuplicate(product)}
+                          render={<Link href={`/dashboard/products/${product.id}/edit`} />}
                         >
+                          <Pencil className="mr-2 h-4 w-4" />
+                          {tCommon('edit')}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDuplicate(product)}>
                           <Copy className="mr-2 h-4 w-4" />
                           {t('duplicate')}
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          onClick={() => handleStatusToggle(product)}
-                        >
+                        <DropdownMenuItem onClick={() => handleStatusToggle(product)}>
                           {product.status === 'active' ? (
                             <>
                               <EyeOff className="mr-2 h-4 w-4" />
@@ -298,9 +218,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                           )}
                         </DropdownMenuItem>
                         {product.status !== 'archived' && (
-                          <DropdownMenuItem
-                            onClick={() => handleArchive(product)}
-                          >
+                          <DropdownMenuItem onClick={() => handleArchive(product)}>
                             <Archive className="mr-2 h-4 w-4" />
                             {t('archive')}
                           </DropdownMenuItem>
@@ -308,10 +226,7 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           className="text-destructive focus:text-destructive"
-                          onClick={() => {
-                            setProductToDelete(product)
-                            setDeleteDialogOpen(true)
-                          }}
+                          onClick={() => requestDelete(product)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           {tCommon('delete')}
@@ -330,15 +245,15 @@ export function ProductsTable({ products, currency = 'EUR' }: ProductsTableProps
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t('deleteConfirm.title')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('deleteConfirm.description')}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{t('deleteConfirm.description')}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogClose render={<Button variant="outline" />}>{tCommon('cancel')}</AlertDialogClose>
+            <AlertDialogClose render={<Button variant="outline" />}>
+              {tCommon('cancel')}
+            </AlertDialogClose>
             <AlertDialogClose
               render={<Button variant="destructive" />}
-              onClick={handleDelete}
+              onClick={() => handleDelete()}
             >
               {tCommon('delete')}
             </AlertDialogClose>

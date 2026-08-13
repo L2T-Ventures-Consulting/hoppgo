@@ -1,0 +1,42 @@
+{
+  "images": {
+    "sup": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/sup.png",
+    "supRigid": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/supRigid.jpg",
+    "kayak": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/kayak.jpg",
+    "kayak2": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/kayak2.jpg",
+    "wetsuit": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/wetsuit.jpg",
+    "wing": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/wing.jpg",
+    "tent4": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/tent4.jpg",
+    "sleepingBag": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/sleepingBag.jpg",
+    "mattress": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/mattress.jpg",
+    "stove": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/stove.jpg",
+    "lock": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/lock.jpg",
+    "gps": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/gps.jpg",
+    "repairKit": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/repairKit.jpg",
+    "basket": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/basket.jpg",
+    "cargoTrailer": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/cargoTrailer.jpg",
+    "balanceBike": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/balanceBike.jpg",
+    "tandem": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/tandem.jpg",
+    "folding": "https://louez-dev.s3.fr-par.scw.cloud/demo/ar-mor-location/products/folding.jpg"
+  },
+  "credits": {
+    "sup": "Inflatable Stand Up Paddle board — Wikimedia Commons, CC BY-SA 4.0",
+    "supRigid": "Paddleboarding at Shanklin — geograph.org.uk, CC BY-SA 2.0",
+    "kayak": "Sit-On-Top kayak with outriggers — Wikimedia Commons, CC BY 4.0",
+    "kayak2": "Tri-Yak sit-on-top kayak — Wikimedia Commons, CC BY-SA 4.0",
+    "wetsuit": "Wetsuit — Wikimedia Commons, CC BY-SA 3.0",
+    "wing": "Wing foil board — Wikimedia Commons, CC BY-SA 4.0",
+    "tent4": "Dome tent in the BWCA — Wikimedia Commons, CC BY-SA 4.0",
+    "sleepingBag": "OutDoor 2018, Friedrichshafen — Wikimedia Commons, CC BY-SA 4.0",
+    "mattress": "Self-inflating mat — Wikimedia Commons, CC BY 3.0",
+    "stove": "JetBoil camping stove — Wikimedia Commons, CC BY-SA 2.0",
+    "lock": "Anti-theft device — Wikimedia Commons, CC BY-SA 2.5",
+    "gps": "Garmin Edge 1040 Solar — Wikimedia Commons, CC BY 2.0",
+    "repairKit": "Bicycle emergency repair kit — Wikimedia Commons, CC0",
+    "basket": "Bicycle basket — Unsplash via Wikimedia Commons, CC0",
+    "cargoTrailer": "Bicycle cargo trailer — Wikimedia Commons, CC BY-SA 4.0",
+    "balanceBike": "Kids balance bike — Wikimedia Commons, CC BY-SA 2.0",
+    "tandem": "Tandem bicycle — Wikimedia Commons, CC BY 2.0",
+    "folding": "Brompton folded — Wikimedia Commons, CC0"
+  }
+}

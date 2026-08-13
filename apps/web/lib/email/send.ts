@@ -3,15 +3,14 @@ import { env } from '@/env'
 import { sendEmail, type EmailAttachment } from './client'
 import { db } from '@louez/db'
 import { emailLogs } from '@louez/db'
+import { getEmailTranslations, type EmailLocale } from './i18n'
+import { getLogoForLightBackground } from '@louez/utils'
+import { resolveEmailLogo } from './logo'
 import {
-  getDateFormatPatterns,
-  getEmailTranslator,
-  getEmailTranslations,
-  type EmailLocale,
-} from './i18n'
-import { formatEmailDateInStoreTimezone } from './date-time'
-import { getLogoForLightBackground, toAbsoluteUrl } from '@louez/utils'
-import { isSvgUrl, convertSvgToPngBuffer } from '@/lib/image-utils'
+  composeInstantAccessEmail,
+  composeReminderPickupEmail,
+  composeReminderReturnEmail,
+} from './compose'
 import type { ReservationLocationSnapshot } from '@louez/types'
 import {
   VerificationCodeEmail,
@@ -23,8 +22,6 @@ import {
   RequestReceivedEmail,
   RequestAcceptedEmail,
   RequestRejectedEmail,
-  ReminderPickupEmail,
-  ReminderReturnEmail,
   ReminderPickupAdminEmail,
   ReminderReturnAdminEmail,
   ReminderDigestAdminEmail,
@@ -34,7 +31,6 @@ import {
   VoiceNumberBillingEmail,
   TeamInvitationEmail,
   RewardUnlockedEmail,
-  InstantAccessEmail,
   ThankYouReviewEmail,
   PaymentConfirmationEmail,
   PaymentFailedEmail,
@@ -92,36 +88,8 @@ interface ReservationItem {
   totalPrice: number
 }
 
-/**
- * Resolves a logo URL for email compatibility.
- * SVG logos are converted to PNG and embedded as CID attachments,
- * because most email clients (Gmail, Outlook, Yahoo) don't render
- * SVG images or data: URIs in <img> tags.
- *
- * Returns the URL to use in <img src> (either the original URL or a cid: reference)
- * and an optional attachment to include in the email.
- */
-async function resolveEmailLogo(
-  logoUrl: string | null | undefined
-): Promise<{ url: string | null; attachments: EmailAttachment[] }> {
-  if (!logoUrl) return { url: null, attachments: [] }
-
-  // Standalone deployments store site-relative asset paths; email clients
-  // need absolute URLs (no-op for already-absolute cloud URLs).
-  const absoluteLogoUrl = toAbsoluteUrl(logoUrl, env.NEXT_PUBLIC_APP_URL)
-  if (!isSvgUrl(absoluteLogoUrl)) return { url: absoluteLogoUrl, attachments: [] }
-
-  const pngBuffer = await convertSvgToPngBuffer(absoluteLogoUrl, 200)
-  if (!pngBuffer) return { url: null, attachments: [] }
-
-  return {
-    url: 'cid:store-logo',
-    attachments: [{ filename: 'logo.png', content: pngBuffer, cid: 'store-logo' }],
-  }
-}
-
 // Log email in database
-async function logEmail({
+export async function logEmail({
   storeId,
   reservationId,
   customerId,
@@ -467,6 +435,8 @@ export async function sendRequestAcceptedEmail({
   reservation,
   items,
   reservationUrl,
+  contractUrl,
+  termsUrl,
   paymentUrl,
   locale = 'fr',
 }: {
@@ -483,6 +453,8 @@ export async function sendRequestAcceptedEmail({
   }
   items: { name: string; quantity: number; totalPrice: number }[]
   reservationUrl: string
+  contractUrl: string
+  termsUrl?: string | null
   paymentUrl?: string | null
   locale?: EmailLocale
 }) {
@@ -513,6 +485,8 @@ export async function sendRequestAcceptedEmail({
       total: reservation.totalAmount,
       deposit: depositAmount,
       reservationUrl,
+      contractUrl,
+      termsUrl,
       paymentUrl,
       customContent,
       locale,
@@ -614,16 +588,18 @@ export async function sendRequestRejectedEmail({
   }
 }
 
-// Reminder Pickup Email
-export async function sendReminderPickupEmail({
-  to,
-  store,
-  customer,
-  reservation,
-  reservationUrl,
-  locale = 'fr',
-}: {
-  to: string
+/**
+ * Rendered message, before it is handed to a transport. Kept separate from the
+ * `send*` helpers so the dashboard can preview exactly what will go out — one
+ * renderer, no second copy of the wording to keep in sync.
+ */
+export interface RenderedEmail {
+  subject: string
+  html: string
+  attachments: EmailAttachment[]
+}
+
+interface ReminderPickupEmailParams {
   store: Store
   customer: Customer
   reservation: {
@@ -632,34 +608,53 @@ export async function sendReminderPickupEmail({
     startDate: Date
   }
   reservationUrl: string
+  additionalMessage?: string | null
   locale?: EmailLocale
-}) {
-  const t = getEmailTranslations(locale)
-  const customContent = store.emailSettings?.pickupReminderContent
-  const subject = customContent?.subject || `${t.reminderPickup.subject} - ${store.name}`
+}
 
+export async function renderReminderPickupEmail({
+  store,
+  customer,
+  reservation,
+  reservationUrl,
+  additionalMessage,
+  locale = 'fr',
+}: ReminderPickupEmailParams): Promise<RenderedEmail> {
   const logo = await resolveEmailLogo(getLogoForLightBackground(store))
-  const html = await render(
-    ReminderPickupEmail({
-      storeName: store.name,
-      logoUrl: logo.url,
-      primaryColor: store.theme?.primaryColor || '#0066FF',
-      storeAddress: store.address,
-      storeEmail: store.email,
-      storePhone: store.phone,
-      storeTimezone: store.settings?.timezone,
-      storeCountry: store.settings?.country,
-      customerFirstName: customer.firstName,
-      reservationNumber: reservation.number,
-      startDate: reservation.startDate,
-      reservationUrl,
-      customContent,
-      locale,
-    })
-  )
+  const { subject, element } = composeReminderPickupEmail({
+    store,
+    customer,
+    reservation: { number: reservation.number, startDate: reservation.startDate },
+    reservationUrl,
+    additionalMessage,
+    locale,
+    logoUrl: logo.url,
+  })
+
+  return { subject, html: await render(element), attachments: logo.attachments }
+}
+
+// Reminder Pickup Email
+export async function sendReminderPickupEmail({
+  to,
+  store,
+  customer,
+  reservation,
+  reservationUrl,
+  additionalMessage,
+  locale = 'fr',
+}: ReminderPickupEmailParams & { to: string }) {
+  const { subject, html, attachments } = await renderReminderPickupEmail({
+    store,
+    customer,
+    reservation,
+    reservationUrl,
+    additionalMessage,
+    locale,
+  })
 
   try {
-    const result = await sendEmail({ to, subject, html, attachments: logo.attachments, fromName: store.name })
+    const result = await sendEmail({ to, subject, html, attachments, fromName: store.name })
     await logEmail({
       storeId: store.id,
       reservationId: reservation.id,
@@ -684,15 +679,7 @@ export async function sendReminderPickupEmail({
   }
 }
 
-// Reminder Return Email
-export async function sendReminderReturnEmail({
-  to,
-  store,
-  customer,
-  reservation,
-  locale = 'fr',
-}: {
-  to: string
+interface ReminderReturnEmailParams {
   store: Store
   customer: Customer
   reservation: {
@@ -700,42 +687,49 @@ export async function sendReminderReturnEmail({
     number: string
     endDate: Date
   }
+  additionalMessage?: string | null
   locale?: EmailLocale
-}) {
-  const translate = getEmailTranslator(locale)
-  const customContent = store.emailSettings?.returnReminderContent
-  const formattedEndDate = formatEmailDateInStoreTimezone(
-    reservation.endDate,
-    locale,
-    getDateFormatPatterns(locale).short,
-    store.settings?.timezone,
-    store.settings?.country
-  )
-  const subject =
-    customContent?.subject ||
-    `${translate('reminderReturn.subject', { date: formattedEndDate })} - ${store.name}`
+}
 
+export async function renderReminderReturnEmail({
+  store,
+  customer,
+  reservation,
+  additionalMessage,
+  locale = 'fr',
+}: ReminderReturnEmailParams): Promise<RenderedEmail> {
   const logo = await resolveEmailLogo(getLogoForLightBackground(store))
-  const html = await render(
-    ReminderReturnEmail({
-      storeName: store.name,
-      logoUrl: logo.url,
-      primaryColor: store.theme?.primaryColor || '#0066FF',
-      storeAddress: store.address,
-      storeEmail: store.email,
-      storePhone: store.phone,
-      storeTimezone: store.settings?.timezone,
-      storeCountry: store.settings?.country,
-      customerFirstName: customer.firstName,
-      reservationNumber: reservation.number,
-      endDate: reservation.endDate,
-      customContent,
-      locale,
-    })
-  )
+  const { subject, element } = composeReminderReturnEmail({
+    store,
+    customer,
+    reservation: { number: reservation.number, endDate: reservation.endDate },
+    additionalMessage,
+    locale,
+    logoUrl: logo.url,
+  })
+
+  return { subject, html: await render(element), attachments: logo.attachments }
+}
+
+// Reminder Return Email
+export async function sendReminderReturnEmail({
+  to,
+  store,
+  customer,
+  reservation,
+  additionalMessage,
+  locale = 'fr',
+}: ReminderReturnEmailParams & { to: string }) {
+  const { subject, html, attachments } = await renderReminderReturnEmail({
+    store,
+    customer,
+    reservation,
+    additionalMessage,
+    locale,
+  })
 
   try {
-    const result = await sendEmail({ to, subject, html, attachments: logo.attachments, fromName: store.name })
+    const result = await sendEmail({ to, subject, html, attachments, fromName: store.name })
     await logEmail({
       storeId: store.id,
       reservationId: reservation.id,
@@ -1130,7 +1124,7 @@ export async function sendVoiceNumberBillingEmail({
       e164,
       credits,
       deadlineText,
-      ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/ai-assistant`,
+      ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/ai-assistant/voice`,
       locale,
     })
   )
@@ -1252,17 +1246,7 @@ export async function sendRewardUnlockedEmail({
 }
 
 // Instant Access Email (for sending access links to customers)
-export async function sendInstantAccessEmail({
-  to,
-  store,
-  customer,
-  reservation,
-  items,
-  accessUrl,
-  showPaymentCta,
-  locale = 'fr',
-}: {
-  to: string
+interface InstantAccessEmailParams {
   store: Store
   customer: Customer
   reservation: {
@@ -1275,37 +1259,65 @@ export async function sendInstantAccessEmail({
   items: { name: string; quantity: number; totalPrice: number }[]
   accessUrl: string
   showPaymentCta: boolean
+  additionalMessage?: string | null
   locale?: EmailLocale
-}) {
-  const t = getEmailTranslations(locale)
-  const subject = `${t.instantAccess.subject.replace('{number}', reservation.number)} - ${store.name}`
+}
 
+export async function renderInstantAccessEmail({
+  store,
+  customer,
+  reservation,
+  items,
+  accessUrl,
+  showPaymentCta,
+  additionalMessage,
+  locale = 'fr',
+}: InstantAccessEmailParams): Promise<RenderedEmail> {
   const logo = await resolveEmailLogo(getLogoForLightBackground(store))
-  const html = await render(
-    InstantAccessEmail({
-      storeName: store.name,
-      logoUrl: logo.url,
-      primaryColor: store.theme?.primaryColor || '#0066FF',
-      storeAddress: store.address,
-      storePhone: store.phone,
-      storeEmail: store.email,
-      storeTimezone: store.settings?.timezone,
-      storeCountry: store.settings?.country,
-      customerFirstName: customer.firstName,
-      reservationNumber: reservation.number,
+  const { subject, element } = composeInstantAccessEmail({
+    store,
+    customer,
+    reservation: {
+      number: reservation.number,
       startDate: reservation.startDate,
       endDate: reservation.endDate,
-      items,
       totalAmount: reservation.totalAmount,
-      accessUrl,
-      showPaymentCta,
-      locale,
-      currency: store.settings?.currency || 'EUR',
-    })
-  )
+    },
+    items,
+    accessUrl,
+    showPaymentCta,
+    additionalMessage,
+    locale,
+    logoUrl: logo.url,
+  })
+
+  return { subject, html: await render(element), attachments: logo.attachments }
+}
+
+export async function sendInstantAccessEmail({
+  to,
+  store,
+  customer,
+  reservation,
+  items,
+  accessUrl,
+  showPaymentCta,
+  additionalMessage,
+  locale = 'fr',
+}: InstantAccessEmailParams & { to: string }) {
+  const { subject, html, attachments } = await renderInstantAccessEmail({
+    store,
+    customer,
+    reservation,
+    items,
+    accessUrl,
+    showPaymentCta,
+    additionalMessage,
+    locale,
+  })
 
   try {
-    const result = await sendEmail({ to, subject, html, attachments: logo.attachments, fromName: store.name })
+    const result = await sendEmail({ to, subject, html, attachments, fromName: store.name })
     await logEmail({
       storeId: store.id,
       reservationId: reservation.id,

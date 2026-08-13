@@ -25,6 +25,8 @@ import {
   DialogTitle,
 } from "@louez/ui";
 
+import { DashboardIconTile } from "@/components/dashboard/shared/dashboard-icon-tile";
+
 interface ShareModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -160,9 +162,7 @@ export function ShareModal({
         <DialogPanel>
           {/* URL Preview */}
           <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Link2 className="h-4 w-4 text-primary" />
-            </div>
+            <DashboardIconTile icon={Link2} accent="primary" />
             <span className="min-w-0 flex-1 truncate text-sm font-medium">{storeUrl}</span>
           </div>
 

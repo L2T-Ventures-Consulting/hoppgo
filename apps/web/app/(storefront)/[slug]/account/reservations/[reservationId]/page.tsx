@@ -1,5 +1,12 @@
+import {
+  ClockSolidIcon,
+  CreditCardSolidIcon,
+  ProductSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+  XCircleSolidIcon,
+} from '@louez/ui/icons'
 import Link from 'next/link'
-import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { db } from '@louez/db'
 import { stores, reservations } from '@louez/db'
@@ -13,16 +20,13 @@ import {
   Calendar,
   Clock,
   CheckCircle,
-  XCircle,
   Package,
   MapPin,
   Phone,
   Mail,
-  ImageIcon,
   FileText,
   ArrowRight,
   CircleDot,
-  CreditCard,
   AlertCircle,
   History,
   Banknote,
@@ -38,9 +42,14 @@ import { getCustomerSession } from '../../actions'
 import { DownloadContractButton } from './download-contract-button'
 import { PayNowButton } from './pay-now-button'
 import { QuoteActions } from './quote-actions'
+import { ProductImage } from '@/components/product/product-image'
 import { ReviewPromptCard } from '@/components/storefront/review-prompt-card'
 import { buildReviewUrl } from '@/lib/google-places'
 import { formatStoreDate } from '@/lib/utils/store-date'
+
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 interface ReservationDetailPageProps {
   params: Promise<{ slug: string; reservationId: string }>
@@ -72,22 +81,33 @@ export default async function ReservationDetailPage({
     storefrontRedirect(slug, '/account/login')
   }
 
-  type ReservationStatus = 'pending' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled' | 'rejected' | 'quote' | 'declined'
+  type ReservationStatus =
+    | 'pending'
+    | 'confirmed'
+    | 'ongoing'
+    | 'completed'
+    | 'cancelled'
+    | 'rejected'
+    | 'quote'
+    | 'declined'
 
-  const statusConfig: Record<ReservationStatus, {
-    label: string
-    description: string
-    variant: 'secondary' | 'default' | 'outline' | 'error'
-    icon: typeof Clock
-    color: string
-    bgColor: string
-    borderColor: string
-  }> = {
+  const statusConfig: Record<
+    ReservationStatus,
+    {
+      label: string
+      description: string
+      variant: 'pending' | 'progress' | 'submitted' | 'success' | 'failed' | 'expired'
+      icon: typeof ClockSolidIcon
+      color: string
+      bgColor: string
+      borderColor: string
+    }
+  > = {
     pending: {
       label: t('status.pendingFull'),
       description: t('status.pendingDescription'),
-      variant: 'secondary',
-      icon: Clock,
+      variant: 'pending',
+      icon: ClockSolidIcon,
       color: 'text-amber-600 dark:text-amber-400',
       bgColor: 'bg-amber-100 dark:bg-amber-950/50',
       borderColor: 'border-amber-200 dark:border-amber-800',
@@ -95,8 +115,8 @@ export default async function ReservationDetailPage({
     confirmed: {
       label: t('status.confirmed'),
       description: t('status.confirmedDescription'),
-      variant: 'default',
-      icon: CheckCircle,
+      variant: 'success',
+      icon: SuccessSolidIcon,
       color: 'text-emerald-600 dark:text-emerald-400',
       bgColor: 'bg-emerald-100 dark:bg-emerald-950/50',
       borderColor: 'border-emerald-200 dark:border-emerald-800',
@@ -104,8 +124,8 @@ export default async function ReservationDetailPage({
     ongoing: {
       label: t('status.ongoing'),
       description: t('status.ongoingDescription'),
-      variant: 'default',
-      icon: Package,
+      variant: 'progress',
+      icon: ProductSolidIcon,
       color: 'text-blue-600 dark:text-blue-400',
       bgColor: 'bg-blue-100 dark:bg-blue-950/50',
       borderColor: 'border-blue-200 dark:border-blue-800',
@@ -113,8 +133,8 @@ export default async function ReservationDetailPage({
     completed: {
       label: t('status.completed'),
       description: t('status.completedDescription'),
-      variant: 'outline',
-      icon: CheckCircle,
+      variant: 'success',
+      icon: SuccessSolidIcon,
       color: 'text-gray-600 dark:text-gray-400',
       bgColor: 'bg-gray-100 dark:bg-gray-950/50',
       borderColor: 'border-gray-200 dark:border-gray-700',
@@ -122,8 +142,8 @@ export default async function ReservationDetailPage({
     cancelled: {
       label: t('status.cancelled'),
       description: t('status.cancelledDescription'),
-      variant: 'error',
-      icon: XCircle,
+      variant: 'failed',
+      icon: XCircleSolidIcon,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-100 dark:bg-red-950/50',
       borderColor: 'border-red-200 dark:border-red-800',
@@ -131,8 +151,8 @@ export default async function ReservationDetailPage({
     rejected: {
       label: t('status.rejected'),
       description: t('status.rejectedDescription'),
-      variant: 'error',
-      icon: XCircle,
+      variant: 'failed',
+      icon: XCircleSolidIcon,
       color: 'text-red-600 dark:text-red-400',
       bgColor: 'bg-red-100 dark:bg-red-950/50',
       borderColor: 'border-red-200 dark:border-red-800',
@@ -140,8 +160,8 @@ export default async function ReservationDetailPage({
     quote: {
       label: t('status.quote'),
       description: t('status.quoteDescription'),
-      variant: 'secondary',
-      icon: FileText,
+      variant: 'submitted',
+      icon: SubmittedSolidIcon,
       color: 'text-violet-600 dark:text-violet-400',
       bgColor: 'bg-violet-100 dark:bg-violet-950/50',
       borderColor: 'border-violet-200 dark:border-violet-800',
@@ -149,8 +169,8 @@ export default async function ReservationDetailPage({
     declined: {
       label: t('status.declined'),
       description: t('status.declinedDescription'),
-      variant: 'outline',
-      icon: XCircle,
+      variant: 'expired',
+      icon: XCircleSolidIcon,
       color: 'text-slate-600 dark:text-slate-400',
       bgColor: 'bg-slate-100 dark:bg-slate-950/50',
       borderColor: 'border-slate-200 dark:border-slate-700',
@@ -251,8 +271,8 @@ export default async function ReservationDetailPage({
                       {isConfirmedAndPaid ? t('status.allSet') : config.label}
                     </h3>
                     {showPaymentRequired && (
-                      <Badge variant="warning" className="gap-1">
-                        <CreditCard className="h-3 w-3" />
+                      <Badge variant="pending" className="gap-1">
+                        <CreditCardSolidIcon className="h-3 w-3" />
                         {t('confirmedAwaitingPayment')}
                       </Badge>
                     )}
@@ -380,11 +400,8 @@ export default async function ReservationDetailPage({
                 {t('rentedItems')}
               </span>
               {/* Payment Status Badge */}
-              <Badge
-                variant={isPaid ? 'default' : 'secondary'}
-                className={`gap-1.5 ${isPaid ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100 dark:bg-emerald-950/50 dark:text-emerald-400' : 'bg-amber-100 text-amber-700 hover:bg-amber-100 dark:bg-amber-950/50 dark:text-amber-400'}`}
-              >
-                <CreditCard className="h-3.5 w-3.5" />
+              <Badge variant={isPaid ? 'success' : 'pending'} className="gap-1.5">
+                <CreditCardSolidIcon className="h-3.5 w-3.5" />
                 {isPaid ? t('paymentPaid') : t('paymentPending')}
               </Badge>
             </CardTitle>
@@ -393,20 +410,12 @@ export default async function ReservationDetailPage({
             <div className="space-y-4">
               {reservation.items.map((item) => (
                 <div key={item.id} className="flex gap-4 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
-                  <div className="relative w-24 aspect-[4/3] flex-shrink-0 rounded-lg overflow-hidden bg-background border">
-                    {item.productSnapshot.images?.[0] ? (
-                      <Image
-                        src={item.productSnapshot.images[0]}
-                        alt={item.productSnapshot.name}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full items-center justify-center">
-                        <ImageIcon className="h-8 w-8 text-muted-foreground/50" />
-                      </div>
-                    )}
-                  </div>
+                  <ProductImage
+                    src={item.productSnapshot.images?.[0]}
+                    alt={item.productSnapshot.name}
+                    sizes="96px"
+                    containerClassName="w-24 shrink-0 border bg-background"
+                  />
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-base">{item.productSnapshot.name}</h4>
                     <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-sm text-muted-foreground">

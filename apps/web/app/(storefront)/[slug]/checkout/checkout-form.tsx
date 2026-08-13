@@ -8,8 +8,16 @@ import { revalidateLogic, useStore } from '@tanstack/react-form';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Check, MapPin, Truck, User } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
+import { usePostHog } from 'posthog-js/react';
 
 import { StepContent, toastManager } from '@louez/ui';
+
+import { DatePickerModal } from '@/components/storefront/date-picker-modal';
+
+import {
+  checkoutAnalyticsBaseProperties,
+  productAnalyticsEvents,
+} from '@/lib/product-analytics/analytics-events';
 
 import { useAppForm } from '@/hooks/form/form';
 import { useStorefrontUrl } from '@/hooks/use-storefront-url';
@@ -17,6 +25,12 @@ import { useStorefrontUrl } from '@/hooks/use-storefront-url';
 import { useAnalytics } from '@/contexts/analytics-context';
 import { useCart } from '@/contexts/cart-context';
 import { useStoreCurrency } from '@/contexts/store-context';
+
+import {
+  getMinStartDateTime,
+  validateAdvanceNotice,
+} from '@/lib/utils/duration';
+import { formatDurationFromMinutes } from '@/lib/utils/rental-duration';
 
 import { createReservation, getTulipQuotePreview } from './actions';
 import { CheckoutAdvisorGateCard } from './components/checkout-advisor-gate';
@@ -65,8 +79,18 @@ const DEFAULT_VALUES: CheckoutFormValues = {
 };
 
 const TULIP_CUSTOMER_INCOMPLETE_ERROR = 'errors.tulipCustomerDataIncomplete';
+const ADVANCE_NOTICE_ERROR = 'errors.advanceNoticeViolation';
 
 type TulipQuotePreviewState = Awaited<ReturnType<typeof getTulipQuotePreview>>;
+type CheckoutSubmitErrorSource = 'client_validation' | 'server';
+
+interface AdvanceNoticeIssue {
+  source: CheckoutSubmitErrorSource;
+  advanceNoticeMinutes: number;
+  duration: string;
+  failedStartDate: string | null;
+  minimumStartTime: string;
+}
 
 function createEmptyTulipQuotePreview(
   mode: 'required' | 'optional' | 'no_public',
@@ -89,11 +113,23 @@ function createEmptyTulipQuotePreview(
 
 class CheckoutSubmitError extends Error {
   readonly params?: Record<string, string | number>;
+  readonly source: CheckoutSubmitErrorSource;
+  readonly minimumStartTime?: string;
+  readonly advanceNoticeMinutes?: number;
 
-  constructor(message: string, params?: Record<string, string | number>) {
+  constructor(
+    message: string,
+    source: CheckoutSubmitErrorSource,
+    params?: Record<string, string | number>,
+    minimumStartTime?: string,
+    advanceNoticeMinutes?: number,
+  ) {
     super(message);
     this.name = 'CheckoutSubmitError';
+    this.source = source;
     this.params = params;
+    this.minimumStartTime = minimumStartTime;
+    this.advanceNoticeMinutes = advanceNoticeMinutes;
   }
 }
 
@@ -115,6 +151,10 @@ export function CheckoutForm({
   tulipInsurance,
   hasActivePromoCodes,
   advisorMode,
+  businessHours,
+  advanceNoticeMinutes,
+  minRentalMinutes,
+  timezone,
 }: CheckoutFormProps) {
   const router = useRouter();
   const locale = useLocale() as 'fr' | 'en';
@@ -122,6 +162,7 @@ export function CheckoutForm({
   const tErrors = useTranslations('errors');
   const currency = useStoreCurrency();
   const { getUrl } = useStorefrontUrl(storeSlug);
+  const posthog = usePostHog();
   const { trackEvent } = useAnalytics();
   const {
     items,
@@ -145,6 +186,9 @@ export function CheckoutForm({
   const advisorGate = useCheckoutAdvisorGate(advisorMode ?? null);
 
   const [appliedPromo, setAppliedPromo] = useState<ValidatedPromo | null>(null);
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+  const [advanceNoticeIssue, setAdvanceNoticeIssue] =
+    useState<AdvanceNoticeIssue | null>(null);
 
   const discountAmount = useMemo(() => {
     if (!appliedPromo) return 0;
@@ -289,6 +333,7 @@ export function CheckoutForm({
     currentStep,
     stepDirection,
     steps,
+    currentStepIndex,
     goToNextStep,
     goToPreviousStep,
     goToStep,
@@ -319,22 +364,67 @@ export function CheckoutForm({
             ),
           );
 
-          return fieldsToValidate.every(
+          const failedFields = fieldsToValidate.filter(
             (fieldName) =>
-              (form.getFieldMeta(fieldName)?.errors?.length ?? 0) === 0,
+              (form.getFieldMeta(fieldName)?.errors?.length ?? 0) > 0,
           );
+
+          if (failedFields.length > 0) {
+            posthog.capture(
+              productAnalyticsEvents.checkoutStepValidationFailed,
+              {
+                ...checkoutAnalyticsBaseProperties,
+                store_id: storeId,
+                step,
+                failed_fields: failedFields,
+              },
+            );
+            return false;
+          }
+
+          return true;
         }
 
         if (step === 'confirm') {
           await form.validateField('acceptCgv', 'submit');
-          return (form.getFieldMeta('acceptCgv')?.errors?.length ?? 0) === 0;
+          const isValid =
+            (form.getFieldMeta('acceptCgv')?.errors?.length ?? 0) === 0;
+
+          if (!isValid) {
+            posthog.capture(
+              productAnalyticsEvents.checkoutStepValidationFailed,
+              {
+                ...checkoutAnalyticsBaseProperties,
+                store_id: storeId,
+                step,
+                failed_fields: ['acceptCgv'],
+              },
+            );
+          }
+
+          return isValid;
         }
 
         return true;
       },
-      [form, requireCustomerAddress],
+      [form, posthog, requireCustomerAddress, storeId],
     ),
   });
+
+  useEffect(() => {
+    if (items.length === 0) return;
+
+    posthog.capture(productAnalyticsEvents.checkoutStepViewed, {
+      ...checkoutAnalyticsBaseProperties,
+      store_id: storeId,
+      step: currentStep,
+      step_index: currentStepIndex,
+      steps_total: steps.length,
+      direction: stepDirection,
+    });
+    // Only re-fire when the visible step actually changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStep, posthog, storeId]);
 
   const tulipQuoteCustomer = useMemo(() => {
     const customerType: 'business' | 'individual' =
@@ -499,17 +589,63 @@ export function CheckoutForm({
       Boolean(tulipQuotePreview.error)
     );
 
+  useEffect(() => {
+    if (!advanceNoticeIssue || !globalStartDate) return;
+    if (globalStartDate === advanceNoticeIssue.failedStartDate) return;
+
+    const validation = validateAdvanceNotice(
+      new Date(globalStartDate),
+      advanceNoticeIssue.advanceNoticeMinutes,
+    );
+    if (!validation.valid) return;
+
+    posthog.capture(productAnalyticsEvents.checkoutValidationRecovered, {
+      ...checkoutAnalyticsBaseProperties,
+      store_id: storeId,
+      error_code: ADVANCE_NOTICE_ERROR,
+      original_failure_source: advanceNoticeIssue.source,
+      recovery_action: 'dates_changed',
+    });
+    setAdvanceNoticeIssue(null);
+  }, [
+    advanceNoticeIssue,
+    globalStartDate,
+    posthog,
+    storeId,
+  ]);
+
   const createReservationMutation = useMutation({
     mutationFn: async (value: CheckoutFormValues) => {
       if (items.length === 0) {
-        throw new CheckoutSubmitError('emptyCart');
+        throw new CheckoutSubmitError('emptyCart', 'client_validation');
       }
       if (!canSubmitCheckoutWithTulip) {
-        throw new CheckoutSubmitError('lineNeedsUpdate');
+        throw new CheckoutSubmitError('lineNeedsUpdate', 'client_validation');
       }
       // Client-side mirror of the server-enforced advisor gate
       if (advisorGate.isRequired && !advisorGate.isValidated) {
-        throw new CheckoutSubmitError('errors.advisorValidationRequired');
+        throw new CheckoutSubmitError(
+          'errors.advisorValidationRequired',
+          'client_validation',
+        );
+      }
+
+      if (globalStartDate) {
+        const advanceNoticeValidation = validateAdvanceNotice(
+          new Date(globalStartDate),
+          advanceNoticeMinutes,
+        );
+        if (!advanceNoticeValidation.valid) {
+          throw new CheckoutSubmitError(
+            ADVANCE_NOTICE_ERROR,
+            'client_validation',
+            {
+              duration: formatDurationFromMinutes(advanceNoticeMinutes),
+            },
+            advanceNoticeValidation.minimumStartTime.toISOString(),
+            advanceNoticeMinutes,
+          );
+        }
       }
 
       const payload = buildReservationPayload({
@@ -535,15 +671,34 @@ export function CheckoutForm({
       const result = await createReservation(payload);
 
       if (result.error) {
+        const errorParams = sanitizeTranslationParams(result.errorParams);
+        const serverAdvanceNoticeMinutes =
+          typeof errorParams.advanceNoticeMinutes === 'number'
+            ? errorParams.advanceNoticeMinutes
+            : advanceNoticeMinutes;
+        const serverMinimumStartTime =
+          typeof errorParams.minimumStartTime === 'string'
+            ? errorParams.minimumStartTime
+            : getMinStartDateTime(serverAdvanceNoticeMinutes).toISOString();
+
         throw new CheckoutSubmitError(
           result.error,
-          sanitizeTranslationParams(result.errorParams),
+          'server',
+          errorParams,
+          result.error === ADVANCE_NOTICE_ERROR
+            ? serverMinimumStartTime
+            : undefined,
+          result.error === ADVANCE_NOTICE_ERROR
+            ? serverAdvanceNoticeMinutes
+            : undefined,
         );
       }
 
       return result;
     },
     onSuccess: (result) => {
+      setAdvanceNoticeIssue(null);
+
       // Track checkout_completed event
       trackEvent({
         eventType: 'checkout_completed',
@@ -554,6 +709,19 @@ export function CheckoutForm({
           total: totalWithEstimatedInsurance,
           reservationMode,
         },
+      });
+
+      // Captured client-side so the PostHog funnel keeps the browser's
+      // distinct_id; the server-side checkout_reservation_created event is
+      // attributed to the customer id and would break the funnel chain.
+      posthog.capture(productAnalyticsEvents.checkoutCompleted, {
+        ...checkoutAnalyticsBaseProperties,
+        store_id: storeId,
+        reservation_id: result.reservationId,
+        reservation_mode: reservationMode,
+        item_count: items.length,
+        subtotal_amount_cents: Math.round(subtotal * 100),
+        total_amount_cents: Math.round(totalWithEstimatedInsurance * 100),
       });
 
       clearCart();
@@ -575,6 +743,60 @@ export function CheckoutForm({
       router.push(getUrl(`/confirmation/${result.reservationId}`));
     },
     onError: (error) => {
+      if (
+        error instanceof CheckoutSubmitError &&
+        error.message === ADVANCE_NOTICE_ERROR
+      ) {
+        setAdvanceNoticeIssue({
+          source: error.source,
+          advanceNoticeMinutes:
+            error.advanceNoticeMinutes ?? advanceNoticeMinutes,
+          duration:
+            typeof error.params?.duration === 'string'
+              ? error.params.duration
+              : formatDurationFromMinutes(
+                  error.advanceNoticeMinutes ?? advanceNoticeMinutes,
+                ),
+          failedStartDate: globalStartDate,
+          minimumStartTime:
+            error.minimumStartTime ??
+            getMinStartDateTime(
+              error.advanceNoticeMinutes ?? advanceNoticeMinutes,
+            ).toISOString(),
+        });
+
+        if (error.source === 'client_validation') {
+          posthog.capture(
+            productAnalyticsEvents.checkoutStepValidationFailed,
+            {
+              ...checkoutAnalyticsBaseProperties,
+              store_id: storeId,
+              step: 'confirm',
+              failed_fields: ['rentalStartDate'],
+              error_code: ADVANCE_NOTICE_ERROR,
+              validation_type: 'advance_notice',
+            },
+          );
+        } else {
+          posthog.capture(productAnalyticsEvents.checkoutSubmitFailed, {
+            ...checkoutAnalyticsBaseProperties,
+            store_id: storeId,
+            error_code: ADVANCE_NOTICE_ERROR,
+            failure_source: 'server',
+          });
+        }
+        return;
+      }
+
+      posthog.capture(productAnalyticsEvents.checkoutSubmitFailed, {
+        ...checkoutAnalyticsBaseProperties,
+        store_id: storeId,
+        error_code:
+          error instanceof CheckoutSubmitError ? error.message : 'unknown',
+        failure_source:
+          error instanceof CheckoutSubmitError ? error.source : 'unknown',
+      });
+
       if (error instanceof CheckoutSubmitError) {
         if (error.message === 'emptyCart') {
           toastManager.add({ title: t('emptyCart'), type: 'error' });
@@ -601,6 +823,20 @@ export function CheckoutForm({
       toastManager.add({ title: tErrors('generic'), type: 'error' });
     },
   });
+
+  const advanceNoticeDisplay = advanceNoticeIssue
+    ? {
+        duration: advanceNoticeIssue.duration,
+        minimumStart: new Intl.DateTimeFormat(
+          locale === 'fr' ? 'fr-FR' : 'en-US',
+          {
+            dateStyle: 'long',
+            timeStyle: 'short',
+            ...(timezone ? { timeZone: timezone } : {}),
+          },
+        ).format(new Date(advanceNoticeIssue.minimumStartTime)),
+      }
+    : undefined;
 
   const isBusinessCustomer = formValues.isBusinessCustomer;
 
@@ -695,7 +931,8 @@ export function CheckoutForm({
                       tulipInsurance={tulipInsurance}
                       canSubmitCheckout={
                         canSubmitCheckoutWithTulip &&
-                        (!advisorGate.isRequired || advisorGate.isValidated)
+                        (!advisorGate.isRequired || advisorGate.isValidated) &&
+                        !advanceNoticeIssue
                       }
                       showVerificationHint={
                         advisorGate.isRequired && !advisorGate.isValidated
@@ -703,6 +940,8 @@ export function CheckoutForm({
                       discountAmount={discountAmount}
                       onBack={goToPreviousStep}
                       onEditContact={() => goToStep('contact')}
+                      advanceNoticeIssue={advanceNoticeDisplay}
+                      onEditDates={() => setIsDatePickerOpen(true)}
                     />
                   </>
                 )}
@@ -742,8 +981,25 @@ export function CheckoutForm({
           discountAmount={discountAmount}
           onApplyPromo={handleApplyPromo}
           onRemovePromo={handleRemovePromo}
+          onEditDates={() => setIsDatePickerOpen(true)}
         />
       </div>
+
+      <DatePickerModal
+        storeSlug={storeSlug}
+        pricingMode={pricingMode}
+        businessHours={businessHours}
+        advanceNotice={
+          advanceNoticeIssue?.advanceNoticeMinutes ?? advanceNoticeMinutes
+        }
+        minRentalMinutes={minRentalMinutes}
+        timezone={timezone}
+        isOpen={isDatePickerOpen}
+        onClose={() => setIsDatePickerOpen(false)}
+        initialStartDate={globalStartDate ?? undefined}
+        initialEndDate={globalEndDate ?? undefined}
+        redirectOnSubmit={false}
+      />
     </div>
   );
 }

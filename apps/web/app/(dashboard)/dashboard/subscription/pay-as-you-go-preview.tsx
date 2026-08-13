@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import { ChevronRight, Loader2, Zap } from 'lucide-react'
+import { ChevronRight, Zap } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
 import {
@@ -20,10 +20,7 @@ import {
 } from '@louez/ui'
 
 import { switchToPayAsYouGo } from './actions'
-import {
-  PayAsYouGoPricing,
-  type PricingBand,
-} from './pay-as-you-go-pricing'
+import { PayAsYouGoPricing, type PricingBand } from './pay-as-you-go-pricing'
 
 interface PayAsYouGoPreviewProps {
   flatRateCents: number | null
@@ -52,7 +49,7 @@ export function PayAsYouGoPreview({
         setError(true)
         return
       }
-      router.push('/dashboard/subscription')
+      router.push('/dashboard/settings/subscription')
       router.refresh()
     })
   }
@@ -60,7 +57,7 @@ export function PayAsYouGoPreview({
   return (
     <div className="space-y-6">
       <Link
-        href="/dashboard/subscription"
+        href="/dashboard/settings/subscription"
         className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
       >
         <ChevronRight className="h-4 w-4 rotate-180" />
@@ -75,11 +72,7 @@ export function PayAsYouGoPreview({
         <p className="text-muted-foreground">{t('previewDescription')}</p>
       </div>
 
-      <PayAsYouGoPricing
-        flatRateCents={flatRateCents}
-        bands={bands}
-        currency={currency}
-      />
+      <PayAsYouGoPricing flatRateCents={flatRateCents} bands={bands} currency={currency} />
 
       <Card>
         <CardHeader>
@@ -97,8 +90,7 @@ export function PayAsYouGoPreview({
               <AlertDescription>{t('deferredNote')}</AlertDescription>
             </Alert>
           )}
-          <Button onClick={handleActivate} disabled={isPending}>
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleActivate} isPending={isPending}>
             {t('activate')}
           </Button>
         </CardContent>

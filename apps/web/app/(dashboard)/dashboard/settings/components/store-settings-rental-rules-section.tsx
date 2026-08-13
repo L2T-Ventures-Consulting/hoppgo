@@ -1,42 +1,22 @@
-'use client';
+"use client";
 
-import { Info } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations } from "next-intl";
 
-import { Label } from '@louez/ui';
-import { Slider } from '@louez/ui';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@louez/ui';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@louez/ui';
+import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText, Label } from "@louez/ui";
+import { Slider } from "@louez/ui";
+import { CalendarCheckIcon, InfoCircleIcon } from "@louez/ui/icons";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@louez/ui";
 
-import { getFieldError } from '@/hooks/form/form-context';
+import { getFieldError } from "@/hooks/form/form-context";
 
-import type {
-  DurationUnit,
-  StoreSettingsUnitsState,
-} from '../hooks/use-store-settings-units';
+import type { DurationUnit, StoreSettingsUnitsState } from "../hooks/use-store-settings-units";
 
 interface StoreSettingsRentalRulesSectionProps {
   form: any;
   stripeChargesEnabled: boolean;
-  reservationMode: 'payment' | 'request';
+  reservationMode: "payment" | "request";
   onStripeRequired: () => void;
   units: StoreSettingsUnitsState;
 }
@@ -48,15 +28,15 @@ export function StoreSettingsRentalRulesSection({
   onStripeRequired,
   units,
 }: StoreSettingsRentalRulesSectionProps) {
-  const t = useTranslations('dashboard.settings');
-  const tCommon = useTranslations('common');
+  const t = useTranslations("dashboard.settings");
+  const tCommon = useTranslations("common");
 
   const handleMinutesInputChange = (
     rawValue: string,
     currentUnit: DurationUnit,
     onChange: (value: number) => void,
   ) => {
-    if (rawValue === '') {
+    if (rawValue === "") {
       onChange(0);
       return;
     }
@@ -70,19 +50,22 @@ export function StoreSettingsRentalRulesSection({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('reservationSettings.title')}</CardTitle>
-        <CardDescription>{t('reservationSettings.description')}</CardDescription>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarCheckIcon className="h-5 w-5 shrink-0" />
+          {t("reservationSettings.title")}
+        </CardTitle>
+        <CardDescription>{t("reservationSettings.description")}</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-4 p-4 sm:p-6">
+      <CardContent className="grid gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <form.Field name="reservationMode">
             {(field: any) => (
               <div className="grid gap-2">
-                <Label htmlFor={field.name}>{t('reservationSettings.mode')}</Label>
+                <Label htmlFor={field.name}>{t("reservationSettings.mode")}</Label>
                 <Select
                   onValueChange={(value) => {
                     if (value === null) return;
-                    if (value === 'payment' && !stripeChargesEnabled) {
+                    if (value === "payment" && !stripeChargesEnabled) {
                       onStripeRequired();
                       return;
                     }
@@ -92,30 +75,24 @@ export function StoreSettingsRentalRulesSection({
                 >
                   <SelectTrigger>
                     <SelectValue>
-                      {field.state.value === 'payment'
-                        ? t('reservationSettings.modePayment')
-                        : t('reservationSettings.modeRequest')}
+                      {field.state.value === "payment"
+                        ? t("reservationSettings.modePayment")
+                        : t("reservationSettings.modeRequest")}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem
-                      value="payment"
-                      label={t('reservationSettings.modePayment')}
-                    >
-                      {t('reservationSettings.modePayment')}
+                    <SelectItem value="payment" label={t("reservationSettings.modePayment")}>
+                      {t("reservationSettings.modePayment")}
                     </SelectItem>
-                    <SelectItem
-                      value="request"
-                      label={t('reservationSettings.modeRequest')}
-                    >
-                      {t('reservationSettings.modeRequest')}
+                    <SelectItem value="request" label={t("reservationSettings.modeRequest")}>
+                      {t("reservationSettings.modeRequest")}
                     </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-muted-foreground text-sm">
-                  {field.state.value === 'payment'
-                    ? t('reservationSettings.modePaymentDescription')
-                    : t('reservationSettings.modeRequestDescription')}
+                  {field.state.value === "payment"
+                    ? t("reservationSettings.modePaymentDescription")
+                    : t("reservationSettings.modeRequestDescription")}
                 </p>
                 {field.state.meta.errors.length > 0 && (
                   <p className="text-destructive text-sm">
@@ -127,32 +104,30 @@ export function StoreSettingsRentalRulesSection({
           </form.Field>
         </div>
 
-        {reservationMode === 'request' && (
+        {reservationMode === "request" && (
           <form.AppField name="pendingBlocksAvailability">
             {(field: any) => (
               <field.Switch
-                label={t('reservationSettings.pendingBlocksAvailability')}
-                description={t(
-                  'reservationSettings.pendingBlocksAvailabilityDescription',
-                )}
+                label={t("reservationSettings.pendingBlocksAvailability")}
+                description={t("reservationSettings.pendingBlocksAvailabilityDescription")}
               />
             )}
           </form.AppField>
         )}
 
-        {reservationMode === 'payment' && (
+        {reservationMode === "payment" && (
           <form.Field name="onlinePaymentDepositPercentage">
             {(field: any) => (
               <div className="rounded-lg border p-4">
                 <div className="flex flex-row items-center justify-between">
                   <div className="space-y-0.5">
                     <Label htmlFor={field.name} className="text-base">
-                      {t('reservationSettings.depositPercentage')}
+                      {t("reservationSettings.depositPercentage")}
                     </Label>
                     <p className="text-muted-foreground text-sm">
                       {field.state.value === 100
-                        ? t('reservationSettings.depositPercentageFull')
-                        : t('reservationSettings.depositPercentagePartial', {
+                        ? t("reservationSettings.depositPercentageFull")
+                        : t("reservationSettings.depositPercentagePartial", {
                             percentage: field.state.value,
                           })}
                     </p>
@@ -181,26 +156,21 @@ export function StoreSettingsRentalRulesSection({
         <div className="grid gap-4 sm:grid-cols-2">
           <form.Field name="minRentalMinutes">
             {(field: any) => {
-              const displayValue = units.getDisplayValue(
-                field.state.value,
-                units.minDurationUnit,
-              );
+              const displayValue = units.getDisplayValue(field.state.value, units.minDurationUnit);
 
               return (
                 <div className="grid gap-2">
                   <div className="flex items-center gap-1.5">
-                    <Label htmlFor={field.name}>
-                      {t('reservationSettings.minRentalHours')}
-                    </Label>
+                    <Label htmlFor={field.name}>{t("reservationSettings.minRentalHours")}</Label>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger
                           render={
-                            <Info className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
+                            <InfoCircleIcon className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
                           }
                         />
                         <TooltipContent side="top" className="max-w-xs">
-                          <p>{t('reservationSettings.minRentalHoursHelp')}</p>
+                          <p>{t("reservationSettings.minRentalHoursHelp")}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -211,7 +181,7 @@ export function StoreSettingsRentalRulesSection({
                       min={0}
                       step={1}
                       className="min-w-0 flex-1 [appearance:textfield] rounded-l-md bg-transparent px-3 text-base outline-none md:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      value={displayValue || ''}
+                      value={displayValue || ""}
                       onChange={(event) =>
                         handleMinutesInputChange(
                           event.target.value,
@@ -231,8 +201,8 @@ export function StoreSettingsRentalRulesSection({
                         units.setMinDurationUnit(nextUnit);
                       }}
                     >
-                      <option value="hours">{tCommon('hourUnit', { count: 2 })}</option>
-                      <option value="days">{tCommon('dayUnit', { count: 2 })}</option>
+                      <option value="hours">{tCommon("hourUnit", { count: 2 })}</option>
+                      <option value="days">{tCommon("dayUnit", { count: 2 })}</option>
                     </select>
                   </div>
                   {field.state.meta.errors.length > 0 && (
@@ -255,16 +225,16 @@ export function StoreSettingsRentalRulesSection({
               return (
                 <div className="grid gap-2">
                   <div className="flex items-center gap-1.5">
-                    <Label htmlFor={field.name}>{t('reservationSettings.leadTime')}</Label>
+                    <Label htmlFor={field.name}>{t("reservationSettings.leadTime")}</Label>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger
                           render={
-                            <Info className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
+                            <InfoCircleIcon className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
                           }
                         />
                         <TooltipContent side="top" className="max-w-xs">
-                          <p>{t('reservationSettings.leadTimeHelp')}</p>
+                          <p>{t("reservationSettings.leadTimeHelp")}</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -275,7 +245,7 @@ export function StoreSettingsRentalRulesSection({
                       min={0}
                       step={1}
                       className="min-w-0 flex-1 [appearance:textfield] rounded-l-md bg-transparent px-3 text-base outline-none md:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                      value={displayValue || ''}
+                      value={displayValue || ""}
                       onChange={(event) =>
                         handleMinutesInputChange(
                           event.target.value,
@@ -295,8 +265,8 @@ export function StoreSettingsRentalRulesSection({
                         units.setAdvanceNoticeUnit(nextUnit);
                       }}
                     >
-                      <option value="hours">{tCommon('hourUnit', { count: 2 })}</option>
-                      <option value="days">{tCommon('dayUnit', { count: 2 })}</option>
+                      <option value="hours">{tCommon("hourUnit", { count: 2 })}</option>
+                      <option value="days">{tCommon("dayUnit", { count: 2 })}</option>
                     </select>
                   </div>
                   {field.state.meta.errors.length > 0 && (
@@ -314,34 +284,32 @@ export function StoreSettingsRentalRulesSection({
           {(field: any) => (
             <div className="grid gap-2">
               <div className="flex items-center gap-1.5">
-                <Label htmlFor={field.name}>
-                  {t('reservationSettings.turnoverBuffer')}
-                </Label>
+                <Label htmlFor={field.name}>{t("reservationSettings.turnoverBuffer")}</Label>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger
                       render={
-                        <Info className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
+                        <InfoCircleIcon className="text-muted-foreground h-3.5 w-3.5 cursor-help" />
                       }
                     />
                     <TooltipContent side="top" className="max-w-xs">
-                      <p>{t('reservationSettings.turnoverBufferHelp')}</p>
+                      <p>{t("reservationSettings.turnoverBufferHelp")}</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </div>
-              <div className="border-input dark:bg-input/30 has-[:focus]:border-ring has-[:focus]:ring-ring/50 flex h-9 max-w-xs rounded-md border bg-transparent shadow-xs has-[:focus]:ring-[3px]">
-                <input
+              <InputGroup className="max-w-xs">
+                <InputGroupInput
                   id={field.name}
                   type="number"
                   min={0}
                   max={10080}
                   step={1}
-                  className="min-w-0 flex-1 [appearance:textfield] rounded-l-md bg-transparent px-3 text-base outline-none md:text-sm [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                  value={field.state.value || ''}
+                  value={field.state.value || ""}
+                  aria-invalid={field.state.meta.errors.length > 0}
                   onChange={(event) => {
                     const value = event.target.value;
-                    if (value === '') {
+                    if (value === "") {
                       field.handleChange(0);
                       return;
                     }
@@ -352,12 +320,12 @@ export function StoreSettingsRentalRulesSection({
                     }
                   }}
                 />
-                <span className="border-input bg-muted/50 text-muted-foreground flex h-full items-center rounded-r-md border-l px-2.5 text-sm">
-                  min
-                </span>
-              </div>
+                <InputGroupAddon align="inline-end">
+                  <InputGroupText>min</InputGroupText>
+                </InputGroupAddon>
+              </InputGroup>
               <p className="text-muted-foreground text-sm">
-                {t('reservationSettings.turnoverBufferDescription')}
+                {t("reservationSettings.turnoverBufferDescription")}
               </p>
               {field.state.meta.errors.length > 0 && (
                 <p className="text-destructive text-sm">
@@ -371,8 +339,8 @@ export function StoreSettingsRentalRulesSection({
         <form.AppField name="requireCustomerAddress">
           {(field: any) => (
             <field.Switch
-              label={t('reservationSettings.requireAddress')}
-              description={t('reservationSettings.requireAddressDescription')}
+              label={t("reservationSettings.requireAddress")}
+              description={t("reservationSettings.requireAddressDescription")}
             />
           )}
         </form.AppField>

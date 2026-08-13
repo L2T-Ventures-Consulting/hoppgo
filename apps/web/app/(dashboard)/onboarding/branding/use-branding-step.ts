@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { useStore } from "@tanstack/react-form";
 import { useMutation } from "@tanstack/react-query";
+import { useTheme } from "next-themes";
 import { useTranslations } from "next-intl";
 import { usePostHog } from "posthog-js/react";
 
@@ -30,11 +31,18 @@ import { useOnboardingDraft } from "../_lib/use-onboarding-draft";
 
 const HEX_COLOR_PATTERN = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
 
+const DEFAULT_BRANDING_VALUES: BrandingInput = {
+  logoUrl: "",
+  primaryColor: "#0066FF",
+  theme: "light",
+};
+
 export const useBrandingStep = () => {
   const router = useRouter();
   const tValidation = useTranslations("validation");
   const showError = useOnboardingErrorToast();
   const posthog = usePostHog();
+  const { resolvedTheme } = useTheme();
   const { updatePreview } = useOnboardingPreview();
 
   const brandingSchema = createBrandingSchema(tValidation);
@@ -59,11 +67,7 @@ export const useBrandingStep = () => {
   useEffect(() => releaseLocalPreview, [releaseLocalPreview]);
 
   const form = useAppForm({
-    defaultValues: {
-      logoUrl: "",
-      primaryColor: "#0066FF",
-      theme: "light" as "light" | "dark",
-    } as BrandingInput,
+    defaultValues: DEFAULT_BRANDING_VALUES,
     validators: { onSubmit: brandingSchema },
     onSubmit: async ({ value }) => {
       let uploadedKey: string | null = null;
@@ -110,9 +114,17 @@ export const useBrandingStep = () => {
   });
 
   const hasHydratedDraft = useRef(false);
+  const hasAppliedUserTheme = useRef(false);
 
   useEffect(() => {
-    if (hasHydratedDraft.current) return;
+    if (hasAppliedUserTheme.current || !resolvedTheme) return;
+
+    form.setFieldValue("theme", resolvedTheme === "dark" ? "dark" : "light");
+    hasAppliedUserTheme.current = true;
+  }, [form, resolvedTheme]);
+
+  useEffect(() => {
+    if (hasHydratedDraft.current || draftQuery.isLoading) return;
 
     const draft = draftQuery.data?.branding;
     if (!draft) return;
@@ -121,10 +133,11 @@ export const useBrandingStep = () => {
 
     form.setFieldValue("logoUrl", logoUrl);
     form.setFieldValue("primaryColor", draft.primaryColor || "#0066FF");
-    form.setFieldValue("theme", draft.theme === "dark" ? "dark" : "light");
+    // The store draft has a database-level light default before this step is
+    // completed, so it must not override the user's resolved dashboard theme.
 
     hasHydratedDraft.current = true;
-  }, [draftQuery.data, form]);
+  }, [draftQuery.isLoading, draftQuery.data, form]);
 
   // Keep the live preview in sync with the store draft and the form values
   useEffect(() => {

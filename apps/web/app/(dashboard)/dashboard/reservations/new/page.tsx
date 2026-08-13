@@ -19,6 +19,10 @@ import { getCurrentDowntimeUnitIds } from '@/lib/utils/unit-current-downtime';
 
 import { NewReservationForm } from './new-reservation-form';
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 async function getCustomers(storeId: string) {
   return db.query.customers.findMany({
     where: eq(customers.storeId, storeId),

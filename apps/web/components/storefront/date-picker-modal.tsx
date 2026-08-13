@@ -46,6 +46,7 @@ interface DatePickerModalProps {
   onClose: () => void
   initialStartDate?: string
   initialEndDate?: string
+  redirectOnSubmit?: boolean
 }
 
 export function DatePickerModal({
@@ -59,6 +60,7 @@ export function DatePickerModal({
   onClose,
   initialStartDate,
   initialEndDate,
+  redirectOnSubmit = true,
 }: DatePickerModalProps) {
   const t = useTranslations('storefront.dateSelection')
   const tBusinessHours = useTranslations('storefront.dateSelection.businessHours')
@@ -170,10 +172,12 @@ export function DatePickerModal({
     })
 
     setGlobalDates(finalStart.toISOString(), finalEnd.toISOString())
-    const params = new URLSearchParams()
-    params.set('startDate', finalStart.toISOString())
-    params.set('endDate', finalEnd.toISOString())
-    router.push(`${getUrl('/rental')}?${params.toString()}`)
+    if (redirectOnSubmit) {
+      const params = new URLSearchParams()
+      params.set('startDate', finalStart.toISOString())
+      params.set('endDate', finalEnd.toISOString())
+      router.push(`${getUrl('/rental')}?${params.toString()}`)
+    }
     onClose()
   }
 

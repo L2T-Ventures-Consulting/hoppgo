@@ -70,6 +70,9 @@ next-env.d.ts
 /.agent-docs/*
 !/.agent-docs/.gitkeep
 
+# Local development playground routes
+/apps/web/app/dev/
+
 # Internal documentation (not for public release)
 tasks/
 specs/
@@ -80,3 +83,4 @@ SPECIFICATIONS*.md
 # ...except build-critical scripts referenced by package.json
 !/scripts/audit-duplicates.mjs
 .playwright-cli
+.email-previews/

@@ -16,120 +16,6 @@
 }
 */
 /* =============================================================================
-   Dashboard Home - Animated Gradient Mesh Background
-   ============================================================================= */
-
-@keyframes gradient-shift {
-
-  0%,
-  100% {
-    transform: translate(0%, 0%) rotate(0deg);
-  }
-
-  25% {
-    transform: translate(2%, 2%) rotate(1deg);
-  }
-
-  50% {
-    transform: translate(-1%, 1%) rotate(-1deg);
-  }
-
-  75% {
-    transform: translate(1%, -2%) rotate(0.5deg);
-  }
-}
-
-@keyframes gradient-pulse {
-
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-
-  50% {
-    opacity: 0.6;
-  }
-}
-
-.dashboard-gradient-mesh {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.dashboard-gradient-mesh::before,
-.dashboard-gradient-mesh::after {
-  content: '';
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  animation: gradient-shift 20s ease-in-out infinite, gradient-pulse 8s ease-in-out infinite;
-}
-
-.dashboard-gradient-mesh::before {
-  width: 50vw;
-  height: 50vh;
-  top: -5%;
-  right: 0;
-  background: radial-gradient(circle at center,
-      oklch(0.75 0.12 264 / 0.07) 0%,
-      oklch(0.65 0.16 264 / 0.04) 40%,
-      transparent 70%);
-  animation-delay: 0s;
-}
-
-.dashboard-gradient-mesh::after {
-  width: 45vw;
-  height: 45vh;
-  bottom: 10%;
-  left: 0;
-  background: radial-gradient(circle at center,
-      oklch(0.7 0.1 220 / 0.05) 0%,
-      oklch(0.75 0.15 300 / 0.03) 40%,
-      transparent 70%);
-  animation-delay: -10s;
-}
-
-/* Third gradient orb - center */
-.dashboard-gradient-mesh .gradient-orb {
-  position: absolute;
-  width: 35vw;
-  height: 35vh;
-  top: 35%;
-  left: 25%;
-  border-radius: 50%;
-  filter: blur(80px);
-  background: radial-gradient(circle at center,
-      oklch(0.65 0.08 200 / 0.04) 0%,
-      transparent 60%);
-  animation: gradient-shift 25s ease-in-out infinite reverse, gradient-pulse 12s ease-in-out infinite;
-  animation-delay: -5s;
-}
-
-/* Dark mode adjustments */
-.dark .dashboard-gradient-mesh::before {
-  background: radial-gradient(circle at center,
-      oklch(0.45 0.16 258 / 0.1) 0%,
-      oklch(0.35 0.18 258 / 0.06) 40%,
-      transparent 70%);
-}
-
-.dark .dashboard-gradient-mesh::after {
-  background: radial-gradient(circle at center,
-      oklch(0.4 0.12 220 / 0.08) 0%,
-      oklch(0.45 0.18 300 / 0.05) 40%,
-      transparent 70%);
-}
-
-.dark .dashboard-gradient-mesh .gradient-orb {
-  background: radial-gradient(circle at center,
-      oklch(0.35 0.12 200 / 0.06) 0%,
-      transparent 60%);
-}
-
-/* =============================================================================
    Dashboard Cards - Enhanced Styling
    ============================================================================= */
 
@@ -147,176 +33,9 @@
   box-shadow: 0 8px 30px -12px oklch(0 0 0 / 0.4);
 }
 
-/* Gradient icon backgrounds */
-.stat-icon-bg {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 0.75rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
-}
-
-.stat-card:hover .stat-icon-bg {
-  transform: scale(1.05);
-}
-
-.stat-icon-bg--emerald {
-  background: linear-gradient(135deg, oklch(0.9 0.1 160) 0%, oklch(0.85 0.15 150) 100%);
-}
-
-.stat-icon-bg--blue {
-  background: linear-gradient(135deg, oklch(0.9 0.1 230) 0%, oklch(0.85 0.15 240) 100%);
-}
-
-.stat-icon-bg--orange {
-  background: linear-gradient(135deg, oklch(0.92 0.1 70) 0%, oklch(0.88 0.15 50) 100%);
-}
-
-.stat-icon-bg--purple {
-  background: linear-gradient(135deg, oklch(0.9 0.1 280) 0%, oklch(0.85 0.15 290) 100%);
-}
-
-.stat-icon-bg--primary {
-  background: linear-gradient(135deg, oklch(0.9 0.1 264) 0%, oklch(0.85 0.15 264) 100%);
-}
-
-.dark .stat-icon-bg--emerald {
-  background: linear-gradient(135deg, oklch(0.35 0.12 160) 0%, oklch(0.3 0.15 150) 100%);
-}
-
-.dark .stat-icon-bg--blue {
-  background: linear-gradient(135deg, oklch(0.35 0.12 230) 0%, oklch(0.3 0.15 240) 100%);
-}
-
-.dark .stat-icon-bg--orange {
-  background: linear-gradient(135deg, oklch(0.4 0.12 70) 0%, oklch(0.35 0.15 50) 100%);
-}
-
-.dark .stat-icon-bg--purple {
-  background: linear-gradient(135deg, oklch(0.35 0.12 280) 0%, oklch(0.3 0.15 290) 100%);
-}
-
-.dark .stat-icon-bg--primary {
-  background: linear-gradient(135deg, oklch(0.35 0.12 258) 0%, oklch(0.3 0.15 258) 100%);
-}
-
-/* =============================================================================
-   Setup Checklist - Gradient Progress Bar
-   ============================================================================= */
-
-.progress-gradient {
-  background: linear-gradient(90deg,
-      oklch(0.52 0.22 264) 0%,
-      oklch(0.58 0.20 264) 50%,
-      oklch(0.55 0.18 264) 100%);
-  background-size: 200% 100%;
-  animation: progress-shimmer 3s ease-in-out infinite;
-}
-
-@keyframes progress-shimmer {
-
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-/* =============================================================================
-   Quick Actions - Hover Effects (removed card-level hover)
-   ============================================================================= */
-
-.quick-action-primary {
-  position: relative;
-  overflow: hidden;
-}
-
-/* =============================================================================
-   Storefront Widget - Enhanced Styling
-   ============================================================================= */
-
-/* Custom header wrapper - doesn't use CardHeader to avoid Tailwind class conflicts */
-.storefront-header-wrapper {
-  padding: 1.5rem;
-  border-radius: 0.75rem 0.75rem 0 0;
-  background: linear-gradient(135deg,
-      oklch(0.96 0.04 264 / 0.4) 0%,
-      oklch(0.98 0.02 264 / 0.2) 100%);
-  border-bottom: 1px solid oklch(0 0 0 / 0.04);
-}
-
-.dark .storefront-header-wrapper {
-  background: linear-gradient(135deg,
-      oklch(0.28 0.05 258 / 0.35) 0%,
-      oklch(0.24 0.03 258 / 0.2) 100%);
-  border-bottom: 1px solid oklch(1 1 1 / 0.04);
-}
-
-/* =============================================================================
-   Quick Actions - Card Enhancements (no hover bar)
-   ============================================================================= */
-
-.quick-actions-card {
-  position: relative;
-}
-
-/* =============================================================================
-   Unified List Item - Hover with Reveal Action
-   ============================================================================= */
-
-.list-item-hover {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1rem;
-  border-radius: 0.75rem;
-  transition: background-color 0.15s ease;
-}
-
-.list-item-hover:hover {
-  background-color: oklch(0 0 0 / 0.02);
-}
-
-.dark .list-item-hover:hover {
-  background-color: oklch(1 0 0 / 0.02);
-}
-
-/* Reveal action button from right */
-.list-item-hover .reveal-action {
-  position: absolute;
-  right: 0.75rem;
-  opacity: 0;
-  transform: translateX(8px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.list-item-hover:hover .reveal-action {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-/* Clickable text links within list items */
-.list-item-link {
-  color: inherit;
-  transition: color 0.15s ease;
-}
-
-.list-item-link:hover {
-  color: oklch(0.50 0.20 264);
-}
-
-.dark .list-item-link:hover {
-  color: oklch(0.65 0.22 258);
-}
-
 /* =============================================================================
    Modern Action Buttons - Clean and Minimal
+   Used by the share modal only — the home widgets use the `Button` primitive.
    ============================================================================= */
 
 .action-btn {
@@ -665,3 +384,105 @@
     font-size: 0.75rem;
   }
 }
+
+/* =============================================================================
+   Dashboard - Gradient Glow
+   Two radial "orbs" anchored to the left of the viewport: one spilling in from
+   the top, a cooler one at the bottom.
+
+   This is a *page-level* layer, not a sidebar-level one, and that's the whole
+   point. With variant="inset" the sidebar-coloured surface is made of several
+   boxes — the fixed sidebar column (with its own 8px padding), its inner
+   panel, and the 8px gutter SidebarInset's m-2 leaves above / right / below
+   the content panel. Painting the gradient on any subset of them leaves the
+   rest flat, and every boundary reads as a hard line. So one fixed full-screen
+   layer sits behind everything instead: the content panel is opaque, so the
+   orbs only actually show through the sidebar and the surrounding gutters, but
+   they do so continuously, with nothing to line up.
+
+   Consequences worth keeping in mind:
+     - the sidebar's inner panel has to be transparent to let the layer through
+     - the orbs are positioned in px, not %, so they stay put at any viewport
+       width and across the expand/collapse transition (the content panel just
+       crops more or less of them)
+     - position: fixed rather than an oversized absolute box means nothing
+       needs overflow: hidden anywhere
+   ============================================================================= */
+
+.dashboard [data-slot="sidebar-inner"] {
+  background-color: transparent;
+}
+
+/* Desktop only: below md the content panel is full-bleed and the sidebar is a
+   Sheet, so this layer would never be visible. */
+/* @media (min-width: 768px) {
+  .dashboard [data-slot="sidebar-wrapper"]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+    background-image:
+      radial-gradient(
+        circle 380px at 80px -10%,
+        color-mix(in oklab, var(--primary) 9%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 5%, transparent) 40%,
+        color-mix(in oklab, var(--primary) 2%, transparent) 70%,
+        transparent 100%
+      ),
+      radial-gradient(
+        circle 300px at 0 90%,
+        color-mix(in oklab, var(--primary) 5%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 2%, transparent) 50%,
+        transparent 100%
+      );
+  }
+
+  .dark .dashboard [data-slot="sidebar-wrapper"]::before,
+  .dashboard.dark [data-slot="sidebar-wrapper"]::before {
+    background-image:
+      radial-gradient(
+        circle 380px at 80px 130px,
+        color-mix(in oklab, var(--primary) 12%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 6%, transparent) 40%,
+        color-mix(in oklab, var(--primary) 2.5%, transparent) 70%,
+        transparent 100%
+      ),
+      radial-gradient(
+        circle 300px at 0 100%,
+        color-mix(in oklab, var(--primary) 6%, transparent) 0%,
+        color-mix(in oklab, var(--primary) 2.5%, transparent) 50%,
+        transparent 100%
+      );
+  }
+} */
+
+/* Mobile: the sheet is its own opaque panel, so the orbs go straight on it.
+   Not scoped under .dashboard — the sheet is portalled to <body>. */
+/* [data-slot="sidebar"][data-mobile="true"] {
+  background-image:
+    radial-gradient(circle 380px at 80px -10%,
+      color-mix(in oklab, var(--primary) 9%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 5%, transparent) 40%,
+      color-mix(in oklab, var(--primary) 2%, transparent) 70%,
+      transparent 100%),
+    radial-gradient(circle 300px at 0 90%,
+      color-mix(in oklab, var(--primary) 5%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 2%, transparent) 50%,
+      transparent 100%);
+  background-repeat: no-repeat;
+}
+
+.dark [data-slot="sidebar"][data-mobile="true"] {
+  background-image:
+    radial-gradient(circle 380px at 80px 130px,
+      color-mix(in oklab, var(--primary) 12%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 6%, transparent) 40%,
+      color-mix(in oklab, var(--primary) 2.5%, transparent) 70%,
+      transparent 100%),
+    radial-gradient(circle 300px at 0 100%,
+      color-mix(in oklab, var(--primary) 6%, transparent) 0%,
+      color-mix(in oklab, var(--primary) 2.5%, transparent) 50%,
+      transparent 100%);
+} */

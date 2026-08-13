@@ -1,17 +1,20 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import { useMutation } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import type { ProductInput } from "@louez/validations";
+import type { ProductImageHistory } from "@louez/types";
 
 import { useImageUpload } from "@/hooks/use-image-upload";
 
-import { createCategory, createProduct, updateProduct } from "../actions";
+import { createProduct, updateProduct } from "../actions";
+import { collectProductImageUrls } from "../utils/util.product-image-history";
 
 interface UseProductFormMutationsParams {
   productId?: string;
   initialImages?: string[];
+  initialImageHistory?: ProductImageHistory[];
 }
 
 export interface ProductActionErrorDetails {
@@ -32,19 +35,22 @@ function isProductActionErrorPayload(value: unknown): value is ProductActionErro
 export function useProductFormMutations({
   productId,
   initialImages = [],
+  initialImageHistory = [],
 }: UseProductFormMutationsParams) {
   const tErrors = useTranslations("errors");
   const { deleteImage } = useImageUpload("product");
+  const persistedImagesRef = useRef(collectProductImageUrls(initialImages, initialImageHistory));
 
   const productMutation = useMutation({
     mutationFn: async (value: ProductInput) => {
-      const submittedImages = value.images ?? [];
-      const newImages = submittedImages.filter((image) => !initialImages.includes(image));
+      const submittedImages = collectProductImageUrls(value.images ?? [], value.imageHistory ?? []);
+      const persistedImages = persistedImagesRef.current;
 
       const result = productId ? await updateProduct(productId, value) : await createProduct(value);
 
       if (result.error) {
-        void Promise.allSettled(newImages.map((image) => deleteImage(image)));
+        // Keep freshly uploaded files available for a retry. The media hook
+        // still owns their cleanup if the user removes them or leaves the form.
         throw {
           error: result.error,
           details: "details" in result && result.details ? result.details : undefined,
@@ -52,22 +58,11 @@ export function useProductFormMutations({
       }
 
       if (productId) {
-        const removedImages = initialImages.filter((image) => !submittedImages.includes(image));
+        const removedImages = persistedImages.filter((image) => !submittedImages.includes(image));
         void Promise.allSettled(removedImages.map((image) => deleteImage(image)));
       }
 
-      return result;
-    },
-  });
-
-  const createCategoryMutation = useMutation({
-    mutationFn: async (name: string) => {
-      const result = await createCategory({ name });
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
+      persistedImagesRef.current = submittedImages;
       return result;
     },
   });
@@ -109,19 +104,18 @@ export function useProductFormMutations({
     async (value: ProductInput) => productMutation.mutateAsync(value),
     [productMutation],
   );
-
-  const createCategoryByName = useCallback(
-    async (name: string) => createCategoryMutation.mutateAsync(name),
-    [createCategoryMutation],
+  const markImagesPersisted = useCallback(
+    (images: string[], imageHistory: ProductImageHistory[] = []) => {
+      persistedImagesRef.current = collectProductImageUrls(images, imageHistory);
+    },
+    [],
   );
 
   return {
     productMutation,
-    createCategoryMutation,
     isSaving: productMutation.isPending,
-    isCreatingCategory: createCategoryMutation.isPending,
     submitProduct,
-    createCategoryByName,
+    markImagesPersisted,
     getActionErrorMessage,
     getActionErrorDetails,
   };

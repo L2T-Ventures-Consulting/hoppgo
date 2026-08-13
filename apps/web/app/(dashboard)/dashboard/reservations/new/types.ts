@@ -1,4 +1,4 @@
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from "react";
 
 import type {
   BookingAttributeAxis,
@@ -8,18 +8,13 @@ import type {
   Rate,
   TulipPublicMode,
   UnitAttributes,
-} from '@louez/types';
-import type { SeasonalPricingConfig } from '@louez/utils';
+} from "@louez/types";
+import type { SeasonalPricingConfig } from "@louez/utils";
 
-import type { DashboardCreationSource } from '@/lib/openreplay/events';
+import type { DashboardCustomer } from "@/components/dashboard/customer.types";
+import type { DashboardCreationSource } from "@/lib/openreplay/events";
 
-export interface Customer {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone: string | null;
-}
+export type Customer = DashboardCustomer;
 
 export interface ProductPricingTier {
   id: string;
@@ -45,7 +40,7 @@ export interface Product {
   trackUnits: boolean;
   bookingAttributeAxes: BookingAttributeAxis[] | null;
   units: Array<{
-    lifecycleStatus: 'active' | 'retired';
+    lifecycleStatus: "active" | "retired";
     inDowntimeNow?: boolean;
     attributes: UnitAttributes | null;
   }>;
@@ -74,9 +69,17 @@ export interface CustomItem {
   basePeriodMinutes: number;
 }
 
+export interface DetailedDuration {
+  days: number;
+  hours: number;
+  minutes: number;
+  totalHours: number;
+  totalMinutes: number;
+}
+
 export interface PeriodWarning {
-  type: 'advance_notice' | 'day_closed' | 'outside_hours' | 'closure_period';
-  field: 'start' | 'end' | 'both';
+  type: "advance_notice" | "day_closed" | "outside_hours" | "closure_period";
+  field: "start" | "end" | "both";
   message: string;
   details?: string;
 }
@@ -90,7 +93,7 @@ export interface AvailabilityWarning {
   turnoverBufferMinutes?: number;
 }
 
-export type { LegMethod } from '@louez/types';
+export type { LegMethod } from "@louez/types";
 
 export interface DeliveryAddress {
   address: string;
@@ -111,7 +114,7 @@ export interface ReservationLocationOption {
 }
 
 export interface DeliveryLegState {
-  method: import('@louez/types').LegMethod;
+  method: import("@louez/types").LegMethod;
   locationId: string | null;
   address: DeliveryAddress;
   distance: number | null;
@@ -146,40 +149,16 @@ export interface NewReservationFormProps {
   storeLocations: ReservationLocationOption[];
 }
 
-export type StepFieldName =
-  | 'customerId'
-  | 'email'
-  | 'firstName'
-  | 'lastName'
-  | 'startDate'
-  | 'endDate';
+export type StepFieldName = "customerId" | "startDate" | "endDate";
 
 export interface NewReservationFormValues {
-  customerType: 'existing' | 'new';
   customerId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  phone: string;
   startDate: Date | undefined;
   endDate: Date | undefined;
   internalNotes: string;
 }
 
-export type ReservationStepId =
-  | 'customer'
-  | 'period'
-  | 'products'
-  | 'delivery'
-  | 'confirm';
-
-export interface ReservationStep {
-  id: ReservationStepId;
-  title: string;
-  description: string;
-}
-
-export type StepDirection = 'forward' | 'backward';
+export type ReservationStepId = "customer" | "period" | "products" | "delivery" | "confirm";
 
 export interface NewReservationFormComponentApi {
   AppField: ComponentType<{

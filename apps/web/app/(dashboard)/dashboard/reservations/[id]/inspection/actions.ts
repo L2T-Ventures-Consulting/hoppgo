@@ -30,12 +30,15 @@ import {
 
 import { getCurrentStore } from "@/lib/store-context";
 import { getImageFiles } from "@/lib/storage/files";
+import { captureReservationActionSucceeded } from "@/lib/product-analytics/analytics";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
 
 export interface RepairDowntimeSuggestion {
   units: Array<{
     id: string;
     identifier: string;
     productName: string;
+    productId: string;
   }>;
 }
 
@@ -193,6 +196,20 @@ export async function createInspection(data: CreateInspectionInput): Promise<{
 
   revalidatePath(`/dashboard/reservations/${reservationId}`);
 
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action:
+      type === "departure"
+        ? reservationAnalyticsActions.startDepartureInspection
+        : reservationAnalyticsActions.startReturnInspection,
+    properties: {
+      item_count: inspectionItemRows.length,
+      photo_count: inspectionPhotoRows.length,
+    },
+  });
+
   return { inspectionId };
 }
 
@@ -286,6 +303,7 @@ export async function completeInspection(
         id: productUnits.id,
         identifier: productUnits.identifier,
         productName: products.name,
+        productId: productUnits.productId,
       })
       .from(inspectionItems)
       .innerJoin(productUnits, eq(productUnits.id, inspectionItems.productUnitId))
@@ -313,6 +331,20 @@ export async function completeInspection(
   }
 
   revalidatePath(`/dashboard/reservations/${inspection.reservationId}`);
+
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId: inspection.reservationId,
+    action:
+      inspection.type === "departure"
+        ? reservationAnalyticsActions.completeDepartureInspection
+        : reservationAnalyticsActions.completeReturnInspection,
+    properties: {
+      has_damage: hasDamage,
+      damaged_unit_count: repairDowntimeSuggestion?.units.length ?? 0,
+    },
+  });
 
   return { success: true, repairDowntimeSuggestion };
 }
@@ -342,6 +374,7 @@ export async function signInspection(
     .select({
       id: inspections.id,
       reservationId: inspections.reservationId,
+      type: inspections.type,
       status: inspections.status,
     })
     .from(inspections)
@@ -377,6 +410,16 @@ export async function signInspection(
   });
 
   revalidatePath(`/dashboard/reservations/${inspection.reservationId}`);
+
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId: inspection.reservationId,
+    action:
+      inspection.type === "departure"
+        ? reservationAnalyticsActions.signDepartureInspection
+        : reservationAnalyticsActions.signReturnInspection,
+  });
 
   return { success: true };
 }

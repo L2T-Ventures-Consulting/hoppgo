@@ -4,7 +4,10 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { toastManager } from '@louez/ui'
 
+import type { ConnectedAccountFinances } from '@/lib/stripe/connected-account-finances'
+
 import { StripeConnectCard } from './stripe-connect-card'
+import { StripeFinancesCard } from './stripe-finances-card'
 import { PaymentFlowExplanation } from './payment-flow-explanation'
 import { startStripeOnboarding } from './actions'
 
@@ -14,6 +17,9 @@ interface PaymentsContentProps {
   stripeOnboardingComplete: boolean
   reservationMode: 'payment' | 'request'
   stripeConfigured: boolean
+  defaultCurrency: string
+  finances: ConnectedAccountFinances | null
+  storeId: string
 }
 
 export function PaymentsContent({
@@ -22,6 +28,9 @@ export function PaymentsContent({
   stripeOnboardingComplete,
   reservationMode,
   stripeConfigured,
+  defaultCurrency,
+  finances,
+  storeId,
 }: PaymentsContentProps) {
   const [isConnecting, setIsConnecting] = useState(false)
   const tErrors = useTranslations('errors')
@@ -59,6 +68,14 @@ export function PaymentsContent({
         stripeChargesEnabled={stripeChargesEnabled}
         stripeOnboardingComplete={stripeOnboardingComplete}
       />
+
+      {stripeChargesEnabled && stripeOnboardingComplete ? (
+        <StripeFinancesCard
+          defaultCurrency={defaultCurrency}
+          finances={finances}
+          storeId={storeId}
+        />
+      ) : null}
 
       <PaymentFlowExplanation
         reservationMode={reservationMode}

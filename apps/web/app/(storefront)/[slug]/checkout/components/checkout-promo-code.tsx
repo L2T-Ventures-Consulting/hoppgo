@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Loader2, Tag, X } from 'lucide-react'
+import { Tag, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { formatCurrency } from '@louez/utils'
 import { Badge, Button, Input } from '@louez/ui'
@@ -62,10 +62,7 @@ export function CheckoutPromoCode({
       <div className="flex items-center justify-between rounded-lg bg-green-50 p-2.5 dark:bg-green-900/20">
         <div className="flex items-center gap-2 min-w-0">
           <Tag className="h-3.5 w-3.5 shrink-0 text-green-600 dark:text-green-400" />
-          <Badge
-            variant="secondary"
-            className="bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300"
-          >
+          <Badge variant="success" className="">
             {appliedPromo.code}
           </Badge>
           <span className="text-sm font-medium text-green-600 dark:text-green-400">
@@ -122,14 +119,11 @@ export function CheckoutPromoCode({
           size="sm"
           variant="outline"
           onClick={handleApply}
-          disabled={isLoading || !code.trim()}
+          isPending={isLoading}
+          disabled={!code.trim()}
           className="h-8 shrink-0"
         >
-          {isLoading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            t('apply')
-          )}
+          {t('apply')}
         </Button>
       </div>
       {error && <p className="text-xs text-destructive">{error}</p>}

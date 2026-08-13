@@ -1,16 +1,49 @@
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from "react";
 
+import type { FormRadioGroupProps } from "@/components/form/form-radio-group";
 import type {
   PricingMode,
+  ProductImageHistory,
   ProductTaxSettings,
   TaxSettings,
-} from '@louez/types';
-import type { DurationUnit } from '@louez/utils';
-import type { ProductInput } from '@louez/validations';
+} from "@louez/types";
+import type { DurationUnit } from "@louez/utils";
+import type { ProductInput } from "@louez/validations";
 
 export interface Category {
   id: string;
   name: string;
+}
+
+export const PRODUCT_STATUS_FILTERS = ["all", "active", "draft", "archived"] as const;
+
+export type ProductStatusFilter = (typeof PRODUCT_STATUS_FILTERS)[number];
+
+/** A row of the products list, as returned by `dashboard.products.list`. */
+export interface ProductListItem {
+  id: string;
+  name: string;
+  images: string[] | null;
+  price: string;
+  deposit: string | null;
+  quantity: number;
+  status: "draft" | "active" | "archived" | null;
+  category: {
+    id: string;
+    name: string;
+  } | null;
+}
+
+export interface ProductCounts {
+  all: number;
+  active: number;
+  draft: number;
+  archived: number;
+}
+
+export interface ProductsList {
+  products: ProductListItem[];
+  counts: ProductCounts;
 }
 
 export interface SeasonalPricingData {
@@ -72,14 +105,16 @@ export interface Product {
   description: string | null;
   aiContext?: string | null;
   categoryId: string | null;
+  categoryIds?: string[];
   price: string;
   deposit: string | null;
   pricingMode?: PricingMode | null;
   basePeriodMinutes?: number | null;
   pricingTiers?: PricingTierData[];
   quantity: number;
-  status: 'draft' | 'active' | 'archived' | null;
+  status: "draft" | "active" | "archived" | null;
   images: string[] | null;
+  imageHistory?: ProductImageHistory[] | null;
   videoUrl: string | null;
   taxSettings?: ProductTaxSettings | null;
   enforceStrictTiers?: boolean;
@@ -103,19 +138,13 @@ export interface ProductFormProps {
   storeTaxSettings?: TaxSettings;
   availableAccessories?: AvailableAccessory[];
   showAiContext?: boolean;
+  imageEnhanceEnabled?: boolean;
+  imageBackgroundRemovalEnabled?: boolean;
 }
 
-export type ProductFormValues = Omit<ProductInput, 'taxSettings'> & {
+export type ProductFormValues = Omit<ProductInput, "taxSettings"> & {
   taxSettings: ProductTaxSettings;
 };
-
-export interface ProductStep {
-  id: 'photos' | 'info' | 'pricing' | 'preview';
-  title: string;
-  description: string;
-}
-
-export type StepDirection = 'forward' | 'backward';
 
 export interface ProductFormComponentApi {
   AppField: ComponentType<{
@@ -126,6 +155,7 @@ export interface ProductFormComponentApi {
     name: any;
     children: (field: any) => ReactNode;
   }>;
+  RadioGroup: ComponentType<FormRadioGroupProps>;
   setFieldMeta: (name: any, updater: any) => void;
   setFieldValue: (name: any, value: any) => void;
 }

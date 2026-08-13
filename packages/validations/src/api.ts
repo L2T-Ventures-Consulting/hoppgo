@@ -1,17 +1,13 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-import { isValidImageUrl } from './image';
+import { isValidImageUrl } from "./image";
 
 const dateTimeOrDateSchema = z
   .string()
   .datetime({ offset: true })
   .or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/));
 
-const customerEmailSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .pipe(z.email().max(320));
+const customerEmailSchema = z.string().trim().toLowerCase().pipe(z.email().max(320));
 
 export const storefrontAvailabilityInputSchema = z.object({
   startDate: dateTimeOrDateSchema,
@@ -52,23 +48,15 @@ export const dashboardReservationPollInputSchema = z.object({});
 
 export const dashboardReservationsListInputSchema = z.object({
   status: z
-    .enum([
-      'all',
-      'pending',
-      'confirmed',
-      'ongoing',
-      'completed',
-      'cancelled',
-      'rejected',
-      'quote',
-    ])
+    .enum(["all", "pending", "confirmed", "ongoing", "completed", "cancelled", "rejected", "quote"])
     .optional(),
-  period: z.enum(['today', 'week', 'month']).optional(),
-  operation: z.enum(['departure', 'return']).optional(),
+  period: z.enum(["today", "week", "month"]).optional(),
+  operation: z.enum(["departure", "return"]).optional(),
+  paymentMethod: z.enum(["stripe", "cash", "card", "transfer", "check", "other"]).optional(),
   limit: z.number().int().min(1).max(500).optional(),
   search: z.string().max(100).optional(),
-  sort: z.enum(['startDate', 'amount', 'status', 'number']).optional(),
-  sortDirection: z.enum(['asc', 'desc']).optional(),
+  sort: z.enum(["startDate", "amount", "status", "number"]).optional(),
+  sortDirection: z.enum(["asc", "desc"]).optional(),
   page: z.number().int().min(1).optional(),
   pageSize: z.number().int().min(1).max(100).optional(),
 });
@@ -79,20 +67,20 @@ export const dashboardReservationGetByIdInputSchema = z.object({
 
 export const dashboardReservationUpdateNotesInputSchema = z.object({
   reservationId: z.string().length(21),
-  notes: z.string().max(100000).default(''),
+  notes: z.string().max(100000).default(""),
 });
 
 export const dashboardReservationUpdateStatusInputSchema = z.object({
   reservationId: z.string().length(21),
   status: z.enum([
-    'pending',
-    'confirmed',
-    'ongoing',
-    'completed',
-    'cancelled',
-    'rejected',
-    'quote',
-    'declined',
+    "pending",
+    "confirmed",
+    "ongoing",
+    "completed",
+    "cancelled",
+    "rejected",
+    "quote",
+    "declined",
   ]),
   rejectionReason: z.string().max(2000).optional(),
 });
@@ -114,7 +102,7 @@ export const dashboardReservationAssignUnitsInputSchema = z.object({
 export const dashboardReservationRequestPaymentInputSchema = z.object({
   reservationId: z.string().length(21),
   payload: z.object({
-    type: z.enum(['rental', 'deposit', 'custom']),
+    type: z.enum(["rental", "deposit", "custom"]),
     amount: z.number().min(0.5).optional(),
     channels: z.object({
       email: z.boolean(),
@@ -131,15 +119,9 @@ export const dashboardReservationGetPaymentMethodInputSchema = z.object({
 export const dashboardReservationRecordPaymentInputSchema = z.object({
   reservationId: z.string().length(21),
   payload: z.object({
-    type: z.enum([
-      'rental',
-      'deposit',
-      'deposit_return',
-      'damage',
-      'adjustment',
-    ]),
+    type: z.enum(["rental", "deposit", "deposit_return", "damage", "adjustment"]),
     amount: z.number(),
-    method: z.enum(['cash', 'card', 'transfer', 'check', 'other']),
+    method: z.enum(["cash", "card", "transfer", "check", "other"]),
     paidAt: z.union([dateTimeOrDateSchema, z.date()]).optional(),
     notes: z.string().max(10000).optional(),
   }),
@@ -153,7 +135,7 @@ export const dashboardReservationReturnDepositInputSchema = z.object({
   reservationId: z.string().length(21),
   payload: z.object({
     amount: z.number().min(0.01),
-    method: z.enum(['cash', 'card', 'transfer', 'check', 'other']),
+    method: z.enum(["cash", "card", "transfer", "check", "other"]),
     notes: z.string().max(10000).optional(),
   }),
 });
@@ -162,7 +144,7 @@ export const dashboardReservationRecordDamageInputSchema = z.object({
   reservationId: z.string().length(21),
   payload: z.object({
     amount: z.number().min(0.01),
-    method: z.enum(['cash', 'card', 'transfer', 'check', 'other']),
+    method: z.enum(["cash", "card", "transfer", "check", "other"]),
     notes: z.string().max(10000),
   }),
 });
@@ -192,6 +174,10 @@ export const dashboardReservationSendReservationEmailInputSchema = z.object({
   }),
 });
 
+export const dashboardReservationGetEmailRenderContextInputSchema = z.object({
+  reservationId: z.string().length(21),
+});
+
 export const dashboardReservationSendModificationEmailInputSchema = z.object({
   reservationId: z.string().length(21),
   payload: z
@@ -204,6 +190,11 @@ export const dashboardReservationSendModificationEmailInputSchema = z.object({
 
 export const dashboardReservationSendAccessLinkInputSchema = z.object({
   reservationId: z.string().length(21),
+  payload: z
+    .object({
+      customMessage: z.string().max(100000).optional(),
+    })
+    .optional(),
 });
 
 export const dashboardReservationSendAccessLinkSmsInputSchema = z.object({
@@ -221,7 +212,7 @@ export const dashboardReservationUpdateReservationInputSchema = z.object({
     delivery: z
       .object({
         outbound: z.object({
-          method: z.enum(['store', 'address']),
+          method: z.enum(["store", "address"]),
           locationId: z.string().length(21).nullable().optional(),
           address: z.string().max(1000).optional(),
           city: z.string().max(255).optional(),
@@ -231,7 +222,7 @@ export const dashboardReservationUpdateReservationInputSchema = z.object({
           longitude: z.number().optional(),
         }),
         return: z.object({
-          method: z.enum(['store', 'address']),
+          method: z.enum(["store", "address"]),
           locationId: z.string().length(21).nullable().optional(),
           address: z.string().max(1000).optional(),
           city: z.string().max(255).optional(),
@@ -251,7 +242,7 @@ export const dashboardReservationUpdateReservationInputSchema = z.object({
           unitPrice: z.number(),
           depositPerUnit: z.number().min(0),
           isManualPrice: z.boolean().optional(),
-          pricingMode: z.enum(['hour', 'day', 'week']).optional(),
+          pricingMode: z.enum(["hour", "day", "week"]).optional(),
           productSnapshot: z.object({
             name: z.string().trim().min(1).max(500),
             description: z.string().max(100000).nullable().optional(),
@@ -338,14 +329,14 @@ export const dashboardReservationCreateManualReservationInputSchema = z.object({
           unitPrice: z.number(),
           deposit: z.number().min(0),
           quantity: z.number().int().min(1),
-          pricingMode: z.enum(['hour', 'day', 'week']),
+          pricingMode: z.enum(["hour", "day", "week"]),
         }),
       )
       .optional(),
     delivery: z
       .object({
         outbound: z.object({
-          method: z.enum(['store', 'address']),
+          method: z.enum(["store", "address"]),
           locationId: z.string().length(21).nullable().optional(),
           address: z.string().max(1000).optional(),
           city: z.string().max(255).optional(),
@@ -355,7 +346,7 @@ export const dashboardReservationCreateManualReservationInputSchema = z.object({
           longitude: z.number().min(-180).max(180).optional(),
         }),
         return: z.object({
-          method: z.enum(['store', 'address']),
+          method: z.enum(["store", "address"]),
           locationId: z.string().length(21).nullable().optional(),
           address: z.string().max(1000).optional(),
           city: z.string().max(255).optional(),
@@ -367,6 +358,8 @@ export const dashboardReservationCreateManualReservationInputSchema = z.object({
       })
       .optional(),
     internalNotes: z.string().max(100000).optional(),
+    discountAmount: z.number().min(0).optional(),
+    depositOverride: z.number().min(0).optional(),
     tulipInsuranceOptIn: z.boolean().optional(),
     sendConfirmationEmail: z.boolean().optional(),
     sendAsQuote: z.boolean().optional(),
@@ -375,29 +368,26 @@ export const dashboardReservationCreateManualReservationInputSchema = z.object({
 });
 
 export const updateStoreLegalInputSchema = z.object({
-  cgv: z.string().max(100000, 'errors.invalidData').optional(),
-  legalNotice: z.string().max(100000, 'errors.invalidData').optional(),
+  cgv: z.string().max(100000, "errors.invalidData").optional(),
+  legalNotice: z.string().max(100000, "errors.invalidData").optional(),
   includeFullCgvInContract: z.boolean().optional(),
 });
 
 const s3UrlSchema = z
   .string()
   .refine(
-    (url) => !url.startsWith('data:'),
-    'Base64 images are not allowed. Please upload images to S3.',
+    (url) => !url.startsWith("data:"),
+    "Base64 images are not allowed. Please upload images to S3.",
   )
-  .refine(
-    (url) => isValidImageUrl(url),
-    'Invalid image URL. Must be a valid S3 URL.',
-  );
+  .refine((url) => isValidImageUrl(url), "Invalid image URL. Must be a valid S3 URL.");
 
 export const updateStoreAppearanceInputSchema = z.object({
-  logoUrl: z.union([s3UrlSchema, z.literal(''), z.null()]).optional(),
-  darkLogoUrl: z.union([s3UrlSchema, z.literal(''), z.null()]).optional(),
+  logoUrl: z.union([s3UrlSchema, z.literal(""), z.null()]).optional(),
+  darkLogoUrl: z.union([s3UrlSchema, z.literal(""), z.null()]).optional(),
   theme: z
     .object({
-      mode: z.enum(['light', 'dark']),
-      primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Invalid hex color'),
+      mode: z.enum(["light", "dark"]),
+      primaryColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Invalid hex color"),
       heroImages: z.array(s3UrlSchema).max(5).optional(),
       maxDiscountPercent: z.number().int().min(0).max(100).nullish(),
     })
@@ -427,35 +417,29 @@ export const dashboardIntegrationsSetEnabledInputSchema = z.object({
 
 export const dashboardIntegrationsGetCalendarStateInputSchema = z.object({});
 
-export const dashboardIntegrationsUpdateGoogleCalendarSettingsInputSchema =
-  z.object({
-    syncPendingReservations: z.boolean(),
-    cancelledReservationBehavior: z.enum(['show', 'hide']),
-  });
+export const dashboardIntegrationsUpdateGoogleCalendarSettingsInputSchema = z.object({
+  syncPendingReservations: z.boolean(),
+  cancelledReservationBehavior: z.enum(["show", "hide"]),
+});
 
-export const dashboardIntegrationsResyncGoogleCalendarInputSchema = z.object(
-  {},
-);
+export const dashboardIntegrationsResyncGoogleCalendarInputSchema = z.object({});
 
-export const dashboardIntegrationsDisconnectGoogleCalendarInputSchema =
-  z.object({
-    deleteEvents: z.boolean().default(false),
-  });
+export const dashboardIntegrationsDisconnectGoogleCalendarInputSchema = z.object({
+  deleteEvents: z.boolean().default(false),
+});
 
 export const dashboardIntegrationsConnectTulipInputSchema = z.object({
   renterUid: z.string().trim().min(1).max(120),
 });
 
-export const dashboardIntegrationsUpdateTulipConfigurationInputSchema =
-  z.object({
-    publicMode: z.enum(['required', 'optional', 'no_public']),
-  });
+export const dashboardIntegrationsUpdateTulipConfigurationInputSchema = z.object({
+  publicMode: z.enum(["required", "optional", "no_public"]),
+});
 
-export const dashboardIntegrationsUpsertTulipProductMappingInputSchema =
-  z.object({
-    productId: z.string().length(21),
-    tulipProductId: z.string().trim().min(1).max(50).nullable(),
-  });
+export const dashboardIntegrationsUpsertTulipProductMappingInputSchema = z.object({
+  productId: z.string().length(21),
+  tulipProductId: z.string().trim().min(1).max(50).nullable(),
+});
 
 const tulipProductTypeSchema = z.string().trim().min(1).max(80);
 const tulipProductSubtypeSchema = z.string().trim().min(1).max(80);
@@ -519,21 +503,13 @@ export const reservationSignInputSchema = z.object({
   reservationId: z.string().length(21),
 });
 
-export type StorefrontAvailabilityInput = z.infer<
-  typeof storefrontAvailabilityInputSchema
->;
+export type StorefrontAvailabilityInput = z.infer<typeof storefrontAvailabilityInputSchema>;
 export type StorefrontResolveCombinationInput = z.infer<
   typeof storefrontResolveCombinationInputSchema
 >;
-export type StorefrontCartResolveInput = z.infer<
-  typeof storefrontCartResolveInputSchema
->;
-export type DashboardReservationPollInput = z.infer<
-  typeof dashboardReservationPollInputSchema
->;
-export type DashboardReservationsListInput = z.infer<
-  typeof dashboardReservationsListInputSchema
->;
+export type StorefrontCartResolveInput = z.infer<typeof storefrontCartResolveInputSchema>;
+export type DashboardReservationPollInput = z.infer<typeof dashboardReservationPollInputSchema>;
+export type DashboardReservationsListInput = z.infer<typeof dashboardReservationsListInputSchema>;
 export type DashboardReservationGetByIdInput = z.infer<
   typeof dashboardReservationGetByIdInputSchema
 >;
@@ -543,9 +519,7 @@ export type DashboardReservationUpdateNotesInput = z.infer<
 export type DashboardReservationUpdateStatusInput = z.infer<
   typeof dashboardReservationUpdateStatusInputSchema
 >;
-export type DashboardReservationCancelInput = z.infer<
-  typeof dashboardReservationCancelInputSchema
->;
+export type DashboardReservationCancelInput = z.infer<typeof dashboardReservationCancelInputSchema>;
 export type DashboardReservationGetAvailableUnitsInput = z.infer<
   typeof dashboardReservationGetAvailableUnitsInputSchema
 >;
@@ -582,6 +556,9 @@ export type DashboardReservationReleaseDepositHoldInput = z.infer<
 export type DashboardReservationSendReservationEmailInput = z.infer<
   typeof dashboardReservationSendReservationEmailInputSchema
 >;
+export type DashboardReservationGetEmailRenderContextInput = z.infer<
+  typeof dashboardReservationGetEmailRenderContextInputSchema
+>;
 export type DashboardReservationSendModificationEmailInput = z.infer<
   typeof dashboardReservationSendModificationEmailInputSchema
 >;
@@ -598,9 +575,7 @@ export type DashboardReservationCreateManualReservationInput = z.infer<
   typeof dashboardReservationCreateManualReservationInputSchema
 >;
 export type UpdateStoreLegalInput = z.infer<typeof updateStoreLegalInputSchema>;
-export type UpdateStoreAppearanceInput = z.infer<
-  typeof updateStoreAppearanceInputSchema
->;
+export type UpdateStoreAppearanceInput = z.infer<typeof updateStoreAppearanceInputSchema>;
 export type DashboardIntegrationsGetTulipStateInput = z.infer<
   typeof dashboardIntegrationsGetTulipStateInputSchema
 >;
@@ -646,13 +621,9 @@ export type DashboardIntegrationsCreateTulipProductInput = z.infer<
 export type DashboardIntegrationsDisconnectTulipInput = z.infer<
   typeof dashboardIntegrationsDisconnectTulipInputSchema
 >;
-export type AddressAutocompleteInput = z.infer<
-  typeof addressAutocompleteInputSchema
->;
+export type AddressAutocompleteInput = z.infer<typeof addressAutocompleteInputSchema>;
 export type AddressResolveInput = z.infer<typeof addressResolveInputSchema>;
 export type AddressDetailsInput = z.infer<typeof addressDetailsInputSchema>;
-export type AddressReverseGeocodeInput = z.infer<
-  typeof addressReverseGeocodeInputSchema
->;
+export type AddressReverseGeocodeInput = z.infer<typeof addressReverseGeocodeInputSchema>;
 export type RouteDistanceInput = z.infer<typeof routeDistanceInputSchema>;
 export type ReservationSignInput = z.infer<typeof reservationSignInputSchema>;

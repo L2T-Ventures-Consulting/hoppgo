@@ -1,10 +1,8 @@
 'use client';
 
-import Image from 'next/image';
-
 import { format } from 'date-fns';
 import { enUS, fr } from 'date-fns/locale';
-import { ImageIcon, Shield, Tag, Truck } from 'lucide-react';
+import { CalendarDays, Shield, Tag, Truck } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import type { TaxSettings } from '@louez/types';
@@ -12,6 +10,7 @@ import {
   Alert,
   AlertDescription,
   Badge,
+  Button,
   Card,
   CardContent,
   Separator,
@@ -21,6 +20,8 @@ import {
   TooltipTrigger,
 } from '@louez/ui';
 import { formatCurrency } from '@louez/utils';
+
+import { ProductImage } from '@/components/product/product-image';
 
 import { getDetailedDuration } from '@/lib/utils/duration';
 import { calculateCartItemPrice } from '@/lib/utils/cart-pricing';
@@ -74,6 +75,7 @@ interface CheckoutOrderSummaryProps {
   discountAmount: number;
   onApplyPromo: (promo: ValidatedPromo) => void;
   onRemovePromo: () => void;
+  onEditDates: () => void;
 }
 
 export function CheckoutOrderSummary({
@@ -105,6 +107,7 @@ export function CheckoutOrderSummary({
   discountAmount,
   onApplyPromo,
   onRemovePromo,
+  onEditDates,
 }: CheckoutOrderSummaryProps) {
   const t = useTranslations('storefront.checkout');
   const tCart = useTranslations('storefront.cart');
@@ -150,7 +153,7 @@ export function CheckoutOrderSummary({
           <h3 className="font-semibold">{t('summary')}</h3>
 
           {globalStartDate && globalEndDate && (
-            <div className="bg-muted/50 flex items-center justify-between rounded-lg px-3 py-2 text-sm">
+            <div className="bg-muted/50 flex items-center gap-2 rounded-lg px-3 py-2 text-sm">
               <span className="text-muted-foreground">
                 {format(new Date(globalStartDate), 'dd MMM', {
                   locale: dateLocale,
@@ -160,7 +163,18 @@ export function CheckoutOrderSummary({
                   locale: dateLocale,
                 })}
               </span>
-              <Badge variant="secondary">{durationLabel}</Badge>
+              <Badge variant="expired" className="ml-auto">
+                {durationLabel}
+              </Badge>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon-sm"
+                onClick={onEditDates}
+                aria-label={tCart('updateDates')}
+              >
+                <CalendarDays />
+              </Button>
             </div>
           )}
 
@@ -190,20 +204,12 @@ export function CheckoutOrderSummary({
                     key={item.lineId || `${item.productId}-${index}`}
                     className="flex gap-3"
                   >
-                    <div className="bg-muted relative aspect-4/3 h-14 w-auto shrink-0 overflow-hidden rounded-lg">
-                      {item.productImage ? (
-                        <Image
-                          src={item.productImage}
-                          alt={item.productName}
-                          fill
-                          className="max-h-full max-w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full items-center justify-center">
-                          <ImageIcon className="text-muted-foreground h-5 w-5" />
-                        </div>
-                      )}
-                    </div>
+                    <ProductImage
+                      src={item.productImage}
+                      alt={item.productName}
+                      sizes="76px"
+                      containerClassName="h-14 shrink-0"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1">
                         <p className="truncate text-sm font-medium">
@@ -261,13 +267,10 @@ export function CheckoutOrderSummary({
                       </p>
                       {discountPercent != null && discountPercent > 0 &&
                         (maxDiscountPercent == null || discountPercent <= maxDiscountPercent) && (
-                        <Badge
-                          variant="secondary"
-                          className="mt-1 bg-green-100 text-xs text-green-700 dark:bg-green-900/50 dark:text-green-300"
-                        >
-                          -{Math.floor(discountPercent)}%
-                        </Badge>
-                      )}
+                          <Badge variant="success" className="mt-1 text-xs">
+                            -{Math.floor(discountPercent)}%
+                          </Badge>
+                        )}
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">

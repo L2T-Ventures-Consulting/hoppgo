@@ -1,21 +1,23 @@
 import { redirect } from 'next/navigation'
 
+import {
+  resolveAiAdvisorSettingsRedirect,
+  type AiAssistantSearchParams,
+} from '@/app/(dashboard)/dashboard/ai-assistant/util.legacy-redirect'
+
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 /**
- * The AI assistant moved out of settings into its own page. Old links (emails,
- * bookmarks, the ?conversation= deep link) land here — forward them, query
- * string included.
+ * The AI advisor moved out of settings, then out of a tabbed page. Old links
+ * (emails, bookmarks, the ?conversation= deep link) land here — forward them to
+ * the section they were aiming at, query string included.
  */
 export default async function AiAdvisorSettingsRedirect({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>
+  searchParams: Promise<AiAssistantSearchParams>
 }) {
-  const params = await searchParams
-  const query = new URLSearchParams()
-  for (const [key, value] of Object.entries(params)) {
-    if (typeof value === 'string') query.set(key, value)
-    else if (Array.isArray(value)) for (const v of value) query.append(key, v)
-  }
-  const suffix = query.size > 0 ? `?${query.toString()}` : ''
-  redirect(`/dashboard/ai-assistant${suffix}`)
+  redirect(resolveAiAdvisorSettingsRedirect(await searchParams))
 }

@@ -1,54 +1,35 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { useTranslations } from 'next-intl'
-import { toastManager } from '@louez/ui'
-import Link from 'next/link'
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import { Globe, Pencil } from "lucide-react";
+import { toastManager } from "@louez/ui";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
 import {
-  Phone,
-  MessageSquare,
-  Loader2,
-  AlertTriangle,
-  CheckCircle2,
-  ExternalLink,
-  Users,
-  Bell,
-  Pencil,
-  Globe,
-  Clock,
-} from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
-import { Button } from '@louez/ui'
-import { Input } from '@louez/ui'
-import { Switch } from '@louez/ui'
-import { Alert, AlertDescription } from '@louez/ui'
-import { Separator } from '@louez/ui'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@louez/ui'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@louez/ui'
-import { PhoneInput } from '@/components/ui/phone-input'
-import { NotificationTemplateSheet } from '@/components/dashboard/notification-template-sheet'
-import {
-  updateSinglePreference,
-  updateDiscordWebhook,
-  updateOwnerPhone,
-  testDiscordWebhook,
-  updateCustomerPreference,
-  updateCustomerTemplate,
-  getCustomerTemplate,
-  updateReminderSettings,
-  updateAdminReminderSettings,
-} from './actions'
+  CalendarCheckIcon,
+  ChatIcon,
+  ClockIcon,
+  ExternalLinkIcon,
+  FastPaymentIcon,
+  MobileIcon,
+  SuccessSolidIcon,
+  WarningIcon,
+} from "@louez/ui/icons";
+import { Button } from "@louez/ui";
+import { Input } from "@louez/ui";
+import { Switch } from "@louez/ui";
+import { Alert, AlertDescription, AlertTitle } from "@louez/ui";
+import { Badge } from "@louez/ui";
+import { Separator } from "@louez/ui";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@louez/ui";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@louez/ui";
+import { PhoneInput } from "@/components/ui/phone-input";
+import { NotificationTemplateSheet } from "@/components/dashboard/notification-template-sheet";
+import { PushManageCard } from "@/components/dashboard/push-manage-card";
+import { orpc } from "@/lib/orpc/react";
+import { updateDiscordWebhook, updateOwnerPhone, testDiscordWebhook } from "./actions";
 import type {
   NotificationSettings,
   NotificationEventType,
@@ -56,72 +37,72 @@ import type {
   CustomerNotificationEventType,
   CustomerNotificationTemplate,
   AdminReminderMode,
-} from '@louez/types'
-import type { EmailLocale } from '@/lib/email/i18n'
+} from "@louez/types";
+import type { EmailLocale } from "@/lib/email/i18n";
 
 // Hours of the day offered for the daily digest send time.
-const DIGEST_HOURS = Array.from({ length: 24 }, (_, i) => i)
-const formatHour = (hour: number) => `${String(hour).padStart(2, '0')}:00`
+const DIGEST_HOURS = Array.from({ length: 24 }, (_, i) => i);
+const formatHour = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 
 interface NotificationsFormProps {
-  settings: NotificationSettings
-  discordWebhookUrl: string | null
-  ownerPhone: string | null
+  settings: NotificationSettings;
+  discordWebhookUrl: string | null;
+  ownerPhone: string | null;
   smsQuota: {
-    current: number
-    limit: number | null
-    prepaidBalance: number
-    allowed: boolean
-    totalAvailable: number
-  }
-  customerSettings: CustomerNotificationSettings
-  storeLocale: EmailLocale
-  storeLanguageName: string
+    current: number;
+    limit: number | null;
+    prepaidBalance: number;
+    allowed: boolean;
+    totalAvailable: number;
+  };
+  customerSettings: CustomerNotificationSettings;
+  storeLocale: EmailLocale;
+  storeLanguageName: string;
   storeInfo: {
-    name: string
-    logoUrl?: string | null
-    email?: string | null
-    phone?: string | null
-    address?: string | null
+    name: string;
+    logoUrl?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
     theme?: {
-      primaryColor?: string
-    } | null
-  }
+      primaryColor?: string;
+    } | null;
+  };
 }
 
 interface NotificationEvent {
-  type: NotificationEventType
-  category: 'reservation' | 'reminder' | 'payment'
+  type: NotificationEventType;
+  category: "reservation" | "reminder" | "payment";
 }
 
 interface CustomerNotificationEvent {
-  type: CustomerNotificationEventType
-  category: 'reservation' | 'reminder'
+  type: CustomerNotificationEventType;
+  category: "reservation" | "reminder";
 }
 
 const NOTIFICATION_EVENTS: NotificationEvent[] = [
-  { type: 'reservation_new', category: 'reservation' },
-  { type: 'reservation_confirmed', category: 'reservation' },
-  { type: 'reservation_rejected', category: 'reservation' },
-  { type: 'reservation_cancelled', category: 'reservation' },
-  { type: 'reservation_picked_up', category: 'reservation' },
-  { type: 'reservation_completed', category: 'reservation' },
-  { type: 'reservation_reminder_pickup', category: 'reminder' },
-  { type: 'reservation_reminder_return', category: 'reminder' },
-  { type: 'payment_received', category: 'payment' },
-  { type: 'payment_failed', category: 'payment' },
-]
+  { type: "reservation_new", category: "reservation" },
+  { type: "reservation_confirmed", category: "reservation" },
+  { type: "reservation_rejected", category: "reservation" },
+  { type: "reservation_cancelled", category: "reservation" },
+  { type: "reservation_picked_up", category: "reservation" },
+  { type: "reservation_completed", category: "reservation" },
+  { type: "reservation_reminder_pickup", category: "reminder" },
+  { type: "reservation_reminder_return", category: "reminder" },
+  { type: "payment_received", category: "payment" },
+  { type: "payment_failed", category: "payment" },
+];
 
 const CUSTOMER_NOTIFICATION_EVENTS: CustomerNotificationEvent[] = [
-  { type: 'customer_request_received', category: 'reservation' },
-  { type: 'customer_request_accepted', category: 'reservation' },
-  { type: 'customer_request_rejected', category: 'reservation' },
-  { type: 'customer_reservation_confirmed', category: 'reservation' },
-  { type: 'customer_reminder_pickup', category: 'reminder' },
-  { type: 'customer_reminder_return', category: 'reminder' },
-]
+  { type: "customer_request_received", category: "reservation" },
+  { type: "customer_request_accepted", category: "reservation" },
+  { type: "customer_request_rejected", category: "reservation" },
+  { type: "customer_reservation_confirmed", category: "reservation" },
+  { type: "customer_reminder_pickup", category: "reminder" },
+  { type: "customer_reminder_return", category: "reminder" },
+];
 
-export function NotificationsForm({
+export const NotificationsForm = ({
   settings: initialSettings,
   discordWebhookUrl: initialWebhookUrl,
   ownerPhone: initialOwnerPhone,
@@ -130,61 +111,82 @@ export function NotificationsForm({
   storeLocale,
   storeLanguageName,
   storeInfo,
-}: NotificationsFormProps) {
-  const t = useTranslations('dashboard.settings.notifications')
-  const tc = useTranslations('common')
+}: NotificationsFormProps) => {
+  const t = useTranslations("dashboard.settings.notifications");
+  const tc = useTranslations("common");
+  const queryClient = useQueryClient();
+
+  const updateSinglePreferenceMutation = useMutation(
+    orpc.dashboard.notifications.updateSinglePreference.mutationOptions(),
+  );
+  const updateCustomerPreferenceMutation = useMutation(
+    orpc.dashboard.notifications.updateCustomerPreference.mutationOptions(),
+  );
+  const updateCustomerTemplateMutation = useMutation(
+    orpc.dashboard.notifications.updateCustomerTemplate.mutationOptions(),
+  );
+  const updateReminderSettingsMutation = useMutation(
+    orpc.dashboard.notifications.updateReminderSettings.mutationOptions(),
+  );
+  const updateAdminReminderSettingsMutation = useMutation(
+    orpc.dashboard.notifications.updateAdminReminderSettings.mutationOptions(),
+  );
+  const updateDiscordWebhookMutation = useMutation({
+    mutationFn: updateDiscordWebhook,
+  });
+  const testDiscordWebhookMutation = useMutation({
+    mutationFn: async () => testDiscordWebhook(),
+  });
+  const updateOwnerPhoneMutation = useMutation({
+    mutationFn: updateOwnerPhone,
+  });
 
   // Admin notification state
-  const [settings, setSettings] = useState(initialSettings)
-  const [discordWebhookUrl, setDiscordWebhookUrl] = useState(initialWebhookUrl || '')
-  const [ownerPhone, setOwnerPhone] = useState(initialOwnerPhone || '')
-  const [isPending, startTransition] = useTransition()
-  const [savingWebhook, setSavingWebhook] = useState(false)
-  const [savingPhone, setSavingPhone] = useState(false)
-  const [testingDiscord, setTestingDiscord] = useState(false)
-  const [isDiscordConnected, setIsDiscordConnected] = useState(!!initialWebhookUrl)
-  const [isSmsConfigured, setIsSmsConfigured] = useState(!!initialOwnerPhone)
+  const [settings, setSettings] = useState(initialSettings);
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState(initialWebhookUrl || "");
+  const [ownerPhone, setOwnerPhone] = useState(initialOwnerPhone || "");
+  const [isDiscordConnected, setIsDiscordConnected] = useState(!!initialWebhookUrl);
+  const [isSmsConfigured, setIsSmsConfigured] = useState(!!initialOwnerPhone);
 
   // Customer notification state
-  const [customerSettings, setCustomerSettings] = useState(initialCustomerSettings)
-  const [templateModalOpen, setTemplateModalOpen] = useState(false)
+  const [customerSettings, setCustomerSettings] = useState(initialCustomerSettings);
+  const [templateModalOpen, setTemplateModalOpen] = useState(false);
   const [editingEventType, setEditingEventType] = useState<CustomerNotificationEventType | null>(
-    null
-  )
-  const [editingTemplate, setEditingTemplate] = useState<CustomerNotificationTemplate | null>(null)
+    null,
+  );
+  const [editingTemplate, setEditingTemplate] = useState<CustomerNotificationTemplate | null>(null);
 
   // Reminder timing state
   const [pickupReminderHours, setPickupReminderHours] = useState(
-    initialCustomerSettings.reminderSettings?.pickupReminderHours ?? 24
-  )
+    initialCustomerSettings.reminderSettings?.pickupReminderHours ?? 24,
+  );
   const [returnReminderHours, setReturnReminderHours] = useState(
-    initialCustomerSettings.reminderSettings?.returnReminderHours ?? 24
-  )
-  const [savingReminderSettings, setSavingReminderSettings] = useState(false)
+    initialCustomerSettings.reminderSettings?.returnReminderHours ?? 24,
+  );
 
   // Admin reminder timing state (independent of customer timing)
   const [adminPickupReminderHours, setAdminPickupReminderHours] = useState(
-    initialSettings.reminderSettings?.pickupReminderHours ?? 24
-  )
+    initialSettings.reminderSettings?.pickupReminderHours ?? 24,
+  );
   const [adminReturnReminderHours, setAdminReturnReminderHours] = useState(
-    initialSettings.reminderSettings?.returnReminderHours ?? 24
-  )
+    initialSettings.reminderSettings?.returnReminderHours ?? 24,
+  );
   const [adminReminderMode, setAdminReminderMode] = useState<AdminReminderMode>(
-    initialSettings.reminderSettings?.mode ?? 'per_reservation'
-  )
+    initialSettings.reminderSettings?.mode ?? "per_reservation",
+  );
   const [adminDigestHour, setAdminDigestHour] = useState(
-    initialSettings.reminderSettings?.digestHour ?? 8
-  )
-  const [savingAdminReminderSettings, setSavingAdminReminderSettings] = useState(false)
-
-  const smsLimitReached = !smsQuota.allowed
-  const smsLow = smsQuota.limit !== null && smsQuota.current >= smsQuota.limit * 0.8
+    initialSettings.reminderSettings?.digestHour ?? 8,
+  );
+  const smsLimitReached = !smsQuota.allowed;
+  const smsLow = smsQuota.limit !== null && smsQuota.current >= smsQuota.limit * 0.8;
+  const isTogglePending =
+    updateSinglePreferenceMutation.isPending || updateCustomerPreferenceMutation.isPending;
 
   // Admin toggle handler
   const handleToggle = async (
     eventType: NotificationEventType,
-    channel: 'email' | 'sms' | 'discord',
-    enabled: boolean
+    channel: "email" | "sms" | "discord",
+    enabled: boolean,
   ) => {
     setSettings((prev) => ({
       ...prev,
@@ -192,28 +194,27 @@ export function NotificationsForm({
         ...prev[eventType],
         [channel]: enabled,
       },
-    }))
+    }));
 
-    startTransition(async () => {
-      const result = await updateSinglePreference({ eventType, channel, enabled })
-      if (result.error) {
-        setSettings((prev) => ({
-          ...prev,
-          [eventType]: {
-            ...prev[eventType],
-            [channel]: !enabled,
-          },
-        }))
-        toastManager.add({ title: t('saveError'), type: 'error' })
-      }
-    })
-  }
+    try {
+      await updateSinglePreferenceMutation.mutateAsync({ eventType, channel, enabled });
+    } catch {
+      setSettings((prev) => ({
+        ...prev,
+        [eventType]: {
+          ...prev[eventType],
+          [channel]: !enabled,
+        },
+      }));
+      toastManager.add({ title: t("saveError"), type: "error" });
+    }
+  };
 
   // Customer toggle handler
   const handleCustomerToggle = async (
     eventType: CustomerNotificationEventType,
-    channel: 'email' | 'sms',
-    enabled: boolean
+    channel: "email" | "sms",
+    enabled: boolean,
   ) => {
     setCustomerSettings((prev) => ({
       ...prev,
@@ -221,176 +222,177 @@ export function NotificationsForm({
         ...prev[eventType],
         [channel]: enabled,
       },
-    }))
+    }));
 
-    startTransition(async () => {
-      const result = await updateCustomerPreference({ eventType, channel, enabled })
-      if (result.error) {
-        setCustomerSettings((prev) => ({
-          ...prev,
-          [eventType]: {
-            ...prev[eventType],
-            [channel]: !enabled,
-          },
-        }))
-        toastManager.add({ title: t('saveError'), type: 'error' })
-      }
-    })
-  }
+    try {
+      await updateCustomerPreferenceMutation.mutateAsync({ eventType, channel, enabled });
+    } catch {
+      setCustomerSettings((prev) => ({
+        ...prev,
+        [eventType]: {
+          ...prev[eventType],
+          [channel]: !enabled,
+        },
+      }));
+      toastManager.add({ title: t("saveError"), type: "error" });
+    }
+  };
 
   const handleSaveWebhook = async () => {
-    setSavingWebhook(true)
-    const result = await updateDiscordWebhook(discordWebhookUrl || null)
-    setSavingWebhook(false)
-
-    if (result.error) {
-      toastManager.add({ title: t('discord.invalidUrl'), type: 'error' })
-    } else {
-      setIsDiscordConnected(!!discordWebhookUrl)
-      toastManager.add({ title: t('discord.saved'), type: 'success' })
+    try {
+      const result = await updateDiscordWebhookMutation.mutateAsync(discordWebhookUrl || null);
+      if (result.error) {
+        toastManager.add({ title: t("discord.invalidUrl"), type: "error" });
+        return;
+      }
+      setIsDiscordConnected(!!discordWebhookUrl);
+      toastManager.add({ title: t("discord.saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("discord.invalidUrl"), type: "error" });
     }
-  }
+  };
 
   const handleTestDiscord = async () => {
-    setTestingDiscord(true)
-    const result = await testDiscordWebhook()
-    setTestingDiscord(false)
-
-    if (result.error) {
-      toastManager.add({ title: t('discord.testError'), type: 'error' })
-    } else {
-      toastManager.add({ title: t('discord.testSuccess'), type: 'success' })
+    try {
+      const result = await testDiscordWebhookMutation.mutateAsync();
+      if (result.error) {
+        toastManager.add({ title: t("discord.testError"), type: "error" });
+        return;
+      }
+      toastManager.add({ title: t("discord.testSuccess"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("discord.testError"), type: "error" });
     }
-  }
+  };
 
   const handleSavePhone = async () => {
-    setSavingPhone(true)
-    const result = await updateOwnerPhone(ownerPhone || null)
-    setSavingPhone(false)
-
-    if (result.error) {
-      toastManager.add({ title: t('phone.invalidNumber'), type: 'error' })
-    } else {
-      const hasPhone = !!result.phone
-      setIsSmsConfigured(hasPhone)
-      if (result.phone) {
-        setOwnerPhone(result.phone)
+    try {
+      const result = await updateOwnerPhoneMutation.mutateAsync(ownerPhone || null);
+      if (result.error) {
+        toastManager.add({ title: t("phone.invalidNumber"), type: "error" });
+        return;
       }
-      toastManager.add({ title: t('phone.saved'), type: 'success' })
+      const hasPhone = !!result.phone;
+      setIsSmsConfigured(hasPhone);
+      if (result.phone) {
+        setOwnerPhone(result.phone);
+      }
+      toastManager.add({ title: t("phone.saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("phone.invalidNumber"), type: "error" });
     }
-  }
+  };
 
   const handleOpenTemplateModal = async (eventType: CustomerNotificationEventType) => {
-    setEditingEventType(eventType)
-    const result = await getCustomerTemplate(eventType)
-    if (!result.error) {
-      setEditingTemplate(result.template || {})
+    setEditingEventType(eventType);
+    try {
+      const result = await queryClient.fetchQuery(
+        orpc.dashboard.notifications.getCustomerTemplate.queryOptions({
+          input: { eventType },
+        }),
+      );
+      setEditingTemplate(result.template);
+    } catch {
+      setEditingTemplate(null);
+    } finally {
+      setTemplateModalOpen(true);
     }
-    setTemplateModalOpen(true)
-  }
+  };
 
   const handleSaveTemplate = async (template: CustomerNotificationTemplate) => {
-    if (!editingEventType) return
+    if (!editingEventType) return;
 
-    const result = await updateCustomerTemplate({
-      eventType: editingEventType,
-      template,
-    })
-
-    if (result.error) {
-      toastManager.add({ title: t('saveError'), type: 'error' })
-    } else {
+    try {
+      await updateCustomerTemplateMutation.mutateAsync({
+        eventType: editingEventType,
+        template,
+      });
       setCustomerSettings((prev) => ({
         ...prev,
         templates: {
           ...prev.templates,
           [editingEventType]: template,
         },
-      }))
-      toastManager.add({ title: t('templateSaved'), type: 'success' })
+      }));
+      toastManager.add({ title: t("templateSaved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("saveError"), type: "error" });
+    } finally {
+      setTemplateModalOpen(false);
+      setEditingEventType(null);
+      setEditingTemplate(null);
     }
-    setTemplateModalOpen(false)
-    setEditingEventType(null)
-    setEditingTemplate(null)
-  }
+  };
 
   // Handler for reminder timing changes
-  const handleReminderTimingChange = async (
-    type: 'pickup' | 'return',
-    hours: number
-  ) => {
-    if (type === 'pickup') {
-      setPickupReminderHours(hours)
+  const handleReminderTimingChange = async (type: "pickup" | "return", hours: number) => {
+    if (type === "pickup") {
+      setPickupReminderHours(hours);
     } else {
-      setReturnReminderHours(hours)
+      setReturnReminderHours(hours);
     }
 
-    setSavingReminderSettings(true)
-    const result = await updateReminderSettings({
-      pickupReminderHours: type === 'pickup' ? hours : pickupReminderHours,
-      returnReminderHours: type === 'return' ? hours : returnReminderHours,
-    })
-
-    if (result.error) {
-      toastManager.add({ title: t('saveError'), type: 'error' })
-    } else {
-      toastManager.add({ title: t('saved'), type: 'success' })
+    try {
+      await updateReminderSettingsMutation.mutateAsync({
+        pickupReminderHours: type === "pickup" ? hours : pickupReminderHours,
+        returnReminderHours: type === "return" ? hours : returnReminderHours,
+      });
+      toastManager.add({ title: t("saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("saveError"), type: "error" });
     }
-    setSavingReminderSettings(false)
-  }
+  };
 
   // Persist admin reminder settings. Any field not being changed is resolved
-  // from current state, so the server action always gets a complete payload.
+  // from current state, so the procedure always gets a complete payload.
   const persistAdminReminderSettings = async (overrides: {
-    pickupReminderHours?: number
-    returnReminderHours?: number
-    mode?: AdminReminderMode
-    digestHour?: number
+    pickupReminderHours?: number;
+    returnReminderHours?: number;
+    mode?: AdminReminderMode;
+    digestHour?: number;
   }) => {
-    setSavingAdminReminderSettings(true)
-    const result = await updateAdminReminderSettings({
-      pickupReminderHours: overrides.pickupReminderHours ?? adminPickupReminderHours,
-      returnReminderHours: overrides.returnReminderHours ?? adminReturnReminderHours,
-      mode: overrides.mode ?? adminReminderMode,
-      digestHour: overrides.digestHour ?? adminDigestHour,
-    })
-    if (result.error) {
-      toastManager.add({ title: t('saveError'), type: 'error' })
-    } else {
-      toastManager.add({ title: t('saved'), type: 'success' })
+    try {
+      await updateAdminReminderSettingsMutation.mutateAsync({
+        pickupReminderHours: overrides.pickupReminderHours ?? adminPickupReminderHours,
+        returnReminderHours: overrides.returnReminderHours ?? adminReturnReminderHours,
+        mode: overrides.mode ?? adminReminderMode,
+        digestHour: overrides.digestHour ?? adminDigestHour,
+      });
+      toastManager.add({ title: t("saved"), type: "success" });
+    } catch {
+      toastManager.add({ title: t("saveError"), type: "error" });
     }
-    setSavingAdminReminderSettings(false)
-  }
+  };
 
-  const handleAdminReminderTimingChange = (type: 'pickup' | 'return', hours: number) => {
-    if (type === 'pickup') {
-      setAdminPickupReminderHours(hours)
-      void persistAdminReminderSettings({ pickupReminderHours: hours })
+  const handleAdminReminderTimingChange = (type: "pickup" | "return", hours: number) => {
+    if (type === "pickup") {
+      setAdminPickupReminderHours(hours);
+      void persistAdminReminderSettings({ pickupReminderHours: hours });
     } else {
-      setAdminReturnReminderHours(hours)
-      void persistAdminReminderSettings({ returnReminderHours: hours })
+      setAdminReturnReminderHours(hours);
+      void persistAdminReminderSettings({ returnReminderHours: hours });
     }
-  }
+  };
 
   const handleAdminModeChange = (mode: AdminReminderMode) => {
-    setAdminReminderMode(mode)
-    void persistAdminReminderSettings({ mode })
-  }
+    setAdminReminderMode(mode);
+    void persistAdminReminderSettings({ mode });
+  };
 
   const handleAdminDigestHourChange = (hour: number) => {
-    setAdminDigestHour(hour)
-    void persistAdminReminderSettings({ digestHour: hour })
-  }
+    setAdminDigestHour(hour);
+    void persistAdminReminderSettings({ digestHour: hour });
+  };
 
-  const reservationEvents = NOTIFICATION_EVENTS.filter((e) => e.category === 'reservation')
-  const adminReminderEvents = NOTIFICATION_EVENTS.filter((e) => e.category === 'reminder')
-  const paymentEvents = NOTIFICATION_EVENTS.filter((e) => e.category === 'payment')
+  const reservationEvents = NOTIFICATION_EVENTS.filter((e) => e.category === "reservation");
+  const adminReminderEvents = NOTIFICATION_EVENTS.filter((e) => e.category === "reminder");
+  const paymentEvents = NOTIFICATION_EVENTS.filter((e) => e.category === "payment");
   const customerReservationEvents = CUSTOMER_NOTIFICATION_EVENTS.filter(
-    (e) => e.category === 'reservation'
-  )
+    (e) => e.category === "reservation",
+  );
   const customerReminderEvents = CUSTOMER_NOTIFICATION_EVENTS.filter(
-    (e) => e.category === 'reminder'
-  )
+    (e) => e.category === "reminder",
+  );
 
   return (
     <TooltipProvider>
@@ -399,15 +401,13 @@ export function NotificationsForm({
         {/* ADMIN NOTIFICATIONS SECTION */}
         {/* ================================================================ */}
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Bell className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold">{t('adminSection.title')}</h2>
-              <p className="text-sm text-muted-foreground">{t('adminSection.description')}</p>
-            </div>
+          <div className="space-y-1">
+            <h2 className="text-base font-semibold">{t("adminSection.title")}</h2>
+            <p className="text-sm text-muted-foreground">{t("adminSection.description")}</p>
           </div>
+
+          {/* Push notifications for this device */}
+          <PushManageCard />
 
           {/* Phone & Discord Cards - Side by side on large screens */}
           <div className="grid gap-6 lg:grid-cols-2">
@@ -415,65 +415,81 @@ export function NotificationsForm({
             <Card className="flex flex-col">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-500/10 text-blue-500">
-                    <Phone className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-sm font-medium">{t('phone.title')}</CardTitle>
-                    <CardDescription className="text-xs">{t('phone.description')}</CardDescription>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="flex items-center gap-2">
+                      <MobileIcon className="shrink-0" />
+                      {t("phone.title")}
+                    </CardTitle>
+                    <CardDescription>{t("phone.description")}</CardDescription>
                   </div>
                   {isSmsConfigured && (
-                    <span className="text-xs text-green-600 flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      {t('phone.configured')}
-                    </span>
+                    <Badge variant="success" size="sm">
+                      <SuccessSolidIcon className="h-3 w-3" />
+                      {t("phone.configured")}
+                    </Badge>
                   )}
                 </div>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
                 <div className="flex gap-2 items-start">
                   <PhoneInput
-                    placeholder={t('phone.placeholder')}
+                    placeholder={t("phone.placeholder")}
                     value={ownerPhone}
                     onChange={setOwnerPhone}
                     className="flex-1"
                   />
-                  <Button onClick={handleSavePhone} disabled={savingPhone}>
-                    {savingPhone ? <Loader2 className="h-4 w-4 animate-spin" /> : tc('save')}
+                  <Button onClick={handleSavePhone} isPending={updateOwnerPhoneMutation.isPending}>
+                    {tc("save")}
                   </Button>
                 </div>
 
                 {/* SMS Quota Section */}
                 <div className="mt-4 pt-4 border-t flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-medium text-muted-foreground">{t('sms.quotaLabel')}</span>
-                    <Button variant="ghost" className="h-7 text-xs" render={<Link href="/dashboard/sms" />}>
-                        {t('sms.manage')}
-                        <ExternalLink className="ml-1 h-3 w-3" />
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {t("sms.quotaLabel")}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      className="h-7 text-xs"
+                      render={<Link href="/dashboard/sms" />}
+                    >
+                      {t("sms.manage")}
+                      <ExternalLinkIcon className="ml-1 h-3 w-3" />
                     </Button>
                   </div>
                   {smsLimitReached ? (
-                    <div className="rounded-lg border border-destructive/50 bg-destructive/10 p-3">
-                      <div className="flex items-center gap-2 text-destructive">
-                        <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-                        <span className="text-sm font-medium">{t('sms.noCreditsLeft')}</span>
-                      </div>
-                      <p className="mt-1 text-xs text-destructive/80">{t('sms.noCreditsDescription')}</p>
-                      <Button variant="destructive" className="mt-2 w-full" render={<Link href="/dashboard/sms" />}>
-                        {t('sms.buyCredits')}
-                      </Button>
-                    </div>
+                    <Alert variant="error">
+                      <WarningIcon className="h-4 w-4" />
+                      <AlertTitle>{t("sms.noCreditsLeft")}</AlertTitle>
+                      <AlertDescription>
+                        <p>{t("sms.noCreditsDescription")}</p>
+                        <Button
+                          variant="destructive"
+                          className="w-full"
+                          render={<Link href="/dashboard/sms" />}
+                        >
+                          {t("sms.buyCredits")}
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
                   ) : (
                     <div className="rounded-lg border bg-muted/30 p-3">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold">{smsQuota.totalAvailable - smsQuota.current}</span>
-                        <span className="text-sm text-muted-foreground">/ {smsQuota.totalAvailable}</span>
-                        <span className="text-xs text-muted-foreground ml-1">{t('sms.remaining')}</span>
+                        <span className="text-2xl font-bold">
+                          {smsQuota.totalAvailable - smsQuota.current}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          / {smsQuota.totalAvailable}
+                        </span>
+                        <span className="text-xs text-muted-foreground ml-1">
+                          {t("sms.remaining")}
+                        </span>
                       </div>
                       {smsLow && (
-                        <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
-                          <AlertTriangle className="h-3 w-3" />
-                          {t('sms.lowWarning')}
+                        <p className="mt-1 text-xs text-warning flex items-center gap-1">
+                          <WarningIcon className="h-3 w-3" />
+                          {t("sms.lowWarning")}
                         </p>
                       )}
                     </div>
@@ -486,18 +502,18 @@ export function NotificationsForm({
             <Card className="flex flex-col">
               <CardHeader className="pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-500">
-                    <MessageSquare className="h-4 w-4" />
-                  </div>
-                  <div className="flex-1">
-                    <CardTitle className="text-sm font-medium">{t('discord.title')}</CardTitle>
-                    <CardDescription className="text-xs">{t('discord.description')}</CardDescription>
+                  <div className="min-w-0 flex-1">
+                    <CardTitle className="flex items-center gap-2">
+                      <ChatIcon className="shrink-0" />
+                      {t("discord.title")}
+                    </CardTitle>
+                    <CardDescription>{t("discord.description")}</CardDescription>
                   </div>
                   {isDiscordConnected && (
-                    <span className="text-xs text-green-600 flex items-center gap-1">
-                      <CheckCircle2 className="h-3 w-3" />
-                      {t('discord.connected')}
-                    </span>
+                    <Badge variant="success" size="sm">
+                      <SuccessSolidIcon className="h-3 w-3" />
+                      {t("discord.connected")}
+                    </Badge>
                   )}
                 </div>
               </CardHeader>
@@ -506,26 +522,26 @@ export function NotificationsForm({
                   <div className="flex gap-2">
                     <Input
                       type="url"
-                      placeholder={t('discord.placeholder')}
+                      placeholder={t("discord.placeholder")}
                       value={discordWebhookUrl}
                       onChange={(e) => setDiscordWebhookUrl(e.target.value)}
                       className="flex-1 text-sm"
                     />
-                    <Button onClick={handleSaveWebhook} disabled={savingWebhook}>
-                      {savingWebhook ? <Loader2 className="h-4 w-4 animate-spin" /> : tc('save')}
+                    <Button
+                      onClick={handleSaveWebhook}
+                      isPending={updateDiscordWebhookMutation.isPending}
+                    >
+                      {tc("save")}
                     </Button>
                   </div>
                   {isDiscordConnected && (
                     <Button
                       variant="outline"
                       onClick={handleTestDiscord}
-                      disabled={testingDiscord}
+                      isPending={testDiscordWebhookMutation.isPending}
                       className="w-full"
                     >
-                      {testingDiscord ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
-                      {t('discord.test')}
+                      {t("discord.test")}
                     </Button>
                   )}
                   <a
@@ -534,8 +550,8 @@ export function NotificationsForm({
                     rel="noopener noreferrer"
                     className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1"
                   >
-                    {t('discord.howTo')}
-                    <ExternalLink className="h-3 w-3" />
+                    {t("discord.howTo")}
+                    <ExternalLinkIcon className="h-3 w-3" />
                   </a>
                 </div>
               </CardContent>
@@ -545,12 +561,15 @@ export function NotificationsForm({
           {/* Admin Reservation Events */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">{t('events.reservation.title')}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <CalendarCheckIcon className="shrink-0" />
+                {t("events.reservation.title")}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
                 <div className="flex items-center justify-between py-2 text-xs text-muted-foreground border-b">
-                  <span>{t('events.event')}</span>
+                  <span>{t("events.event")}</span>
                   <div className="flex items-center gap-6">
                     <span className="w-10 text-center">Email</span>
                     <span className="w-10 text-center">SMS</span>
@@ -568,14 +587,14 @@ export function NotificationsForm({
                     smsDisabled={!isSmsConfigured || smsLimitReached}
                     smsTooltip={
                       !isSmsConfigured
-                        ? t('phone.required')
+                        ? t("phone.required")
                         : smsLimitReached
-                          ? t('sms.limitReached')
+                          ? t("sms.limitReached")
                           : undefined
                     }
                     discordDisabled={!isDiscordConnected}
-                    discordTooltip={!isDiscordConnected ? t('discord.required') : undefined}
-                    isPending={isPending}
+                    discordTooltip={!isDiscordConnected ? t("discord.required") : undefined}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -585,12 +604,15 @@ export function NotificationsForm({
           {/* Admin Payment Events */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">{t('events.payment.title')}</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <FastPaymentIcon className="shrink-0" />
+                {t("events.payment.title")}
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
                 <div className="flex items-center justify-between py-2 text-xs text-muted-foreground border-b">
-                  <span>{t('events.event')}</span>
+                  <span>{t("events.event")}</span>
                   <div className="flex items-center gap-6">
                     <span className="w-10 text-center">Email</span>
                     <span className="w-10 text-center">SMS</span>
@@ -608,14 +630,14 @@ export function NotificationsForm({
                     smsDisabled={!isSmsConfigured || smsLimitReached}
                     smsTooltip={
                       !isSmsConfigured
-                        ? t('phone.required')
+                        ? t("phone.required")
                         : smsLimitReached
-                          ? t('sms.limitReached')
+                          ? t("sms.limitReached")
                           : undefined
                     }
                     discordDisabled={!isDiscordConnected}
-                    discordTooltip={!isDiscordConnected ? t('discord.required') : undefined}
-                    isPending={isPending}
+                    discordTooltip={!isDiscordConnected ? t("discord.required") : undefined}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -625,122 +647,157 @@ export function NotificationsForm({
           {/* Admin Reminders */}
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-sm font-medium">
-                  {t('events.reminder.title')}
-                </CardTitle>
-              </div>
-              <CardDescription className="text-xs">
-                {t('events.reminder.description')}
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <ClockIcon className="shrink-0" />
+                {t("events.reminder.title")}
+              </CardTitle>
+              <CardDescription>{t("events.reminder.description")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Delivery mode: per-reservation reminders vs. a daily digest */}
               <div className="space-y-2 sm:max-w-sm">
-                <label className="text-sm font-medium">{t('adminReminderMode.label')}</label>
+                <label className="text-sm font-medium">{t("adminReminderMode.label")}</label>
                 <Select
                   value={adminReminderMode}
                   onValueChange={(value) => {
-                    if (value === 'per_reservation' || value === 'daily_digest')
-                      handleAdminModeChange(value)
+                    if (value === "per_reservation" || value === "daily_digest")
+                      handleAdminModeChange(value);
                   }}
-                  disabled={savingAdminReminderSettings}
+                  disabled={updateAdminReminderSettingsMutation.isPending}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue>{t(`adminReminderMode.${adminReminderMode}`)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent alignItemWithTrigger={false}>
-                    <SelectItem value="per_reservation" label={t('adminReminderMode.per_reservation')}>{t('adminReminderMode.per_reservation')}</SelectItem>
-                    <SelectItem value="daily_digest" label={t('adminReminderMode.daily_digest')}>{t('adminReminderMode.daily_digest')}</SelectItem>
+                    <SelectItem
+                      value="per_reservation"
+                      label={t("adminReminderMode.per_reservation")}
+                    >
+                      {t("adminReminderMode.per_reservation")}
+                    </SelectItem>
+                    <SelectItem value="daily_digest" label={t("adminReminderMode.daily_digest")}>
+                      {t("adminReminderMode.daily_digest")}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs text-muted-foreground">
-                  {adminReminderMode === 'daily_digest'
-                    ? t('adminReminderMode.daily_digestDescription')
-                    : t('adminReminderMode.per_reservationDescription')}
+                  {adminReminderMode === "daily_digest"
+                    ? t("adminReminderMode.daily_digestDescription")
+                    : t("adminReminderMode.per_reservationDescription")}
                 </p>
               </div>
 
               {/* Timing: per-reservation lead times, or the daily digest send time */}
-              {adminReminderMode === 'per_reservation' ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {t('adminReminderTiming.pickupLabel')}
-                  </label>
-                  <Select
-                    value={adminPickupReminderHours.toString()}
-                    onValueChange={(value) => {
-                      if (value !== null)
-                        handleAdminReminderTimingChange('pickup', parseInt(value, 10))
-                    }}
-                    disabled={savingAdminReminderSettings}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {t('reminderTiming.hours', { count: adminPickupReminderHours })}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent alignItemWithTrigger={false}>
-                      <SelectItem value="1" label={t('reminderTiming.hours', { count: 1 })}>{t('reminderTiming.hours', { count: 1 })}</SelectItem>
-                      <SelectItem value="2" label={t('reminderTiming.hours', { count: 2 })}>{t('reminderTiming.hours', { count: 2 })}</SelectItem>
-                      <SelectItem value="4" label={t('reminderTiming.hours', { count: 4 })}>{t('reminderTiming.hours', { count: 4 })}</SelectItem>
-                      <SelectItem value="6" label={t('reminderTiming.hours', { count: 6 })}>{t('reminderTiming.hours', { count: 6 })}</SelectItem>
-                      <SelectItem value="12" label={t('reminderTiming.hours', { count: 12 })}>{t('reminderTiming.hours', { count: 12 })}</SelectItem>
-                      <SelectItem value="24" label={t('reminderTiming.hours', { count: 24 })}>{t('reminderTiming.hours', { count: 24 })}</SelectItem>
-                      <SelectItem value="48" label={t('reminderTiming.hours', { count: 48 })}>{t('reminderTiming.hours', { count: 48 })}</SelectItem>
-                      <SelectItem value="72" label={t('reminderTiming.hours', { count: 72 })}>{t('reminderTiming.hours', { count: 72 })}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {t('adminReminderTiming.pickupDescription')}
-                  </p>
+              {adminReminderMode === "per_reservation" ? (
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      {t("adminReminderTiming.pickupLabel")}
+                    </label>
+                    <Select
+                      value={adminPickupReminderHours.toString()}
+                      onValueChange={(value) => {
+                        if (value !== null)
+                          handleAdminReminderTimingChange("pickup", parseInt(value, 10));
+                      }}
+                      disabled={updateAdminReminderSettingsMutation.isPending}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue>
+                          {t("reminderTiming.hours", { count: adminPickupReminderHours })}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent alignItemWithTrigger={false}>
+                        <SelectItem value="1" label={t("reminderTiming.hours", { count: 1 })}>
+                          {t("reminderTiming.hours", { count: 1 })}
+                        </SelectItem>
+                        <SelectItem value="2" label={t("reminderTiming.hours", { count: 2 })}>
+                          {t("reminderTiming.hours", { count: 2 })}
+                        </SelectItem>
+                        <SelectItem value="4" label={t("reminderTiming.hours", { count: 4 })}>
+                          {t("reminderTiming.hours", { count: 4 })}
+                        </SelectItem>
+                        <SelectItem value="6" label={t("reminderTiming.hours", { count: 6 })}>
+                          {t("reminderTiming.hours", { count: 6 })}
+                        </SelectItem>
+                        <SelectItem value="12" label={t("reminderTiming.hours", { count: 12 })}>
+                          {t("reminderTiming.hours", { count: 12 })}
+                        </SelectItem>
+                        <SelectItem value="24" label={t("reminderTiming.hours", { count: 24 })}>
+                          {t("reminderTiming.hours", { count: 24 })}
+                        </SelectItem>
+                        <SelectItem value="48" label={t("reminderTiming.hours", { count: 48 })}>
+                          {t("reminderTiming.hours", { count: 48 })}
+                        </SelectItem>
+                        <SelectItem value="72" label={t("reminderTiming.hours", { count: 72 })}>
+                          {t("reminderTiming.hours", { count: 72 })}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {t("adminReminderTiming.pickupDescription")}
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      {t("adminReminderTiming.returnLabel")}
+                    </label>
+                    <Select
+                      value={adminReturnReminderHours.toString()}
+                      onValueChange={(value) => {
+                        if (value !== null)
+                          handleAdminReminderTimingChange("return", parseInt(value, 10));
+                      }}
+                      disabled={updateAdminReminderSettingsMutation.isPending}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue>
+                          {t("reminderTiming.hours", { count: adminReturnReminderHours })}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent alignItemWithTrigger={false}>
+                        <SelectItem value="1" label={t("reminderTiming.hours", { count: 1 })}>
+                          {t("reminderTiming.hours", { count: 1 })}
+                        </SelectItem>
+                        <SelectItem value="2" label={t("reminderTiming.hours", { count: 2 })}>
+                          {t("reminderTiming.hours", { count: 2 })}
+                        </SelectItem>
+                        <SelectItem value="4" label={t("reminderTiming.hours", { count: 4 })}>
+                          {t("reminderTiming.hours", { count: 4 })}
+                        </SelectItem>
+                        <SelectItem value="6" label={t("reminderTiming.hours", { count: 6 })}>
+                          {t("reminderTiming.hours", { count: 6 })}
+                        </SelectItem>
+                        <SelectItem value="12" label={t("reminderTiming.hours", { count: 12 })}>
+                          {t("reminderTiming.hours", { count: 12 })}
+                        </SelectItem>
+                        <SelectItem value="24" label={t("reminderTiming.hours", { count: 24 })}>
+                          {t("reminderTiming.hours", { count: 24 })}
+                        </SelectItem>
+                        <SelectItem value="48" label={t("reminderTiming.hours", { count: 48 })}>
+                          {t("reminderTiming.hours", { count: 48 })}
+                        </SelectItem>
+                        <SelectItem value="72" label={t("reminderTiming.hours", { count: 72 })}>
+                          {t("reminderTiming.hours", { count: 72 })}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      {t("adminReminderTiming.returnDescription")}
+                    </p>
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {t('adminReminderTiming.returnLabel')}
-                  </label>
-                  <Select
-                    value={adminReturnReminderHours.toString()}
-                    onValueChange={(value) => {
-                      if (value !== null)
-                        handleAdminReminderTimingChange('return', parseInt(value, 10))
-                    }}
-                    disabled={savingAdminReminderSettings}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue>
-                        {t('reminderTiming.hours', { count: adminReturnReminderHours })}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent alignItemWithTrigger={false}>
-                      <SelectItem value="1" label={t('reminderTiming.hours', { count: 1 })}>{t('reminderTiming.hours', { count: 1 })}</SelectItem>
-                      <SelectItem value="2" label={t('reminderTiming.hours', { count: 2 })}>{t('reminderTiming.hours', { count: 2 })}</SelectItem>
-                      <SelectItem value="4" label={t('reminderTiming.hours', { count: 4 })}>{t('reminderTiming.hours', { count: 4 })}</SelectItem>
-                      <SelectItem value="6" label={t('reminderTiming.hours', { count: 6 })}>{t('reminderTiming.hours', { count: 6 })}</SelectItem>
-                      <SelectItem value="12" label={t('reminderTiming.hours', { count: 12 })}>{t('reminderTiming.hours', { count: 12 })}</SelectItem>
-                      <SelectItem value="24" label={t('reminderTiming.hours', { count: 24 })}>{t('reminderTiming.hours', { count: 24 })}</SelectItem>
-                      <SelectItem value="48" label={t('reminderTiming.hours', { count: 48 })}>{t('reminderTiming.hours', { count: 48 })}</SelectItem>
-                      <SelectItem value="72" label={t('reminderTiming.hours', { count: 72 })}>{t('reminderTiming.hours', { count: 72 })}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">
-                    {t('adminReminderTiming.returnDescription')}
-                  </p>
-                </div>
-              </div>
               ) : (
                 <div className="space-y-2 sm:max-w-sm">
                   <label className="text-sm font-medium">
-                    {t('adminReminderMode.digestTimeLabel')}
+                    {t("adminReminderMode.digestTimeLabel")}
                   </label>
                   <Select
                     value={String(adminDigestHour)}
                     onValueChange={(value) => {
-                      if (value !== null) handleAdminDigestHourChange(parseInt(value, 10))
+                      if (value !== null) handleAdminDigestHourChange(parseInt(value, 10));
                     }}
-                    disabled={savingAdminReminderSettings}
+                    disabled={updateAdminReminderSettingsMutation.isPending}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue>{formatHour(adminDigestHour)}</SelectValue>
@@ -754,7 +811,7 @@ export function NotificationsForm({
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {t('adminReminderMode.digestTimeDescription')}
+                    {t("adminReminderMode.digestTimeDescription")}
                   </p>
                 </div>
               )}
@@ -764,7 +821,7 @@ export function NotificationsForm({
               {/* Reminder Channel Configuration */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between py-2 text-xs text-muted-foreground border-b">
-                  <span>{t('events.event')}</span>
+                  <span>{t("events.event")}</span>
                   <div className="flex items-center gap-6">
                     <span className="w-10 text-center">Email</span>
                     <span className="w-10 text-center">SMS</span>
@@ -782,14 +839,14 @@ export function NotificationsForm({
                     smsDisabled={!isSmsConfigured || smsLimitReached}
                     smsTooltip={
                       !isSmsConfigured
-                        ? t('phone.required')
+                        ? t("phone.required")
                         : smsLimitReached
-                          ? t('sms.limitReached')
+                          ? t("sms.limitReached")
                           : undefined
                     }
                     discordDisabled={!isDiscordConnected}
-                    discordTooltip={!isDiscordConnected ? t('discord.required') : undefined}
-                    isPending={isPending}
+                    discordTooltip={!isDiscordConnected ? t("discord.required") : undefined}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -803,15 +860,12 @@ export function NotificationsForm({
         {/* CUSTOMER NOTIFICATIONS SECTION */}
         {/* ================================================================ */}
         <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/10 text-green-600">
-              <Users className="h-5 w-5" />
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 space-y-1">
+              <h2 className="text-base font-semibold">{t("customerSection.title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("customerSection.description")}</p>
             </div>
-            <div className="flex-1">
-              <h2 className="text-lg font-semibold">{t('customerSection.title')}</h2>
-              <p className="text-sm text-muted-foreground">{t('customerSection.description')}</p>
-            </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2.5 py-1.5 rounded-md">
+            <div className="flex shrink-0 items-center gap-1.5 text-xs text-muted-foreground bg-muted px-2.5 py-1.5 rounded-md">
               <Globe className="h-3.5 w-3.5" />
               <span>{storeLanguageName}</span>
             </div>
@@ -820,14 +874,15 @@ export function NotificationsForm({
           {/* Customer Reservation Events */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">
-                {t('customerEvents.reservationTitle')}
+              <CardTitle className="flex items-center gap-2">
+                <CalendarCheckIcon className="shrink-0" />
+                {t("customerEvents.reservationTitle")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
                 <div className="flex items-center justify-between py-2 text-xs text-muted-foreground border-b">
-                  <span>{t('events.event')}</span>
+                  <span>{t("events.event")}</span>
                   <div className="flex items-center gap-4">
                     <span className="w-10 text-center">Email</span>
                     <span className="w-10 text-center">SMS</span>
@@ -844,8 +899,8 @@ export function NotificationsForm({
                     onToggle={handleCustomerToggle}
                     onEditTemplate={() => handleOpenTemplateModal(event.type)}
                     smsDisabled={smsLimitReached}
-                    smsTooltip={smsLimitReached ? t('sms.limitReached') : undefined}
-                    isPending={isPending}
+                    smsTooltip={smsLimitReached ? t("sms.limitReached") : undefined}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -855,79 +910,103 @@ export function NotificationsForm({
           {/* Customer Reminder Events */}
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <CardTitle className="text-sm font-medium">
-                  {t('customerEvents.reminderTitle')}
-                </CardTitle>
-              </div>
-              <CardDescription className="text-xs">
-                {t('customerEvents.reminderDescription')}
-              </CardDescription>
+              <CardTitle className="flex items-center gap-2">
+                <ClockIcon className="shrink-0" />
+                {t("customerEvents.reminderTitle")}
+              </CardTitle>
+              <CardDescription>{t("customerEvents.reminderDescription")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Reminder Timing Configuration */}
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {t('reminderTiming.pickupLabel')}
-                  </label>
+                  <label className="text-sm font-medium">{t("reminderTiming.pickupLabel")}</label>
                   <Select
                     value={pickupReminderHours.toString()}
                     onValueChange={(value) => {
-                      if (value !== null) handleReminderTimingChange('pickup', parseInt(value, 10))
+                      if (value !== null) handleReminderTimingChange("pickup", parseInt(value, 10));
                     }}
-                    disabled={savingReminderSettings}
+                    disabled={updateReminderSettingsMutation.isPending}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue>
-                        {t('reminderTiming.hours', { count: pickupReminderHours })}
+                        {t("reminderTiming.hours", { count: pickupReminderHours })}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent alignItemWithTrigger={false}>
-                      <SelectItem value="1" label={t('reminderTiming.hours', { count: 1 })}>{t('reminderTiming.hours', { count: 1 })}</SelectItem>
-                      <SelectItem value="2" label={t('reminderTiming.hours', { count: 2 })}>{t('reminderTiming.hours', { count: 2 })}</SelectItem>
-                      <SelectItem value="4" label={t('reminderTiming.hours', { count: 4 })}>{t('reminderTiming.hours', { count: 4 })}</SelectItem>
-                      <SelectItem value="6" label={t('reminderTiming.hours', { count: 6 })}>{t('reminderTiming.hours', { count: 6 })}</SelectItem>
-                      <SelectItem value="12" label={t('reminderTiming.hours', { count: 12 })}>{t('reminderTiming.hours', { count: 12 })}</SelectItem>
-                      <SelectItem value="24" label={t('reminderTiming.hours', { count: 24 })}>{t('reminderTiming.hours', { count: 24 })}</SelectItem>
-                      <SelectItem value="48" label={t('reminderTiming.hours', { count: 48 })}>{t('reminderTiming.hours', { count: 48 })}</SelectItem>
-                      <SelectItem value="72" label={t('reminderTiming.hours', { count: 72 })}>{t('reminderTiming.hours', { count: 72 })}</SelectItem>
+                      <SelectItem value="1" label={t("reminderTiming.hours", { count: 1 })}>
+                        {t("reminderTiming.hours", { count: 1 })}
+                      </SelectItem>
+                      <SelectItem value="2" label={t("reminderTiming.hours", { count: 2 })}>
+                        {t("reminderTiming.hours", { count: 2 })}
+                      </SelectItem>
+                      <SelectItem value="4" label={t("reminderTiming.hours", { count: 4 })}>
+                        {t("reminderTiming.hours", { count: 4 })}
+                      </SelectItem>
+                      <SelectItem value="6" label={t("reminderTiming.hours", { count: 6 })}>
+                        {t("reminderTiming.hours", { count: 6 })}
+                      </SelectItem>
+                      <SelectItem value="12" label={t("reminderTiming.hours", { count: 12 })}>
+                        {t("reminderTiming.hours", { count: 12 })}
+                      </SelectItem>
+                      <SelectItem value="24" label={t("reminderTiming.hours", { count: 24 })}>
+                        {t("reminderTiming.hours", { count: 24 })}
+                      </SelectItem>
+                      <SelectItem value="48" label={t("reminderTiming.hours", { count: 48 })}>
+                        {t("reminderTiming.hours", { count: 48 })}
+                      </SelectItem>
+                      <SelectItem value="72" label={t("reminderTiming.hours", { count: 72 })}>
+                        {t("reminderTiming.hours", { count: 72 })}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {t('reminderTiming.pickupDescription')}
+                    {t("reminderTiming.pickupDescription")}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
-                    {t('reminderTiming.returnLabel')}
-                  </label>
+                  <label className="text-sm font-medium">{t("reminderTiming.returnLabel")}</label>
                   <Select
                     value={returnReminderHours.toString()}
                     onValueChange={(value) => {
-                      if (value !== null) handleReminderTimingChange('return', parseInt(value, 10))
+                      if (value !== null) handleReminderTimingChange("return", parseInt(value, 10));
                     }}
-                    disabled={savingReminderSettings}
+                    disabled={updateReminderSettingsMutation.isPending}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue>
-                        {t('reminderTiming.hours', { count: returnReminderHours })}
+                        {t("reminderTiming.hours", { count: returnReminderHours })}
                       </SelectValue>
                     </SelectTrigger>
                     <SelectContent alignItemWithTrigger={false}>
-                      <SelectItem value="1" label={t('reminderTiming.hours', { count: 1 })}>{t('reminderTiming.hours', { count: 1 })}</SelectItem>
-                      <SelectItem value="2" label={t('reminderTiming.hours', { count: 2 })}>{t('reminderTiming.hours', { count: 2 })}</SelectItem>
-                      <SelectItem value="4" label={t('reminderTiming.hours', { count: 4 })}>{t('reminderTiming.hours', { count: 4 })}</SelectItem>
-                      <SelectItem value="6" label={t('reminderTiming.hours', { count: 6 })}>{t('reminderTiming.hours', { count: 6 })}</SelectItem>
-                      <SelectItem value="12" label={t('reminderTiming.hours', { count: 12 })}>{t('reminderTiming.hours', { count: 12 })}</SelectItem>
-                      <SelectItem value="24" label={t('reminderTiming.hours', { count: 24 })}>{t('reminderTiming.hours', { count: 24 })}</SelectItem>
-                      <SelectItem value="48" label={t('reminderTiming.hours', { count: 48 })}>{t('reminderTiming.hours', { count: 48 })}</SelectItem>
-                      <SelectItem value="72" label={t('reminderTiming.hours', { count: 72 })}>{t('reminderTiming.hours', { count: 72 })}</SelectItem>
+                      <SelectItem value="1" label={t("reminderTiming.hours", { count: 1 })}>
+                        {t("reminderTiming.hours", { count: 1 })}
+                      </SelectItem>
+                      <SelectItem value="2" label={t("reminderTiming.hours", { count: 2 })}>
+                        {t("reminderTiming.hours", { count: 2 })}
+                      </SelectItem>
+                      <SelectItem value="4" label={t("reminderTiming.hours", { count: 4 })}>
+                        {t("reminderTiming.hours", { count: 4 })}
+                      </SelectItem>
+                      <SelectItem value="6" label={t("reminderTiming.hours", { count: 6 })}>
+                        {t("reminderTiming.hours", { count: 6 })}
+                      </SelectItem>
+                      <SelectItem value="12" label={t("reminderTiming.hours", { count: 12 })}>
+                        {t("reminderTiming.hours", { count: 12 })}
+                      </SelectItem>
+                      <SelectItem value="24" label={t("reminderTiming.hours", { count: 24 })}>
+                        {t("reminderTiming.hours", { count: 24 })}
+                      </SelectItem>
+                      <SelectItem value="48" label={t("reminderTiming.hours", { count: 48 })}>
+                        {t("reminderTiming.hours", { count: 48 })}
+                      </SelectItem>
+                      <SelectItem value="72" label={t("reminderTiming.hours", { count: 72 })}>
+                        {t("reminderTiming.hours", { count: 72 })}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <p className="text-xs text-muted-foreground">
-                    {t('reminderTiming.returnDescription')}
+                    {t("reminderTiming.returnDescription")}
                   </p>
                 </div>
               </div>
@@ -937,7 +1016,7 @@ export function NotificationsForm({
               {/* Reminder Channel Configuration */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between py-2 text-xs text-muted-foreground border-b">
-                  <span>{t('events.event')}</span>
+                  <span>{t("events.event")}</span>
                   <div className="flex items-center gap-4">
                     <span className="w-10 text-center">Email</span>
                     <span className="w-10 text-center">SMS</span>
@@ -954,8 +1033,8 @@ export function NotificationsForm({
                     onToggle={handleCustomerToggle}
                     onEditTemplate={() => handleOpenTemplateModal(event.type)}
                     smsDisabled={smsLimitReached}
-                    smsTooltip={smsLimitReached ? t('sms.limitReached') : undefined}
-                    isPending={isPending}
+                    smsTooltip={smsLimitReached ? t("sms.limitReached") : undefined}
+                    isPending={isTogglePending}
                   />
                 ))}
               </div>
@@ -965,19 +1044,19 @@ export function NotificationsForm({
 
         {/* SMS Warning */}
         {(smsLimitReached || smsLow) && (
-          <Alert variant={smsLimitReached ? 'error' : 'default'}>
-            <AlertTriangle className="h-4 w-4" />
+          <Alert variant={smsLimitReached ? "error" : "default"}>
+            <WarningIcon className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
               <span>
                 {smsLimitReached
-                  ? t('sms.limitReachedMessage')
-                  : t('sms.lowCredits', {
+                  ? t("sms.limitReachedMessage")
+                  : t("sms.lowCredits", {
                       current: smsQuota.current,
                       limit: smsQuota.limit ?? 0,
                     })}
               </span>
               <Button variant="outline" render={<Link href="/dashboard/sms" />}>
-                {t('sms.buyMore')}
+                {t("sms.buyMore")}
               </Button>
             </AlertDescription>
           </Alert>
@@ -997,31 +1076,31 @@ export function NotificationsForm({
         )}
       </div>
     </TooltipProvider>
-  )
-}
+  );
+};
 
 // ============================================================================
 // Admin Notification Row
 // ============================================================================
 
 interface NotificationRowProps {
-  eventType: NotificationEventType
-  label: string
-  description: string
-  config: { email: boolean; sms: boolean; discord: boolean }
+  eventType: NotificationEventType;
+  label: string;
+  description: string;
+  config: { email: boolean; sms: boolean; discord: boolean };
   onToggle: (
     eventType: NotificationEventType,
-    channel: 'email' | 'sms' | 'discord',
-    enabled: boolean
-  ) => void
-  smsDisabled?: boolean
-  smsTooltip?: string
-  discordDisabled?: boolean
-  discordTooltip?: string
-  isPending?: boolean
+    channel: "email" | "sms" | "discord",
+    enabled: boolean,
+  ) => void;
+  smsDisabled?: boolean;
+  smsTooltip?: string;
+  discordDisabled?: boolean;
+  discordTooltip?: string;
+  isPending?: boolean;
 }
 
-function NotificationRow({
+const NotificationRow = ({
   eventType,
   label,
   description,
@@ -1032,7 +1111,7 @@ function NotificationRow({
   discordDisabled,
   discordTooltip,
   isPending,
-}: NotificationRowProps) {
+}: NotificationRowProps) => {
   return (
     <div className="flex items-center justify-between py-2.5 border-b last:border-0">
       <div className="space-y-0.5 flex-1 min-w-0 pr-4">
@@ -1043,7 +1122,7 @@ function NotificationRow({
         <div className="w-10 flex justify-center">
           <Switch
             checked={config.email}
-            onCheckedChange={(checked) => onToggle(eventType, 'email', checked)}
+            onCheckedChange={(checked) => onToggle(eventType, "email", checked)}
             disabled={isPending}
           />
         </div>
@@ -1051,7 +1130,7 @@ function NotificationRow({
           {smsDisabled && smsTooltip ? (
             <Tooltip>
               <TooltipTrigger render={<div />}>
-                  <Switch checked={config.sms} disabled />
+                <Switch checked={config.sms} disabled />
               </TooltipTrigger>
               <TooltipContent>
                 <p>{smsTooltip}</p>
@@ -1060,7 +1139,7 @@ function NotificationRow({
           ) : (
             <Switch
               checked={config.sms}
-              onCheckedChange={(checked) => onToggle(eventType, 'sms', checked)}
+              onCheckedChange={(checked) => onToggle(eventType, "sms", checked)}
               disabled={isPending || smsDisabled}
             />
           )}
@@ -1069,7 +1148,7 @@ function NotificationRow({
           {discordDisabled && discordTooltip ? (
             <Tooltip>
               <TooltipTrigger render={<div />}>
-                  <Switch checked={config.discord} disabled />
+                <Switch checked={config.discord} disabled />
               </TooltipTrigger>
               <TooltipContent>
                 <p>{discordTooltip}</p>
@@ -1078,37 +1157,37 @@ function NotificationRow({
           ) : (
             <Switch
               checked={config.discord}
-              onCheckedChange={(checked) => onToggle(eventType, 'discord', checked)}
+              onCheckedChange={(checked) => onToggle(eventType, "discord", checked)}
               disabled={isPending || discordDisabled}
             />
           )}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 // ============================================================================
 // Customer Notification Row
 // ============================================================================
 
 interface CustomerNotificationRowProps {
-  eventType: CustomerNotificationEventType
-  label: string
-  description: string
-  config: { enabled: boolean; email: boolean; sms: boolean }
+  eventType: CustomerNotificationEventType;
+  label: string;
+  description: string;
+  config: { enabled: boolean; email: boolean; sms: boolean };
   onToggle: (
     eventType: CustomerNotificationEventType,
-    channel: 'email' | 'sms',
-    enabled: boolean
-  ) => void
-  onEditTemplate: () => void
-  smsDisabled?: boolean
-  smsTooltip?: string
-  isPending?: boolean
+    channel: "email" | "sms",
+    enabled: boolean,
+  ) => void;
+  onEditTemplate: () => void;
+  smsDisabled?: boolean;
+  smsTooltip?: string;
+  isPending?: boolean;
 }
 
-function CustomerNotificationRow({
+const CustomerNotificationRow = ({
   eventType,
   label,
   description,
@@ -1118,7 +1197,7 @@ function CustomerNotificationRow({
   smsDisabled,
   smsTooltip,
   isPending,
-}: CustomerNotificationRowProps) {
+}: CustomerNotificationRowProps) => {
   return (
     <div className="flex items-center justify-between py-2.5 border-b last:border-0">
       <div className="space-y-0.5 flex-1 min-w-0 pr-4">
@@ -1129,7 +1208,7 @@ function CustomerNotificationRow({
         <div className="w-10 flex justify-center">
           <Switch
             checked={config.email}
-            onCheckedChange={(checked) => onToggle(eventType, 'email', checked)}
+            onCheckedChange={(checked) => onToggle(eventType, "email", checked)}
             disabled={isPending}
           />
         </div>
@@ -1137,7 +1216,7 @@ function CustomerNotificationRow({
           {smsDisabled && smsTooltip ? (
             <Tooltip>
               <TooltipTrigger render={<div />}>
-                  <Switch checked={config.sms} disabled />
+                <Switch checked={config.sms} disabled />
               </TooltipTrigger>
               <TooltipContent>
                 <p>{smsTooltip}</p>
@@ -1146,7 +1225,7 @@ function CustomerNotificationRow({
           ) : (
             <Switch
               checked={config.sms}
-              onCheckedChange={(checked) => onToggle(eventType, 'sms', checked)}
+              onCheckedChange={(checked) => onToggle(eventType, "sms", checked)}
               disabled={isPending || smsDisabled}
             />
           )}
@@ -1164,5 +1243,5 @@ function CustomerNotificationRow({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

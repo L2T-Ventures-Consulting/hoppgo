@@ -1,7 +1,9 @@
-'use client';
+"use client";
 
-import { BellOff, BellRing } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { BellOff } from "lucide-react";
+
+import { BellIcon } from "@louez/ui/icons";
+import { useTranslations } from "next-intl";
 
 import {
   Button,
@@ -11,31 +13,35 @@ import {
   CardHeader,
   CardTitle,
   toastManager,
-} from '@louez/ui';
+} from "@louez/ui";
 
-import { usePushSubscription } from '@/hooks/use-push-subscription';
+import { usePushSubscription } from "@/hooks/use-push-subscription";
 
 /**
  * Manage push notifications for the current device. Lives in
  * Settings → Notifications. Hidden where push is unsupported or still loading.
  */
 export function PushManageCard() {
-  const t = useTranslations('dashboard.settings.notifications.push');
+  const t = useTranslations("dashboard.settings.notifications.push");
+  const tErrors = useTranslations("errors");
   const { state, busy, enable, disable } = usePushSubscription();
 
-  if (state === 'loading' || state === 'unsupported') return null;
+  if (state === "loading" || state === "unsupported") return null;
 
   const handleEnable = async () => {
     const ok = await enable();
-    if (!ok) return;
-    toastManager.add({ title: t('confirmTitle'), type: 'success' });
+    if (!ok) {
+      toastManager.add({ title: tErrors("generic"), type: "error" });
+      return;
+    }
+    toastManager.add({ title: t("confirmTitle"), type: "success" });
     // A real notification doubles as proof the pipeline works end to end.
     try {
       const reg = await navigator.serviceWorker.ready;
-      await reg.showNotification(t('confirmTitle'), {
-        body: t('confirmBody'),
-        icon: '/icons/icon-192.png',
-        badge: '/icons/icon-192.png',
+      await reg.showNotification(t("confirmTitle"), {
+        body: t("confirmBody"),
+        icon: "/icons/icon-192.png",
+        badge: "/icons/icon-192.png",
       });
     } catch {
       /* showNotification can be unavailable — the toast already confirmed */
@@ -44,45 +50,38 @@ export function PushManageCard() {
 
   const handleDisable = async () => {
     await disable();
-    toastManager.add({ title: t('disabledToast') });
+    toastManager.add({ title: t("disabledToast") });
   };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <BellRing className="size-4" />
-          {t('title')}
+          <BellIcon className="shrink-0" />
+          {t("title")}
         </CardTitle>
-        <CardDescription>{t('description')}</CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
-        {state === 'ios-needs-install' && (
-          <p className="text-muted-foreground text-sm">{t('iosNeedsInstall')}</p>
+        {state === "ios-needs-install" && (
+          <p className="text-muted-foreground text-sm">{t("iosNeedsInstall")}</p>
         )}
 
-        {state === 'denied' && (
-          <p className="text-muted-foreground text-sm">{t('denied')}</p>
-        )}
+        {state === "denied" && <p className="text-muted-foreground text-sm">{t("denied")}</p>}
 
-        {state === 'prompt' && (
+        {state === "prompt" && (
           <Button onClick={handleEnable} isPending={busy}>
-            <BellRing />
-            {t('enable')}
+            <BellIcon />
+            {t("enable")}
           </Button>
         )}
 
-        {state === 'subscribed' && (
+        {state === "subscribed" && (
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-success text-sm font-medium">{t('enabled')}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDisable}
-              isPending={busy}
-            >
+            <p className="text-success text-sm font-medium">{t("enabled")}</p>
+            <Button variant="outline" size="sm" onClick={handleDisable} isPending={busy}>
               <BellOff />
-              {t('disable')}
+              {t("disable")}
             </Button>
           </div>
         )}

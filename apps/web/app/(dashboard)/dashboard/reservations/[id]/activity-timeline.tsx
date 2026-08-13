@@ -1,3 +1,4 @@
+import { GlobeSolidIcon, UserPlusSolidIcon } from '@louez/ui/icons'
 import { getTranslations } from 'next-intl/server'
 
 import { formatStoreDate } from '@/lib/utils/store-date'
@@ -338,61 +339,63 @@ async function ActivityItem({
             {/* Source badge for creation events */}
             {source && (
               <Badge
-                variant="secondary"
-                className={
-                  source === 'manual'
-                    ? 'text-[10px] px-1.5 py-0 h-4 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                    : 'text-[10px] px-1.5 py-0 h-4 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                }
+                variant={source === 'manual' ? 'progress' : 'success'}
+                className="h-4 px-1.5 py-0 text-[10px]"
               >
                 {source === 'manual' ? (
                   <>
-                    <UserPlus className="h-2.5 w-2.5 mr-0.5" />
+                    <UserPlusSolidIcon className="h-2.5 w-2.5 mr-0.5" />
                     {t('sourceManual')}
                   </>
                 ) : (
                   <>
-                    <Globe className="h-2.5 w-2.5 mr-0.5" />
+                    <GlobeSolidIcon className="h-2.5 w-2.5 mr-0.5" />
                     {t('sourceOnline')}
                   </>
                 )}
               </Badge>
             )}
             {/* Stripe badge for online payment activities */}
-            {(activityType === 'payment_received' || activityType === 'payment_initiated' || activityType === 'payment_failed' || activityType === 'payment_expired') && isStripePayment && (
-              <Badge
-                variant="secondary"
-                className="text-[10px] px-1.5 py-0 h-4 bg-[#635BFF]/10 text-[#635BFF] border-0"
-              >
-                Stripe
-              </Badge>
-            )}
+            {(activityType === 'payment_received' ||
+              activityType === 'payment_initiated' ||
+              activityType === 'payment_failed' ||
+              activityType === 'payment_expired') &&
+              isStripePayment && (
+                <Badge variant="submitted" className="text-[10px] px-1.5 py-0 h-4 border-0">
+                  Stripe
+                </Badge>
+              )}
             {/* Payment amount badge */}
-            {paymentAmount && (activityType === 'payment_received' || activityType === 'payment_initiated' || activityType === 'payment_failed' || activityType === 'payment_expired') && (
-              <Badge
-                variant="secondary"
-                className={`text-[10px] px-1.5 py-0 h-4 font-mono ${
-                  activityType === 'payment_received'
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                    : activityType === 'payment_failed' || activityType === 'payment_expired'
-                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                }`}
-              >
-                {activityType === 'payment_received' ? '+' : ''}{paymentAmount.toFixed(2)} {paymentCurrency}
-              </Badge>
-            )}
+            {paymentAmount &&
+              (activityType === 'payment_received' ||
+                activityType === 'payment_initiated' ||
+                activityType === 'payment_failed' ||
+                activityType === 'payment_expired') && (
+                <Badge
+                  variant={
+                    activityType === 'payment_received'
+                      ? 'success'
+                      : activityType === 'payment_failed' || activityType === 'payment_expired'
+                        ? 'failed'
+                        : 'progress'
+                  }
+                  className="h-4 px-1.5 py-0 font-mono text-[10px]"
+                >
+                  {activityType === 'payment_received' ? '+' : ''}
+                  {paymentAmount.toFixed(2)} {paymentCurrency}
+                </Badge>
+              )}
             {/* Modified amount badge */}
             {activityType === 'modified' && metadata?.difference !== undefined && (
               <Badge
-                variant="secondary"
-                className={`text-[10px] px-1.5 py-0 h-4 font-mono ${
+                variant={
                   (metadata.difference as number) > 0
-                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                    ? 'success'
                     : (metadata.difference as number) < 0
-                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                    : 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400'
-                }`}
+                      ? 'failed'
+                      : 'expired'
+                }
+                className="h-4 px-1.5 py-0 font-mono text-[10px]"
               >
                 {(metadata.difference as number) >= 0 ? '+' : ''}{(metadata.difference as number).toFixed(2)} EUR
               </Badge>

@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { CheckSolidIcon, SparklesSolidIcon } from '@louez/ui/icons'
+
+import { useEffect, useState } from 'react'
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -150,7 +152,7 @@ export function SubscriptionManagement({
   useEffect(() => {
     if (showSuccess || showCanceled) {
       const timeout = setTimeout(() => {
-        router.replace('/dashboard/subscription');
+        router.replace('/dashboard/settings/subscription');
       }, 5000);
       return () => clearTimeout(timeout);
     }
@@ -227,15 +229,15 @@ export function SubscriptionManagement({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="success">{t('status.active')}</Badge>;
+        return <Badge variant="success">{t('status.active')}</Badge>
       case 'trialing':
-        return <Badge variant="secondary">{t('status.trialing')}</Badge>;
+        return <Badge variant="progress">{t('status.trialing')}</Badge>
       case 'past_due':
-        return <Badge variant="error">{t('status.pastDue')}</Badge>;
+        return <Badge variant="failed">{t('status.pastDue')}</Badge>
       case 'cancelled':
-        return <Badge variant="outline">{t('status.cancelled')}</Badge>;
+        return <Badge variant="expired">{t('status.cancelled')}</Badge>
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return <Badge variant="expired">{status}</Badge>;
     }
   };
 
@@ -348,7 +350,7 @@ export function SubscriptionManagement({
       {/* Pay-as-you-go store here only to pick a subscription plan. */}
       {showBackToPayAsYouGo && (
         <Link
-          href="/dashboard/subscription"
+          href="/dashboard/settings/subscription"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           <ChevronRight className="h-4 w-4 rotate-180" />
@@ -619,7 +621,9 @@ export function SubscriptionManagement({
               pendingBillingMode !== 'pay_as_you_go' && (
                 <Button
                   variant="outline"
-                  render={<Link href="/dashboard/subscription?payg=1" />}
+                  render={
+                    <Link href="/dashboard/settings/subscription?payg=1" />
+                  }
                 >
                   <Zap className="mr-2 h-4 w-4" />
                   {t('payAsYouGo.switchCta')}
@@ -759,7 +763,7 @@ export function SubscriptionManagement({
                 {plan.isPopular && !isCurrent && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <Badge className="flex items-center gap-1 px-3 py-1 shadow-md">
-                      <Sparkles className="h-3 w-3" />
+                      <SparklesSolidIcon className="h-3 w-3" />
                       {t('popular')}
                     </Badge>
                   </div>
@@ -767,11 +771,8 @@ export function SubscriptionManagement({
 
                 {isCurrent && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge
-                      variant="secondary"
-                      className="flex items-center gap-1 px-3 py-1"
-                    >
-                      <Check className="h-3 w-3" />
+                    <Badge variant="expired" className="flex items-center gap-1 px-3 py-1">
+                      <CheckSolidIcon className="h-3 w-3" />
                       {t('currentPlanBadge')}
                     </Badge>
                   </div>
@@ -809,7 +810,7 @@ export function SubscriptionManagement({
                           <span className="text-muted-foreground text-lg line-through">
                             {formatPrice(originalPrice, currency)}
                           </span>
-                          <Badge className="border-green-500/20 bg-green-500/10 text-xs text-green-600">
+                          <Badge variant="success" className="text-xs">
                             -{discountPercent}%
                           </Badge>
                         </div>

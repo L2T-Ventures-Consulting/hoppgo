@@ -22,6 +22,7 @@ import {
   toAnalyticsAmountCents,
 } from '@/lib/product-analytics/analytics';
 import { productAnalyticsEvents } from '@/lib/product-analytics/analytics-events';
+import { createReservationInstantAccessUrl } from '@/lib/reservations/instant-access';
 import { getEffectiveReservationMode } from '@/lib/reservation-mode';
 import { getStorefrontUrl } from '@/lib/storefront-url';
 import { createCheckoutSession, toStripeCents } from '@/lib/stripe';
@@ -392,45 +393,65 @@ export async function acceptQuote(storeSlug: string, reservationId: string) {
     totalPrice: parseFloat(item.totalPrice),
   }));
 
-  dispatchCustomerNotification('customer_quote_accepted', {
-    store: {
-      id: store.id,
-      name: store.name,
-      email: store.email,
-      logoUrl: store.logoUrl,
-      darkLogoUrl: store.darkLogoUrl,
-      address: store.address,
-      phone: store.phone,
-      theme: store.theme,
-      settings: store.settings,
-      emailSettings: store.emailSettings,
-      customerNotificationSettings: store.customerNotificationSettings,
-    },
-    customer: {
-      id: reservation.customer.id,
-      firstName: reservation.customer.firstName,
-      lastName: reservation.customer.lastName,
-      email: reservation.customer.email,
-      phone: reservation.customer.phone,
-    },
-    reservation: {
-      id: reservationId,
-      number: reservation.number,
-      startDate: reservation.startDate,
-      endDate: reservation.endDate,
-      totalAmount: parseFloat(reservation.totalAmount),
-      subtotalAmount: parseFloat(reservation.subtotalAmount),
-      depositAmount: parseFloat(reservation.depositAmount),
-    },
-    items: emailItems,
-    reservationUrl,
-    paymentUrl,
-  }).catch((error) => {
+  try {
+    const contractUrl = await createReservationInstantAccessUrl({
+      storeId: store.id,
+      storeSlug,
+      customerEmail: reservation.customer.email,
+      reservationId,
+      redirectPath: `/account/reservations/${reservationId}/contract`,
+    });
+    const termsUrl = store.cgv?.trim()
+      ? getStorefrontUrl(storeSlug, '/terms')
+      : null;
+
+    dispatchCustomerNotification('customer_quote_accepted', {
+      store: {
+        id: store.id,
+        name: store.name,
+        email: store.email,
+        logoUrl: store.logoUrl,
+        darkLogoUrl: store.darkLogoUrl,
+        address: store.address,
+        phone: store.phone,
+        theme: store.theme,
+        settings: store.settings,
+        emailSettings: store.emailSettings,
+        customerNotificationSettings: store.customerNotificationSettings,
+      },
+      customer: {
+        id: reservation.customer.id,
+        firstName: reservation.customer.firstName,
+        lastName: reservation.customer.lastName,
+        email: reservation.customer.email,
+        phone: reservation.customer.phone,
+      },
+      reservation: {
+        id: reservationId,
+        number: reservation.number,
+        startDate: reservation.startDate,
+        endDate: reservation.endDate,
+        totalAmount: parseFloat(reservation.totalAmount),
+        subtotalAmount: parseFloat(reservation.subtotalAmount),
+        depositAmount: parseFloat(reservation.depositAmount),
+      },
+      items: emailItems,
+      reservationUrl,
+      contractUrl,
+      termsUrl,
+      paymentUrl,
+    }).catch((error) => {
+      console.error(
+        'Failed to dispatch quote accepted customer notification:',
+        error,
+      );
+    });
+  } catch (error) {
     console.error(
       'Failed to dispatch quote accepted customer notification:',
       error,
     );
-  });
+  }
 
   revalidatePath(`/${storeSlug}/account/reservations/${reservationId}`);
   return { success: true, paymentUrl };

@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowDownLeftSolidIcon, CheckSolidIcon, ReviewSolidIcon } from "@louez/ui/icons";
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -61,6 +62,11 @@ import { useStoreTimezone } from "@/contexts/store-context";
 import { ReferralNudge } from "@/components/dashboard/referral-nudge";
 import { orpc } from "@/lib/orpc/react";
 import { invalidateReservationAll } from "@/lib/orpc/invalidation";
+import { reservationAnalyticsActions } from "@/lib/product-analytics/analytics-events";
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+} from "@/lib/product-analytics/reservation-analytics-client";
 import { RequestPaymentModal } from "./request-payment-modal";
 
 interface Payment {
@@ -125,6 +131,8 @@ interface UnifiedPaymentSectionProps {
   };
   stripeConfigured: boolean;
   defaultPaymentMethod?: PaymentMethod;
+  paymentModalOpen: boolean;
+  onPaymentModalOpenChange: (open: boolean) => void;
 }
 
 const METHOD_ICONS: Record<string, React.ReactNode> = {
@@ -184,6 +192,8 @@ export function UnifiedPaymentSection({
   customer,
   stripeConfigured,
   defaultPaymentMethod = "cash",
+  paymentModalOpen,
+  onPaymentModalOpenChange: setPaymentModalOpen,
 }: UnifiedPaymentSectionProps) {
   const t = useTranslations("dashboard.reservations");
   const tCommon = useTranslations("common");
@@ -193,7 +203,6 @@ export function UnifiedPaymentSection({
   const queryClient = useQueryClient();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [depositReturnModalOpen, setDepositReturnModalOpen] = useState(false);
   const [damageModalOpen, setDamageModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -390,6 +399,13 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.recordPayment,
+      properties: { payment_type: paymentType, payment_method: paymentMethodType },
+    });
+
     setIsLoading(true);
     try {
       await recordPaymentMutation.mutateAsync({
@@ -406,6 +422,12 @@ export function UnifiedPaymentSection({
       setPaymentModalOpen(false);
       resetForm();
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.recordPayment,
+        properties: { error_code: "record_payment_failed", payment_type: paymentType },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -424,6 +446,13 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.returnDeposit,
+      properties: { payment_method: paymentMethodType },
+    });
+
     setIsLoading(true);
     try {
       await returnDepositMutation.mutateAsync({
@@ -439,6 +468,12 @@ export function UnifiedPaymentSection({
       setDepositReturnModalOpen(false);
       resetForm();
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.returnDeposit,
+        properties: { error_code: "return_deposit_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -457,6 +492,13 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.recordDamage,
+      properties: { payment_method: paymentMethodType },
+    });
+
     setIsLoading(true);
     try {
       await recordDamageMutation.mutateAsync({
@@ -472,6 +514,12 @@ export function UnifiedPaymentSection({
       setDamageModalOpen(false);
       resetForm();
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.recordDamage,
+        properties: { error_code: "record_damage_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -481,6 +529,13 @@ export function UnifiedPaymentSection({
   const handleDeletePayment = async () => {
     if (!paymentToDelete) return;
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.deletePayment,
+      properties: { payment_type: paymentToDelete.type, payment_method: paymentToDelete.method },
+    });
+
     setIsLoading(true);
     try {
       await deletePaymentMutation.mutateAsync({ paymentId: paymentToDelete.id });
@@ -488,6 +543,12 @@ export function UnifiedPaymentSection({
       setDeleteDialogOpen(false);
       setPaymentToDelete(null);
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.deletePayment,
+        properties: { error_code: "delete_payment_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -496,11 +557,22 @@ export function UnifiedPaymentSection({
 
   // Deposit authorization handlers
   const handleCreateHold = async () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.createDepositHold,
+    });
     setIsLoading(true);
     try {
       await createHoldMutation.mutateAsync({ reservationId });
       toastManager.add({ title: t("deposit.holdCreated"), type: "success" });
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.createDepositHold,
+        properties: { error_code: "create_deposit_hold_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -524,6 +596,12 @@ export function UnifiedPaymentSection({
       return;
     }
 
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.captureDepositHold,
+    });
+
     setIsLoading(true);
     try {
       await captureHoldMutation.mutateAsync({
@@ -538,6 +616,12 @@ export function UnifiedPaymentSection({
       setCaptureAmount("");
       setCaptureReason("");
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.captureDepositHold,
+        properties: { error_code: "capture_deposit_hold_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -545,12 +629,23 @@ export function UnifiedPaymentSection({
   };
 
   const handleRelease = async () => {
+    captureReservationActionStarted({
+      reservationId,
+      reservationStatus: status,
+      action: reservationAnalyticsActions.releaseDepositHold,
+    });
     setIsLoading(true);
     try {
       await releaseHoldMutation.mutateAsync({ reservationId });
       toastManager.add({ title: t("deposit.released"), type: "success" });
       setReleaseDialogOpen(false);
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        reservationStatus: status,
+        action: reservationAnalyticsActions.releaseDepositHold,
+        properties: { error_code: "release_deposit_hold_failed" },
+      });
       toastManager.add({ title: tErrors("generic"), type: "error" });
     } finally {
       setIsLoading(false);
@@ -597,27 +692,18 @@ export function UnifiedPaymentSection({
               {t("payment.title")}
             </CardTitle>
             {isFullyPaid && !hasDepositToReturn ? (
-              <Badge
-                variant="secondary"
-                className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-              >
-                <Check className="h-3 w-3 mr-1" />
+              <Badge variant="success" className="">
+                <CheckSolidIcon className="h-3 w-3 mr-1" />
                 {t("payment.allPaidBadge")}
               </Badge>
             ) : hasDepositToReturn ? (
-              <Badge
-                variant="secondary"
-                className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-              >
-                <ArrowDownLeft className="h-3 w-3 mr-1" />
+              <Badge variant="progress" className="">
+                <ArrowDownLeftSolidIcon className="h-3 w-3 mr-1" />
                 {t("payment.depositToReturnBadge")}
               </Badge>
             ) : (
-              <Badge
-                variant="secondary"
-                className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
-              >
-                <AlertCircle className="h-3 w-3 mr-1" />
+              <Badge variant="pending" className="">
+                <ReviewSolidIcon className="h-3 w-3 mr-1" />
                 {t("payment.pendingBadge")}
               </Badge>
             )}
@@ -696,16 +782,13 @@ export function UnifiedPaymentSection({
                 )}
               />
               {isRentalFullyPaid ? (
-                <Badge
-                  variant="secondary"
-                  className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 text-xs px-2"
-                >
-                  <Check className="h-3 w-3 mr-1" />
+                <Badge variant="success" className="text-xs px-2">
+                  <CheckSolidIcon className="h-3 w-3 mr-1" />
                   {t("payment.paid")}
                 </Badge>
               ) : (
                 <div className="flex items-center gap-1.5">
-                  <Badge variant="error" className="font-mono text-xs">
+                  <Badge variant="failed" className="font-mono text-xs">
                     -{rentalRemaining.toFixed(2)}
                     {currencySymbol}
                   </Badge>
@@ -881,12 +964,8 @@ export function UnifiedPaymentSection({
 
                   <div className="flex gap-2">
                     {depositStatusVal === "card_saved" && (
-                      <Button onClick={handleCreateHold} disabled={isLoading} className="flex-1">
-                        {isLoading ? (
-                          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                        ) : (
-                          <ShieldCheck className="mr-2 h-3.5 w-3.5" />
-                        )}
+                      <Button onClick={handleCreateHold} isPending={isLoading} className="flex-1">
+                        <ShieldCheck data-slot="icon" />
                         {t("deposit.createHold")}
                       </Button>
                     )}
@@ -950,7 +1029,7 @@ export function UnifiedPaymentSection({
                   {t("payment.damages")}
                 </span>
               </div>
-              <Badge variant="error" className="font-mono">
+              <Badge variant="failed" className="font-mono">
                 +{damagesPaid.toFixed(2)}
                 {currencySymbol}
               </Badge>
@@ -1029,34 +1108,22 @@ export function UnifiedPaymentSection({
                           <div className="flex items-center gap-1.5">
                             <span className="font-medium">{getTypeLabel(payment.type)}</span>
                             {payment.method === "stripe" && (
-                              <Badge
-                                variant="secondary"
-                                className="h-4 px-1 text-[9px] bg-[#635BFF]/10 text-[#635BFF] border-0"
-                              >
+                              <Badge variant="submitted" className="h-4 px-1 text-[9px] border-0">
                                 Stripe
                               </Badge>
                             )}
                             {payment.status === "authorized" && (
-                              <Badge
-                                variant="secondary"
-                                className="h-4 px-1 text-[9px] bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-0"
-                              >
+                              <Badge variant="pending" className="h-4 px-1 text-[9px] border-0">
                                 {t("payment.statusAuthorized")}
                               </Badge>
                             )}
                             {payment.status === "refunded" && (
-                              <Badge
-                                variant="secondary"
-                                className="h-4 px-1 text-[9px] bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-0"
-                              >
+                              <Badge variant="expired" className="h-4 px-1 text-[9px] border-0">
                                 {t("payment.statusRefunded")}
                               </Badge>
                             )}
                             {payment.status === "cancelled" && (
-                              <Badge
-                                variant="secondary"
-                                className="h-4 px-1 text-[9px] bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border-0"
-                              >
+                              <Badge variant="expired" className="h-4 px-1 text-[9px] border-0">
                                 {t("payment.statusCancelled")}
                               </Badge>
                             )}
@@ -1254,12 +1321,11 @@ export function UnifiedPaymentSection({
             </div>
           </DialogPanel>
 
-          <DialogFooter className="flex-row justify-between">
+          <DialogFooter className="sm:justify-between">
             <Button variant="outline" onClick={() => setPaymentModalOpen(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button onClick={handleRecordPayment} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleRecordPayment} isPending={isLoading}>
               {t("payment.record")}
             </Button>
           </DialogFooter>
@@ -1375,8 +1441,7 @@ export function UnifiedPaymentSection({
             <Button variant="outline" onClick={() => setDepositReturnModalOpen(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button onClick={handleReturnDeposit} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleReturnDeposit} isPending={isLoading}>
               {t("payment.return")}
             </Button>
           </DialogFooter>
@@ -1454,8 +1519,7 @@ export function UnifiedPaymentSection({
             <Button variant="outline" onClick={() => setDamageModalOpen(false)}>
               {tCommon("cancel")}
             </Button>
-            <Button onClick={handleRecordDamage} disabled={isLoading} variant="destructive">
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button onClick={handleRecordDamage} isPending={isLoading} variant="destructive">
               {t("payment.recordDamage")}
             </Button>
           </DialogFooter>
@@ -1552,8 +1616,7 @@ export function UnifiedPaymentSection({
             >
               {tCommon("cancel")}
             </Button>
-            <Button variant="destructive" onClick={handleCapture} disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button variant="destructive" onClick={handleCapture} isPending={isLoading}>
               {t("deposit.confirmCapture")}
             </Button>
           </DialogFooter>

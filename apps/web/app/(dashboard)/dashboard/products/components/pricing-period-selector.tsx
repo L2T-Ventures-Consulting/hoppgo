@@ -96,8 +96,8 @@ export function PricingPeriodSelector({
         <span className="max-w-[160px] truncate">{triggerLabel}</span>
         <ChevronsUpDown className="h-3.5 w-3.5 opacity-50" />
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-72 p-0">
-        <div className="p-1">
+      <PopoverContent align="end" className="w-72">
+        <div>
           {/* Base pricing option */}
           <PopoverClose
             render={
@@ -151,12 +151,8 @@ export function PricingPeriodSelector({
                         <span className="font-medium">{sp.name}</span>
                         {diff && (
                           <Badge
-                            variant={diff.isHigher ? 'destructive' : 'default'}
-                            className={cn(
-                              'text-[10px] px-1.5 py-0',
-                              !diff.isHigher &&
-                                'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                            )}
+                            variant={diff.isHigher ? 'failed' : 'success'}
+                            className="px-1.5 py-0 text-[10px]"
                           >
                             {diff.isHigher ? '+' : '-'}
                             {diff.percent}%

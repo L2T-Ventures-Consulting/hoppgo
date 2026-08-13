@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `image_history` json DEFAULT ('[]');

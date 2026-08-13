@@ -21,6 +21,7 @@ import {
   CardTitle,
   toastManager,
 } from '@louez/ui';
+import { ShieldCheckIcon, UnlinkIcon } from '@louez/ui/icons';
 
 import { orpc } from '@/lib/orpc/react';
 
@@ -213,7 +214,10 @@ export function TulipAssurancePanel() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>{t('title')}</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheckIcon className="h-5 w-5 shrink-0" />
+            {t('title')}
+          </CardTitle>
           <CardDescription>{t('description')}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -288,7 +292,10 @@ export function TulipAssurancePanel() {
       {isConnected && (
         <Card>
           <CardHeader>
-            <CardTitle>{t('disconnect.title')}</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <UnlinkIcon className="h-5 w-5 shrink-0" />
+              {t('disconnect.title')}
+            </CardTitle>
             <CardDescription>{t('disconnect.description')}</CardDescription>
           </CardHeader>
           <CardContent>

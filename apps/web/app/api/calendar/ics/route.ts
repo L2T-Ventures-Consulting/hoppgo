@@ -10,10 +10,6 @@ import { buildReservationCalendarDescription } from '@/lib/integrations/calendar
 
 import { env } from '@/env';
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 const CALENDAR_REFRESH_INTERVAL = 'PT5M';
 const CALENDAR_EVENT_FORMAT_VERSION = 2;
 

@@ -1,126 +1,86 @@
-'use client'
+"use client";
 
-import { User, UserPlus } from 'lucide-react'
-import { useTranslations } from 'next-intl'
+import { useState } from "react";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  Label,
-  RadioGroup,
-  RadioGroupItem,
-} from '@louez/ui'
-import { cn } from '@louez/utils'
+import { User, UserPlus } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { CustomerCombobox } from '@/components/dashboard/customer-combobox'
+import { Button, Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
 
-import type {
-  Customer,
-  NewReservationFormComponentApi,
-  NewReservationFormValues,
-  StepFieldName,
-} from '../types'
+import { CustomerCombobox } from "@/components/dashboard/customer-combobox";
+import { CustomerCreateDialog } from "@/components/dashboard/customer-create-dialog";
+import { NewFeatureBadge } from "@/components/dashboard/new-feature-badge";
+import { parseCustomerQuery } from "@/components/dashboard/util.customer-query";
+import { useWhatsNew } from "@/hooks/use-whats-new";
+
+import type { Customer, NewReservationFormComponentApi, StepFieldName } from "../types";
 
 interface NewReservationStepCustomerProps {
-  form: NewReservationFormComponentApi
-  customers: Customer[]
-  customerType: NewReservationFormValues['customerType']
-  clearStepFieldError: (name: StepFieldName) => void
-  getFieldErrorMessage: (error: unknown) => string
+  form: NewReservationFormComponentApi;
+  customers: Customer[];
+  clearStepFieldError: (name: StepFieldName) => void;
+  getFieldErrorMessage: (error: unknown) => string;
+  onCustomerCreated: (customer: Customer) => void;
 }
 
 export function NewReservationStepCustomer({
   form,
   customers,
-  customerType,
   clearStepFieldError,
   getFieldErrorMessage,
+  onCustomerCreated,
 }: NewReservationStepCustomerProps) {
-  const t = useTranslations('dashboard.reservations.manualForm')
+  const t = useTranslations("dashboard.reservations.manualForm");
+  const tCustomerSearch = useTranslations("common.customerSearch");
+  const { dismissFeature } = useWhatsNew();
+  const [createDialog, setCreateDialog] = useState({ isOpen: false, query: "" });
+
+  const openCreateDialog = () => {
+    dismissFeature("reservation-creation-simplified");
+    setCreateDialog({ isOpen: true, query: "" });
+  };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="h-5 w-5" />
-          {t('customer')}
-        </CardTitle>
-        <CardDescription>{t('customerStepDescription')}</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <form.Field name="customerType">
-          {(field) => (
-            <RadioGroup
-              onValueChange={(value) => field.handleChange(value as 'existing' | 'new')}
-              defaultValue={field.state.value}
-              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
-            >
-              <label
-                htmlFor="existing"
-                className={cn(
-                  'flex cursor-pointer items-center space-x-4 rounded-lg border p-4 transition-colors',
-                  field.state.value === 'existing'
-                    ? 'border-primary bg-primary/5'
-                    : 'hover:bg-muted/50',
-                  customers.length === 0 && 'cursor-not-allowed opacity-50'
-                )}
-              >
-                <RadioGroupItem
-                  value="existing"
-                  id="existing"
-                  disabled={customers.length === 0}
-                />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
-                    <span className="font-medium">{t('existingCustomer')}</span>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t('existingCustomerDescription')}
-                  </p>
-                </div>
-              </label>
-
-              <label
-                htmlFor="new"
-                className={cn(
-                  'flex cursor-pointer items-center space-x-4 rounded-lg border p-4 transition-colors',
-                  field.state.value === 'new'
-                    ? 'border-primary bg-primary/5'
-                    : 'hover:bg-muted/50'
-                )}
-              >
-                <RadioGroupItem value="new" id="new" />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <UserPlus className="h-4 w-4" />
-                    <span className="font-medium">{t('newCustomer')}</span>
-                  </div>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {t('newCustomerDescription')}
-                  </p>
-                </div>
-              </label>
-            </RadioGroup>
-          )}
-        </form.Field>
-
-        {customerType === 'existing' && customers.length > 0 && (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <User className="h-5 w-5" />
+            {t("customer")}
+          </CardTitle>
+          <CardDescription>{t("customerStepDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent>
           <form.Field name="customerId">
             {(field) => (
               <div className="space-y-2">
-                <Label>{t('selectCustomer')}</Label>
-                <CustomerCombobox
-                  customers={customers}
-                  value={field.state.value}
-                  onValueChange={(value) => {
-                    field.handleChange(value)
-                    clearStepFieldError('customerId')
-                  }}
-                />
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                  <CustomerCombobox
+                    className="sm:flex-1"
+                    customers={customers}
+                    value={field.state.value}
+                    onValueChange={(value) => {
+                      field.handleChange(value);
+                      clearStepFieldError("customerId");
+                    }}
+                    onCreateRequest={(query) => setCreateDialog({ isOpen: true, query })}
+                  />
+                  <Button
+                    className="h-11 shrink-0 max-sm:w-full"
+                    onClick={openCreateDialog}
+                    type="button"
+                    variant="outline"
+                  >
+                    <UserPlus className="h-4 w-4" />
+                    {tCustomerSearch("createCustomer")}
+                    {/* Dot rather than a pill: the button shares its row with the combobox. */}
+                    <NewFeatureBadge
+                      className="absolute -top-1 -right-1"
+                      featureId="reservation-creation-simplified"
+                      mode="dot"
+                    />
+                  </Button>
+                </div>
                 {field.state.meta.errors.length > 0 && (
                   <p className="text-sm font-medium text-destructive">
                     {getFieldErrorMessage(field.state.meta.errors[0])}
@@ -129,45 +89,15 @@ export function NewReservationStepCustomer({
               </div>
             )}
           </form.Field>
-        )}
+        </CardContent>
+      </Card>
 
-        {customerType === 'new' && (
-          <div className="space-y-4">
-            <form.AppField name="email">
-              {(field) => (
-                <field.Input
-                  label={`${t('email')} *`}
-                  type="email"
-                  placeholder={t('emailPlaceholder')}
-                />
-              )}
-            </form.AppField>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <form.AppField name="firstName">
-                {(field) => (
-                  <field.Input
-                    label={`${t('firstName')} *`}
-                    placeholder={t('firstNamePlaceholder')}
-                  />
-                )}
-              </form.AppField>
-              <form.AppField name="lastName">
-                {(field) => (
-                  <field.Input
-                    label={`${t('lastName')} *`}
-                    placeholder={t('lastNamePlaceholder')}
-                  />
-                )}
-              </form.AppField>
-            </div>
-            <form.AppField name="phone">
-              {(field) => (
-                <field.PhoneInput label={t('phone')} placeholder={t('phonePlaceholder')} />
-              )}
-            </form.AppField>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
+      <CustomerCreateDialog
+        open={createDialog.isOpen}
+        onOpenChange={(isOpen) => setCreateDialog((prev) => ({ ...prev, isOpen }))}
+        prefill={parseCustomerQuery(createDialog.query)}
+        onCreated={onCustomerCreated}
+      />
+    </>
+  );
 }

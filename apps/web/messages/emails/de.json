@@ -1,0 +1,290 @@
+{
+  "common": {
+    "greeting": "Hallo {name},",
+    "regards": "Mit freundlichen Grüßen,",
+    "team": "Das {storeName}-Team",
+    "viewReservation": "Meine Reservierung ansehen",
+    "contactUs": "Kontaktieren Sie uns",
+    "reservationNumber": "Reservierung #{number}",
+    "period": "Zeitraum",
+    "periodFrom": "Von {startDate}",
+    "periodTo": "Bis {endDate}",
+    "address": "Adresse",
+    "pickupAddress": "Abholadresse",
+    "returnAddress": "Rückgabeadresse",
+    "subtotal": "Zwischensumme",
+    "subtotalExclTax": "Zwischensumme netto",
+    "taxAmount": "MwSt ({rate}%)",
+    "subtotalInclTax": "Zwischensumme brutto",
+    "deposit": "Kaution",
+    "total": "Gesamt",
+    "totalToPay": "Zu zahlender Betrag",
+    "question": "Fragen? Kontaktieren Sie uns:",
+    "summary": "Zusammenfassung",
+    "timezone": "Zeitzone: {timezone}",
+    "seeYouSoon": "Bis bald,\n{storeName}"
+  },
+  "verificationCode": {
+    "subject": "Ihr Anmeldecode: {code}",
+    "title": "Anmeldecode",
+    "body": "Hier ist Ihr Anmeldecode für den Zugang zu Ihrem Konto bei {storeName}:",
+    "expiry": "Dieser Code läuft in 10 Minuten ab. Wenn Sie diesen Code nicht angefordert haben, können Sie diese E-Mail ignorieren."
+  },
+  "confirmReservation": {
+    "subject": "Ihre Reservierung #{number} ist bestätigt",
+    "title": "Reservierung bestätigt!",
+    "body": "Ihre Reservierung #{number} ist bestätigt. Hier ist die Zusammenfassung:",
+    "summary": "Zusammenfassung"
+  },
+  "requestReceived": {
+    "subject": "Reservierungsanfrage #{number} erhalten",
+    "title": "Anfrage erhalten",
+    "body": "Wir haben Ihre Reservierungsanfrage erhalten.",
+    "review": "Unser Team prüft Ihre Anfrage und wird sich in Kürze bei Ihnen melden.",
+    "confirmation": "Sie erhalten eine Bestätigungs-E-Mail, sobald Ihre Reservierung validiert ist.",
+    "seeYouSoon": "Bis bald,"
+  },
+  "requestAccepted": {
+    "subject": "Ihre Anfrage #{number} wurde angenommen!",
+    "title": "Anfrage angenommen!",
+    "body": "Gute Neuigkeiten! Ihre Reservierungsanfrage #{number} wurde angenommen.",
+    "rentalPeriod": "Mietzeitraum",
+    "yourReservation": "Ihre Reservierung",
+    "proceedPayment": "Zur Zahlung",
+    "legalAcceptance": "Die Bestätigung Ihrer Reservierung gilt als Zustimmung zum Mietvertrag und zu den allgemeinen Geschäftsbedingungen.",
+    "contractAvailable": "Rufen Sie den Mietvertrag zu Ihrer Reservierung auf.",
+    "viewContract": "Mietvertrag ansehen",
+    "viewTerms": "Allgemeine Geschäftsbedingungen ansehen"
+  },
+  "requestRejected": {
+    "subject": "Reservierungsanfrage #{number}",
+    "title": "Anfrage nicht angenommen",
+    "body": "Es tut uns leid, Ihre Reservierungsanfrage #{number} konnte nicht angenommen werden.",
+    "contactForAlternative": "Bitte kontaktieren Sie uns für weitere Informationen oder um eine Alternative zu finden."
+  },
+  "reminderPickup": {
+    "subject": "Erinnerung: Ihre Miete beginnt morgen!",
+    "title": "Ihre Miete beginnt morgen!",
+    "body": "Dies ist eine Erinnerung für Ihre Reservierung #{number}.",
+    "scheduledPickup": "Geplante Abholung",
+    "dontForget": "Vergessen Sie nicht:",
+    "bringId": "Einen gültigen Ausweis",
+    "bringConfirmation": "Ihre Reservierungsbestätigung",
+    "seeTomorrow": "Bis morgen!"
+  },
+  "reminderReturn": {
+    "subject": "Erinnerung: Ausrüstungsrückgabe am {date}",
+    "title": "Denken Sie an die Rückgabe Ihrer Ausrüstung",
+    "body": "Dies ist eine Erinnerung für Ihre Reservierung #{number}. Die Rückgabe der Ausrüstung ist für den {date} geplant.",
+    "scheduledReturn": "Geplante Rückgabe",
+    "returnInfo": "Bitte geben Sie die Ausrüstung in gutem Zustand zurück. Die Kaution wird nach Prüfung zurückgegeben.",
+    "thanks": "Vielen Dank für Ihr Vertrauen!"
+  },
+  "reminderPickupAdmin": {
+    "subject": "Bevorstehende Abholung: Reservierung #{number}",
+    "title": "Bevorstehende Geräteabholung",
+    "body": "Für die Reservierung #{number} steht eine Abholung an. Hier sind die Details, damit Sie die Ausrüstung bereitstellen können.",
+    "scheduledPickup": "Geplante Abholung",
+    "customer": "Kunde:",
+    "email": "E-Mail:",
+    "phone": "Telefon:",
+    "amount": "Betrag:",
+    "viewReservation": "Reservierung ansehen",
+    "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um diese Reservierung zu verwalten."
+  },
+  "reminderReturnAdmin": {
+    "subject": "Bevorstehende Rückgabe: Reservierung #{number}",
+    "title": "Bevorstehende Geräterückgabe",
+    "body": "Für die Reservierung #{number} steht eine Rückgabe an. Hier sind die Details, damit Sie sich auf die Annahme der Ausrüstung vorbereiten können.",
+    "scheduledReturn": "Geplante Rückgabe",
+    "customer": "Kunde:",
+    "email": "E-Mail:",
+    "phone": "Telefon:",
+    "amount": "Betrag:",
+    "viewReservation": "Reservierung ansehen",
+    "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um diese Reservierung zu verwalten."
+  },
+  "reminderDigestAdmin": {
+    "subject": "Ihr Tagesplan für {date}",
+    "title": "Tagesplan",
+    "body": "Das steht heute bei {storeName} an.",
+    "pickupsTitle": "Abholungen ({count})",
+    "returnsTitle": "Rückgaben ({count})",
+    "viewCalendar": "Kalender ansehen",
+    "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um Ihren Tag zu verwalten."
+  },
+  "thankYouReview": {
+    "subject": "Vielen Dank für Ihre Miete!",
+    "title": "Vielen Dank für Ihr Vertrauen!",
+    "body": "Wir hoffen, dass Ihre Miete gut verlaufen ist. Ihre Bewertung hilft uns, uns zu verbessern und anderen Kunden bei ihrer Entscheidung.",
+    "cta": "Bewertung abgeben",
+    "disclaimer": "Es dauert nur eine Minute und wäre uns eine große Hilfe!",
+    "smsThankYou": "Danke fur Ihre Miete!",
+    "smsReview": "Ihre Bewertung zahlt:"
+  },
+  "newRequestLandlord": {
+    "subject": "Neue Reservierungsanfrage #{number}",
+    "title": "Neue Reservierungsanfrage",
+    "body": "Sie haben eine neue Anfrage bei {storeName} erhalten.",
+    "customer": "Kunde:",
+    "email": "E-Mail:",
+    "period": "Zeitraum:",
+    "amount": "Betrag:",
+    "viewRequest": "Anfrage ansehen",
+    "connectToManage": "Melden Sie sich in Ihrem Dashboard an, um diese Anfrage anzunehmen oder abzulehnen."
+  },
+  "phoneCallbackLandlord": {
+    "subject": "Ein Anrufer zum Zurückrufen — {store}",
+    "title": "Ein Anrufer zum Zurückrufen",
+    "body": "Ihr Sprachassistent konnte eine Anfrage auf {storeName} nicht abschließen und leitet Ihnen diese Nachricht weiter.",
+    "phone": "Rückrufnummer:",
+    "message": "Nachricht:",
+    "listen": "Anruf öffnen",
+    "footer": "Öffnen Sie die Konversation, um den Verlauf zu lesen und die Aufnahme des Anrufs anzuhören."
+  },
+  "voiceNumberBilling": {
+    "numberLabel": "Nummer:",
+    "rentalLabel": "Monatliche Miete:",
+    "rentalValue": "{credits} KI-Guthaben / Monat",
+    "deadlineLabel": "Frist:",
+    "ctaRecharge": "Guthaben aufladen",
+    "ctaOpen": "Meinen KI-Assistenten öffnen",
+    "footer": "Die Nummernmiete wird jeden Monat automatisch mit KI-Guthaben bezahlt.",
+    "warning": {
+      "subject": "Bitte aufladen — Verlängerung der Nummer {number}",
+      "title": "Ihr Guthaben deckt die nächste Verlängerung nicht",
+      "body": "Die Nummer {number} von {storeName} wird am {date} für {credits} KI-Guthaben verlängert, aber Ihr aktuelles Guthaben reicht nicht aus. Laden Sie vor diesem Datum auf, um Ihre Nummer zu behalten."
+    },
+    "failed": {
+      "subject": "Handlung erforderlich — {number} droht getrennt zu werden",
+      "title": "Verlängerung fehlgeschlagen",
+      "body": "Die Verlängerung der Nummer {number} ({credits} KI-Guthaben) konnte nicht durchgeführt werden: Guthaben unzureichend. Laden Sie vor dem {date} auf, sonst wird die Nummer automatisch getrennt. Wir versuchen die Abbuchung täglich erneut, sobald Sie aufladen."
+    },
+    "released": {
+      "subject": "Die Nummer {number} wurde getrennt",
+      "title": "Nummer getrennt",
+      "body": "Die Nummer {number} von {storeName} wurde getrennt und ist nicht mehr aktiv. Sie können jederzeit über Ihren KI-Assistenten eine neue Nummer wählen."
+    }
+  },
+  "teamInvitation": {
+    "subject": "{inviterName} lädt Sie ein, {storeName} beizutreten",
+    "title": "Team-Einladung",
+    "greeting": "Hallo,",
+    "body": "{inviterName} lädt Sie ein, dem {storeName}-Team auf Louez.io beizutreten.",
+    "accessDescription": "Durch Annahme dieser Einladung erhalten Sie Zugriff auf das Shop-Dashboard zur Verwaltung von Reservierungen, Produkten und Kunden.",
+    "acceptButton": "Einladung annehmen",
+    "expiry": "Diese Einladung läuft in 7 Tagen ab. Wenn Sie nicht darum gebeten haben, diesem Team beizutreten, können Sie diese E-Mail ignorieren."
+  },
+  "baseLayout": {
+    "sentBy": "Diese E-Mail wurde von {storeName} gesendet",
+    "ignoreIfNotYou": "Wenn Sie diese Aktion nicht initiiert haben, ignorieren Sie diese E-Mail bitte.",
+    "poweredBy": "Bereitgestellt von"
+  },
+  "instantAccess": {
+    "subject": "Zugriff auf Ihre Reservierung #{number}",
+    "title": "Zugriff auf Ihre Reservierung",
+    "body": "Klicken Sie hier, um auf Ihre Reservierung #{number} zuzugreifen.",
+    "paymentPending": "Eine Zahlung für diese Reservierung steht noch aus.",
+    "viewAndPay": "Anzeigen und bezahlen",
+    "linkValid": "Dieser Link ist 30 Tage gültig."
+  },
+  "reservationCancelled": {
+    "subject": "Reservierung #{number} storniert",
+    "title": "Reservierung storniert",
+    "body": "Ihre Reservierung #{number} wurde storniert.",
+    "cancelledPeriod": "Stornierter Zeitraum",
+    "reasonLabel": "Grund",
+    "contactForQuestions": "Bei Fragen kontaktieren Sie uns gerne.",
+    "browseEquipment": "Katalog durchsuchen",
+    "thankYou": "Vielen Dank für Ihr Verständnis."
+  },
+  "reservationCompleted": {
+    "subject": "Reservierung #{number} abgeschlossen",
+    "title": "Vermietung abgeschlossen!",
+    "body": "Ihre Reservierung #{number} ist nun abgeschlossen.",
+    "rentalPeriod": "Mietzeitraum",
+    "depositReturned": "Ihre Kaution von {amount} wird erstattet.",
+    "depositPending": "Ihre Kaution von {amount} wird geprüft und in Kürze erstattet.",
+    "thankYouMessage": "Vielen Dank für Ihr Vertrauen!",
+    "rentAgain": "Erneut mieten",
+    "seeYouSoon": "Bis bald!"
+  },
+  "paymentConfirmation": {
+    "subject": "Zahlung bestätigt - Reservierung #{number}",
+    "title": "Zahlung erhalten!",
+    "body": "Wir haben Ihre Zahlung für Reservierung #{number} erhalten.",
+    "paymentDetails": "Zahlungsdetails",
+    "amount": "Betrag",
+    "date": "Datum",
+    "method": "Methode",
+    "reservation": "Reservierung",
+    "confirmation": "Ihre Zahlung wurde erfolgreich verarbeitet.",
+    "keepEmail": "Bewahren Sie diese E-Mail als Zahlungsbeleg auf."
+  },
+  "paymentFailed": {
+    "subject": "Zahlung fehlgeschlagen - Reservierung #{number}",
+    "title": "Zahlung fehlgeschlagen",
+    "body": "Die Zahlung von {amount} für Ihre Reservierung #{number} konnte nicht verarbeitet werden.",
+    "whatToDo": "Was tun?",
+    "tip1": "Überprüfen Sie, ob Ihre Karte gültig ist und ausreichend Guthaben hat",
+    "tip2": "Versuchen Sie es mit einer anderen Karte",
+    "tip3": "Kontaktieren Sie Ihre Bank, wenn das Problem weiterhin besteht",
+    "retryPayment": "Zahlung erneut versuchen",
+    "contactSupport": "Hilfe benötigt? Kontaktieren Sie uns."
+  },
+  "paymentRequest": {
+    "subject": "Zahlungsanforderung für Reservierung #{number}",
+    "title": "Zahlungsanforderung",
+    "body": "{storeName} fordert eine Zahlung von {amount} für Ihre Reservierung #{number} an.",
+    "paymentDetails": "Zahlungsdetails",
+    "reservation": "Reservierung",
+    "description": "Beschreibung",
+    "amountDue": "Fälliger Betrag",
+    "payNow": "{amount} bezahlen",
+    "linkFallback": "Oder kopieren Sie diesen Link in Ihren Browser:",
+    "securePayment": "Diese Zahlung wird durch Stripe gesichert. Ihre Zahlungsdaten werden niemals mit dem Vermieter geteilt.",
+    "manualBody": "Wir kontaktieren Sie bezüglich der Zahlung für Ihre Reservierung #{number}.",
+    "payPromptly": "Bitte nehmen Sie die Zahlung zeitnah vor."
+  },
+  "depositAuthorizationRequest": {
+    "subject": "Kautionsautorisierung für Reservierung #{number}",
+    "title": "Kautionsautorisierung erforderlich",
+    "body": "{storeName} fordert eine Kautionsautorisierung von {amount} für Ihre Reservierung #{number} an.",
+    "howItWorks": "So funktioniert es",
+    "step1": "Sie autorisieren den Kautionsbetrag auf Ihrer Karte",
+    "step2": "Der Betrag wird vorübergehend reserviert (nicht belastet)",
+    "step3": "Am Ende der Miete wird die Autorisierung automatisch freigegeben",
+    "step4": "Bei Schäden kann ein Teil oder der gesamte Betrag belastet werden",
+    "authorizeNow": "Kaution autorisieren",
+    "linkFallback": "Oder kopieren Sie diesen Link in Ihren Browser:",
+    "securePayment": "Diese Autorisierung wird durch Stripe gesichert. Der Betrag wird nicht sofort belastet."
+  },
+  "quoteSent": {
+    "subject": "Angebot #{number}",
+    "title": "Sie haben ein Angebot erhalten",
+    "body": "{store} hat Ihnen ein Angebot für die Reservierung #{number} gesendet.",
+    "rentalPeriod": "Mietzeitraum",
+    "yourQuote": "Ihr Angebot",
+    "viewQuote": "Angebot ansehen",
+    "expiry": "Sie können dieses Angebot in Ihrem Kundenkonto annehmen oder ablehnen."
+  },
+  "rewardUnlocked": {
+    "subject": "Sie haben Gratis-Reservierungen verdient 🎉",
+    "title": "Ihre Empfehlung hat sich gelohnt!",
+    "greeting": "Hallo,",
+    "body": "{referredStoreName} hat gerade den ersten Online-Verkauf getätigt. Sie erhalten {freeReservations} Gratis-Reservierungen im Wert von ≈ {rewardValue}.",
+    "cta": "Meine Prämien ansehen",
+    "footer": "Danke, dass Sie die Louez-Community wachsen lassen.",
+    "subjectCredit": "Sie haben ein Louez-Guthaben verdient 🎉",
+    "bodyCredit": "{referredStoreName} hat gerade den ersten Online-Verkauf getätigt. Sie erhalten ein Guthaben von {rewardValue} auf Ihrer nächsten Louez-Rechnung."
+  },
+  "contract": {
+    "subject": "Ihr Mietvertrag #{number}",
+    "title": "Ihr Mietvertrag",
+    "body": "Hier ist der Mietvertrag für Ihre Reservierung #{number}.",
+    "downloadContract": "Vertrag herunterladen"
+  },
+  "customMessage": {
+    "subject": "Zu Ihrer Reservierung #{number}"
+  }
+}

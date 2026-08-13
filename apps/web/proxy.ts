@@ -3,6 +3,7 @@ import type { NextRequest } from 'next/server';
 
 import { isStandaloneMode } from '@/lib/deployment';
 import { isValidReferralCode } from '@/lib/utils/referral';
+import { LOGIN_CALLBACK_PATH_HEADER } from '@/lib/utils/util.url';
 
 import { env } from '@/env';
 
@@ -106,6 +107,20 @@ function createInternalRewriteUrl(request: NextRequest, pathname: string) {
   }
 
   return url;
+}
+
+function createDashboardResponse(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(
+    LOGIN_CALLBACK_PATH_HEADER,
+    `${request.nextUrl.pathname}${request.nextUrl.search}`,
+  );
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
 }
 
 // =============================================================================
@@ -306,7 +321,7 @@ export async function proxy(request: NextRequest) {
   //   - {DASHBOARD_SUBDOMAIN}.{APP_DOMAIN} (e.g., app.example.com)
   //   - localhost (when PREVIEW_STORE_SLUG is not set)
   if (subdomain === DASHBOARD_SUBDOMAIN || (isLocalhost && !subdomain)) {
-    return captureReferral(request, NextResponse.next(), host);
+    return captureReferral(request, createDashboardResponse(request), host);
   }
 
   // -----------------------------------------------------------------------------

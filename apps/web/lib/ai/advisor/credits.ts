@@ -85,7 +85,8 @@ export async function getAiCreditsInfo(
     sumMonthlyUsedMicro(db, storeId),
   ])
   const perMonth = plan.features.aiCreditsPerMonth
-  const monthlyIncludedMicro = perMonth === null ? null : perMonth * CREDIT_MICRO
+  const monthlyIncludedMicro =
+    perMonth === null ? null : perMonth * CREDIT_MICRO
   const monthlyRemainingMicro =
     monthlyIncludedMicro === null
       ? null
@@ -102,7 +103,10 @@ export async function getAiCreditsInfo(
   }
 }
 
-export type AdvisorCreditCheck = { allowed: boolean; code?: 'credits_exhausted' }
+export type AdvisorCreditCheck = {
+  allowed: boolean
+  code?: 'credits_exhausted'
+}
 
 /**
  * Pre-model credit gate — fail-closed. Blocks a new run only when there is no
@@ -123,9 +127,7 @@ export async function checkAdvisorCredits(
   } catch (error) {
     log.error(
       'advisor',
-      `credit check failed: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      `credit check failed: ${error instanceof Error ? error.message : String(error)}`,
     )
     return { allowed: false, code: 'credits_exhausted' }
   }
@@ -302,9 +304,7 @@ export async function creditAiCredits(params: {
   } catch (error) {
     log.error(
       'advisor',
-      `creditAiCredits failed: ${
-        error instanceof Error ? error.message : String(error)
-      }`,
+      `creditAiCredits failed: ${error instanceof Error ? error.message : String(error)}`,
     )
     return false
   }
@@ -328,7 +328,9 @@ export async function updateAutoTopupConfig(
     .update(aiCredits)
     .set({
       autoTopupEnabled: config.enabled,
-      autoTopupThresholdMicro: creditsToMicro(Math.max(0, config.thresholdCredits)),
+      autoTopupThresholdMicro: creditsToMicro(
+        Math.max(0, config.thresholdCredits),
+      ),
       autoTopupCredits: config.credits > 0 ? config.credits : null,
       autoTopupPriceCents: config.priceCents > 0 ? config.priceCents : null,
       updatedAt: new Date(),
@@ -345,6 +347,140 @@ export type AiCreditTransactionRow = {
   status: 'pending' | 'completed' | 'failed'
   createdAt: Date
   completedAt: Date | null
+}
+
+export type AiCreditDebitRow = {
+  id: string
+  kind: 'usage' | 'number_rental' | 'image_enhancement'
+  conversationId: string | null
+  imageKey: string | null
+  creditsMicro: number
+  audioSeconds: number
+  createdAt: Date
+}
+
+export type AiCreditDebitHistory = {
+  rows: AiCreditDebitRow[]
+  total: number
+}
+
+/** Whether this store has ever spent a billable AI credit. */
+export async function hasEverUsedAiCredits(storeId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ id: aiCreditDebits.id })
+    .from(aiCreditDebits)
+    .where(
+      and(
+        eq(aiCreditDebits.storeId, storeId),
+        gte(aiCreditDebits.debitedMicro, 1),
+      ),
+    )
+    .limit(1)
+
+  return row !== undefined
+}
+
+/**
+ * Paginated consumption history (the `ai_credit_debits` ledger) for the
+ * dashboard. Only exposes what was BILLED (credits, kind, call duration) —
+ * never `costMicroUsd` or token counts, which would reveal cost and margin.
+ * Zero-billed audit rows (cost-only mode) are excluded: the merchant paid
+ * nothing, so there is nothing to itemize.
+ */
+export async function getAiCreditDebitHistory(
+  storeId: string,
+  params: { page?: number; pageSize?: number } = {},
+): Promise<AiCreditDebitHistory> {
+  const pageSize = Math.min(Math.max(params.pageSize ?? 20, 1), 50)
+  const page = Math.max(params.page ?? 1, 1)
+  const where = and(
+    eq(aiCreditDebits.storeId, storeId),
+    gte(aiCreditDebits.debitedMicro, 1),
+  )
+  const [rows, [countRow]] = await Promise.all([
+    db
+      .select({
+        id: aiCreditDebits.id,
+        kind: aiCreditDebits.kind,
+        conversationId: aiCreditDebits.conversationId,
+        imageKey: aiCreditDebits.imageKey,
+        creditsMicro: aiCreditDebits.debitedMicro,
+        audioSeconds: aiCreditDebits.audioSeconds,
+        createdAt: aiCreditDebits.createdAt,
+      })
+      .from(aiCreditDebits)
+      .where(where)
+      .orderBy(desc(aiCreditDebits.createdAt))
+      .limit(pageSize)
+      .offset((page - 1) * pageSize),
+    db
+      .select({ count: sql<number>`COUNT(*)`.mapWith(Number) })
+      .from(aiCreditDebits)
+      .where(where),
+  ])
+  return { rows, total: countRow?.count ?? 0 }
+}
+
+export type AiCreditUsageSummary = {
+  /** Distinct advisor conversations billed this month. */
+  conversations: number
+  /** Distinct voice calls billed this month. */
+  calls: number
+  /** Total billed call time this month, in seconds. */
+  callSeconds: number
+  /** Product images enhanced this month. */
+  images: number
+  /** Micro-credits spent this month, all kinds together. */
+  creditsMicro: number
+}
+
+/**
+ * "What your credits bought you this month" recap for the dashboard, derived
+ * from the BILLED debit rows only (same visibility rule as the history: no
+ * cost, no tokens). Conversations and calls are counted distinctly because one
+ * conversation bills several runs.
+ */
+export async function getAiCreditUsageSummary(
+  storeId: string,
+): Promise<AiCreditUsageSummary> {
+  const [row] = await db
+    .select({
+      conversations:
+        sql<number>`COUNT(DISTINCT CASE WHEN ${aiCreditDebits.kind} = 'usage' AND ${aiCreditDebits.audioSeconds} = 0 THEN ${aiCreditDebits.conversationId} END)`.mapWith(
+          Number,
+        ),
+      calls:
+        sql<number>`COUNT(DISTINCT CASE WHEN ${aiCreditDebits.audioSeconds} > 0 THEN ${aiCreditDebits.conversationId} END)`.mapWith(
+          Number,
+        ),
+      callSeconds:
+        sql<number>`COALESCE(SUM(${aiCreditDebits.audioSeconds}), 0)`.mapWith(
+          Number,
+        ),
+      images:
+        sql<number>`COUNT(CASE WHEN ${aiCreditDebits.kind} = 'image_enhancement' THEN 1 END)`.mapWith(
+          Number,
+        ),
+      creditsMicro:
+        sql<number>`COALESCE(SUM(${aiCreditDebits.debitedMicro}), 0)`.mapWith(
+          Number,
+        ),
+    })
+    .from(aiCreditDebits)
+    .where(
+      and(
+        eq(aiCreditDebits.storeId, storeId),
+        gte(aiCreditDebits.debitedMicro, 1),
+        gte(aiCreditDebits.createdAt, startOfCalendarMonth()),
+      ),
+    )
+  return {
+    conversations: row?.conversations ?? 0,
+    calls: row?.calls ?? 0,
+    callSeconds: row?.callSeconds ?? 0,
+    images: row?.images ?? 0,
+    creditsMicro: row?.creditsMicro ?? 0,
+  }
 }
 
 /** Recent credit acquisitions (grants + purchases) for the dashboard history. */

@@ -2,28 +2,17 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import {
-  ClipboardCheck,
-  ClipboardX,
-  ArrowRight,
-  Camera,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
-  PenLine,
-  Download,
-  MoreVertical,
-} from 'lucide-react'
+import { ClipboardCheck, ArrowRight, Camera, Download, MoreVertical } from 'lucide-react'
 import { cn } from '@louez/utils'
 import { Button } from '@louez/ui'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
 import { Badge } from '@louez/ui'
+import {
+  ClockSolidIcon,
+  FailedSolidIcon,
+  SubmittedSolidIcon,
+  SuccessSolidIcon,
+} from "@louez/ui/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,57 +45,57 @@ interface InspectionStatusCardProps {
 function getStatusConfig(status: InspectionStatus | null, hasDamage?: boolean) {
   if (!status) {
     return {
-      icon: Clock,
+      icon: ClockSolidIcon,
       color: 'text-muted-foreground',
       bgColor: 'bg-muted',
-      badgeVariant: 'secondary' as const,
+      badgeVariant: 'expired' as const,
     }
   }
 
   switch (status) {
     case 'draft':
       return {
-        icon: Clock,
+        icon: ClockSolidIcon,
         color: 'text-amber-600 dark:text-amber-400',
         bgColor: 'bg-amber-50 dark:bg-amber-950/30',
-        badgeVariant: 'secondary' as const,
+        badgeVariant: 'pending' as const,
       }
     case 'completed':
       if (hasDamage) {
         return {
-          icon: AlertCircle,
+          icon: FailedSolidIcon,
           color: 'text-red-600 dark:text-red-400',
           bgColor: 'bg-red-50 dark:bg-red-950/30',
-          badgeVariant: 'error' as const,
+          badgeVariant: 'failed' as const,
         }
       }
       return {
-        icon: CheckCircle2,
+        icon: SuccessSolidIcon,
         color: 'text-emerald-600 dark:text-emerald-400',
         bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
-        badgeVariant: 'default' as const,
+        badgeVariant: 'success' as const,
       }
     case 'signed':
       if (hasDamage) {
         return {
-          icon: AlertCircle,
+          icon: FailedSolidIcon,
           color: 'text-red-600 dark:text-red-400',
           bgColor: 'bg-red-50 dark:bg-red-950/30',
-          badgeVariant: 'error' as const,
+          badgeVariant: 'failed' as const,
         }
       }
       return {
-        icon: PenLine,
+        icon: SubmittedSolidIcon,
         color: 'text-emerald-600 dark:text-emerald-400',
         bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
-        badgeVariant: 'default' as const,
+        badgeVariant: 'success' as const,
       }
     default:
       return {
-        icon: ClipboardX,
+        icon: FailedSolidIcon,
         color: 'text-muted-foreground',
         bgColor: 'bg-muted',
-        badgeVariant: 'secondary' as const,
+        badgeVariant: 'expired' as const,
       }
   }
 }
@@ -255,7 +244,7 @@ export function InspectionStatusCard({
             <CardTitle className="text-lg">{t('card.title')}</CardTitle>
           </div>
           {inspectionMode !== 'optional' && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="expired" className="text-xs">
               {t(`mode${inspectionMode.charAt(0).toUpperCase() + inspectionMode.slice(1)}`)}
             </Badge>
           )}

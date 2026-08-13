@@ -1,6 +1,16 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+import { useTheme } from "next-themes";
 
 export interface OnboardingPreviewState {
   storeName: string;
@@ -40,7 +50,19 @@ export function OnboardingPreviewProvider({
   children: React.ReactNode;
   initial?: Partial<OnboardingPreviewState>;
 }) {
+  const { resolvedTheme } = useTheme();
+  const hasAppliedUserTheme = useRef(Boolean(initial?.theme));
   const [preview, setPreview] = useState({ ...DEFAULT_PREVIEW, ...initial });
+
+  useEffect(() => {
+    if (hasAppliedUserTheme.current || !resolvedTheme) return;
+
+    setPreview((current) => ({
+      ...current,
+      theme: resolvedTheme === "dark" ? "dark" : "light",
+    }));
+    hasAppliedUserTheme.current = true;
+  }, [resolvedTheme]);
 
   const updatePreview = useCallback((patch: Partial<OnboardingPreviewState>) => {
     setPreview((prev) => ({ ...prev, ...patch }));

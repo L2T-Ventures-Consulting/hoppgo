@@ -1,5 +1,6 @@
 "use client";
 
+import { StarSolidIcon } from "@louez/ui/icons";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -9,7 +10,6 @@ import {
   Package,
   CalendarCheck,
   Users,
-  Crown,
   ArrowRight,
   Check,
   Zap,
@@ -57,7 +57,7 @@ export function UpgradeModal({
 
   const handleUpgrade = () => {
     setIsNavigating(true);
-    router.push("/dashboard/subscription");
+    router.push("/dashboard/settings/subscription");
   };
 
   // Limits only bite on Pro (Ultra and pay-as-you-go are unlimited), so a store
@@ -97,8 +97,14 @@ export function UpgradeModal({
               </DialogTitle>
               <DialogDescription className="text-center text-base">
                 {isOverLimit
-                  ? t(`${limitType}.overLimitDescription`, { count: currentCount, limit })
-                  : t(`${limitType}.limitReachedDescription`, { count: currentCount, limit })}
+                  ? t(`${limitType}.overLimitDescription`, {
+                      count: currentCount,
+                      limit,
+                    })
+                  : t(`${limitType}.limitReachedDescription`, {
+                      count: currentCount,
+                      limit,
+                    })}
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -128,8 +134,8 @@ export function UpgradeModal({
           {/* Upgrade CTA card */}
           <div className="rounded-lg border bg-card p-4 mb-6">
             <div className="flex items-center gap-3 mb-3">
-              <Badge className="bg-primary text-primary-foreground border-0 gap-1">
-                <Crown className="h-3 w-3" />
+              <Badge variant="progress" className="border-0 gap-1">
+                <StarSolidIcon className="h-3 w-3" />
                 {targetPlanName}
               </Badge>
               <Badge variant="success">{t("earlyBird")}</Badge>

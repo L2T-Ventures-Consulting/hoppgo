@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
+import { useQueryClient } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
 import { Reorder, useDragControls } from 'framer-motion'
-import { GripVertical, Package, Loader2 } from 'lucide-react'
+import { GripVertical } from 'lucide-react'
 import { toastManager } from '@louez/ui'
+
+import { ProductImage } from '@/components/product/product-image'
 
 import { Button } from '@louez/ui'
 import {
@@ -17,6 +19,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@louez/ui'
+
+import { invalidateProductsList } from '@/lib/orpc/invalidation'
 
 import { updateProductsOrder } from './actions'
 
@@ -32,21 +36,6 @@ interface ProductsOrderDialogProps {
   products: Product[]
 }
 
-function ProductImage({ src, alt }: { src?: string; alt: string }) {
-  if (!src) {
-    return (
-      <div className="flex h-9 w-12 items-center justify-center rounded-md bg-muted">
-        <Package className="h-4 w-4 text-muted-foreground" />
-      </div>
-    )
-  }
-
-  return (
-    <div className="relative h-9 w-12 overflow-hidden rounded-md bg-muted">
-      <Image src={src} alt={alt} fill className="object-cover" sizes="48px" />
-    </div>
-  )
-}
 
 interface DraggableProductProps {
   product: Product
@@ -70,7 +59,12 @@ function DraggableProduct({ product }: DraggableProductProps) {
       >
         <GripVertical className="h-5 w-5" />
       </button>
-      <ProductImage src={product.images?.[0]} alt={product.name} />
+      <ProductImage
+        src={product.images?.[0]}
+        alt={product.name}
+        sizes="48px"
+        containerClassName="h-9 shrink-0 rounded-md"
+      />
       <span className="flex-1 truncate text-sm font-medium">{product.name}</span>
     </Reorder.Item>
   )
@@ -84,6 +78,7 @@ export function ProductsOrderDialog({
   const t = useTranslations('dashboard.products')
   const tCommon = useTranslations('common')
   const tErrors = useTranslations('errors')
+  const queryClient = useQueryClient()
 
   const [products, setProducts] = useState(initialProducts)
   const [isLoading, setIsLoading] = useState(false)
@@ -106,6 +101,7 @@ export function ProductsOrderDialog({
         toastManager.add({ title: tErrors(result.error), type: 'error' })
       } else {
         toastManager.add({ title: t('orderUpdated'), type: 'success' })
+        await invalidateProductsList(queryClient)
         onOpenChange(false)
       }
     } catch {
@@ -144,8 +140,7 @@ export function ProductsOrderDialog({
           >
             {tCommon('cancel')}
           </Button>
-          <Button onClick={handleSave} disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleSave} isPending={isLoading}>
             {tCommon('save')}
           </Button>
         </DialogFooter>

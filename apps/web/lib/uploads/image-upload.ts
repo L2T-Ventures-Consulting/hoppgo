@@ -12,6 +12,8 @@ export const IMAGE_UPLOAD_MIME_TYPES = [
 ] as const;
 
 export type ImageUploadIssue = "invalidType" | "tooLarge";
+export type ProductImageProcessingKind = "ai-enhanced" | "background-removed";
+export type ProductImageProcessingOperation = "enhance" | "remove-background";
 
 export const IMAGE_UPLOAD_CONFIG = {
   avatar: { folder: null, maxSize: MAX_LOGO_SIZE },
@@ -44,6 +46,7 @@ export const getImageUploadIssue = (
 
 export const getImageKeyFromUrl = (url: string | null | undefined) => {
   if (!url) return null;
+  if (!url.includes("://") && !url.startsWith("/")) return null;
 
   try {
     // The base makes site-relative asset URLs ("/files/…", standalone
@@ -54,4 +57,25 @@ export const getImageKeyFromUrl = (url: string | null | undefined) => {
   } catch {
     return null;
   }
+};
+
+export const getProductImageProcessingKind = (
+  url: string | null | undefined,
+): ProductImageProcessingKind | null => {
+  const key = getImageKeyFromUrl(url)?.toLowerCase();
+  if (key?.endsWith("-ai.webp")) return "ai-enhanced";
+  if (key?.endsWith("-bg.webp")) return "background-removed";
+  return null;
+};
+
+export const canApplyProductImageOperation = (
+  url: string | null | undefined,
+  operation: ProductImageProcessingOperation,
+): boolean => {
+  const processingKind = getProductImageProcessingKind(url);
+  if (!processingKind) return true;
+
+  // A background-only result may still deliberately be upgraded with GPT
+  // Image. Every other repeat would only redo work already present.
+  return operation === "enhance" && processingKind === "background-removed";
 };

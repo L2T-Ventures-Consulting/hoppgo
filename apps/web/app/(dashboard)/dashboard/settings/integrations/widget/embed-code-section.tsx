@@ -1,32 +1,32 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { useTranslations } from 'next-intl'
-import { Copy, Check, ExternalLink, Code, Eye } from 'lucide-react'
+import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
-import { Button } from '@louez/ui'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@louez/ui";
+import { CodeIcon, ExternalLinkIcon, EyeIcon } from "@louez/ui/icons";
+
+import { CopyButton } from "@/components/ui/copy-button";
 
 interface EmbedCodeSectionProps {
-  embedUrl: string
-  storeName: string
+  embedUrl: string;
+  storeName: string;
 }
 
 export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps) {
-  const t = useTranslations('dashboard.settings.embed')
-  const [copied, setCopied] = useState(false)
-  const previewIframeRef = useRef<HTMLIFrameElement>(null)
+  const t = useTranslations("dashboard.settings.embed");
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
 
   // Auto-resize preview iframe via postMessage from embed
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'louez-embed-resize' && previewIframeRef.current) {
-        previewIframeRef.current.style.height = `${event.data.height}px`
+      if (event.data?.type === "louez-embed-resize" && previewIframeRef.current) {
+        previewIframeRef.current.style.height = `${event.data.height}px`;
       }
-    }
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [])
+    };
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
+  }, []);
 
   const embedSnippet = `<div id="louez-embed">
   <iframe
@@ -35,7 +35,7 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
     height="210"
     frameborder="0"
     style="border: none; border-radius: 16px; transition: height 0.3s ease;"
-    title="${t('iframeTitle', { storeName })}"
+    title="${t("iframeTitle", { storeName })}"
     allow="popups"
   ></iframe>
 </div>
@@ -46,13 +46,7 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
       if (iframe) iframe.style.height = e.data.height + "px";
     }
   });
-</script>`
-
-  const handleCopy = useCallback(async () => {
-    await navigator.clipboard.writeText(embedSnippet)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }, [embedSnippet])
+</script>`;
 
   return (
     <div className="space-y-6">
@@ -60,10 +54,10 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5" />
-            {t('preview')}
+            <EyeIcon className="h-5 w-5 shrink-0" />
+            {t("preview")}
           </CardTitle>
-          <CardDescription>{t('previewDescription')}</CardDescription>
+          <CardDescription>{t("previewDescription")}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-xl border bg-muted/30 p-6 flex justify-center">
@@ -72,8 +66,13 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
               src={embedUrl}
               width="100%"
               height="210"
-              style={{ border: 'none', borderRadius: '16px', maxWidth: '600px', transition: 'height 0.3s ease' }}
-              title={t('iframeTitle', { storeName })}
+              style={{
+                border: "none",
+                borderRadius: "16px",
+                maxWidth: "600px",
+                transition: "height 0.3s ease",
+              }}
+              title={t("iframeTitle", { storeName })}
             />
           </div>
         </CardContent>
@@ -83,40 +82,30 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Code className="h-5 w-5" />
-            {t('code')}
+            <CodeIcon className="h-5 w-5 shrink-0" />
+            {t("code")}
           </CardTitle>
-          <CardDescription>{t('codeDescription')}</CardDescription>
+          <CardDescription>{t("codeDescription")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* Code block */}
           <div className="relative">
-            <pre className="rounded-lg bg-zinc-950 p-4 text-sm text-zinc-300 overflow-x-auto">
+            <pre className="rounded-lg bg-muted p-4 text-sm text-muted-foreground overflow-x-auto">
               <code>{embedSnippet}</code>
             </pre>
-            <Button
+            <CopyButton
+              value={embedSnippet}
+              label={t("copy")}
+              copiedLabel={t("copied")}
               size="sm"
               variant="secondary"
               className="absolute top-2 right-2"
-              onClick={handleCopy}
-            >
-              {copied ? (
-                <>
-                  <Check className="h-4 w-4 mr-1" />
-                  {t('copied')}
-                </>
-              ) : (
-                <>
-                  <Copy className="h-4 w-4 mr-1" />
-                  {t('copy')}
-                </>
-              )}
-            </Button>
+            />
           </div>
 
           {/* Direct link */}
           <div className="flex items-center gap-2 pt-2">
-            <span className="text-sm text-muted-foreground">{t('directLink')}</span>
+            <span className="text-sm text-muted-foreground">{t("directLink")}</span>
             <a
               href={embedUrl}
               target="_blank"
@@ -124,11 +113,11 @@ export function EmbedCodeSection({ embedUrl, storeName }: EmbedCodeSectionProps)
               className="text-sm text-primary hover:underline inline-flex items-center gap-1"
             >
               {embedUrl}
-              <ExternalLink className="h-3 w-3" />
+              <ExternalLinkIcon className="h-3 w-3" />
             </a>
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

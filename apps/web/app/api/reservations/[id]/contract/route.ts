@@ -5,6 +5,14 @@ import { reservations } from '@louez/db'
 import { eq, and } from 'drizzle-orm'
 import { generateContract, getContractPdfBuffer } from '@/lib/pdf/generate'
 import type { SupportedLocale } from '@/lib/pdf/contract'
+import {
+  captureProductServerEvent,
+  captureReservationActionSucceeded,
+} from '@/lib/product-analytics/analytics'
+import {
+  productAnalyticsEvents,
+  reservationAnalyticsActions,
+} from '@/lib/product-analytics/analytics-events'
 
 // Parse Accept-Language header to determine preferred locale
 function getPreferredLocale(acceptLanguage: string | null): SupportedLocale {
@@ -74,6 +82,18 @@ export async function GET(
   // Always regenerate contract to ensure latest data with correct locale
   const contract = await generateContract({ reservationId, regenerate: true, locale })
   if (!contract) {
+    await captureProductServerEvent({
+      distinctId: store.userId,
+      event: productAnalyticsEvents.reservationActionFailed,
+      properties: {
+        feature: 'reservation_management',
+        surface: 'dashboard',
+        store_id: store.id,
+        reservation_id: reservationId,
+        action: reservationAnalyticsActions.downloadContract,
+        error_code: 'contract_generation_failed',
+      },
+    })
     return new NextResponse('Failed to generate contract', { status: 500 })
   }
 
@@ -81,8 +101,28 @@ export async function GET(
   const pdfBuffer = await getContractPdfBuffer(reservationId)
 
   if (!pdfBuffer) {
+    await captureProductServerEvent({
+      distinctId: store.userId,
+      event: productAnalyticsEvents.reservationActionFailed,
+      properties: {
+        feature: 'reservation_management',
+        surface: 'dashboard',
+        store_id: store.id,
+        reservation_id: reservationId,
+        action: reservationAnalyticsActions.downloadContract,
+        error_code: 'contract_file_missing',
+      },
+    })
     return new NextResponse('Contract file not found', { status: 404 })
   }
+
+  await captureReservationActionSucceeded({
+    distinctId: store.userId,
+    storeId: store.id,
+    reservationId,
+    action: reservationAnalyticsActions.downloadContract,
+    properties: { locale },
+  })
 
   // Return PDF - convert Buffer to Uint8Array for Response compatibility
   return new NextResponse(new Uint8Array(pdfBuffer), {

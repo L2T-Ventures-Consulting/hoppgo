@@ -2,16 +2,10 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@louez/ui'
 import { Badge } from '@louez/ui'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@louez/ui'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@louez/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@louez/ui'
-import { Users, Sparkles, Crown, Zap } from 'lucide-react'
+import { Users } from 'lucide-react'
+import { SparklesSolidIcon, StarSolidIcon, ZapSolidIcon } from '@louez/ui/icons'
 import { useTranslations } from 'next-intl'
 import { formatDate } from '@louez/utils'
 import type { ReferralData } from './actions'
@@ -21,28 +15,35 @@ interface ReferralsListProps {
 }
 
 function PlanBadge({ plan }: { plan: string }) {
-  const config: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
+  const config: Record<
+    string,
+    {
+      label: string;
+      icon: React.ReactNode;
+      variant: "submitted" | "review" | "success";
+    }
+  > = {
     pro: {
       label: 'Pro',
-      icon: <Sparkles className="h-3 w-3" />,
-      className: 'bg-primary/10 text-primary border-primary/20',
+      icon: <SparklesSolidIcon className="h-3 w-3" />,
+      variant: 'submitted' as const,
     },
     ultra: {
       label: 'Ultra',
-      icon: <Crown className="h-3 w-3" />,
-      className: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
+      icon: <StarSolidIcon className="h-3 w-3" />,
+      variant: 'review' as const,
     },
     pay_as_you_go: {
       label: 'Pay as you go',
-      icon: <Zap className="h-3 w-3" />,
-      className: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20',
+      icon: <ZapSolidIcon className="h-3 w-3" />,
+      variant: 'success' as const,
     },
   }
 
   const c = config[plan] || config.pay_as_you_go
 
   return (
-    <Badge variant="outline" className={c.className}>
+    <Badge variant={c.variant}>
       {c.icon}
       {c.label}
     </Badge>
@@ -52,14 +53,14 @@ function PlanBadge({ plan }: { plan: string }) {
 function StatusBadge({ status }: { status: string }) {
   const t = useTranslations('dashboard.referrals.list.status')
 
-  const variants: Record<string, 'default' | 'secondary' | 'error' | 'outline'> = {
-    active: 'default',
-    cancelled: 'secondary',
-    past_due: 'error',
-    trialing: 'outline',
+  const variants: Record<string, 'success' | 'expired' | 'failed' | 'progress'> = {
+    active: 'success',
+    cancelled: 'expired',
+    past_due: 'failed',
+    trialing: 'progress',
   }
 
-  return <Badge variant={variants[status] || 'secondary'}>{t(status)}</Badge>
+  return <Badge variant={variants[status] || 'expired'}>{t(status)}</Badge>
 }
 
 function RewardBadge({ rewarded }: { rewarded: boolean }) {
@@ -68,7 +69,7 @@ function RewardBadge({ rewarded }: { rewarded: boolean }) {
   return rewarded ? (
     <Badge variant="success">{t('rewarded')}</Badge>
   ) : (
-    <Badge variant="outline">{t('pending')}</Badge>
+    <Badge variant="pending">{t('pending')}</Badge>
   )
 }
 

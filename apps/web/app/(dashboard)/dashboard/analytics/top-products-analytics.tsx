@@ -1,9 +1,13 @@
 "use client";
 
 import Link from "next/link";
+
 import { useTranslations } from "next-intl";
+
 import { Badge } from "@louez/ui";
-import { Eye, ShoppingCart, Package } from "lucide-react";
+import { CartSolidIcon, EyeIcon, ProductSolidIcon } from "@louez/ui/icons";
+
+import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 
 export interface TopProductData {
   productId: string;
@@ -15,53 +19,41 @@ export interface TopProductData {
 
 interface TopProductsAnalyticsProps {
   products: TopProductData[];
-  storeSlug?: string;
 }
 
-export function TopProductsAnalytics({
-  products,
-  storeSlug: _storeSlug,
-}: TopProductsAnalyticsProps) {
+export const TopProductsAnalytics = ({ products }: TopProductsAnalyticsProps) => {
   const t = useTranslations("dashboard.analytics");
 
   if (products.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-        <Package className="mb-2 h-8 w-8" />
-        <p>{t("noProducts")}</p>
-      </div>
-    );
+    return <DashboardEmptyState icon={ProductSolidIcon} description={t("noProducts")} />;
   }
 
-  // Get max values for relative sizing
-  const maxViews = Math.max(...products.map((p) => p.views), 1);
+  const maxViews = Math.max(...products.map((product) => product.views), 1);
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {products.map((product, index) => {
         const viewsPercentage = (product.views / maxViews) * 100;
         const conversionRate =
           product.views > 0 ? ((product.conversions / product.views) * 100).toFixed(1) : "0";
 
         return (
-          <div
-            key={product.productId}
-            className="relative overflow-hidden rounded-lg border bg-card p-4"
-          >
-            {/* Background bar */}
+          <div key={product.productId} className="relative overflow-hidden rounded-xl border p-3">
+            {/* Relative-volume bar behind the row */}
             <div
-              className="absolute inset-y-0 left-0 bg-primary/5"
+              aria-hidden="true"
+              className="bg-primary/5 absolute inset-y-0 left-0"
               style={{ width: `${viewsPercentage}%` }}
             />
 
-            <div className="relative flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                {/* Rank badge */}
-                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold">
+            <div className="relative flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <Badge
+                  variant="expired"
+                  className="size-6 shrink-0 justify-center rounded-full tabular-nums"
+                >
                   {index + 1}
-                </div>
-
-                {/* Product name */}
+                </Badge>
                 <Link
                   href={`/dashboard/products/${product.productId}`}
                   className="truncate font-medium hover:underline"
@@ -70,19 +62,16 @@ export function TopProductsAnalytics({
                 </Link>
               </div>
 
-              {/* Stats */}
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Eye className="h-4 w-4" />
+              <div className="flex shrink-0 items-center gap-3 text-sm max-sm:pl-8.5">
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <EyeIcon className="size-4" />
                   <span className="tabular-nums">{product.views.toLocaleString()}</span>
-                </div>
-
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <ShoppingCart className="h-4 w-4" />
+                </span>
+                <span className="text-muted-foreground flex items-center gap-1">
+                  <CartSolidIcon className="size-4" />
                   <span className="tabular-nums">{product.cartAdditions.toLocaleString()}</span>
-                </div>
-
-                <Badge variant="secondary" className="tabular-nums">
+                </span>
+                <Badge variant="expired" className="tabular-nums">
                   {conversionRate}%
                 </Badge>
               </div>
@@ -92,4 +81,4 @@ export function TopProductsAnalytics({
       })}
     </div>
   );
-}
+};

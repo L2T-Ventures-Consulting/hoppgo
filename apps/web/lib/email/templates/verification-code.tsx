@@ -1,5 +1,6 @@
-import { Heading, Section, Text } from '@react-email/components'
+import { Section, Text } from '@react-email/components'
 import { BaseLayout } from './base-layout'
+import { EmailHeading, EmailText, FooterNote, emailTheme, styles } from './components'
 import { getEmailTranslations, type EmailLocale } from '../i18n'
 
 interface VerificationCodeEmailProps {
@@ -15,7 +16,7 @@ interface VerificationCodeEmailProps {
 export function VerificationCodeEmail({
   storeName,
   logoUrl,
-  primaryColor = '#0066FF',
+  primaryColor,
   storeEmail,
   storePhone,
   code,
@@ -34,49 +35,25 @@ export function VerificationCodeEmail({
       storePhone={storePhone}
       locale={locale}
     >
-      <Heading style={heading}>{messages.title}</Heading>
+      <EmailHeading>{messages.title}</EmailHeading>
 
-      <Text style={paragraph}>
-        {messages.body.replace('{storeName}', storeName)}
-      </Text>
+      <EmailText>{messages.body.replace('{storeName}', storeName)}</EmailText>
 
-      <Section style={codeContainer}>
+      <Section style={{ ...styles.card, textAlign: 'center' as const }}>
         <Text style={codeText}>{code}</Text>
       </Section>
 
-      <Text style={paragraph}>
-        {messages.expiry}
-      </Text>
+      <FooterNote>{messages.expiry}</FooterNote>
     </BaseLayout>
   )
 }
 
-const heading = {
-  fontSize: '24px',
-  fontWeight: 'bold',
-  color: '#1a1a1a',
-  marginBottom: '24px',
-}
-
-const paragraph = {
-  fontSize: '16px',
-  lineHeight: '26px',
-  color: '#525f7f',
-}
-
-const codeContainer = {
-  backgroundColor: '#f4f4f5',
-  borderRadius: '8px',
-  padding: '24px',
-  textAlign: 'center' as const,
-  margin: '24px 0',
-}
-
 const codeText = {
-  fontSize: '32px',
-  fontWeight: 'bold',
-  letterSpacing: '4px',
-  color: '#1a1a1a',
+  fontSize: '26px',
+  fontWeight: '700',
+  letterSpacing: '6px',
+  fontFamily: "'SF Mono', 'Roboto Mono', Menlo, Consolas, monospace",
+  color: emailTheme.colors.ink,
   margin: '0',
 }
 

@@ -64,7 +64,7 @@ export async function notifyReferrerRewardGranted(
       kind: input.kind,
       freeReservations: input.freeReservations,
       rewardValue,
-      ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/referrals`,
+      ctaUrl: `${env.NEXT_PUBLIC_APP_URL}/dashboard/settings/referrals`,
       locale: getLocaleFromCountry(store.settings?.country),
     });
   } catch (error) {

@@ -6,8 +6,6 @@ import { Readable } from "node:stream";
 import { env } from "@/env";
 import { getStorageClient, isProxiedStorage } from "@/lib/storage/files";
 
-export const runtime = "nodejs";
-
 // Same shape the upload pipeline enforces on keys (lib/storage/files.ts):
 // alphanumeric path segments ending in an image extension. Rejecting anything
 // else keeps this from becoming a generic bucket browser.

@@ -1,0 +1,136 @@
+export type VariantPresetId = 'size' | 'shoeSize' | 'color' | 'material';
+
+export type VariantPresetValueSeed =
+  | {
+      /** Literal label, locale-independent (e.g. "XS", "42"). */
+      label: string;
+      key?: never;
+      colorHex?: string;
+    }
+  | {
+      /** Translation key under unitTracking.presets.<id>.values when localized. */
+      key: string;
+      label?: never;
+      colorHex?: string;
+    };
+
+export interface ResolvedVariantPreset {
+  id: VariantPresetId;
+  key: string;
+  aliases: string[];
+  kind: 'size' | 'color' | 'custom';
+  label: string;
+  defaultActive: boolean;
+  values: Array<{ label: string; colorHex: string | null }>;
+}
+
+export interface VariantPreset {
+  id: VariantPresetId;
+  /** Locale-independent key stored in variant definitions and product axes. */
+  key: string;
+  /** Historical localized keys that may already be persisted. */
+  aliases: string[];
+  kind: 'size' | 'color' | 'custom';
+  defaultActive: boolean;
+  values: VariantPresetValueSeed[];
+}
+
+type VariantPresetTranslator = (key: string) => string;
+
+export const resolveVariantPresets = (
+  translate: VariantPresetTranslator,
+): ResolvedVariantPreset[] =>
+  VARIANT_PRESETS.map((preset) => ({
+    id: preset.id,
+    key: preset.key,
+    aliases: preset.aliases,
+    kind: preset.kind,
+    label: translate(`presets.${preset.id}.label`),
+    defaultActive: preset.defaultActive,
+    values: preset.values.map((value) => ({
+      label:
+        value.label ?? translate(`presets.${preset.id}.values.${value.key}`),
+      colorHex: value.colorHex ?? null,
+    })),
+  }));
+
+/**
+ * System presets offered in the variant picker. Labels and localized value
+ * names resolve client-side via unitTracking.presets.* translations. Taille
+ * and Couleur are available by default; the other presets must be enabled
+ * explicitly from the shared variant manager.
+ */
+export const VARIANT_PRESETS: VariantPreset[] = [
+  {
+    id: 'size',
+    key: 'size',
+    aliases: [
+      'Taille',
+      'Größe',
+      'Talla',
+      'Taglia',
+      'Maat',
+      'Rozmiar',
+      'Tamanho',
+    ],
+    kind: 'size',
+    defaultActive: true,
+    values: ['XS', 'S', 'M', 'L', 'XL', 'XXL'].map((label) => ({ label })),
+  },
+  {
+    id: 'shoeSize',
+    key: 'shoe-size',
+    aliases: [
+      'Pointure',
+      'Shoe size',
+      'Schuhgröße',
+      'Número de calzado',
+      'Numero di scarpe',
+      'Schoenmaat',
+      'Rozmiar buta',
+      'Tamanho do calçado',
+    ],
+    kind: 'size',
+    defaultActive: false,
+    values: Array.from({ length: 11 }, (_, i) => ({ label: String(36 + i) })),
+  },
+  {
+    id: 'color',
+    key: 'color',
+    aliases: ['Couleur', 'Farbe', 'Colore', 'Kleur', 'Kolor', 'Cor'],
+    kind: 'color',
+    defaultActive: true,
+    values: [
+      { key: 'black', colorHex: '#171717' },
+      { key: 'white', colorHex: '#FAFAFA' },
+      { key: 'gray', colorHex: '#6B7280' },
+      { key: 'red', colorHex: '#EF4444' },
+      { key: 'orange', colorHex: '#F97316' },
+      { key: 'yellow', colorHex: '#EAB308' },
+      { key: 'green', colorHex: '#22C55E' },
+      { key: 'blue', colorHex: '#3B82F6' },
+      { key: 'purple', colorHex: '#8B5CF6' },
+      { key: 'pink', colorHex: '#EC4899' },
+      { key: 'brown', colorHex: '#92400E' },
+      { key: 'beige', colorHex: '#D6C7A1' },
+    ],
+  },
+  {
+    id: 'material',
+    key: 'material',
+    aliases: ['Matière', 'Material', 'Materiale', 'Materiaal', 'Materiał'],
+    kind: 'custom',
+    defaultActive: false,
+    values: [
+      'cotton',
+      'leather',
+      'wood',
+      'metal',
+      'plastic',
+      'aluminum',
+      'carbon',
+    ].map((key) => ({
+      key,
+    })),
+  },
+];

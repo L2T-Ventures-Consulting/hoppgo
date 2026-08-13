@@ -1,4 +1,15 @@
 /**
+ * Store-configured overrides of an email's wording ({name}/{number}
+ * placeholders). Structural subset of `EmailCustomContent` in @louez/types.
+ */
+type EmailContentOverride = {
+  subject?: string;
+  greeting?: string;
+  message?: string;
+  signature?: string;
+};
+
+/**
  * Minimal Session type matching next-auth Session
  * Defined locally to avoid dependency on next-auth in this package
  */
@@ -266,6 +277,8 @@ export interface BaseContext {
         };
       };
       internalNotes?: string;
+      discountAmount?: number;
+      depositOverride?: number;
       tulipInsuranceOptIn?: boolean;
       sendConfirmationEmail?: boolean;
       sendAsQuote?: boolean;
@@ -357,12 +370,47 @@ export interface BaseContext {
         customMessage?: string;
       },
     ) => Promise<{ success?: boolean; error?: string }>;
+    getManualEmailRenderContext?: (reservationId: string) => Promise<
+      | {
+          store: {
+            name: string;
+            email?: string | null;
+            phone?: string | null;
+            address?: string | null;
+            theme?: { mode?: "light" | "dark"; primaryColor?: string } | null;
+            settings?: {
+              currency?: string;
+              country?: string;
+              timezone?: string;
+            } | null;
+            emailSettings?: {
+              pickupReminderContent?: EmailContentOverride;
+              returnReminderContent?: EmailContentOverride;
+            } | null;
+          };
+          customer: { firstName: string; lastName: string; email: string };
+          reservation: {
+            id: string;
+            number: string;
+            startDate: string;
+            endDate: string;
+            totalAmount: string;
+            depositAmount: string;
+            items: { name: string; quantity: number; totalPrice: string }[];
+          };
+          reservationUrl: string;
+          logoUrl: string | null;
+          showPaymentCta: boolean;
+        }
+      | { error: string }
+    >;
     sendReservationModificationEmail?: (
       reservationId: string,
       data?: { previousPeriod?: { startDate: Date; endDate: Date } },
     ) => Promise<{ success?: boolean; error?: string }>;
     sendAccessLink?: (
       reservationId: string,
+      data?: { customMessage?: string },
     ) => Promise<{ success?: boolean; error?: string } & Record<string, unknown>>;
     sendAccessLinkBySms?: (
       reservationId: string,

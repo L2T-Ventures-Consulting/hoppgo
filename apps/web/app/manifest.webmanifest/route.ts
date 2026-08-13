@@ -6,8 +6,6 @@ import { getLocale, getTranslations } from 'next-intl/server';
 // matches each visitor's language rather than a single fixed locale. The locale
 // is resolved by the shared next-intl config (NEXT_LOCALE cookie, then
 // Accept-Language) — see apps/web/i18n/request.ts.
-export const dynamic = 'force-dynamic';
-
 // Fixed brand blue for the install splash / standalone chrome (the live in-app
 // theme-color is handled responsively by the dashboard layout's viewport).
 const BRAND_COLOR = '#1f54dd';

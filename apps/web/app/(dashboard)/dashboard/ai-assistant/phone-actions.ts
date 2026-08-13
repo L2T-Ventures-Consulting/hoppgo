@@ -79,6 +79,6 @@ export async function updateAiPhoneSettings(data: AiPhoneSettingsInput) {
     }
   }
 
-  revalidatePath('/dashboard/ai-assistant')
+  revalidatePath('/dashboard/ai-assistant/voice')
   return { success: true, warning }
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { ReviewSolidIcon, SuccessSolidIcon, XCircleSolidIcon } from '@louez/ui/icons'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
@@ -14,7 +15,6 @@ import {
   Phone,
   User,
   Clock,
-  AlertTriangle,
   Eye,
   CalendarDays,
   ChevronDown,
@@ -251,8 +251,8 @@ export function SmsContent({
             </div>
             <div className="flex items-center gap-2">
               {isAtLimit && (
-                <Badge variant="error" className="flex items-center gap-1">
-                  <AlertTriangle className="h-3 w-3" />
+                <Badge variant="failed" className="flex items-center gap-1">
+                  <ReviewSolidIcon className="h-3 w-3" />
                   {t('quota.limitReached')}
                 </Badge>
               )}
@@ -431,7 +431,7 @@ export function SmsContent({
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="secondary" className="font-normal">
+                        <Badge variant="expired" className="font-normal">
                           {t(`types.${TEMPLATE_TYPE_LABELS[log.templateType] || 'custom'}`)}
                         </Badge>
                       </TableCell>
@@ -505,17 +505,17 @@ export function SmsContent({
 
                 {/* Status and Type */}
                 <div className="flex items-center gap-3">
-                  <Badge variant="secondary">
+                  <Badge variant="expired">
                     {t(`types.${TEMPLATE_TYPE_LABELS[selectedSms.templateType] || 'custom'}`)}
                   </Badge>
                   {selectedSms.status === 'sent' ? (
                     <Badge variant="success">
-                      <CheckCircle2 className="mr-1 h-3 w-3" />
+                      <SuccessSolidIcon className="mr-1 h-3 w-3" />
                       {t('status.sent')}
                     </Badge>
                   ) : (
-                    <Badge variant="error">
-                      <XCircle className="mr-1 h-3 w-3" />
+                    <Badge variant="failed">
+                      <XCircleSolidIcon className="mr-1 h-3 w-3" />
                       {t('status.failed')}
                     </Badge>
                   )}

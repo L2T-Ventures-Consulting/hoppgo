@@ -1,9 +1,8 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { type RegisterableHotkey, useHotkey } from '@tanstack/react-hotkeys';
+import * as React from "react";
 
-import { Search, X } from 'lucide-react';
+import { Search, X } from "lucide-react";
 
 import {
   InputGroup,
@@ -11,24 +10,23 @@ import {
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
-} from '@louez/ui';
+} from "@louez/ui";
+import { cn } from "@louez/utils";
 
-import { keyboardShortcuts } from '@/lib/keyboard-shortcuts';
+import { useTrackedKeyboardHotkey } from "@/hooks/use-tracked-keyboard-shortcut";
 
-type SearchInputProps = Omit<React.ComponentProps<typeof InputGroupInput>, 'type'> & {
+type SearchInputProps = Omit<React.ComponentProps<typeof InputGroupInput>, "type"> & {
   clearLabel: string;
   enableShortcut?: boolean;
   groupClassName?: string;
   onClear?: () => void;
-  shortcutHotkey?: RegisterableHotkey;
-  shortcutLabel?: string;
   showShortcutHint?: boolean;
 };
 
 function setRef<T>(ref: React.Ref<T> | undefined, value: T | null) {
   if (!ref) return;
 
-  if (typeof ref === 'function') {
+  if (typeof ref === "function") {
     ref(value);
     return;
   }
@@ -45,8 +43,6 @@ function SearchInput(
     onChange,
     onClear,
     onKeyDown,
-    shortcutHotkey = keyboardShortcuts.search.focus.hotkey,
-    shortcutLabel = keyboardShortcuts.search.focus.label,
     showShortcutHint = true,
     value,
     ...props
@@ -54,11 +50,10 @@ function SearchInput(
   ref: React.Ref<HTMLInputElement>,
 ) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const stringValue = typeof value === 'string' ? value : value?.toString() ?? '';
+  const stringValue = typeof value === "string" ? value : (value?.toString() ?? "");
   const hasValue = stringValue.length > 0;
-
-  useHotkey(
-    shortcutHotkey,
+  const shortcut = useTrackedKeyboardHotkey(
+    "search",
     () => {
       inputRef.current?.focus();
     },
@@ -81,12 +76,12 @@ function SearchInput(
         value={value}
         onChange={onChange}
         onKeyDown={(event) => {
-          if (event.key === 'Escape') {
+          if (event.key === "Escape") {
             event.currentTarget.blur();
           }
           onKeyDown?.(event);
         }}
-        className={className}
+        className={cn(className, "pl-1")}
         {...props}
       />
       <InputGroupAddon align="inline-start">
@@ -106,7 +101,7 @@ function SearchInput(
       )}
       {!hasValue && showShortcutHint && enableShortcut && (
         <InputGroupAddon align="inline-end">
-          <InputGroupText>{shortcutLabel}</InputGroupText>
+          <InputGroupText>{shortcut.label}</InputGroupText>
         </InputGroupAddon>
       )}
     </InputGroup>

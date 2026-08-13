@@ -4,6 +4,8 @@
     "description": "Eenvoudig en modern materiaalverhuurplatform"
   },
   "common": {
+    "duration": "Duur",
+    "price": "Prijs",
     "save": "Opslaan",
     "unsavedChanges": "Niet-opgeslagen wijzigingen",
     "cancel": "Annuleren",
@@ -22,7 +24,11 @@
     "error": "Fout",
     "success": "Gelukt",
     "confirm": "Bevestigen",
+    "done": "Klaar",
     "close": "Sluiten",
+    "play": "Afspelen",
+    "pause": "Pauze",
+    "seek": "Zoeken",
     "yes": "Ja",
     "no": "Nee",
     "view": "Bekijken",
@@ -114,14 +120,20 @@
     },
     "dateTimePicker": {
       "select": "Selecteren",
+      "chooseDate": "Kies een datum",
+      "choosePeriod": "Kies een periode",
       "naturalPlaceholder": "bijv. morgen om 14:00 of 12 mei om 13:00",
       "time": "Tijd",
+      "startTime": "Start",
+      "endTime": "Einde",
       "confirm": "Bevestigen"
     },
     "customerSearch": {
       "placeholder": "Zoek een klant...",
       "noResults": "Geen klant gevonden",
-      "selectCustomer": "Selecteer een klant"
+      "selectCustomer": "Selecteer een klant",
+      "createCustomer": "Klant aanmaken",
+      "createNamed": "“{query}” aanmaken"
     }
   },
   "auth": {
@@ -224,20 +236,10 @@
   },
   "dashboard": {
     "aiAssistant": {
-      "header": {
-        "title": "AI-assistent",
-        "subtitle": "Je winkel adviseert, antwoordt en reserveert — automatisch",
-        "credits": "{count} credits",
-        "creditsUnlimited": "Onbeperkte credits",
-        "recharge": "Opwaarderen"
-      },
       "hero": {
         "eyebrow": "AI-assistent",
-        "title": "Je winkel antwoordt, adviseert en reserveert, ook als je er niet bent",
-        "subtitle": "Activeer de online adviseur en de spraakagent: je klanten krijgen direct antwoord, jij krijgt gekwalificeerde reserveringen.",
         "activate": "Activeren",
         "upgrade": "Plan upgraden",
-        "upgradeHint": "De AI-assistent is inbegrepen vanaf het Pro-plan.",
         "advisor": {
           "title": "Online adviseur",
           "b1": "Beantwoordt 24/7 vragen van je klanten over je winkel",
@@ -249,6 +251,20 @@
           "b1": "Neemt elke oproep aan, op elk uur",
           "b2": "Deelt openingstijden, tarieven en beschikbaarheid mondeling",
           "b3": "Neemt reserveringen aan en geeft berichten aan je door"
+        }
+      },
+      "pages": {
+        "advisor": {
+          "title": "Online adviseur",
+          "description": "Laat een AI-assistent uw klanten verwelkomen in uw winkel, hun vragen beantwoorden en hen naar de juiste verhuur begeleiden"
+        },
+        "voice": {
+          "title": "Spraakagent",
+          "description": "Een AI-spraakagent die je telefoonlijn beantwoordt — informeert je klanten en neemt reserveringen op, in de taal die je kiest."
+        },
+        "conversations": {
+          "title": "Klantgesprekken",
+          "description": "Bekijk wat klanten de adviseur vroegen en welke gesprekken tot een reservering leidden"
         }
       }
     },
@@ -267,7 +283,13 @@
         "step1Other": "Open het menu en tik op 'Delen'",
         "step2": "Kies 'Zet op beginscherm'",
         "step3": "Tik op 'Voeg toe'"
-      }
+      },
+      "benefits": {
+        "home": "Pictogram op je beginscherm",
+        "fullscreen": "Volledig scherm, zonder browserbalk",
+        "push": "Reserveringsmeldingen"
+      },
+      "sidebarLabel": "App installeren"
     },
     "title": "Dashboard",
     "notifications": {
@@ -318,7 +340,21 @@
       "newReservation": "Nieuwe reservering",
       "reservationLimitReached": "Limiet bereikt",
       "help": "Hulp",
-      "feedback": "Hulp en feedback"
+      "feedback": "Hulp en feedback",
+      "aiCreditsLow": "Tegoed raakt op"
+    },
+    "shortcuts": {
+      "actions": {
+        "commandPalette": "Opdrachtpalet openen",
+        "aiAssistant": "AI-assistent openen",
+        "toggleTheme": "Wisselen tussen het lichte en donkere thema",
+        "sidebar": "Zijbalk tonen of verbergen",
+        "search": "Zoeken activeren",
+        "createReservation": "Reservering maken",
+        "goToReservations": "Naar reserveringen gaan",
+        "goToCalendar": "Naar kalender gaan",
+        "save": "Actief formulier opslaan"
+      }
     },
     "storeSwitcher": {
       "selectStore": "Selecteer een winkel",
@@ -553,6 +589,9 @@
     },
     "navigation": {
       "aiAssistant": "AI-assistent",
+      "aiConversations": "Klantgesprekken",
+      "aiAdvisor": "Online adviseur",
+      "aiVoice": "Spraakagent",
       "home": "Home",
       "products": "Producten",
       "inventory": "Inventaris",
@@ -562,13 +601,16 @@
       "categories": "Categorieën",
       "statistics": "Statistieken",
       "analytics": "Analyses",
+      "analyticsSales": "Verkopen",
+      "analyticsTraffic": "Verkeer",
       "team": "Team",
       "referrals": "Verwijzingen",
       "sms": "SMS",
       "subscription": "Abonnement",
       "settings": "Instellingen",
       "store": "Mijn winkel",
-      "multiStore": "Multi-winkel"
+      "multiStore": "Multi-winkel",
+      "aiCredits": "AI-tegoed"
     },
     "home": {
       "viewAll": "Alles bekijken",
@@ -650,7 +692,8 @@
         "noDepartures": "Geen overdrachten gepland vandaag",
         "noReturns": "Geen retours gepland vandaag",
         "noActivityTitle": "Rustige dag",
-        "noActivityDescription": "Geen operaties gepland vandaag"
+        "noActivityDescription": "Geen operaties gepland vandaag",
+        "overdue": "Te laat"
       },
       "pending": {
         "title": "Openstaande aanvragen",
@@ -758,16 +801,6 @@
         "archived": "Gearchiveerd"
       },
       "form": {
-        "steps": {
-          "photos": "Foto's",
-          "photosDescription": "Productafbeeldingen",
-          "info": "Informatie",
-          "infoDescription": "Naam en beschrijving",
-          "pricing": "Prijzen",
-          "pricingDescription": "Prijs en tarieven",
-          "preview": "Publiceren",
-          "previewDescription": "Controleren en publiceren"
-        },
         "photos": "Foto's",
         "photosDescription": "Voeg tot 5 foto's van uw product toe",
         "addImage": "Toevoegen",
@@ -779,6 +812,22 @@
         "uploading": "Uploaden...",
         "imageUploadError": "Upload mislukt",
         "recropImage": "Opnieuw bijsnijden",
+        "openImageViewer": "Foto bekijken",
+        "imageHistoryAction": "Geschiedenis bekijken",
+        "imageHistoryTitle": "Fotogeschiedenis",
+        "imageHistoryDescription": "Bekijk elke versie van deze foto en kies welke je wilt gebruiken. Eerdere versies blijven bewaard.",
+        "imageHistoryOriginal": "Originele foto",
+        "imageHistoryCropped": "Na bijsnijden",
+        "imageHistoryAiEnhanced": "Na AI-verbetering",
+        "imageHistoryBackgroundRemoved": "Na achtergrond verwijderen",
+        "imageHistoryCurrent": "In gebruik",
+        "imageHistoryInitialVersion": "Eerste versie",
+        "imageHistoryUseVersion": "Deze versie gebruiken",
+        "imageHistoryDeleteVersion": "Deze versie verwijderen",
+        "imageHistoryDeleteTitle": "Deze versie verwijderen?",
+        "imageHistoryDeleteDescription": "Deze versie wordt uit de geschiedenis verwijderd. De andere versies blijven beschikbaar.",
+        "imageHistoryDeleteCancel": "Annuleren",
+        "imageHistoryDeleteConfirm": "Verwijderen",
         "cropUnsupportedFormat": "Dit afbeeldingsformaat kan niet opnieuw worden bijgesneden",
         "cropDialogTitle": "Pas je foto's aan",
         "cropDialogDescription": "Gebruik een 4:3 uitsnede voor een consistente weergave in de storefront",
@@ -797,6 +846,129 @@
         "cropPreviewTitle": "Voorbeeld",
         "cropPreviewDescription": "Zo zal je foto eruitzien in de winkel",
         "cropUploadSelected": "Selectie uploaden",
+        "aiEnhanceAction": "Verbeteren met AI",
+        "removeBackgroundAction": "Achtergrond verwijderen",
+        "aiEnhanceLoading": "Verwerken…",
+        "aiEnhanceReadyBadge": "Te beoordelen",
+        "aiEnhanceQueuedBadge": "In wachtrij",
+        "aiEnhancedBadge": "Verbeterd met AI",
+        "backgroundRemovedBadge": "Achtergrond verwijderd",
+        "aiEnhanceErrorAlreadyProcessed": "Deze foto is al verwerkt",
+        "aiEnhanceBatchAction": "Foto's uniform maken",
+        "aiEnhanceBatchHint": "Snijdt uw producten uit en centreert ze in een 4:3-kader",
+        "aiEnhanceBatchProgress": "Foto {current} van {total}…",
+        "aiEnhanceDialogTitle": "Voor / Na",
+        "removeBackgroundDialogTitle": "Achtergrond verwijderd",
+        "aiEnhanceDialogDescription": "Vergelijk het resultaat voordat u uw foto vervangt.",
+        "aiEnhanceRemaining": "{count, plural, one {# foto te beoordelen} other {# foto's te beoordelen}}",
+        "aiEnhanceBefore": "Voor",
+        "aiEnhanceAfter": "Na",
+        "aiEnhanceAccept": "Deze versie gebruiken",
+        "aiEnhanceReject": "Origineel behouden",
+        "aiEnhanceTransparencyHint": "Transparante achtergrond, product gecentreerd in een 4:3-kader",
+        "aiEnhanceTransparencyHintPreserve": "Transparante achtergrond, oorspronkelijke kadrering behouden in 4:3",
+        "aiEnhanceBackgroundCheckerboard": "Dambord",
+        "aiEnhanceBackgroundWhite": "Wit",
+        "aiEnhanceError": "Verbeteren van de foto is mislukt",
+        "aiEnhanceErrorCredits": "Uw AI-credits zijn op. Vul ze aan om uw foto's te blijven verbeteren.",
+        "aiEnhanceErrorDisabled": "AI-verbetering is momenteel niet beschikbaar.",
+        "removeBackgroundErrorDisabled": "Achtergrond verwijderen is momenteel niet beschikbaar.",
+        "aiEnhanceErrorInvalidImage": "Deze afbeelding kan niet worden verbeterd",
+        "aiEnhanceErrorEmptyImage": "Er is geen product gedetecteerd op deze foto",
+        "aiEnhanceErrorProvider": "De verbeterservice is tijdelijk niet beschikbaar. Probeer het over enkele ogenblikken opnieuw.",
+        "removeBackgroundErrorProvider": "De service voor achtergrondverwijdering is tijdelijk niet beschikbaar. Probeer het over enkele ogenblikken opnieuw.",
+        "aiEnhanceOriginalMissing": "De originele foto staat niet meer in het formulier",
+        "aiEnhanceSavedToHistory": "De AI-versie is in de geschiedenis bewaard",
+        "aiEnhanceCropAction": "Verbeteren met AI",
+        "aiEnhancePromoTitle": "Verbeter uw foto's met AI",
+        "aiEnhancePromoDescription": "Scherpe, consistente winkelbeelden met één klik.",
+        "aiEnhancePromoBenefitBackground": "De achtergrond wordt verwijderd en vervangen door transparantie",
+        "aiEnhancePromoBenefitFraming": "Uw product staat perfect gecentreerd in een 4:3-kader",
+        "aiEnhancePromoBenefitConsistency": "Een uniforme uitstraling in uw hele winkel",
+        "aiEnhancePromoNote": "Voor deze functie moet AI in uw account zijn geactiveerd.",
+        "aiEnhancePromoCta": "AI activeren",
+        "aiEnhancePromoClose": "Later",
+        "video": "Video",
+        "aiCreditsPerImage": "{count, plural, one {# credit} other {# credits}} / foto",
+        "aiCreditsBgRemoval": "Alleen achtergrond verwijderen: {count, plural, one {# credit} other {# credits}}",
+        "aiCreditsBgRemovalFree": "Achtergrond verwijderen inbegrepen",
+        "aiCreditsBalance": "Saldo: {count, plural, one {# credit} other {# credits}}",
+        "aiCreditsBalanceUnlimited": "Onbeperkte credits",
+        "aiCreditsBatchEstimate": "Ongeveer {credits, plural, one {# credit} other {# credits}} voor {images, plural, one {# foto} other {# foto's}}",
+        "aiCreditsLearnMore": "Meer informatie",
+        "aiCreditsLearnMoreTitle": "Foto's die verkopen",
+        "aiCreditsLearnMoreValue": "De AI snijdt je product uit, maakt de achtergrond uniform en kadreert opnieuw: professionele beelden die klanten vertrouwen geven en je conversie verhogen.",
+        "aiCreditsLearnMoreCost": "Elke verbeterde foto kost {count, plural, one {# credit} other {# credits}}, eerst van je maandelijkse credits en daarna van je prepaidsaldo.",
+        "aiCreditsLearnMoreLink": "Mijn AI-credits bekijken",
+        "aiCreditsExhaustedTitle": "Niet genoeg AI-credits",
+        "aiCreditsExhaustedDescription": "Fotoverbetering staat op pauze: je saldo dekt geen foto meer. Laad credits op om verder te gaan.",
+        "aiCreditsRecharge": "Opwaarderen",
+        "aiChoiceTitle": "Wat doen we met deze foto?",
+        "aiChoiceDescription": "Kies het resultaat — je kunt het altijd nog aanpassen.",
+        "aiChoiceEnhanceDescription": "Professionele look: strakke achtergrond, product uitgesneden en gecentreerd",
+        "aiChoiceRemoveBackgroundDescription": "Behoudt je foto en vervangt alleen de achtergrond",
+        "aiChoiceCrop": "Zelf bijsnijden",
+        "aiChoiceCropDescription": "Stel de 4:3-uitsnede handmatig in",
+        "aiChoiceUseAsIs": "Ongewijzigd gebruiken",
+        "aiChoiceBatchEnhance": "{count, plural, one {# foto verbeteren} other {Alle # foto's verbeteren}}",
+        "cropBackToChoice": "Terug naar de opties",
+        "aiCreditsChip": "{count, plural, one {# credit} other {# credits}}",
+        "aiCreditsChipIncluded": "Inbegrepen",
+        "aiCreditsTooltipTitle": "AI-verbetering",
+        "aiCreditsTooltipWhat": "Je product wordt uitgesneden, de achtergrond uniform gemaakt en het beeld op 4:3 gezet — een studioresultaat.",
+        "aiCreditsTooltipCost": "{count, plural, one {# credit} other {# credits}} per foto",
+        "aiCreditsTooltipBgTitle": "Achtergrond verwijderen",
+        "aiCreditsTooltipBgWhat": "Je foto blijft precies zoals hij is: alleen de achtergrond verdwijnt.",
+        "aiCreditsTooltipFree": "Inbegrepen in je abonnement",
+        "aiProcessingTitle": "Je foto wordt verbeterd",
+        "aiProcessingTitleBackground": "Achtergrond wordt verwijderd",
+        "aiProcessingDescription": "Je hoeft niet te wachten: het werk gaat door als je dit sluit.",
+        "aiProcessingContinueBackground": "Op de achtergrond doorgaan",
+        "aiProcessingFailedTitle": "De verwerking is niet afgerond",
+        "aiProcessingFailedDescription": "Je foto's zijn gewoon toegevoegd. Je kunt de verwerking altijd opnieuw starten.",
+        "aiProcessingRetry": "Opnieuw proberen",
+        "aiProcessingClose": "Sluiten",
+        "aiStepPrepareLabel": "Voorbereiding",
+        "aiStepPrepareMessage1": "We analyseren je foto…",
+        "aiStepPrepareMessage2": "We zoeken het product in het beeld.",
+        "aiStepPrepareMessage3": "Licht en kleuren worden gemeten.",
+        "aiStepEnhanceLabel": "AI-verbetering",
+        "aiStepEnhanceMessage1": "De AI werkt aan licht en scherpte.",
+        "aiStepEnhanceMessage2": "Kleuren worden afgestemd op een natuurgetrouw resultaat.",
+        "aiStepEnhanceMessage3": "Dit is de langste stap — het wachten waard.",
+        "aiStepEnhanceMessage4": "Je beeld komt steeds dichter bij een studiofoto.",
+        "aiStepCutoutLabel": "Uitsnijden",
+        "aiStepCutoutMessage1": "Product en achtergrond worden gescheiden.",
+        "aiStepCutoutMessage2": "De randen worden pixel voor pixel bijgewerkt.",
+        "aiStepCutoutMessage3": "Een strakke achtergrond zet je product op de voorgrond.",
+        "aiStepFinishLabel": "Afwerking",
+        "aiStepFinishMessage1": "4:3-uitsnede en centrering van het product.",
+        "aiStepFinishMessage2": "Laatste aanpassingen voordat we het resultaat tonen.",
+        "aiStepFinishMessage3": "Nog heel even…",
+        "aiEnhanceLearnMoreTitle": "Foto's waar je van wilt huren",
+        "aiEnhanceLearnMoreDescription": "De AI maakt van een snelle telefoonfoto een catalogusbeeld.",
+        "aiEnhanceLearnMoreBenefit1": "Een professionele uitstraling zonder studio of apparatuur: je product komt scherp en goed belicht naar voren.",
+        "aiEnhanceLearnMoreBenefit2": "Een uniforme catalogus: al je advertenties delen dezelfde kadrering en dezelfde achtergrond.",
+        "aiEnhanceLearnMoreBenefit3": "Verzorgde beelden wekken vertrouwen, en klanten boeken makkelijker.",
+        "aiEnhanceLearnMoreGalleryTitle": "Voorbeelden uit andere winkels",
+        "aiEnhanceLearnMoreHeroAlt": "Voorbeeld van een door AI verbeterde foto",
+        "aiEnhanceLearnMoreExampleAlt": "Voorbeeld {index}: foto voor en na de verbetering",
+        "removeBackgroundLearnMoreTitle": "Een achtergrond die opzij gaat voor je product",
+        "removeBackgroundLearnMoreDescription": "We laten je foto precies zoals hij is en halen alleen de achtergrond weg.",
+        "removeBackgroundLearnMoreBenefit1": "De achtergrond van je etalage neemt het over: het product past overal, zonder witte rand.",
+        "removeBackgroundLearnMoreBenefit2": "Geen garage of woonkamer meer op de achtergrond die de aandacht van het product afleidt.",
+        "removeBackgroundLearnMoreBenefit3": "Ideaal als je foto al goed is en alleen de omgeving tegenvalt.",
+        "removeBackgroundLearnMoreThemeTitle": "Past bij zowel het lichte als het donkere thema",
+        "removeBackgroundLearnMoreThemeDescription": "Het uitgesneden product ligt op de achtergrond van je etalage en blijft er goed uitzien, welk thema je bezoeker ook kiest.",
+        "removeBackgroundLearnMoreThemeLight": "Licht thema",
+        "removeBackgroundLearnMoreThemeDark": "Donker thema",
+        "removeBackgroundLearnMoreAlt": "Voorbeeld van een uitgesneden product",
+        "removeImage": "Foto verwijderen",
+        "aiActionWithCost": "{action} — {cost}",
+        "aiEnhanceCancelled": "Generatie geannuleerd",
+        "aiCancelGeneration": "Generatie annuleren",
+        "aiCancelledTitle": "Generatie geannuleerd",
+        "aiCancelledDescription": "Er zijn geen credits afgeschreven. Je foto's zijn gewoon toegevoegd — start de verwerking wanneer je wilt opnieuw.",
         "information": "Informatie",
         "name": "Productnaam",
         "namePlaceholder": "Bijv. Mountainbike XC 500",
@@ -892,7 +1064,9 @@
             "strictLine": "Vaste stappen",
             "progressiveLine": "Progressief",
             "savings": "Klantbesparing",
-            "basePricing": "Basistarieven"
+            "basePricing": "Basistarieven",
+            "title": "Prijssimulatie",
+            "subtitle": "Totale prijs per huurperiode"
           }
         },
         "unitTracking": {
@@ -932,7 +1106,7 @@
           "bookingAttributesEmpty": "Geen boekingskenmerken geconfigureerd. Alle gevolgde eenheden delen de standaardcombinatie.",
           "bookingAttributeValuePlaceholder": "{label} waarde",
           "combinationKey": "Combinatie",
-          "missingAttributesWarning": "{count, plural, one {# actieve eenheid mist ten minste één kenmerkwaarde} other {# actieve eenheden missen ten minste één kenmerkwaarde}}",
+          "missingAttributesWarning": "{count, plural, one {# eenheid mist variantwaarden} other {# eenheden missen variantwaarden}}",
           "manageAttributes": "Kenmerken beheren",
           "manageAttributesDescription": "Met kenmerken kunnen klanten specifieke eigenschappen kiezen bij het boeken (bijv. maat, kleur). Elke eenheid wordt getagd met kenmerkwaarden en het systeem wijst automatisch een passende eenheid toe bij het afrekenen.",
           "manageAttributesExample": "Voorbeeld: voor een kajakhuurverhuur voegt u \"Maat\" (S, M, L) en \"Kleur\" (Rood, Blauw) toe. Een klant die een Medium Rode kajak boekt, krijgt een passende beschikbare eenheid toegewezen.",
@@ -948,7 +1122,89 @@
           "purchaseDetails": "Aankoopgegevens",
           "unitDetails": "Details",
           "existingUnitDetailsHint": "Aankoopdetails, notities en levenscyclus worden beheerd vanuit de inventaris.",
-          "openInventoryDetails": "Inventaris openen"
+          "openInventoryDetails": "Inventaris openen",
+          "benefitIdentify": "Geef elk exemplaar een serienummer of referentie",
+          "benefitAvailability": "Volg de beschikbaarheid en verhuur van elk exemplaar",
+          "benefitInventory": "Registreer aankoopprijs en -datum voor je inventaris",
+          "modeQuantity": "Eenvoudige hoeveelheid",
+          "modeQuantityDescription": "Geef gewoon aan hoeveel exemplaren beschikbaar zijn voor verhuur.",
+          "modeUnits": "Per eenheid volgen",
+          "modeUnitsDescription": "Elk exemplaar krijgt een eigen kenmerk.",
+          "variantsTitle": "Varianten",
+          "variantsHelp": "Maximaal 3 varianten (maat, kleur…). Elke eenheid draagt haar waarde en de klant kiest bij het boeken.",
+          "variantsEmptyHint": "Maak je per maat een apart product aan? Voeg liever een variant \"Maat\" toe: elke eenheid draagt de hare en de klant kiest bij het boeken.",
+          "variantPlaceholder": "bijv. Maat",
+          "addVariant": "Variant toevoegen",
+          "variantsMaxReached": "Maximaal 3 varianten",
+          "defaultBadge": "Standaard",
+          "advancedBadge": "Geavanceerd",
+          "learnMore": "Meer informatie",
+          "addRefPlaceholder": "Typ een referentie en druk op Enter",
+          "generateSeries": "Reeks genereren",
+          "changeMode": "Modus wijzigen",
+          "createVariantValue": "\"{value}\" aanmaken ({axis})",
+          "chooseColor": "Kies een kleur",
+          "colorPickerDescription": "Pas de kleur aan of voer een hexadecimale waarde in.",
+          "colorHue": "Tint",
+          "hexColor": "Hexkleur",
+          "presetSuggestions": "Suggesties",
+          "valuesCount": "{count, plural, one {# waarde} other {# waarden}}",
+          "presets": {
+            "size": {
+              "label": "Maat"
+            },
+            "shoeSize": {
+              "label": "Schoenmaat"
+            },
+            "color": {
+              "label": "Kleur",
+              "values": {
+                "black": "Zwart",
+                "white": "Wit",
+                "gray": "Grijs",
+                "red": "Rood",
+                "orange": "Oranje",
+                "yellow": "Geel",
+                "green": "Groen",
+                "blue": "Blauw",
+                "purple": "Paars",
+                "pink": "Roze",
+                "brown": "Bruin",
+                "beige": "Beige"
+              }
+            },
+            "material": {
+              "label": "Materiaal",
+              "values": {
+                "cotton": "Katoen",
+                "leather": "Leer",
+                "wood": "Hout",
+                "metal": "Metaal",
+                "plastic": "Plastic",
+                "aluminum": "Aluminium",
+                "carbon": "Carbon"
+              }
+            }
+          },
+          "manageVariants": "Varianten beheren",
+          "managerTitle": "Varianten",
+          "managerDescription": "Definities gedeeld door al je producten (maat, kleur…).",
+          "activeVariantsCount": "{active} van {total} actief",
+          "variantActive": "Actief",
+          "variantInactive": "Inactief",
+          "toggleVariant": "{name}: {status}",
+          "newVariant": "Nieuwe variant",
+          "newVariantDescription": "Maak een variant die je producten delen (bijv. Maat).",
+          "editVariant": "Variant hernoemen",
+          "editVariantDescription": "De naam wordt bijgewerkt in de gedeelde catalogus.",
+          "editValue": "Waarde bewerken",
+          "editValueDescription": "Het label wordt bijgewerkt in de gedeelde catalogus.",
+          "deleteVariantTitle": "Variant verwijderen?",
+          "deleteVariantDescription": "\"{name}\" en de bijbehorende waarden worden uit de catalogus verwijderd. Producten die de variant gebruiken behouden hun huidige waarden.",
+          "addValuePlaceholder": "Nieuwe waarde…",
+          "noVariants": "Geen varianten",
+          "variantsCount": "{count, plural, one {# variant} other {# varianten}}",
+          "unitImages": "Foto's van de eenheid"
         },
         "previewTitle": "Voorbeeld",
         "previewDescription": "Zo verschijnt uw product in de catalogus",
@@ -956,8 +1212,6 @@
         "noName": "Geen naam",
         "units": "eenhe(i)d(en)",
         "recommended": "Aanbevolen",
-        "previous": "Vorige",
-        "next": "Volgende",
         "videoUrl": "YouTube video",
         "videoUrlPlaceholder": "https://www.youtube.com/watch?v=...",
         "videoUrlHelp": "Optioneel - Voeg een presentatievideo voor uw product toe",
@@ -1077,12 +1331,35 @@
         },
         "aiContext": "Context voor de AI-adviseur",
         "aiContextPlaceholder": "Bijv. rijbewijs B vereist, niet geschikt voor kinderen onder de 12 jaar, vraag altijd naar de datum van het evenement en de groepsgrootte…",
-        "aiContextHint": "Extra informatie die alleen de AI-adviseur ziet — hij gebruikt deze om klanten te adviseren en vereisten te controleren. Wordt nooit in uw winkel getoond."
+        "aiContextHint": "Extra informatie die alleen de AI-adviseur ziet — hij gebruikt deze om klanten te adviseren en vereisten te controleren. Wordt nooit in uw winkel getoond.",
+        "createAndDuplicate": "Aanmaken en dupliceren",
+        "productCreatedCopyReady": "De vooraf ingevulde kopie kan worden bewerkt.",
+        "copySuffix": "(kopie)",
+        "productSection": "Product",
+        "productSectionDescription": "Naam, foto's en beschrijving van je product",
+        "addVideo": "Een YouTube-video toevoegen",
+        "categories": "Categorieën",
+        "categorySearchPlaceholder": "Zoeken of aanmaken…",
+        "categoryCreateOption": "'{name}' aanmaken",
+        "categoryNoResults": "Geen categorie gevonden",
+        "manageCategories": "Categorieën beheren",
+        "summary": {
+          "checklistTitle": "Voortgang",
+          "required": "Verplicht"
+        },
+        "videoTileLabel": "Video",
+        "videoInvalid": "Ongeldige YouTube-link",
+        "editVideo": "Video bewerken",
+        "removeVideo": "Video verwijderen"
       },
       "deleteConfirm": {
         "title": "Dit product verwijderen?",
         "description": "Deze actie is onomkeerbaar. Het product wordt permanent verwijderd."
-      }
+      },
+      "categoriesSelected": "{count} categorieën",
+      "filterByCategory": "Filteren op categorie",
+      "searchCategories": "Zoek een categorie...",
+      "noCategoriesFound": "Geen categorie gevonden"
     },
     "inventory": {
       "title": "Inventaris",
@@ -1283,6 +1560,7 @@
       "clearSearch": "Zoekopdracht wissen",
       "allStatuses": "Alle statussen",
       "allPeriods": "Alle periodes",
+      "allPaymentMethods": "Alle betaalmethoden",
       "number": "Nummer",
       "customer": "Klant",
       "period": "Periode",
@@ -1507,11 +1785,7 @@
       "manualForm": {
         "title": "Nieuwe handmatige reservering",
         "selectCustomer": "Selecteer een klant",
-        "newCustomer": "Nieuwe klant",
-        "newCustomerDescription": "Maak een nieuwe klant aan voor deze reservering",
         "newCustomerBadge": "Nieuwe klant",
-        "existingCustomer": "Bestaande klant",
-        "existingCustomerDescription": "Selecteer een klant uit uw database",
         "selectProducts": "Selecteer producten",
         "selectPeriod": "Selecteer periode",
         "addProduct": "Product toevoegen",
@@ -1519,15 +1793,6 @@
         "sendConfirmationEmail": "Bevestiging naar klant verzenden",
         "customer": "Klant",
         "customerStepDescription": "Selecteer een bestaande klant of maak een nieuwe aan",
-        "chooseCustomer": "Kies een klant",
-        "email": "E-mail",
-        "emailPlaceholder": "klant@email.nl",
-        "firstName": "Voornaam",
-        "firstNamePlaceholder": "Jan",
-        "lastName": "Achternaam",
-        "lastNamePlaceholder": "Jansen",
-        "phone": "Telefoon (optioneel)",
-        "phonePlaceholder": "06 12 34 56 78",
         "period": "Periode",
         "periodStepDescription": "Stel de begin- en einddatum van de verhuur in",
         "startDate": "Startdatum",
@@ -1540,7 +1805,7 @@
         "noProductsFound": "Geen producten gevonden",
         "noProductsFoundHint": "Geen producten komen overeen met \"{search}\".",
         "noProducts": "Geen producten geselecteerd",
-        "noProductsHint": "Gebruik het menu hierboven om producten toe te voegen",
+        "noProductsHint": "Voeg een product toe aan deze reservering om te beginnen",
         "perHour": "u",
         "perDay": "d",
         "available": "beschikbaar",
@@ -1567,13 +1832,28 @@
           "shortfall": "Gevraagd: {requested} · Beschikbaar: {available}",
           "createAnyway": "Toch aanmaken"
         },
+        "addUnavailable": {
+          "title": "Product niet beschikbaar",
+          "description": "“{name}” is niet meer beschikbaar in de geselecteerde periode. Toevoegen kan overboeking veroorzaken.",
+          "confirm": "Toch toevoegen"
+        },
         "reservationCreated": "Reservering aangemaakt",
         "selectDatesError": "Selecteer data",
         "addProductError": "Voeg minimaal één product toe",
         "selectCustomerError": "Selecteer een klant",
-        "fillCustomerInfoError": "Vul de klantgegevens in",
         "confirmTitle": "Samenvatting",
         "confirmDescription": "Controleer de informatie voordat u de reservering aanmaakt",
+        "confirmDrawer": {
+          "title": "Reservering bevestigen",
+          "titleQuote": "Offerte bevestigen",
+          "description": "Controleer het overzicht voordat u de reservering aanmaakt.",
+          "descriptionQuote": "Controleer het overzicht voordat u de offerte verstuurt.",
+          "warningsTitle": "Aandachtspunten",
+          "emailOn": "Er wordt een bevestigingsmail naar de klant verzonden.",
+          "emailOff": "Er wordt geen e-mail naar de klant verzonden."
+        },
+        "adjustmentsTitle": "Bedragen en opties",
+        "adjustmentsDescription": "Pas de korting, de borg en het verzenden van de bevestiging aan.",
         "steps": {
           "customer": "Klant",
           "customerDescription": "Selecteer klant",
@@ -1629,7 +1909,7 @@
         "customItem": {
           "title": "Aangepaste artikelen",
           "add": "Toevoegen",
-          "button": "Aangepast",
+          "button": "Eigen artikel",
           "units": "eenheid(en)",
           "badge": "Aangepast",
           "empty": "Geen aangepaste artikelen toegevoegd",
@@ -1661,7 +1941,11 @@
           "apply": "Toepassen",
           "modified": "Prijs gewijzigd",
           "priceUpdated": "Prijs bijgewerkt",
-          "priceReset": "Prijs hersteld"
+          "priceReset": "Prijs hersteld",
+          "modeUnit": "Stukprijs",
+          "modeTotal": "Totaalprijs",
+          "modePercent": "Korting %",
+          "resultingUnitPrice": "Resulterende stukprijs"
         },
         "warnings": {
           "advanceNotice": "Startdatum is vóór de vooraanmeldingsperiode",
@@ -1701,6 +1985,11 @@
           "optionalLabel": "Dekking inschakelen voor deze reservering",
           "insurableProduct": "Verzekerbaar",
           "assuredProduct": "Verzekerd"
+        },
+        "globalDiscount": {
+          "label": "Korting",
+          "add": "Korting toevoegen",
+          "remove": "Korting verwijderen"
         }
       },
       "quoteCard": {
@@ -1721,8 +2010,6 @@
       },
       "awaitingResponse": "Wacht op reactie",
       "itemsCount": "{count, plural, one {# artikel} other {# artikelen}}",
-      "viewTable": "Tabelweergave",
-      "viewCards": "Kaartweergave",
       "pagination": {
         "showing": "Toont {start} tot {end} van {total}",
         "perPage": "Per pagina",
@@ -2033,11 +2320,17 @@
         "customMessageRequired": "Schrijf een bericht",
         "additionalMessage": "Extra bericht",
         "additionalMessagePlaceholder": "Voeg een aangepast bericht toe (optioneel)...",
-        "emailWillBeSentTo": "De e-mail wordt verzonden naar {email}",
         "selectTemplateError": "Selecteer een e-mailtype",
         "sendError": "Er is een fout opgetreden bij het verzenden",
         "sendSuccess": "E-mail succesvol verzonden",
         "send": "E-mail verzenden",
+        "preview": "E-mail bekijken",
+        "previewTitle": "Voorbeeld van de e-mail",
+        "previewDescription": "Wat {name} zal ontvangen",
+        "previewPlaceholder": "Kies een e-mailtype om het voorbeeld te zien",
+        "previewSubject": "Onderwerp",
+        "previewLinkNotice": "De persoonlijke links van de klant worden bij verzending aangemaakt.",
+        "previewError": "Kan het voorbeeld niet genereren",
         "templates": {
           "contract": {
             "name": "Huurcontract",
@@ -2084,6 +2377,12 @@
         "viewConversation": "Gesprek bekijken",
         "sheetTitle": "Gesprek met de adviseur",
         "sheetDescription": "Chat tussen de klant en de AI-adviseur voor deze reservering."
+      },
+      "views": {
+        "label": "Weergavemodus",
+        "list": "Lijst",
+        "calendar": "Kalender",
+        "planning": "Planning"
       }
     },
     "customers": {
@@ -2192,6 +2491,10 @@
         "CA": "Canada",
         "US": "Verenigde Staten",
         "GB": "Verenigd Koninkrijk"
+      },
+      "quickCreate": {
+        "title": "Nieuwe klant",
+        "description": "De klant wordt aangemaakt en automatisch geselecteerd."
       }
     },
     "calendar": {
@@ -2265,44 +2568,82 @@
         "reservationsCount": "{count, plural, one {# reservering} other {# reserveringen}}"
       },
       "timeline": {
-        "products": "Producten",
-        "quantity": "{count, plural, one {# eenheid} other {# eenheden}}",
-        "available": "Beschikbaar",
-        "noProducts": "Geen producten om weer te geven"
+        "previous": "Vorige periode",
+        "next": "Volgende periode",
+        "statusFilter": "Filteren op status",
+        "operationFilter": "Filteren op handeling van vandaag",
+        "allOperations": "Alle handelingen",
+        "todaysDepartures": "Vertrekken vandaag",
+        "todaysReturns": "Retours vandaag",
+        "showAll": "Alles tonen",
+        "retry": "Opnieuw proberen",
+        "loadingReservations": "Reserveringen laden…",
+        "loadError": "De kalenderreserveringen konden niet worden geladen.",
+        "emptyPeriodTitle": "Geen reserveringen in deze periode",
+        "emptyPeriodDescription": "Geladen reserveringen kunnen vóór of na de weergegeven datums liggen.",
+        "emptyStoreTitle": "Nog geen reserveringen",
+        "emptyStoreDescription": "Maak je eerste reservering om je activiteiten te plannen.",
+        "createFirstReservation": "Eerste reservering maken",
+        "viewPreviousReservation": "Vorige reservering bekijken",
+        "viewNextReservation": "Volgende reservering bekijken",
+        "reservationAbove": "Reservering hierboven",
+        "reservationBelow": "Reservering hieronder",
+        "resetFilters": "Filters resetten",
+        "dragHint": "Tip: klik en sleep over een leeg bereik om een vooraf ingevulde reservering te maken.",
+        "searchProductsPlaceholder": "Zoeken in {count} producten...",
+        "noProductsFound": "Geen producten gevonden",
+        "productsSelected": "{count} producten",
+        "filters": "Filters",
+        "filtersDescription": "Beperk de reserveringen die op de kalender worden getoond.",
+        "applyFilters": "Toepassen",
+        "sectionOperation": "Bewerking van vandaag",
+        "sectionStatus": "Statussen",
+        "sectionProducts": "Producten",
+        "goToDate": "Naar een datum",
+        "currentlyViewing": "Nu getoond: {date}",
+        "dateSearchPlaceholder": "15, morgen, volgende vrijdag…",
+        "noDateFound": "Geen datum herkend",
+        "clearSearch": "Wissen",
+        "quickDates": "Snelkeuzes",
+        "today": "Vandaag",
+        "tomorrow": "Morgen",
+        "nextWeek": "Volgende week",
+        "chooseDate": "Datum kiezen"
       },
       "export": {
-        "button": "Kalender exporteren",
-        "title": "Exporteren naar kalender",
-        "description": "Synchroniseer uw reserveringen met uw favoriete kalender door de link hieronder te kopieren.",
-        "urlLabel": "ICS-kalenderlink",
+        "button": "Agenda synchroniseren",
+        "title": "Agenda synchroniseren",
+        "description": "Voeg je reserveringen toe aan de agenda die je al gebruikt.",
         "loading": "Laden...",
-        "instructions": {
-          "title": "Hoe voeg ik deze kalender toe?",
-          "google": {
-            "step1": "Open Google Agenda",
-            "step2": "Klik op het + naast \"Andere agenda's\" en dan op \"Via URL\"",
-            "step3": "Plak de link en klik op \"Agenda toevoegen\"",
-            "openLink": "Google Agenda openen",
-            "freshnessNote": "Louez publiceert wijzigingen onmiddellijk en vraagt clients om elke 5 minuten te vernieuwen. Google kan toch zijn eigen synchronisatievertraging toepassen."
-          },
-          "apple": {
-            "step1": "Open de Agenda-app op Mac of iPhone",
-            "step2": "Archief > Nieuw agenda-abonnement (Mac) of Voeg account toe > Overige > Agenda-abonnement toevoegen (iOS)",
-            "step3": "Plak de link en bevestig"
-          },
-          "outlook": {
-            "step1": "Open Outlook Agenda",
-            "step2": "Klik op \"Agenda toevoegen\" en dan op \"Abonneren vanaf web\"",
-            "step3": "Plak de link en geef de kalender een naam"
-          }
+        "done": "Klaar",
+        "cancel": "Annuleren",
+        "google": {
+          "title": "Google Agenda",
+          "recommended": "Aanbevolen",
+          "connected": "Verbonden",
+          "connect": "Verbinden",
+          "manage": "Beheren",
+          "help": "Automatische synchronisatie: kleuren, privézichtbaarheid, beschikbaarheid en automatische nieuwe pogingen. De betrouwbaarste optie."
         },
-        "regenerate": "Link opnieuw genereren",
-        "regenerateHint": "Het opnieuw genereren van de link maakt eerder gedeelde links ongeldig."
+        "subscribe": {
+          "title": "Abonneren met een link",
+          "help": "Alleen-lezen abonnement. Louez publiceert wijzigingen direct, maar elke agenda-app bepaalt zelf hoe vaak die vernieuwt.",
+          "apple": "Apple Agenda",
+          "outlook": "Outlook",
+          "google": "Google Agenda",
+          "copy": "Link kopiëren",
+          "copied": "Gekopieerd"
+        },
+        "regenerate": {
+          "action": "Link opnieuw genereren",
+          "confirmTitle": "Link opnieuw genereren?",
+          "hint": "Eerder gedeelde links werken niet meer en elke geabonneerde agenda moet opnieuw worden toegevoegd."
+        }
       }
     },
     "statistics": {
       "title": "Statistieken",
-      "description": "Analyseer Stripe-verkopen en verkeer van uw winkel",
+      "description": "Analyseer verkopen en verkeer van uw winkel",
       "period": "Periode",
       "periods": {
         "today": "Vandaag",
@@ -2314,55 +2655,63 @@
         "custom": "Aangepast"
       },
       "revenue": "Omzet",
-      "revenueThisMonth": "Stripe-ontvangsten deze maand",
-      "revenueThisMonthWithManual": "Ontvangsten deze maand",
-      "reservationsThisMonth": "Stripe-betalingen deze maand",
-      "reservationsThisMonthWithManual": "Betalingen deze maand",
-      "totalRevenue": "Totale Stripe-ontvangsten",
-      "totalRevenueWithManual": "Totale ontvangsten",
+      "totalRevenue": "Totale ontvangsten",
       "reservations": "Reserveringen",
-      "averageCart": "Gemiddelde betaling",
+      "avgPaymentInline": "gemiddelde betaling {amount}",
       "occupancyRate": "Bezettingsgraad",
-      "salesScopeTitle": "Online Stripe-verkopen",
-      "salesScopeDescription": "Huurbedragen ontvangen via Stripe, niet omgerekend naar omzet exclusief btw. Handmatige betalingen, waarborgen en terugbetalingen zijn niet inbegrepen.",
-      "salesScopeWithManualTitle": "Stripe + handmatige betalingen",
-      "salesScopeWithManualDescription": "Huurbedragen ontvangen via Stripe en geregistreerde handmatige betalingen, niet omgerekend naar omzet exclusief btw. Waarborgen en terugbetalingen zijn niet inbegrepen.",
-      "includeManualPayments": "Handmatige betalingen meenemen",
-      "includeManualPaymentsDescription": "Voegt geregistreerde contante, kaart-, overschrijvings-, cheque- en andere betalingen toe.",
+      "upcomingRevenue": "Verwachte omzet",
+      "avgRentalDuration": "Gemiddelde verhuurduur",
+      "rentalActivity": "Verhuuractiviteit",
       "topProducts": {
         "title": "Meest verhuurde producten",
-        "description": "Top 10 producten in de geselecteerde periode",
-        "descriptionWithManual": "Top 10 producten met Stripe- of handmatige betalingen in de geselecteerde periode",
+        "description": "Top 10 producten op ontvangsten in de geselecteerde periode",
         "product": "Product",
         "rentals": "Verhuur",
         "totalQuantity": "Totaal aantal",
         "revenue": "Omzet",
-        "units": "{count, plural, one {# eenheid} other {# eenheden}}"
+        "units": "{count, plural, one {# eenheid} other {# eenheden}}",
+        "othersRow": "{count, plural, one {+ # ander product} other {+ # andere producten}}",
+        "totalRow": "Totaal"
       },
-      "revenueChart": "Trend van Stripe-ontvangsten",
-      "revenueChartDescription": "Stripe-betalingen ontvangen in de geselecteerde periode",
-      "revenueChartWithManual": "Trend van ontvangsten",
-      "revenueChartWithManualDescription": "Stripe- en handmatige betalingen ontvangen in de geselecteerde periode",
-      "revenueAbbrev": "Stripe",
-      "revenueAbbrevWithManual": "Ontvangsten",
+      "topCustomers": {
+        "title": "Beste klanten",
+        "description": "Top 10 klanten op ontvangsten in de geselecteerde periode",
+        "customer": "Klant",
+        "reservations": "Reserveringen",
+        "payments": "Betalingen",
+        "revenue": "Ontvangsten"
+      },
+      "paymentMethods": {
+        "title": "Betaalmethoden",
+        "description": "Verdeling van de ontvangsten in de periode",
+        "stripe": "Stripe (online)",
+        "cash": "Contant",
+        "card": "Kaart (ter plaatse)",
+        "transfer": "Overschrijving",
+        "check": "Cheque",
+        "other": "Overig"
+      },
+      "revenueChart": "Evolutie van de ontvangsten",
+      "revenueChartDescription": "Stripe-ontvangsten en handmatige betalingen van verhuur — waarborgen en terugbetalingen uitgesloten",
+      "revenueAbbrev": "Ontvangsten",
       "reservationsCount": "{count, plural, one {# reservering} other {# reserveringen}}",
-      "paymentsCount": "{count, plural, one {# Stripe-betaling} other {# Stripe-betalingen}}",
-      "paymentsCountWithManual": "{count, plural, one {# betaling} other {# betalingen}}",
+      "paymentsCount": "{count, plural, one {# betaling} other {# betalingen}}",
       "vsLastMonth": "vs vorige maand",
       "lastMonth": "vorige maand",
       "onReservations": "over {count} reserveringen",
-      "onPayments": "over {count} Stripe-betalingen",
-      "onPaymentsWithManual": "over {count} betalingen",
       "sinceBeginning": "sinds het begin",
       "vsLastPeriod": "vs vorige periode",
+      "occupancySubtitle": "{count, plural, =0 {geen actieve eenheid} one {van # beschikbare eenheid} other {van # beschikbare eenheden}}",
+      "upcomingRevenueCount": "{count, plural, =0 {geen bevestigde reservering} one {# bevestigde reservering} other {# bevestigde reserveringen}}",
+      "durationDays": "{days, plural, one {{days, number, ::.0} dag} other {{days, number, ::.0} dagen}}",
+      "durationHours": "{hours, plural, one {# uur} other {# uur}}",
       "noData": "Onvoldoende gegevens",
       "noRentalData": "Nog geen verhuurgegevens",
-      "noRevenueData": "Nog geen Stripe-ontvangsten",
-      "noRevenueDataWithManual": "Nog geen ontvangsten"
+      "noRevenueData": "Nog geen ontvangsten"
     },
     "analytics": {
       "title": "Analyse",
-      "description": "Volg Stripe-verkopen, verkeer en conversies van je winkel",
+      "description": "Volg verkopen, verkeer en conversies van je winkel",
       "visitors": "Bezoekers",
       "productViews": "Productweergaven",
       "conversions": "Bestellingen",
@@ -2375,10 +2724,6 @@
         "90d": "90 dagen",
         "6m": "6 maanden",
         "12m": "12 maanden"
-      },
-      "tabs": {
-        "traffic": "Verkeer",
-        "sales": "Verkopen"
       },
       "refresh": "Vernieuwen",
       "trafficTrend": "Verkeerstrend",
@@ -2893,7 +3238,13 @@
           "iosNeedsInstall": "Voeg de app op iPhone eerst toe aan je beginscherm om meldingen in te schakelen.",
           "denied": "Meldingen zijn geblokkeerd. Sta ze toe in je browserinstellingen.",
           "confirmTitle": "Meldingen ingeschakeld",
-          "confirmBody": "Je krijgt een melding bij elke nieuwe reservering."
+          "confirmBody": "Je krijgt een melding bij elke nieuwe reservering.",
+          "sidebarLabel": "Pushmeldingen",
+          "benefits": {
+            "instant": "Melding zodra er een reservering binnenkomt",
+            "closed": "Werkt ook als de app gesloten is",
+            "device": "Alleen op dit apparaat"
+          }
         },
         "title": "Meldingen",
         "description": "Configureer hoe u meldingen over winkelgebeurtenissen ontvangt",
@@ -3961,7 +4312,18 @@
         "deleteAccountWarning": "Deze actie is onomkeerbaar. Al uw gegevens worden verwijderd.",
         "signOut": "Uitloggen",
         "comingSoon": "Binnenkort",
-        "administration": "Beheer"
+        "administration": "Beheer",
+        "keyboardShortcuts": {
+          "title": "Sneltoetsen",
+          "description": "Pas de sneltoetsen van je werkruimte aan.",
+          "recording": "Druk op de toetsen…",
+          "recordingSequence": "Voer de reeks in en druk daarna op Enter…",
+          "sequenceTooShort": "Een reeks moet uit minstens twee sneltoetsen bestaan.",
+          "hint": "Selecteer een sneltoets. Druk voor een reeks de toetsen op volgorde in en daarna op Enter.",
+          "saved": "Sneltoetsen opgeslagen",
+          "conflict": "Deze sneltoets wordt al gebruikt voor ‘{action}’.",
+          "resetAction": "‘{action}’ herstellen"
+        }
       },
       "admin": {
         "title": "Platformbeheer",
@@ -4202,8 +4564,6 @@
         "title": "AI-adviseur",
         "description": "Laat een AI-assistent uw klanten verwelkomen in uw winkel, hun vragen beantwoorden en hen naar de juiste verhuur begeleiden",
         "saved": "AI-adviseur instellingen opgeslagen",
-        "enableSection": "AI-adviseur",
-        "enableSectionDescription": "Configureer de assistent die met uw klanten chat in uw winkel",
         "enabled": "AI-adviseur inschakelen",
         "enabledDescription": "Toon de chatwidget in uw winkel",
         "mode": "Modus bij het reserveren",
@@ -4229,17 +4589,12 @@
           "description": "De platformbeheerder moet de omgevingsvariabelen AI_PROVIDER en AI_API_KEY instellen voordat de adviseur klanten kan antwoorden. U kunt uw instellingen hieronder alvast voorbereiden."
         },
         "locked": {
-          "title": "Ontgrendel de AI-adviseur",
-          "description": "Zet bezoekers van uw winkel om in reserveringen met een AI-assistent",
           "upgrade": "Upgrade naar Pro",
-          "featureLocked": "Functie vergrendeld",
-          "upgradeToUnlock": "Upgrade naar Pro om deze functie in te schakelen"
+          "featureLocked": "Functie vergrendeld"
         },
         "conversations": {
           "columnCredits": "Credits",
           "creditsUsed": "{count} cr",
-          "title": "Gesprekken",
-          "description": "Bekijk wat klanten de adviseur vroegen en welke gesprekken tot een reservering leidden",
           "filterAll": "Alle",
           "filterConverted": "Geconverteerd",
           "filterNotConverted": "Niet geconverteerd",
@@ -4298,9 +4653,6 @@
           "confirm": "Uitschakelen en loskoppelen"
         },
         "numberReleaseFailed": "Het nummer kon niet worden losgekoppeld — het blijft gekoppeld, automatische nieuwe poging gepland",
-        "description": "Een AI-spraakagent die je telefoonlijn beantwoordt — informeert je klanten en neemt reserveringen op, in de taal die je kiest.",
-        "enableSection": "AI-spraakagent",
-        "enableSectionDescription": "Configureer de spraakagent die antwoordt wanneer je klanten bellen",
         "enabled": "AI-spraakagent inschakelen",
         "enabledDescription": "De AI beantwoordt inkomende oproepen op uw nummer",
         "number": {
@@ -4330,9 +4682,13 @@
           "unlinkConfirmBody": "Het nummer {number} wordt ontkoppeld van je spraakagent. Je behoudt het nummer bij je provider.",
           "searching": "Beschikbare nummers zoeken…",
           "searchHint": "Kies een land en zoek een beschikbaar nummer om te voorzien.",
-          "areaCodePlaceholder": "bijv. 20",
+          "areaCodePlaceholder": "bijv. 415",
           "manualSetup": "Een bestaand nummer koppelen",
-          "copy": "Kopiëren"
+          "copy": "Kopiëren",
+          "areaCodeHint": "Filtert nummers op regionaal netnummer (bijv. 415 voor San Francisco).",
+          "contains": "Gewenste cijfers (optioneel)",
+          "containsPlaceholder": "bijv. 06",
+          "containsHint": "Toont alleen nummers die deze cijferreeks bevatten."
         },
         "notConfigured": {
           "title": "Telefonie niet geconfigureerd",
@@ -4367,6 +4723,21 @@
         },
         "voicePreview": "Beluisteren",
         "voiceRecommended": "Aanbevolen"
+      },
+      "settingsNavigation": {
+        "label": "Instellingennavigatie",
+        "mobileLabel": "Kies een instellingenpagina",
+        "search": {
+          "label": "Instellingen doorzoeken",
+          "placeholder": "Instellingen zoeken…",
+          "noResults": "Geen instellingen komen overeen met je zoekopdracht."
+        },
+        "groups": {
+          "store": "Winkel",
+          "rental": "Verhuur",
+          "communication": "Communicatie",
+          "accountData": "Account en gegevens"
+        }
       }
     },
     "commandPalette": {
@@ -4395,7 +4766,10 @@
       "emptyState": "Hoe kan ik u helpen?",
       "emptyStateHint": "Probeer een suggestie of stel uw eigen vraag.",
       "placeholder": "Wat wilt u weten of doen?",
+      "send": "Versturen",
+      "disclaimer": "De AI-assistent kan fouten maken. Controleer belangrijke informatie.",
       "newConversation": "Nieuw gesprek",
+      "openFullPage": "Openen als volledige pagina",
       "history": {
         "title": "Geschiedenis",
         "empty": "Geen gesprekken",
@@ -4416,11 +4790,17 @@
         "reservations": "Zijn er vandaag ophalingen of retouren gepland?",
         "stats": "Toon me de omzet en topproducten van deze maand",
         "products": "Welke producten worden het meest verhuurd?",
-        "customers": "Hoeveel nieuwe klanten deze maand?"
+        "customers": "Hoeveel nieuwe klanten deze maand?",
+        "overdue": "Zijn er retouren te laat?",
+        "pending": "Toon me de reserveringen die wachten op bevestiging"
       }
     },
     "breadcrumbs": {
       "aiAssistant": "AI-assistent",
+      "aiConversations": "Klantgesprekken",
+      "aiAdvisor": "Online adviseur",
+      "aiVoice": "Spraakagent",
+      "aiCredits": "AI-tegoed",
       "label": "Kruimelpad",
       "home": "Home",
       "products": "Producten",
@@ -4431,11 +4811,14 @@
       "customersNew": "Nieuwe klant",
       "calendar": "Kalender",
       "analytics": "Analyses",
+      "analyticsSales": "Verkopen",
+      "analyticsTraffic": "Verkeer",
       "team": "Team",
       "referrals": "Verwijzingen",
       "sms": "SMS",
       "subscription": "Abonnement",
       "account": "Account",
+      "whatsNew": "Nieuw",
       "settings": "Instellingen",
       "settingsAdmin": "Administratie",
       "settingsApi": "API",
@@ -4451,7 +4834,9 @@
       "settingsPayments": "Betalingen",
       "settingsPromoCodes": "Promocodes",
       "settingsReviewBooster": "Reviewbooster",
-      "settingsTaxes": "Belastingen"
+      "settingsTaxes": "Belastingen",
+      "productsEdit": "Bewerken",
+      "reservationsEdit": "Bewerken"
     },
     "notificationsCenter": {
       "title": "Meldingen",
@@ -4460,6 +4845,69 @@
       "emptyTitle": "Niets te controleren",
       "emptyDescription": "Nieuwe aanvragen verschijnen hier.",
       "viewAllPending": "Alle openstaande aanvragen bekijken"
+    },
+    "whatsNew": {
+      "title": "Wat is er nieuw",
+      "description": "De nieuwste verbeteringen van Louez",
+      "pageDescription": "Alles wat we in Louez hebben uitgebracht, het nieuwste eerst — en waarom we het hebben gebouwd.",
+      "newLabel": "Nieuw",
+      "newFeatureLabel": "Nieuwe functie",
+      "unread": "Ongelezen",
+      "markAsRead": "Markeren als gelezen",
+      "markAllAsRead": "Alles markeren als gelezen",
+      "watchDemo": "Bekijk de demo van {title}",
+      "tryIt": "Uitproberen",
+      "viewAll": "Alle updates bekijken",
+      "backToList": "Alle updates",
+      "emptyTitle": "Hier is nog niets",
+      "empty": "Nog geen nieuws.",
+      "filterEmpty": "Nog niets in deze categorie.",
+      "filters": {
+        "all": "Alles"
+      },
+      "categories": {
+        "feature": "Nieuw",
+        "improvement": "Verbeterd",
+        "fix": "Opgelost"
+      },
+      "announcements": {
+        "product-image-ai": {
+          "title": "Uw productfoto's krijgen een studiobehandeling",
+          "description": "Bij het uploaden snijdt de AI uw product uit, maakt de achtergrond schoon en centreert het — of verwijdert alleen de achtergrond als u uw kadrering wilt houden. En elke versie blijft bewaard in de geschiedenis van de foto: vergelijk, verander van gedachten, ga terug naar het origineel."
+        },
+        "sidebar-simplified": {
+          "title": "Een korter menu, pagina's waar u ze verwacht",
+          "description": "De agenda gaat naar de reserveringen, de voorraad naar de productpagina, abonnement en doorverwijzingen naar de instellingen: vier items minder in het menu, en niets kwijt."
+        },
+        "product-variants": {
+          "title": "Varianten, eenvoudig gehouden",
+          "description": "De kenmerken die u met de hand intypte zijn nu echte varianten, gedeeld door uw hele winkel. Maat en Kleur staan klaar zodra u het volgen per exemplaar aanzet, Schoenmaat en Materiaal voegt u met één klik toe — en u hebt geen productpagina per maat meer nodig."
+        },
+        "product-detail-hub": {
+          "title": "Elk product heeft nu een eigen pagina",
+          "description": "Een product openen betekende zijn formulier openen. Nu heeft het een echte pagina: wat het opbrengt, hoe vaak het uitgaat, hoe de voorraad ervoor staat, wie het reserveerde en wat er met elk exemplaar is gebeurd."
+        },
+        "reservations-unified-views": {
+          "title": "Uw reserveringen openen op de agenda",
+          "description": "De pagina Reserveringen opent nu op de agenda. Die scrolt doorlopend, van week tot week zonder van pagina te wisselen, en één beweging met de muis toont de volledige reservering. Lijst en planning per product blijven één klik verwijderd."
+        },
+        "product-creation-flow-redesign": {
+          "title": "Twee secties, en uw product staat online",
+          "description": "De wizard in vier stappen maakt plaats voor één pagina. Accessoires en verzekering worden bij het aanmaken niet meer gevraagd — die voegt u later toe als u ze nodig hebt. Rechts: een voorbeeld van de pagina en de lijst van wat nog ontbreekt."
+        },
+        "keyboard-shortcuts": {
+          "title": "Voor wie het toetsenbord niet loslaat",
+          "description": "Acht dagelijkse handelingen gaan via het toetsenbord, en elk daarvan kunt u in uw account opnieuw instellen — ook de reeksen van twee toetsen. Werkt u de hele dag in Louez, dan is dit voor u. Zo niet, dan blijft alles gewoon met de muis werken."
+        },
+        "navigation-refresh": {
+          "title": "⌘K brengt u overal",
+          "description": "Het opdrachtenpalet opent elke pagina, elke instelling, elk product, elke klant en elke reservering. In de instellingen brengt een zoekveld u naar precies de juiste instelling en markeert die. En het kruimelpad vertelt altijd waar u bent."
+        },
+        "reservation-creation-simplified": {
+          "title": "Eén reservering, één pagina",
+          "description": "Geen stappen meer om door te lopen: klant, periode, producten en levering passen op één pagina, met het overzicht altijd ernaast. En alles waarvoor u de reservering daarna opnieuw moest openen — een korting, een afgesproken prijs, de waarborg, een passant — regelt u nu meteen."
+        }
+      }
     },
     "aiCredits": {
       "title": "AI-tegoed",
@@ -4518,6 +4966,60 @@
         "errors": {
           "generic": "Er ging iets mis. Probeer het opnieuw."
         }
+      },
+      "page": {
+        "title": "AI-tegoed",
+        "subtitle": "Het tegoed achter alle AI-functies van je winkel",
+        "totalTitle": "Totaalsaldo",
+        "totalUnlimitedHint": "Je abonnement kent geen gebruikslimiet",
+        "monthlyTitle": "Inbegrepen deze maand",
+        "monthlyUsedHint": "{used} van {included} gebruikt",
+        "monthlyUnlimitedHint": "Onbeperkt met je abonnement",
+        "monthlyNoneHint": "Je abonnement bevat geen tegoed",
+        "prepaidTitle": "Vooruitbetaald tegoed",
+        "prepaidHint": "Verloopt nooit",
+        "pitchTitle": "Wat je tegoed mogelijk maakt",
+        "perkAdvisorTitle": "Een adviseur die nooit slaapt",
+        "perkAdvisorDescription": "Klanten stellen vragen over je aanbod en krijgen meteen antwoord, ook 's nachts.",
+        "perkVoiceTitle": "Een agent die opneemt",
+        "perkVoiceDescription": "Gemiste oproepen worden concrete aanvragen, met een eigen nummer als je dat wilt.",
+        "perkImagesTitle": "Strakke productfoto's",
+        "perkImagesDescription": "Verwijder de achtergrond en verbeter je foto's met één klik, direct vanaf het product.",
+        "pitchSecondaryCta": "Ontdek de AI-assistent",
+        "pitchFootnote": "Je betaalt alleen wat je verbruikt en tegoed verloopt niet.",
+        "recapTitle": "Je tegoed deze maand",
+        "recapDescription": "Wat je tegoed sinds het begin van de maand voor je winkel heeft gedaan.",
+        "recapConversations": "Gesprekken",
+        "recapCalls": "Beantwoorde oproepen",
+        "recapImages": "Verbeterde afbeeldingen",
+        "recapCredits": "Verbruikt tegoed",
+        "recapCallTime": "Samen {minutes} min beltijd.",
+        "historyTitle": "Geschiedenis",
+        "historyDescription": "Alles wat je hebt verbruikt en gekocht.",
+        "tabUsage": "Verbruik",
+        "tabPurchases": "Aankopen",
+        "usageEmpty": "Nog niets verbruikt",
+        "usageEmptyDescription": "Zodra de AI voor je aan de slag gaat, verschijnt hier elke afboeking.",
+        "purchasesEmpty": "Nog geen aankopen",
+        "purchasesEmptyDescription": "Je opwaarderingen en gratis tegoed komen hier te staan.",
+        "usageConversation": "Adviesgesprek",
+        "usageVoiceCall": "Telefoongesprek",
+        "usageCallDuration": "{minutes} min in rekening gebracht",
+        "usageNumberRental": "Huur van het nummer",
+        "usageImageEnhancement": "Afbeelding verbeteren",
+        "columnDate": "Datum",
+        "columnDetail": "Details",
+        "columnCredits": "Tegoed",
+        "columnAmount": "Bedrag",
+        "columnStatus": "Status",
+        "status": {
+          "completed": "Voltooid",
+          "pending": "In behandeling",
+          "failed": "Mislukt"
+        },
+        "pagination": "Pagina {page} van {totalPages}",
+        "previousPage": "Vorige pagina",
+        "nextPage": "Volgende pagina"
       }
     }
   },
@@ -4902,6 +5404,12 @@
       "contactDescription": "We hebben deze informatie nodig om contact met u op te nemen",
       "addressDescription": "Optioneel - Vul uw adres in indien nodig",
       "confirmDescription": "Controleer uw gegevens voor bevestiging",
+      "advanceNotice": {
+        "title": "Wijzig de startdatum",
+        "guidance": "Deze winkel vereist minimaal {duration} voorafgaande kennisgeving. Kies een start vanaf {minimum}.",
+        "preserved": "Uw contactgegevens en keuzes blijven bewaard tijdens de wijziging.",
+        "editDates": "Datums wijzigen"
+      },
       "continue": "Doorgaan",
       "back": "Terug",
       "modify": "Bewerken",
@@ -5549,6 +6057,10 @@
     "noCategories": "Geen categorieën",
     "noCategoriesDescription": "Maak uw eerste categorie aan om uw producten te organiseren",
     "emptyDescription": "Categorieën helpen u uw producten te organiseren en maken het makkelijker voor klanten om te bladeren.",
+    "searchPlaceholder": "Categorieën zoeken…",
+    "noSearchResults": "Geen categorie komt overeen met uw zoekopdracht.",
+    "totalCount": "{count, plural, =0 {Geen categorieën} one {# categorie} other {# categorieën}}",
+    "actionsFor": "Acties voor {name}",
     "newCategoryDescription": "Maak een nieuwe categorie aan om uw producten te organiseren",
     "editCategoryDescription": "Bewerk de categorienaam",
     "namePlaceholder": "Categorienaam",
@@ -5563,282 +6075,9 @@
       "title": "Deze categorie verwijderen?",
       "description": "Deze actie is onomkeerbaar. Producten in deze categorie worden niet verwijderd.",
       "descriptionWithName": "Deze actie is onomkeerbaar. De categorie \"{name}\" wordt verwijderd.",
-      "productsWarning": "{count, plural, one {Het product in deze categorie wordt verplaatst naar \"Zonder categorie\".} other {De # producten in deze categorie worden verplaatst naar \"Zonder categorie\".}}"
-    }
-  },
-  "emails": {
-    "common": {
-      "greeting": "Hallo {name},",
-      "regards": "Met vriendelijke groet,",
-      "team": "Het {storeName} team",
-      "viewReservation": "Mijn reservering bekijken",
-      "contactUs": "Neem contact met ons op",
-      "reservationNumber": "Reservering #{number}",
-      "period": "Periode",
-      "periodFrom": "Van {startDate}",
-      "periodTo": "Tot {endDate}",
-      "address": "Adres",
-      "pickupAddress": "Ophaaladres",
-      "returnAddress": "Retourgadres",
-      "subtotal": "Subtotaal",
-      "subtotalExclTax": "Subtotaal excl. BTW",
-      "taxAmount": "BTW ({rate}%)",
-      "subtotalInclTax": "Subtotaal incl. BTW",
-      "deposit": "Borg",
-      "total": "Totaal",
-      "totalToPay": "Te betalen totaal",
-      "question": "Vragen? Neem contact met ons op:",
-      "summary": "Overzicht",
-      "timezone": "Tijdzone: {timezone}"
-    },
-    "verificationCode": {
-      "subject": "Uw inlogcode: {code}",
-      "title": "Inlogcode",
-      "body": "Hier is uw inlogcode om toegang te krijgen tot uw account op {storeName}:",
-      "expiry": "Deze code verloopt over 10 minuten. Als u deze code niet heeft aangevraagd, kunt u deze e-mail veilig negeren."
-    },
-    "confirmReservation": {
-      "subject": "Uw reservering #{number} is bevestigd",
-      "title": "Reservering bevestigd!",
-      "body": "Uw reservering #{number} is bevestigd. Hier is de samenvatting:",
-      "summary": "Samenvatting"
-    },
-    "requestReceived": {
-      "subject": "Reserveringsaanvraag #{number} ontvangen",
-      "title": "Aanvraag ontvangen",
-      "body": "We hebben uw reserveringsaanvraag ontvangen.",
-      "review": "Ons team beoordeelt uw aanvraag en neemt binnenkort contact met u op.",
-      "confirmation": "U ontvangt een bevestigingsmail zodra uw reservering is gevalideerd.",
-      "seeYouSoon": "Tot ziens,"
-    },
-    "requestAccepted": {
-      "subject": "Uw aanvraag #{number} is geaccepteerd!",
-      "title": "Aanvraag geaccepteerd!",
-      "body": "Goed nieuws! Uw reserveringsaanvraag #{number} is geaccepteerd.",
-      "rentalPeriod": "Huurperiode",
-      "yourReservation": "Uw reservering",
-      "proceedPayment": "Doorgaan naar betaling",
-      "signContract": "Vergeet niet uw huurcontract te ondertekenen voordat u uw materiaal ophaalt."
-    },
-    "requestRejected": {
-      "subject": "Reserveringsaanvraag #{number}",
-      "title": "Aanvraag niet geaccepteerd",
-      "body": "Het spijt ons, uw reserveringsaanvraag #{number} kon niet worden geaccepteerd.",
-      "contactForAlternative": "Neem contact met ons op voor meer informatie of om een alternatief te vinden dat bij u past."
-    },
-    "quoteSent": {
-      "subject": "Offerte #{number}",
-      "title": "U heeft een offerte ontvangen",
-      "body": "{store} heeft u een offerte gestuurd voor reservering #{number}.",
-      "rentalPeriod": "Huurperiode",
-      "yourQuote": "Uw offerte",
-      "viewQuote": "Offerte bekijken",
-      "expiry": "U kunt deze offerte accepteren of weigeren vanuit uw account."
-    },
-    "reminderPickup": {
-      "subject": "Herinnering: uw verhuur begint morgen!",
-      "title": "Uw verhuur begint morgen!",
-      "body": "Dit is een herinnering voor uw reservering #{number}.",
-      "scheduledPickup": "Gepland ophalen",
-      "dontForget": "Vergeet niet:",
-      "bringId": "Een geldig identiteitsbewijs",
-      "bringConfirmation": "Uw reserveringsbevestiging",
-      "seeTomorrow": "Tot morgen!"
-    },
-    "reminderReturn": {
-      "subject": "Herinnering: materiaal retourneren op {date}",
-      "title": "Vergeet niet uw materiaal terug te brengen",
-      "body": "Dit is een herinnering voor uw reservering #{number}. De materiaalretour is gepland voor {date}.",
-      "scheduledReturn": "Gepland retour",
-      "returnInfo": "Breng het materiaal alstublieft in goede staat terug. De borg wordt na verificatie geretourneerd.",
-      "thanks": "Bedankt voor uw vertrouwen!"
-    },
-    "reminderPickupAdmin": {
-      "subject": "Aankomend ophalen: reservering #{number}",
-      "title": "Aankomend ophalen van materiaal",
-      "body": "Er komt een ophaling aan voor reservering #{number}. Hier zijn de details zodat u het materiaal klaar kunt maken.",
-      "scheduledPickup": "Gepland ophalen",
-      "customer": "Klant:",
-      "email": "E-mail:",
-      "phone": "Telefoon:",
-      "amount": "Bedrag:",
-      "viewReservation": "Reservering bekijken",
-      "connectToManage": "Log in op uw dashboard om deze reservering te beheren."
-    },
-    "reminderReturnAdmin": {
-      "subject": "Aankomend retour: reservering #{number}",
-      "title": "Aankomend retour van materiaal",
-      "body": "Er komt een retour aan voor reservering #{number}. Hier zijn de details zodat u zich kunt voorbereiden op de ontvangst van het materiaal.",
-      "scheduledReturn": "Gepland retour",
-      "customer": "Klant:",
-      "email": "E-mail:",
-      "phone": "Telefoon:",
-      "amount": "Bedrag:",
-      "viewReservation": "Reservering bekijken",
-      "connectToManage": "Log in op uw dashboard om deze reservering te beheren."
-    },
-    "reminderDigestAdmin": {
-      "subject": "Uw planning voor {date}",
-      "title": "Planning van vandaag",
-      "body": "Dit staat er vandaag op de planning bij {storeName}.",
-      "pickupsTitle": "Ophalingen ({count})",
-      "returnsTitle": "Retouren ({count})",
-      "viewCalendar": "Kalender bekijken",
-      "connectToManage": "Log in op uw dashboard om uw dag te beheren."
-    },
-    "thankYouReview": {
-      "subject": "Bedankt voor uw huur!",
-      "title": "Bedankt voor uw vertrouwen!",
-      "body": "We hopen dat uw huur goed is verlopen. Uw review helpt ons verbeteren en helpt andere klanten bij hun keuze.",
-      "cta": "Laat een review achter",
-      "disclaimer": "Het duurt maar een minuutje en zou ons enorm helpen!",
-      "smsThankYou": "Bedankt voor uw huur!",
-      "smsReview": "Uw mening telt:"
-    },
-    "newRequestLandlord": {
-      "subject": "Nieuwe reserveringsaanvraag #{number}",
-      "title": "Nieuwe reserveringsaanvraag",
-      "body": "U heeft een nieuwe aanvraag ontvangen op {storeName}.",
-      "customer": "Klant:",
-      "email": "E-mail:",
-      "period": "Periode:",
-      "amount": "Bedrag:",
-      "viewRequest": "Aanvraag bekijken",
-      "connectToManage": "Log in op uw dashboard om deze aanvraag te accepteren of af te wijzen."
-    },
-    "phoneCallbackLandlord": {
-      "subject": "Een beller om terug te bellen — {store}",
-      "title": "Een beller om terug te bellen",
-      "body": "Je spraakassistent kon een verzoek op {storeName} niet afronden en geeft dit bericht aan je door.",
-      "phone": "Terugbelnummer:",
-      "message": "Bericht:",
-      "listen": "Gesprek openen",
-      "footer": "Open het gesprek om de uitwisseling te lezen en de opname van het gesprek opnieuw te beluisteren."
-    },
-    "voiceNumberBilling": {
-      "numberLabel": "Nummer:",
-      "rentalLabel": "Maandelijkse huur:",
-      "rentalValue": "{credits} AI-credits / maand",
-      "deadlineLabel": "Deadline:",
-      "ctaRecharge": "Mijn credits opwaarderen",
-      "ctaOpen": "Mijn AI-assistent openen",
-      "footer": "De huur van het nummer wordt elke maand automatisch met AI-credits betaald.",
-      "warning": {
-        "subject": "Opwaarderen nodig — verlenging van nummer {number}",
-        "title": "Je saldo dekt de volgende verlenging niet",
-        "body": "Het nummer {number} van {storeName} wordt op {date} verlengd voor {credits} AI-credits, maar je huidige saldo is onvoldoende. Waardeer vóór die datum op om je nummer te behouden."
-      },
-      "failed": {
-        "subject": "Actie vereist — nummer {number} dreigt te worden losgekoppeld",
-        "title": "Verlenging mislukt",
-        "body": "De verlenging van nummer {number} ({credits} AI-credits) kon niet worden uitgevoerd: onvoldoende saldo. Waardeer op vóór {date}, anders wordt het nummer automatisch losgekoppeld. We proberen de afschrijving elke dag opnieuw zodra je opwaardeert."
-      },
-      "released": {
-        "subject": "Nummer {number} is losgekoppeld",
-        "title": "Nummer losgekoppeld",
-        "body": "Het nummer {number} van {storeName} is losgekoppeld en niet meer actief. Je kunt op elk moment een nieuw nummer kiezen via je AI-assistent."
-      }
-    },
-    "teamInvitation": {
-      "subject": "{inviterName} nodigt u uit om lid te worden van {storeName}",
-      "title": "Teamuitnodiging",
-      "greeting": "Hallo,",
-      "body": "{inviterName} nodigt u uit om lid te worden van het {storeName} team op Louez.io.",
-      "accessDescription": "Door deze uitnodiging te accepteren, krijgt u toegang tot het winkeldashboard om reserveringen, producten en klanten te beheren.",
-      "acceptButton": "Uitnodiging accepteren",
-      "expiry": "Deze uitnodiging verloopt over 7 dagen. Als u niet heeft gevraagd om lid te worden van dit team, kunt u deze e-mail veilig negeren."
-    },
-    "baseLayout": {
-      "sentBy": "Deze e-mail is verzonden door {storeName}",
-      "ignoreIfNotYou": "Als u deze actie niet heeft geïnitieerd, negeer dan deze e-mail.",
-      "poweredBy": "Mogelijk gemaakt door"
-    },
-    "instantAccess": {
-      "subject": "Toegang tot uw reservering #{number}",
-      "title": "Toegang tot uw reservering",
-      "body": "Klik om toegang te krijgen tot uw reservering #{number}.",
-      "paymentPending": "De betaling voor deze reservering is in afwachting.",
-      "viewAndPay": "Bekijken en betalen",
-      "linkValid": "Deze link is 30 dagen geldig."
-    },
-    "reservationCancelled": {
-      "subject": "Reservering #{number} geannuleerd",
-      "title": "Reservering geannuleerd",
-      "body": "Uw reservering #{number} is geannuleerd.",
-      "cancelledPeriod": "Geannuleerde periode",
-      "reasonLabel": "Reden",
-      "contactForQuestions": "Als u vragen heeft, neem dan gerust contact met ons op.",
-      "browseEquipment": "Bekijk onze catalogus",
-      "thankYou": "Bedankt voor uw begrip."
-    },
-    "reservationCompleted": {
-      "subject": "Reservering #{number} voltooid",
-      "title": "Verhuur voltooid!",
-      "body": "Uw reservering #{number} is nu voltooid.",
-      "rentalPeriod": "Huurperiode",
-      "depositReturned": "Uw borg van {amount} wordt teruggestort.",
-      "depositPending": "Uw borg van {amount} wordt gecontroleerd en binnenkort teruggestort.",
-      "thankYouMessage": "Bedankt dat u voor onze diensten heeft gekozen!",
-      "rentAgain": "Opnieuw huren",
-      "seeYouSoon": "Tot ziens!"
-    },
-    "paymentConfirmation": {
-      "subject": "Betaling bevestigd - Reservering #{number}",
-      "title": "Betaling ontvangen!",
-      "body": "We hebben uw betaling voor reservering #{number} ontvangen.",
-      "paymentDetails": "Betalingsgegevens",
-      "amount": "Bedrag",
-      "date": "Datum",
-      "method": "Methode",
-      "reservation": "Reservering",
-      "confirmation": "Uw betaling is succesvol verwerkt.",
-      "keepEmail": "Bewaar deze e-mail als betalingsbewijs."
-    },
-    "paymentFailed": {
-      "subject": "Betaling mislukt - Reservering #{number}",
-      "title": "Betaling mislukt",
-      "body": "De betaling van {amount} voor uw reservering #{number} kon niet worden verwerkt.",
-      "whatToDo": "Wat te doen?",
-      "tip1": "Controleer of uw kaart geldig is en voldoende saldo heeft",
-      "tip2": "Probeer een andere kaart",
-      "tip3": "Neem contact op met uw bank als het probleem aanhoudt",
-      "retryPayment": "Betaling opnieuw proberen",
-      "contactSupport": "Hulp nodig? Neem contact met ons op."
-    },
-    "paymentRequest": {
-      "subject": "Betalingsverzoek voor reservering #{number}",
-      "title": "Betalingsverzoek",
-      "body": "{storeName} vraagt een betaling van {amount} voor uw reservering #{number}.",
-      "paymentDetails": "Betalingsgegevens",
-      "reservation": "Reservering",
-      "description": "Beschrijving",
-      "amountDue": "Te betalen bedrag",
-      "payNow": "{amount} betalen",
-      "linkFallback": "Of kopieer deze link naar uw browser:",
-      "securePayment": "Deze betaling wordt beveiligd door Stripe. Uw betalingsgegevens worden nooit gedeeld met de verhuurder."
-    },
-    "depositAuthorizationRequest": {
-      "subject": "Borgautorisatie voor reservering #{number}",
-      "title": "Borgautorisatie vereist",
-      "body": "{storeName} vraagt een borgautorisatie van {amount} voor uw reservering #{number}.",
-      "howItWorks": "Hoe het werkt",
-      "step1": "U autoriseert het borgbedrag op uw kaart",
-      "step2": "Het bedrag wordt tijdelijk gereserveerd (niet afgeschreven)",
-      "step3": "Aan het einde van de huur wordt de autorisatie automatisch vrijgegeven",
-      "step4": "Bij schade kan een deel of het geheel worden afgeschreven",
-      "authorizeNow": "Borg autoriseren",
-      "linkFallback": "Of kopieer deze link naar uw browser:",
-      "securePayment": "Deze autorisatie wordt beveiligd door Stripe. Het bedrag wordt niet direct afgeschreven."
-    },
-    "rewardUnlocked": {
-      "subject": "Je hebt gratis reserveringen verdiend 🎉",
-      "title": "Je verwijzing heeft zich uitbetaald!",
-      "greeting": "Hallo,",
-      "body": "{referredStoreName} heeft zojuist de eerste online verkoop gedaan. Je verdient {freeReservations} gratis reserveringen, ter waarde van ≈ {rewardValue}.",
-      "cta": "Bekijk mijn beloningen",
-      "footer": "Bedankt dat je de Louez-community laat groeien.",
-      "subjectCredit": "Je hebt een Louez-tegoed verdiend 🎉",
-      "bodyCredit": "{referredStoreName} heeft zojuist de eerste online verkoop gedaan. Je verdient een tegoed van {rewardValue} op je volgende Louez-factuur."
+      "productsWarning": "{count, plural, one {Deze categorie wordt verwijderd van # product.} other {Deze categorie wordt verwijderd van # producten.}}",
+      "reassignLabel": "Producten opnieuw toewijzen aan",
+      "keepExisting": "Andere categorieën behouden"
     }
   },
   "contract": {

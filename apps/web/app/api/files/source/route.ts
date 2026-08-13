@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 
+import { and, eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { db, products } from "@louez/db";
 import { toAbsoluteUrl } from "@louez/utils";
 import { MAX_IMAGE_SIZE, isOwnedImageUrl } from "@louez/validations";
 
+import { parseTrustedDemoProductImageUrl } from "@/app/api/ai/product-image/enhance/util.product-image-source";
 import { env } from "@/env";
 import { useLogger, withEvlog } from "@/lib/evlog";
 import { getCurrentStore } from "@/lib/store-context";
@@ -15,11 +18,8 @@ const requestSchema = z.object({
   // deployments (same shapes isOwnedImageUrl accepts).
   url: z
     .string()
-    .refine(
-      (value) =>
-        (value.startsWith("/") && !value.startsWith("//")) ||
-        URL.canParse(value),
-    ),
+    .refine((value) => (value.startsWith("/") && !value.startsWith("//")) || URL.canParse(value)),
+  productId: z.string().length(21).optional(),
 });
 
 const handlePost = async (request: Request) => {
@@ -37,17 +37,31 @@ const handlePost = async (request: Request) => {
       return NextResponse.json({ error: "errors.invalidData" }, { status: 400 });
     }
 
+    let sourceUrl = toAbsoluteUrl(parsed.data.url, env.NEXT_PUBLIC_APP_URL);
+
     if (!isOwnedImageUrl(parsed.data.url, `${store.id}/products`)) {
-      return NextResponse.json({ error: "errors.forbidden" }, { status: 403 });
+      const trustedDemoUrl = parseTrustedDemoProductImageUrl(sourceUrl);
+      if (!trustedDemoUrl || !parsed.data.productId) {
+        return NextResponse.json({ error: "errors.forbidden" }, { status: 403 });
+      }
+
+      const product = await db.query.products.findFirst({
+        where: and(eq(products.id, parsed.data.productId), eq(products.storeId, store.id)),
+        columns: { images: true },
+      });
+      if (!product?.images?.includes(parsed.data.url)) {
+        return NextResponse.json({ error: "errors.forbidden" }, { status: 403 });
+      }
+
+      sourceUrl = trustedDemoUrl.toString();
     }
 
-    const sourceResponse = await fetch(
-      toAbsoluteUrl(parsed.data.url, env.NEXT_PUBLIC_APP_URL),
-      {
-        headers: { Accept: IMAGE_UPLOAD_MIME_TYPES.join(",") },
-        cache: "no-store",
-      },
-    );
+    const sourceResponse = await fetch(sourceUrl, {
+      headers: { Accept: IMAGE_UPLOAD_MIME_TYPES.join(",") },
+      cache: "no-store",
+      redirect: "error",
+      signal: request.signal,
+    });
 
     if (!sourceResponse.ok) {
       return NextResponse.json({ error: "errors.notFound" }, { status: 404 });

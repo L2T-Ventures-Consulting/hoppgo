@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Loader2 } from 'lucide-react'
 import { toastManager } from '@louez/ui'
 import { useTranslations } from 'next-intl'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -18,6 +17,12 @@ import {
 
 import { orpc } from '@/lib/orpc/react'
 import { invalidateReservationAll } from '@/lib/orpc/invalidation'
+import { reservationAnalyticsActions } from '@/lib/product-analytics/analytics-events'
+import {
+  captureReservationActionFailed,
+  captureReservationActionStarted,
+  captureReservationActionSucceeded,
+} from '@/lib/product-analytics/reservation-analytics-client'
 
 interface ReservationNotesProps {
   reservationId: string
@@ -118,11 +123,26 @@ export function ReservationNotes({
   }
 
   const handleSave = async () => {
+    captureReservationActionStarted({
+      reservationId,
+      action: reservationAnalyticsActions.updateNotes,
+      properties: { has_notes: notes.trim().length > 0 },
+    })
     setIsLoading(true)
     try {
       await updateNotesMutation.mutateAsync({ reservationId, notes })
+      captureReservationActionSucceeded({
+        reservationId,
+        action: reservationAnalyticsActions.updateNotes,
+        properties: { has_notes: notes.trim().length > 0 },
+      })
       toastManager.add({ title: t('notes.saved'), type: 'success' })
     } catch {
+      captureReservationActionFailed({
+        reservationId,
+        action: reservationAnalyticsActions.updateNotes,
+        properties: { error_code: 'notes_update_failed' },
+      })
       toastManager.add({ title: t('notes.error'), type: 'error' })
     } finally {
       setIsLoading(false)
@@ -147,10 +167,9 @@ export function ReservationNotes({
         {hasChanges && (
           <Button
             onClick={handleSave}
-            disabled={isLoading}
+            isPending={isLoading}
             className="w-full"
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {tCommon('save')}
           </Button>
         )}

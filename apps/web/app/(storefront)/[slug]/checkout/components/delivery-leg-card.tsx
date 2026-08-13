@@ -143,7 +143,7 @@ export function DeliveryLegCard({
                 <span className="min-w-0 font-medium text-sm">
                   {isMultiLocationEnabled ? locationLabel : storeLabel}
                 </span>
-                <Badge variant="secondary" className="shrink-0 text-xs">
+                <Badge variant="success" className="shrink-0 text-xs">
                   {t('free')}
                 </Badge>
               </div>

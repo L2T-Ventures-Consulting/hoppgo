@@ -22,7 +22,7 @@ import { orpc } from '@/lib/orpc/react';
 import {
   getIcsToken,
   regenerateIcsToken,
-} from '@/app/(dashboard)/dashboard/calendar/actions';
+} from '@/app/(dashboard)/dashboard/reservations/calendar/actions';
 
 export const IcsCalendarConfigurationPanel = () => {
   const [token, setToken] = useState<string | null>(null);

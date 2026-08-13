@@ -1,19 +1,22 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
-  AreaChart,
   Area,
+  AreaChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
 } from "recharts";
 import type { TooltipContentProps } from "recharts";
-import type { NameType, ValueType, Payload } from "recharts/types/component/DefaultTooltipContent";
-import { TrendingUp } from "lucide-react";
-import { useTranslations } from "next-intl";
+import type { NameType, Payload, ValueType } from "recharts/types/component/DefaultTooltipContent";
+
+import { ChartColumnIcon } from "@louez/ui/icons";
+
+import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
 
 export interface TrendDataPoint {
   date: string;
@@ -28,30 +31,29 @@ interface TrendChartProps {
   showConversions?: boolean;
 }
 
-export function TrendChart({ data, showConversions = true }: TrendChartProps) {
+/** Same hues as the badge tokens, so charts and badges agree. */
+const VISITORS_COLOR = "var(--primary)";
+const CONVERSIONS_COLOR = "var(--badge-success-foreground)";
+
+export const TrendChart = ({ data, showConversions = true }: TrendChartProps) => {
   const t = useTranslations("dashboard.analytics");
 
-  if (data.every((d) => d.visitors === 0 && d.pageViews === 0)) {
-    return (
-      <div className="flex h-[350px] flex-col items-center justify-center text-muted-foreground">
-        <TrendingUp className="mb-2 h-8 w-8" />
-        <p>{t("noData")}</p>
-      </div>
-    );
+  if (data.every((point) => point.visitors === 0 && point.pageViews === 0)) {
+    return <DashboardEmptyState icon={ChartColumnIcon} description={t("noData")} />;
   }
 
   return (
-    <div className="h-[350px] w-full">
+    <div className="h-64 w-full sm:h-80">
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="colorVisitors" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+              <stop offset="5%" stopColor={VISITORS_COLOR} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={VISITORS_COLOR} stopOpacity={0} />
             </linearGradient>
             <linearGradient id="colorConversions" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3} />
-              <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+              <stop offset="5%" stopColor={CONVERSIONS_COLOR} stopOpacity={0.3} />
+              <stop offset="95%" stopColor={CONVERSIONS_COLOR} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -60,23 +62,28 @@ export function TrendChart({ data, showConversions = true }: TrendChartProps) {
             tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
+            minTickGap={16}
             dy={10}
           />
           <YAxis
             tick={{ fontSize: 12, fill: "var(--muted-foreground)" }}
             tickLine={false}
             axisLine={false}
-            dx={-10}
+            width={40}
             allowDecimals={false}
           />
           <Tooltip
             content={({ active, payload, label }: TooltipContentProps<ValueType, NameType>) => {
               if (active && payload && payload.length) {
                 return (
-                  <div className="rounded-lg border bg-background p-3 shadow-lg">
+                  <div className="bg-background rounded-lg border p-3 shadow-lg">
                     <p className="mb-2 font-medium">{label}</p>
-                    {payload.map((entry: Payload<ValueType, NameType>, index: number) => (
-                      <p key={index} className="text-sm" style={{ color: entry.color }}>
+                    {payload.map((entry: Payload<ValueType, NameType>) => (
+                      <p
+                        key={String(entry.name)}
+                        className="text-sm"
+                        style={{ color: entry.color }}
+                      >
                         {entry.name}: {entry.value?.toLocaleString()}
                       </p>
                     ))}
@@ -91,14 +98,14 @@ export function TrendChart({ data, showConversions = true }: TrendChartProps) {
             height={36}
             iconType="circle"
             formatter={(value: string) => (
-              <span className="text-sm text-muted-foreground">{value}</span>
+              <span className="text-muted-foreground text-sm">{value}</span>
             )}
           />
           <Area
             type="monotone"
             dataKey="visitors"
             name={t("visitors")}
-            stroke="var(--primary)"
+            stroke={VISITORS_COLOR}
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorVisitors)"
@@ -108,7 +115,7 @@ export function TrendChart({ data, showConversions = true }: TrendChartProps) {
               type="monotone"
               dataKey="conversions"
               name={t("conversions")}
-              stroke="#22c55e"
+              stroke={CONVERSIONS_COLOR}
               strokeWidth={2}
               fillOpacity={1}
               fill="url(#colorConversions)"
@@ -118,4 +125,4 @@ export function TrendChart({ data, showConversions = true }: TrendChartProps) {
       </ResponsiveContainer>
     </div>
   );
-}
+};

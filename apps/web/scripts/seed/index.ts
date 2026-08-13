@@ -381,6 +381,11 @@ async function seedStore(
   if (productsData.products.length > 0) {
     await db.insert(schema.products).values(productsData.products);
   }
+  if (productsData.productCategories.length > 0) {
+    await db
+      .insert(schema.productCategories)
+      .values(productsData.productCategories);
+  }
   if (productsData.pricingTiers.length > 0) {
     await db
       .insert(schema.productPricingTiers)

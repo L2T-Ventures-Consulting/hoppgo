@@ -8,6 +8,10 @@ import { getStorefrontUrl } from '@/lib/storefront-url'
 import { getMinRentalMinutes } from '@/lib/utils/rental-duration'
 import type { StoreSettings } from '@louez/types'
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 interface EmbedPageProps {
   params: Promise<{ slug: string }>
 }

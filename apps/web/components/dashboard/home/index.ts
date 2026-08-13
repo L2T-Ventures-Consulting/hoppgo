@@ -1,8 +1,11 @@
-export { DashboardAlert } from './dashboard-alert'
-export { SetupChecklist, type OnlinePaymentsStep } from './setup-checklist'
-export { AdaptiveHeader } from './adaptive-header'
-export { AdaptiveStats } from './adaptive-stats'
-export { TodayActivity, PendingRequests } from './today-activity'
-export { QuickActions, StorefrontWidget } from './quick-actions'
-export { GradientMesh } from './gradient-mesh'
-export { ShareModal } from './share-modal'
+export { AdaptiveHeader } from "./adaptive-header";
+export { AdaptiveStats } from "./adaptive-stats";
+export { DashboardAlert } from "./dashboard-alert";
+export { PendingRequests } from "./pending-requests";
+export { QuickActions } from "./quick-actions";
+export { ReservationsCalendarPrefetch } from "./reservations-calendar-prefetch";
+export { SetupChecklist, type OnlinePaymentsStep } from "./setup-checklist";
+export { ShareModal } from "./share-modal";
+export { StorefrontWidget } from "./storefront-widget";
+export { TodayActivity } from "./today-activity";
+export type { HomeReservation, StoreMetrics, StoreState } from "./home-types";

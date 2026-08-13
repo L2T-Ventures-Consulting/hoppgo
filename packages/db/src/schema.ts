@@ -28,6 +28,7 @@ import type {
   GoogleReview,
   NotificationSettings,
   PricingBreakdown,
+  ProductImageHistory,
   ProductSnapshot,
   ProductTaxSettings,
   PromoCodeSnapshot,
@@ -70,6 +71,15 @@ export const users = mysqlTable('users', {
   // Analytics segmentation only (ICP discovery) — never gates features.
   productCategory: varchar('product_category', { length: 32 }),
   fleetSize: varchar('fleet_size', { length: 16 }),
+  keyboardShortcuts:
+    json('keyboard_shortcuts').$type<Record<string, string | string[]>>(),
+  // What's New reading state, per user rather than per browser: which
+  // announcements have been read (`seenIds`) and which contextual "New" badges
+  // have been dismissed (`dismissedFeatureIds`). `null` until the first read.
+  whatsNewProgress: json('whats_new_progress').$type<{
+    dismissedFeatureIds: string[]
+    seenIds: string[]
+  }>(),
   // Set once the user has been through the "introduce yourself" onboarding
   // step. Google users get a prefilled name but still confirm it once.
   profileCompletedAt: timestamp('profile_completed_at', { mode: 'date' }),
@@ -787,6 +797,60 @@ export const categories = mysqlTable(
   }),
 );
 
+// ============================================================================
+// Variant Definitions (store-level shared catalog: Size, Color, Material...)
+// ============================================================================
+
+export const variantDefinitions = mysqlTable(
+  'variant_definitions',
+  {
+    id: id(),
+    storeId: varchar('store_id', { length: 21 }).notNull(),
+    // Canonical axis key (normalizeAxisKey of the label), matches
+    // products.bookingAttributeAxes[].key and product_units.attributes keys.
+    key: varchar('key', { length: 32 }).notNull(),
+    label: varchar('label', { length: 50 }).notNull(),
+    // Drives the presentation: color → swatches, size → ordered chips.
+    kind: mysqlEnum('kind', ['size', 'color', 'custom'])
+      .notNull()
+      .default('custom'),
+    isActive: boolean('is_active').notNull().default(true),
+    position: int('position').notNull().default(0),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (table) => ({
+    storeIdx: index('variant_definitions_store_idx').on(table.storeId),
+    uniqueStoreKey: unique('variant_definitions_store_key_unique').on(
+      table.storeId,
+      table.key,
+    ),
+  }),
+);
+
+export const variantValues = mysqlTable(
+  'variant_values',
+  {
+    id: id(),
+    definitionId: varchar('definition_id', { length: 21 }).notNull(),
+    // Stored label is the canonical value shared across products; units
+    // reference it by label in product_units.attributes.
+    label: varchar('label', { length: 100 }).notNull(),
+    colorHex: varchar('color_hex', { length: 7 }),
+    position: int('position').notNull().default(0),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (table) => ({
+    definitionIdx: index('variant_values_definition_idx').on(
+      table.definitionId,
+    ),
+    uniqueDefinitionLabel: unique('variant_values_unique').on(
+      table.definitionId,
+      table.label,
+    ),
+  }),
+);
+
 export const productStatus = mysqlEnum('product_status', [
   'draft',
   'active',
@@ -815,6 +879,10 @@ export const products = mysqlTable(
 
     // Images (array of URLs)
     images: json('images').$type<string[]>().default([]),
+    // Non-destructive transformation history for each logical product image.
+    imageHistory: json('image_history')
+      .$type<ProductImageHistory[]>()
+      .default([]),
 
     // Pricing
     price: decimal('price', { precision: 10, scale: 2 }).notNull(),
@@ -868,6 +936,33 @@ export const products = mysqlTable(
       table.storeId,
       table.status,
       table.name,
+    ),
+  }),
+);
+
+// ============================================================================
+// Product Categories (Many-to-Many)
+// ============================================================================
+
+// Products can belong to several categories. `products.category_id` is kept in
+// sync with the first (primary) category for backward compatibility with
+// consumers that expect a single category (analytics, exports, related
+// products, inspection templates).
+export const productCategories = mysqlTable(
+  'product_categories',
+  {
+    id: id(),
+    productId: varchar('product_id', { length: 21 }).notNull(),
+    categoryId: varchar('category_id', { length: 21 }).notNull(),
+    position: int('position').default(0),
+    createdAt: timestamp('created_at', { mode: 'date' }).defaultNow().notNull(),
+  },
+  (table) => ({
+    productIdx: index('product_categories_product_idx').on(table.productId),
+    categoryIdx: index('product_categories_category_idx').on(table.categoryId),
+    uniqueProductCategory: unique('product_categories_unique').on(
+      table.productId,
+      table.categoryId,
     ),
   }),
 );
@@ -1916,6 +2011,7 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
     references: [stores.id],
   }),
   products: many(products),
+  productLinks: many(productCategories),
 }));
 
 export const productsRelations = relations(products, ({ one, many }) => ({
@@ -1927,6 +2023,7 @@ export const productsRelations = relations(products, ({ one, many }) => ({
     fields: [products.categoryId],
     references: [categories.id],
   }),
+  categoryLinks: many(productCategories),
   reservationItems: many(reservationItems),
   pricingTiers: many(productPricingTiers),
   seasonalPricings: many(productSeasonalPricing),
@@ -1936,6 +2033,38 @@ export const productsRelations = relations(products, ({ one, many }) => ({
   tulipMapping: one(productsTulip, {
     fields: [products.id],
     references: [productsTulip.productId],
+  }),
+}));
+
+export const productCategoriesRelations = relations(
+  productCategories,
+  ({ one }) => ({
+    product: one(products, {
+      fields: [productCategories.productId],
+      references: [products.id],
+    }),
+    category: one(categories, {
+      fields: [productCategories.categoryId],
+      references: [categories.id],
+    }),
+  }),
+);
+
+export const variantDefinitionsRelations = relations(
+  variantDefinitions,
+  ({ one, many }) => ({
+    store: one(stores, {
+      fields: [variantDefinitions.storeId],
+      references: [stores.id],
+    }),
+    values: many(variantValues),
+  }),
+);
+
+export const variantValuesRelations = relations(variantValues, ({ one }) => ({
+  definition: one(variantDefinitions, {
+    fields: [variantValues.definitionId],
+    references: [variantDefinitions.id],
   }),
 }));
 
@@ -2025,6 +2154,9 @@ export const productUnits = mysqlTable(
     // Optional internal notes (e.g., "Blue frame", "New battery 2025")
     notes: text('notes'),
 
+    // Unit-specific photos (URLs), shown alongside the product images
+    images: json('images').$type<string[]>().default([]),
+
     // Flexible attributes for the unit (size/color/etc)
     attributes: json('attributes').$type<UnitAttributes>(),
 
@@ -2111,7 +2243,9 @@ export const productUnitEvents = mysqlTable(
     id: id(),
     productUnitId: varchar('product_unit_id', { length: 21 }).references(
       () => productUnits.id,
-      { onDelete: 'set null' },
+      {
+        onDelete: 'set null',
+      },
     ),
     identifierSnapshot: varchar('identifier_snapshot', { length: 255 }),
     storeId: varchar('store_id', { length: 21 }).notNull(),
@@ -3413,12 +3547,17 @@ export const aiCreditDebits = mysqlTable(
     storeId: varchar('store_id', { length: 21 }).notNull(),
     // Null for debits not tied to a conversation (e.g. phone-number rental).
     conversationId: varchar('conversation_id', { length: 21 }),
-    // What the debit pays for: AI usage (tokens/audio) or the monthly rental of
-    // the store's provisioned phone number. Keeps cost-vs-billed reporting
-    // trivially segmentable per revenue line.
-    kind: mysqlEnum('kind', ['usage', 'number_rental'])
+    // What the debit pays for: AI usage (tokens/audio), the monthly rental of
+    // the store's provisioned phone number, or one AI product-image enhancement
+    // (flat tariff). Keeps cost-vs-billed reporting trivially segmentable per
+    // revenue line.
+    kind: mysqlEnum('kind', ['usage', 'number_rental', 'image_enhancement'])
       .notNull()
       .default('usage'),
+    // Generated product-image artifact associated with an image debit. Stored
+    // as a key (not a deployment-specific public URL) so reads can resolve it
+    // through the current storage adapter.
+    imageKey: varchar('image_key', { length: 500 }),
 
     dedupKey: varchar('dedup_key', { length: 120 }).notNull().unique(),
 

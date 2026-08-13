@@ -23,6 +23,8 @@ interface AuthorizeDepositPageProps {
   searchParams: Promise<{ token?: string }>
 }
 
+export const instant = false;
+
 export async function generateMetadata({
   params,
 }: AuthorizeDepositPageProps): Promise<Metadata> {

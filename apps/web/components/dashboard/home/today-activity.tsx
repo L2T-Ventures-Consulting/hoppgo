@@ -1,296 +1,63 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import {
-  ArrowDownRight,
-  ArrowRight,
-  ArrowUpRight,
-  CheckCircle,
-  Clock,
-  Package,
-} from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { Card, CardPanel } from "@louez/ui";
+import { CheckCircleIcon } from "@louez/ui/icons";
+import { cn } from "@louez/utils";
 
-import { Button } from '@louez/ui';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@louez/ui';
-import { cn, formatCurrency } from '@louez/utils';
-
-interface ReservationWithDetails {
-  id: string;
-  number: string;
-  startDate: Date;
-  endDate: Date;
-  totalAmount: string;
-  customer: {
-    firstName: string;
-    lastName: string;
-  };
-  items: Array<{
-    id: string;
-    product: {
-      name: string;
-    } | null;
-  }>;
-}
-
-interface ActivityListItemProps {
-  reservation: ReservationWithDetails;
-  showPeriod?: boolean;
-  showAmount?: boolean;
-}
-
-function ActivityListItem({
-  reservation,
-  showPeriod = false,
-  showAmount = false,
-}: ActivityListItemProps) {
-  const productNames = reservation.items
-    .map((item) => item.product?.name)
-    .filter(Boolean)
-    .slice(0, 2);
-
-  const remainingCount = reservation.items.length - 2;
-
-  // Get customer initials
-  const initials =
-    `${reservation.customer.firstName.charAt(0)}${reservation.customer.lastName.charAt(0)}`.toUpperCase();
-
-  return (
-    <Link
-      href={`/dashboard/reservations/${reservation.id}`}
-      className="list-item-hover group hover:border-border/50 border-b border-transparent pr-12 last:border-b-0"
-    >
-      {/* Customer Avatar with Initials */}
-      <div className="from-primary/20 to-primary/10 ring-primary/5 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ring-2">
-        <span className="text-primary text-sm font-semibold">{initials}</span>
-      </div>
-
-      {/* Main Content */}
-      <div className="min-w-0 flex-1 space-y-0.5">
-        {/* Customer Name & Reservation Number */}
-        <div className="flex items-center gap-2">
-          <span className="font-medium">
-            {reservation.customer.firstName} {reservation.customer.lastName}
-          </span>
-          <span className="bg-muted text-muted-foreground rounded px-1.5 py-0.5 text-[10px] font-medium">
-            #{reservation.number}
-          </span>
-        </div>
-
-        {/* Products or Period/Amount */}
-        <div className="text-muted-foreground flex items-center gap-2 text-sm">
-          {showPeriod ? (
-            <>
-              <Clock className="h-3.5 w-3.5" />
-              <span>
-                {format(reservation.startDate, 'dd/MM', { locale: fr })} -{' '}
-                {format(reservation.endDate, 'dd/MM', { locale: fr })}
-              </span>
-              {showAmount && (
-                <>
-                  <span className="text-muted-foreground/40">•</span>
-                  <span className="text-foreground font-medium">
-                    {formatCurrency(parseFloat(reservation.totalAmount))}
-                  </span>
-                </>
-              )}
-            </>
-          ) : (
-            <>
-              <Package className="h-3.5 w-3.5" />
-              <span className="truncate">
-                {productNames.join(', ')}
-                {remainingCount > 0 && (
-                  <span className="text-muted-foreground/60">
-                    {' '}
-                    +{remainingCount}
-                  </span>
-                )}
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Reveal Action Button */}
-      <div className="reveal-action bg-primary/10 text-primary flex h-8 w-8 items-center justify-center rounded-lg">
-        <ArrowRight className="h-4 w-4" />
-      </div>
-    </Link>
-  );
-}
-
-interface ActivityCardProps {
-  title: string;
-  description: string;
-  icon: React.ElementType;
-  iconColor: string;
-  iconBgColor: string;
-  reservations: ReservationWithDetails[];
-  emptyMessage: string;
-  viewAllHref: string;
-  showPeriod?: boolean;
-  showAmount?: boolean;
-  className?: string;
-}
-
-function ActivityCard({
-  title,
-  description,
-  icon: Icon,
-  iconColor,
-  iconBgColor,
-  reservations,
-  emptyMessage,
-  viewAllHref,
-  showPeriod = false,
-  showAmount = false,
-  className,
-}: ActivityCardProps) {
-  const t = useTranslations('dashboard.home');
-
-  return (
-    <Card className={cn('stat-card flex flex-col', className)}>
-      <CardHeader className="flex flex-row items-center justify-between pb-3">
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              'flex h-10 w-10 items-center justify-center rounded-lg',
-              iconBgColor,
-            )}
-          >
-            <Icon className={cn('h-5 w-5', iconColor)} />
-          </div>
-          <div>
-            <CardTitle className="text-base">{title}</CardTitle>
-            <CardDescription className="text-sm">{description}</CardDescription>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground shrink-0"
-          render={<Link href={viewAllHref} />}
-        >
-          {t('viewAll')}
-          <ArrowRight className="ml-1 h-3 w-3" />
-        </Button>
-      </CardHeader>
-      <CardContent className="flex-1 pt-0">
-        {reservations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="bg-muted rounded-full p-3">
-              <CheckCircle className="text-muted-foreground/50 h-6 w-6" />
-            </div>
-            <p className="text-muted-foreground mt-3 text-sm">{emptyMessage}</p>
-          </div>
-        ) : (
-          <div className="-mx-1 space-y-0.5">
-            {reservations.map((reservation) => (
-              <ActivityListItem
-                key={reservation.id}
-                reservation={reservation}
-                showPeriod={showPeriod}
-                showAmount={showAmount}
-              />
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
+import { ActivityCard } from "./activity-card";
+import { DashboardEmptyState } from "@/components/dashboard/shared/dashboard-empty-state";
+import type { HomeReservation } from "./home-types";
 
 interface TodayActivityProps {
-  departures: ReservationWithDetails[];
-  returns: ReservationWithDetails[];
+  departures: HomeReservation[];
+  returns: HomeReservation[];
   className?: string;
 }
 
-export function TodayActivity({
-  departures,
-  returns,
-  className,
-}: TodayActivityProps) {
-  const t = useTranslations('dashboard.home');
+export const TodayActivity = ({ departures, returns, className }: TodayActivityProps) => {
+  const t = useTranslations("dashboard.home");
 
-  // If no activity today, show a simpler view
   if (departures.length === 0 && returns.length === 0) {
     return (
-      <Card className={cn('stat-card', className)}>
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="bg-muted rounded-full p-4">
-            <CheckCircle className="text-muted-foreground/50 h-8 w-8" />
-          </div>
-          <h3 className="mt-4 font-medium">{t('activity.noActivityTitle')}</h3>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {t('activity.noActivityDescription')}
-          </p>
-        </CardContent>
+      <Card className={className}>
+        <CardPanel className="p-4 sm:p-5">
+          <DashboardEmptyState
+            icon={CheckCircleIcon}
+            title={t("activity.noActivityTitle")}
+            description={t("activity.noActivityDescription")}
+          />
+        </CardPanel>
       </Card>
     );
   }
 
   return (
-    <div className={cn('grid gap-4 lg:grid-cols-2', className)}>
+    <div className={cn("grid gap-4 lg:grid-cols-2", className)}>
       <ActivityCard
-        title={t('activity.departures')}
-        description={t('activity.departuresDescription')}
+        title={t("activity.departures")}
+        description={t("activity.departuresDescription")}
         icon={ArrowUpRight}
-        iconColor="text-emerald-600 dark:text-emerald-400"
-        iconBgColor="bg-emerald-100 dark:bg-emerald-900/30"
+        accent="success"
         reservations={departures}
-        emptyMessage={t('activity.noDepartures')}
-        viewAllHref="/dashboard/reservations?status=confirmed&period=today&operation=departure"
+        reservationSource="home_departure"
+        emptyMessage={t("activity.noDepartures")}
+        viewAllHref="/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=departure&status=confirmed&statuses=confirmed&source=home_departure"
+        prefetchCalendar
       />
       <ActivityCard
-        title={t('activity.returns')}
-        description={t('activity.returnsDescription')}
+        title={t("activity.returns")}
+        description={t("activity.returnsDescription")}
         icon={ArrowDownRight}
-        iconColor="text-blue-600 dark:text-blue-400"
-        iconBgColor="bg-blue-100 dark:bg-blue-900/30"
+        accent="progress"
         reservations={returns}
-        emptyMessage={t('activity.noReturns')}
-        viewAllHref="/dashboard/reservations?status=ongoing&period=today&operation=return"
+        reservationSource="home_return"
+        emptyMessage={t("activity.noReturns")}
+        viewAllHref="/dashboard/reservations?restorePreferredView=true&date=today&period=today&operation=return&status=ongoing&statuses=ongoing&source=home_return"
+        prefetchCalendar
       />
     </div>
   );
-}
-
-interface PendingRequestsProps {
-  pending: ReservationWithDetails[];
-  className?: string;
-}
-
-export function PendingRequests({ pending, className }: PendingRequestsProps) {
-  const t = useTranslations('dashboard.home');
-
-  // Don't render if no pending requests
-  if (pending.length === 0) {
-    return null;
-  }
-
-  return (
-    <ActivityCard
-      title={t('pending.title')}
-      description={t('pending.description')}
-      icon={Clock}
-      iconColor="text-amber-600 dark:text-amber-400"
-      iconBgColor="bg-amber-100 dark:bg-amber-900/30"
-      reservations={pending}
-      emptyMessage={t('pending.empty')}
-      viewAllHref="/dashboard/reservations?status=pending"
-      showPeriod
-      showAmount
-      className={className}
-    />
-  );
-}
+};

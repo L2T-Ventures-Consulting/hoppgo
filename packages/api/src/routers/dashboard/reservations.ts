@@ -1,5 +1,6 @@
 import { ORPCError } from '@orpc/server';
 import { and, eq } from 'drizzle-orm';
+import { z } from 'zod';
 
 import { db, reservations } from '@louez/db';
 import {
@@ -14,6 +15,7 @@ import {
   dashboardReservationGetPaymentMethodInputSchema,
   dashboardReservationPollInputSchema,
   dashboardReservationPreviewManualTulipQuoteInputSchema,
+  dashboardReservationGetEmailRenderContextInputSchema,
   dashboardReservationPreviewTulipQuoteInputSchema,
   dashboardReservationRecordDamageInputSchema,
   dashboardReservationRecordPaymentInputSchema,
@@ -76,6 +78,7 @@ const list = dashboardProcedure
         status: input.status,
         period: input.period,
         operation: input.operation,
+        paymentMethod: input.paymentMethod,
         limit: input.limit ?? 100,
         search: input.search,
         sort: input.sort,
@@ -542,6 +545,91 @@ const sendReservationEmail = requirePermission('write')
     }
   });
 
+const emailContentOverrideSchema = z
+  .object({
+    subject: z.string().optional(),
+    greeting: z.string().optional(),
+    message: z.string().optional(),
+    signature: z.string().optional(),
+  })
+  .optional();
+
+// Everything the browser needs to render the manual reservation emails
+// locally (live preview). Unknown keys are stripped, so loose JSON columns
+// (emailSettings) never leak past the fields composition actually reads.
+const getEmailRenderContextOutputSchema = z.object({
+  store: z.object({
+    name: z.string(),
+    email: z.string().nullish(),
+    phone: z.string().nullish(),
+    address: z.string().nullish(),
+    theme: z
+      .object({
+        mode: z.enum(['light', 'dark']).optional(),
+        primaryColor: z.string().optional(),
+      })
+      .nullish(),
+    settings: z
+      .object({
+        currency: z.string().optional(),
+        country: z.string().optional(),
+        timezone: z.string().optional(),
+      })
+      .nullish(),
+    emailSettings: z
+      .object({
+        pickupReminderContent: emailContentOverrideSchema,
+        returnReminderContent: emailContentOverrideSchema,
+      })
+      .nullish(),
+  }),
+  customer: z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    email: z.string(),
+  }),
+  reservation: z.object({
+    id: z.string(),
+    number: z.string(),
+    startDate: z.string(),
+    endDate: z.string(),
+    totalAmount: z.string(),
+    depositAmount: z.string(),
+    items: z.array(
+      z.object({
+        name: z.string(),
+        quantity: z.number(),
+        totalPrice: z.string(),
+      }),
+    ),
+  }),
+  reservationUrl: z.string(),
+  logoUrl: z.string().nullable(),
+  showPaymentCta: z.boolean(),
+});
+
+const getEmailRenderContext = requirePermission('write')
+  .input(dashboardReservationGetEmailRenderContextInputSchema)
+  .output(getEmailRenderContextOutputSchema)
+  .handler(async ({ context, input }) => {
+    try {
+      const fn = context.dashboardReservationActions?.getManualEmailRenderContext;
+      if (!fn) {
+        throw new ORPCError('INTERNAL_SERVER_ERROR', {
+          message:
+            'dashboardReservationActions.getManualEmailRenderContext not provided',
+        });
+      }
+      const result = await fn(input.reservationId);
+      if ('error' in result) {
+        throw new ORPCError('BAD_REQUEST', { message: result.error });
+      }
+      return result;
+    } catch (error) {
+      throw toORPCError(error);
+    }
+  });
+
 const sendModificationEmail = requirePermission('write')
   .input(dashboardReservationSendModificationEmailInputSchema)
   .handler(async ({ context, input }) => {
@@ -576,7 +664,7 @@ const sendAccessLink = requirePermission('write')
           message: 'dashboardReservationActions.sendAccessLink not provided',
         });
       }
-      const result = await fn(input.reservationId);
+      const result = await fn(input.reservationId, input.payload);
       if (result.error) {
         throw new ORPCError('BAD_REQUEST', { message: result.error });
       }
@@ -664,6 +752,7 @@ export const dashboardReservationsRouter = {
   releaseDepositHold,
   assignUnitsToItem,
   sendReservationEmail,
+  getEmailRenderContext,
   sendModificationEmail,
   sendAccessLink,
   sendAccessLinkBySms,
