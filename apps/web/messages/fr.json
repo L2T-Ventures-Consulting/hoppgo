@@ -4476,6 +4476,38 @@
           "active": "Actif",
           "incomplete": "Incomplet"
         },
+        "finances": {
+          "title": "Argent et virements",
+          "description": "Suivez les montants encaissés par Stripe et leur arrivée sur votre compte bancaire.",
+          "unavailable": "Les informations financières Stripe sont temporairement indisponibles. Réessayez en actualisant la page ou consultez votre tableau de bord Stripe.",
+          "available": "Disponible",
+          "availableHelp": "Prêt à être inclus dans un prochain virement.",
+          "pending": "En attente",
+          "pendingHelp": "Paiements encaissés, encore en cours de traitement par Stripe.",
+          "payoutsTitle": "Derniers virements",
+          "payoutsDescription": "Virements envoyés par Stripe vers votre compte bancaire.",
+          "noPayouts": "Aucun virement Stripe pour le moment.",
+          "viewMore": "Voir plus",
+          "drawerTitle": "Historique des virements",
+          "drawerDescription": "Retrouvez tous les virements envoyés par Stripe vers votre compte bancaire.",
+          "loadingMore": "Chargement des virements…",
+          "retry": "Réessayer",
+          "destination": "Compte •••• {last4}",
+          "paidHelp": "Le statut « Versé » indique que Stripe a envoyé le virement à votre banque. Il peut apparaître sur votre relevé sous le libellé « STRIPE PAYOUT ».",
+          "statuses": {
+            "paid": "Versé",
+            "pending": "En attente",
+            "in_transit": "En transit",
+            "failed": "Échoué",
+            "canceled": "Annulé",
+            "unknown": "À vérifier"
+          },
+          "payoutDates": {
+            "paid": "Versé le {date}",
+            "expected": "Arrivée estimée le {date}",
+            "created": "Créé le {date}"
+          }
+        },
         "callback": {
           "successTitle": "Stripe connecté !",
           "successDescription": "Votre compte Stripe est maintenant connecté. Vous pouvez accepter les paiements en ligne.",

@@ -4476,6 +4476,38 @@
           "active": "Active",
           "incomplete": "Incomplete"
         },
+        "finances": {
+          "title": "Balance and payouts",
+          "description": "Track the funds collected by Stripe and when they reach your bank account.",
+          "unavailable": "Stripe financial information is temporarily unavailable. Refresh the page or check your Stripe Dashboard.",
+          "available": "Available",
+          "availableHelp": "Ready to be included in an upcoming payout.",
+          "pending": "Pending",
+          "pendingHelp": "Collected payments that Stripe is still processing.",
+          "payoutsTitle": "Recent payouts",
+          "payoutsDescription": "Payouts sent by Stripe to your bank account.",
+          "noPayouts": "No Stripe payouts yet.",
+          "viewMore": "View more",
+          "drawerTitle": "Payout history",
+          "drawerDescription": "See all payouts sent by Stripe to your bank account.",
+          "loadingMore": "Loading payouts…",
+          "retry": "Try again",
+          "destination": "Account •••• {last4}",
+          "paidHelp": "A “Paid” status means Stripe sent the payout to your bank. It may appear on your statement as “STRIPE PAYOUT”.",
+          "statuses": {
+            "paid": "Paid",
+            "pending": "Pending",
+            "in_transit": "In transit",
+            "failed": "Failed",
+            "canceled": "Canceled",
+            "unknown": "Check status"
+          },
+          "payoutDates": {
+            "paid": "Paid on {date}",
+            "expected": "Estimated arrival {date}",
+            "created": "Created on {date}"
+          }
+        },
         "callback": {
           "successTitle": "Stripe Connected!",
           "successDescription": "Your Stripe account is now connected. You can accept online payments.",
