@@ -14,7 +14,7 @@
 
 [![Docker](https://img.shields.io/badge/Docker-synapsr%2Flouez-2496ED?style=for-the-badge&logo=docker)](https://hub.docker.com/r/synapsr/louez)
 [![GitHub Stars](https://img.shields.io/github/stars/Synapsr/Louez?style=for-the-badge&logo=github)](https://github.com/Synapsr/Louez)
-[![License](https://img.shields.io/badge/License-Apache_2.0-blue?style=for-the-badge)](LICENSE)
+[![License](https://img.shields.io/badge/License-AGPL_v3-blue?style=for-the-badge)](LICENSE)
 
 [☁️ Cloud](https://louez.io) • [🚀 Self-Host](#-self-host-in-one-command) • [✨ Features](#-features) • [📋 Changelog](CHANGELOG.md)
 
@@ -314,12 +314,14 @@ See [SECURITY.md](SECURITY.md) for our full security policy.
 
 ## 📄 License
 
-**Apache 2.0 with Commons Clause** — see [LICENSE](LICENSE)
+**GNU AGPLv3** — see [LICENSE](LICENSE). Louez is free and open source.
 
-✅ Free for personal and internal use
-✅ Modify and customize freely
+✅ Free to use, self-host, and modify — forever
+✅ Free for **commercial use** — run your rental business on it
 ✅ Contributions welcome
-❌ Cannot sell as a commercial service without agreement
+↩️ If you modify Louez and offer it to others over a network, share your changes back under the AGPL
+
+> **Trademark**: "Louez" and the Louez logo are trademarks of Synapsr. The AGPL covers the code, not the brand.
 
 ---
 
