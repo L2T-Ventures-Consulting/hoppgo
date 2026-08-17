@@ -1,0 +1,54 @@
+# =============================================================================
+# Hopp & Go — Reverse Proxy
+# =============================================================================
+# Caddy holt und erneuert die TLS-Zertifikate selbstständig bei Let's Encrypt.
+# Voraussetzung: hoppgo.de und www.hoppgo.de zeigen per A- und AAAA-Eintrag auf
+# diesen Server, und Port 80 ist von außen erreichbar (Prüfung der Domain).
+# =============================================================================
+
+{
+	email kontakt@hoppgo.de
+}
+
+# www leitet dauerhaft auf die Hauptdomain um — eine kanonische Adresse,
+# damit sich die Suchmaschinen-Signale nicht auf zwei Hosts verteilen.
+www.hoppgo.de {
+	redir https://hoppgo.de{uri} permanent
+}
+
+hoppgo.de {
+	encode zstd gzip
+
+	# Sicherheits-Header. Louez liefert eigene CSP-Header aus, deshalb hier
+	# bewusst keine — sonst überschreiben wir die der Anwendung.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy 127.0.0.1:3000 {
+		# Louez wertet diese Header aus, um die öffentliche URL zu bilden.
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+
+	log {
+		output file /data/access.log {
+			roll_size 10MiB
+			roll_keep 5
+		}
+		# Analytics läuft in der Anwendung. Das Zugriffsprotokoll dient der
+		# Fehlersuche, deshalb ohne vollständige IP-Adressen.
+		format filter {
+			wrap console
+			fields {
+				request>remote_ip ip_mask {
+					ipv4 24
+					ipv6 48
+				}
+			}
+		}
+	}
+}
