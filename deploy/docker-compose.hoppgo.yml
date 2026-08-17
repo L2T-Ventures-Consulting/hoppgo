@@ -18,6 +18,10 @@ services:
     image: caddy:2-alpine
     restart: unless-stopped
     network_mode: host
+    environment:
+      # Kommt aus der .env. Solange die echten DNS-Einträge fehlen, steht hier
+      # ein sslip.io-Name, der auf die Server-IP zeigt.
+      HOPPGO_DOMAIN: ${HOPPGO_DOMAIN:?HOPPGO_DOMAIN muss in der .env gesetzt sein}
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

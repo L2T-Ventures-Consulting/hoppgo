@@ -2,25 +2,23 @@
 # Hopp & Go — Reverse Proxy
 # =============================================================================
 # Caddy holt und erneuert die TLS-Zertifikate selbstständig bei Let's Encrypt.
-# Voraussetzung: hoppgo.de und www.hoppgo.de zeigen per A- und AAAA-Eintrag auf
-# diesen Server, und Port 80 ist von außen erreichbar (Prüfung der Domain).
+#
+# Die Domain kommt aus HOPPGO_DOMAIN in der .env. Solange die echten
+# DNS-Einträge fehlen, kann dort ein sslip.io-Name stehen
+# (z. B. 91-99-207-61.sslip.io) — der löst auf die Server-IP auf und bekommt
+# ein vollwertiges Zertifikat. Umstellen auf hoppgo.de ist später ein einziger
+# geänderter Wert, kein Umbau.
 # =============================================================================
 
 {
 	email kontakt@hoppgo.de
 }
 
-# www leitet dauerhaft auf die Hauptdomain um — eine kanonische Adresse,
-# damit sich die Suchmaschinen-Signale nicht auf zwei Hosts verteilen.
-www.hoppgo.de {
-	redir https://hoppgo.de{uri} permanent
-}
-
-hoppgo.de {
+{$HOPPGO_DOMAIN} {
 	encode zstd gzip
 
-	# Sicherheits-Header. Louez liefert eigene CSP-Header aus, deshalb hier
-	# bewusst keine — sonst überschreiben wir die der Anwendung.
+	# Louez liefert eigene CSP-Header aus, deshalb hier bewusst keine —
+	# sonst überschreiben wir die der Anwendung.
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
@@ -29,7 +27,6 @@ hoppgo.de {
 	}
 
 	reverse_proxy 127.0.0.1:3000 {
-		# Louez wertet diese Header aus, um die öffentliche URL zu bilden.
 		header_up X-Forwarded-Proto {scheme}
 		header_up X-Forwarded-Host {host}
 	}
@@ -40,7 +37,7 @@ hoppgo.de {
 			roll_keep 5
 		}
 		# Analytics läuft in der Anwendung. Das Zugriffsprotokoll dient der
-		# Fehlersuche, deshalb ohne vollständige IP-Adressen.
+		# Fehlersuche, deshalb mit gekürzten IP-Adressen.
 		format filter {
 			wrap console
 			fields {
@@ -51,4 +48,10 @@ hoppgo.de {
 			}
 		}
 	}
+}
+
+# www leitet dauerhaft auf die Hauptdomain um, sobald sie gesetzt ist.
+# Bei einem sslip.io-Namen greift dieser Block schlicht nie.
+www.{$HOPPGO_DOMAIN} {
+	redir https://{$HOPPGO_DOMAIN}{uri} permanent
 }
