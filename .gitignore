@@ -88,3 +88,40 @@ SPECIFICATIONS*.md
 !/scripts/audit-duplicates.mjs
 .playwright-cli
 .email-previews/
+
+# =============================================================================
+# HoppGo — zusaetzlicher Schutz fuer das oeffentliche Repository
+# =============================================================================
+# Ergaenzt den Upstream-Teil oben. Bewusst ans Dateiende, damit Merges mit
+# Louez konfliktarm bleiben. Siehe HOPPGO.md §5.
+
+# Zugangsdaten und Schluessel
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+id_rsa
+id_ecdsa
+id_ed25519
+*service-account*.json
+*serviceaccount*.json
+*client_secret*.json
+credentials.json
+gcp-key*.json
+
+# Datenbankabzuege und Backups — koennen echte Kundendaten enthalten
+*.sql
+# ...ausser Drizzle-Migrationen, die gehoeren zwingend ins Repository
+!packages/db/src/migrations/*.sql
+!packages/hoppgo-db/src/migrations/*.sql
+*.dump
+*.sqlite
+*.sqlite3
+*.db
+/backups/
+/dumps/
+
+# Interne Geschaeftsunterlagen: Einkaufspreise, Margen, Kalkulationen
+/docs/intern/
+/intern/

@@ -1,0 +1,161 @@
+#!/bin/sh
+# =============================================================================
+# HoppGo — Secret-Schutz vor jedem Commit
+# =============================================================================
+# Dieses Repository wird oeffentlich veroeffentlicht (AGPL-3.0 §13). Alles, was
+# hier committet wird, ist damit dauerhaft oeffentlich — auch nach einem
+# spaeteren Loeschen, weil die Git-Historie erhalten bleibt.
+#
+# Aktiviert ueber `git config core.hooksPath .githooks` (siehe HOPPGO.md).
+# Notfall-Umgehung: git commit --no-verify   (nur nach bewusster Pruefung!)
+# =============================================================================
+
+set -eu
+
+RED=$(printf '\033[31m')
+YELLOW=$(printf '\033[33m')
+BOLD=$(printf '\033[1m')
+RESET=$(printf '\033[0m')
+
+BLOCKED=0
+
+fail() {
+	if [ "$BLOCKED" -eq 0 ]; then
+		printf '\n%s%sCOMMIT BLOCKIERT — moegliche Geheimnisse erkannt%s\n\n' "$RED" "$BOLD" "$RESET"
+		BLOCKED=1
+	fi
+	printf '  %s✗%s %s\n' "$RED" "$RESET" "$1"
+}
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z "$STAGED" ] && exit 0
+
+# -----------------------------------------------------------------------------
+# 1. Dateinamen, die niemals ins Repository gehoeren
+# -----------------------------------------------------------------------------
+for FILE in $STAGED; do
+	BASE=$(basename "$FILE")
+
+	case "$BASE" in
+	.env.example | .env.sample | .env.template) ;; # Vorlagen sind erlaubt
+	.env | .env.*)
+		fail "$FILE — echte Umgebungsdatei (nur .env.example gehoert ins Repo)"
+		;;
+	esac
+
+	case "$BASE" in
+	*.pem | *.key | *.p12 | *.pfx | *.jks | *.keystore)
+		fail "$FILE — Schluessel-/Zertifikatsdatei"
+		;;
+	id_rsa | id_dsa | id_ecdsa | id_ed25519)
+		fail "$FILE — privater SSH-Schluessel"
+		;;
+	*service-account*.json | *serviceaccount*.json | *-sa-key.json | gcp-key*.json)
+		fail "$FILE — sieht nach einem Google-Service-Account-Schluessel aus"
+		;;
+	credentials.json | client_secret*.json)
+		fail "$FILE — OAuth-/API-Zugangsdaten"
+		;;
+	*.sql | *.dump | *.sqlite | *.sqlite3 | *.db)
+		fail "$FILE — Datenbankabzug (kann echte Kundendaten enthalten)"
+		;;
+	esac
+
+	case "$FILE" in
+	*/backups/* | backups/* | */dumps/* | dumps/*)
+		fail "$FILE — Backup-Verzeichnis"
+		;;
+	esac
+done
+
+# -----------------------------------------------------------------------------
+# 2. Inhalte: bekannte Schluessel-Formate
+# -----------------------------------------------------------------------------
+# Bewusst eng gefasste Muster — sie erkennen die tatsaechlichen Formate der
+# Anbieter, statt breit auf Woerter wie "secret" zu triggern.
+PATTERNS='-----BEGIN [A-Z ]*PRIVATE KEY-----
+sk_live_[0-9a-zA-Z]{16,}
+rk_live_[0-9a-zA-Z]{16,}
+whsec_[0-9a-zA-Z]{16,}
+AKIA[0-9A-Z]{16}
+AIza[0-9A-Za-z_-]{35}
+sk-ant-[0-9A-Za-z_-]{24,}
+sk-proj-[0-9A-Za-z_-]{24,}
+gh[pousr]_[0-9A-Za-z]{36}
+xox[baprs]-[0-9A-Za-z-]{12,}
+"type": "service_account"
+(mysql|postgres|postgresql|mongodb(\+srv)?)://[^:@/[:space:]]+:[^@/[:space:]]+@'
+
+for FILE in $STAGED; do
+	# Diese Datei enthaelt die Suchmuster im Klartext und wuerde sonst
+	# jeden Commit an sich selbst blockieren.
+	[ "$FILE" = ".githooks/pre-commit" ] && continue
+
+	# Binaerdateien ueberspringen
+	git diff --cached --numstat -- "$FILE" | grep -q '^-' && continue
+
+	CONTENT=$(git show ":$FILE" 2>/dev/null) || continue
+
+	echo "$PATTERNS" | while IFS= read -r PATTERN; do
+		[ -z "$PATTERN" ] && continue
+		if printf '%s' "$CONTENT" | grep -qE -- "$PATTERN"; then
+			printf 'HIT\t%s\t%s\n' "$FILE" "$PATTERN"
+		fi
+	done
+done >"${TMPDIR:-/tmp}/hoppgo-secret-hits.$$" || true
+
+if [ -s "${TMPDIR:-/tmp}/hoppgo-secret-hits.$$" ]; then
+	while IFS="$(printf '\t')" read -r _ HITFILE HITPATTERN; do
+		fail "$HITFILE — Treffer auf Muster: $HITPATTERN"
+	done <"${TMPDIR:-/tmp}/hoppgo-secret-hits.$$"
+fi
+rm -f "${TMPDIR:-/tmp}/hoppgo-secret-hits.$$"
+
+# -----------------------------------------------------------------------------
+# 3. Zuweisungen mit echt aussehenden Werten
+# -----------------------------------------------------------------------------
+# Greift auf SECRET/PASSWORD/TOKEN/API_KEY, laesst Platzhalter aber durch.
+ASSIGN='(SECRET|PASSWORD|PASSWD|TOKEN|API_KEY|APIKEY|ACCESS_KEY|PRIVATE_KEY)[A-Z_]*[[:space:]]*[:=][[:space:]]*.?[A-Za-z0-9/+_.-]{16,}'
+PLACEHOLDER='(your[-_]|my[-_]|xxx|XXX|changeme|CHANGEME|placeholder|PLACEHOLDER|example|EXAMPLE|dummy|DUMMY|<[^>]+>|\$\{|process\.env|env\.|\.\.\.|●|\*\*\*)'
+
+for FILE in $STAGED; do
+	case "$(basename "$FILE")" in
+	.env.example | .env.sample | .env.template) continue ;;
+	esac
+	case "$FILE" in
+	*.md | *.lock | pnpm-lock.yaml | .githooks/pre-commit) continue ;;
+	esac
+
+	git diff --cached --numstat -- "$FILE" | grep -q '^-' && continue
+	CONTENT=$(git show ":$FILE" 2>/dev/null) || continue
+
+	SUSPECT=$(printf '%s' "$CONTENT" | grep -nE "$ASSIGN" | grep -vE "$PLACEHOLDER" | head -3 || true)
+	if [ -n "$SUSPECT" ]; then
+		fail "$FILE — Zuweisung mit echt aussehendem Wert:"
+		printf '%s' "$SUSPECT" | while IFS= read -r LINE; do
+			printf '      %s%s%s\n' "$YELLOW" "$(printf '%s' "$LINE" | cut -c1-100)" "$RESET"
+		done
+	fi
+done
+
+# -----------------------------------------------------------------------------
+# Ergebnis
+# -----------------------------------------------------------------------------
+if [ "$BLOCKED" -eq 1 ]; then
+	cat <<EOF
+
+  ${BOLD}Dieses Repository ist oeffentlich.${RESET} Ein einmal gepushtes Geheimnis
+  bleibt in der Git-Historie, auch wenn du die Datei spaeter loeschst.
+
+  ${BOLD}So gehst du vor:${RESET}
+    1. Wert aus der Datei entfernen und ueber Umgebungsvariablen laden
+    2. git restore --staged <datei>
+    3. Ist der Wert schon irgendwo gelaufen: beim Anbieter rotieren
+
+  Fehlalarm? Dann bewusst umgehen mit:  ${BOLD}git commit --no-verify${RESET}
+
+EOF
+	exit 1
+fi
+
+exit 0

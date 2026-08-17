@@ -6,4 +6,5 @@ racine. Rien à faire côté modèle — pour ajouter des instructions spécifiq
 modèle, il suffit de créer le fichier correspondant (ex. CLAUDE.fable.md).
 -->
 
+HOPPGO.md
 AGENTS.md

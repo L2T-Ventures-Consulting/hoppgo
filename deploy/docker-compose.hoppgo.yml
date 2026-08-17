@@ -1,0 +1,30 @@
+# =============================================================================
+# Hopp & Go — TLS-Ergänzung zum Louez-Stack
+# =============================================================================
+# Louez' docker-compose.yml bleibt unverändert, damit Upstream-Merges
+# konfliktfrei bleiben. Diese Datei legt einen Caddy davor, der Zertifikate
+# automatisch bei Let's Encrypt holt und erneuert.
+#
+# Start:
+#   docker compose -f docker-compose.yml -f deploy/docker-compose.hoppgo.yml up -d
+#
+# Die Anwendung selbst hört nur auf 127.0.0.1 — dafür sorgt LOUEZ_PORT in der
+# .env, nicht eine Überschreibung hier. Von außen ist ausschließlich Caddy
+# erreichbar.
+# =============================================================================
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - louez
+
+volumes:
+  caddy_data:
+  caddy_config:
