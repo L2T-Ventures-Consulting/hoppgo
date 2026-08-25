@@ -26,7 +26,6 @@ import {
 } from "lucide-react";
 import { toastManager } from "@louez/ui";
 import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
 
 import { Button } from "@louez/ui";
 import { Badge } from "@louez/ui";
@@ -68,6 +67,7 @@ import {
   captureReservationActionStarted,
 } from "@/lib/product-analytics/reservation-analytics-client";
 import { RequestPaymentModal } from "./request-payment-modal";
+import { FORMAT_DATE_FNS_LOCALE } from "@/lib/i18n/format-locale";
 
 interface Payment {
   id: string;
@@ -288,7 +288,7 @@ export function UnifiedPaymentSection({
 
   const authorizationTimeRemaining = depositAuthorizationExpiresAt
     ? formatDistanceToNow(new Date(depositAuthorizationExpiresAt), {
-        locale: fr,
+        locale: FORMAT_DATE_FNS_LOCALE,
         addSuffix: false,
       })
     : null;
