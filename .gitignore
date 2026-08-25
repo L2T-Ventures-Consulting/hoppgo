@@ -95,6 +95,11 @@ SPECIFICATIONS*.md
 # Ergaenzt den Upstream-Teil oben. Bewusst ans Dateiende, damit Merges mit
 # Louez konfliktarm bleiben. Siehe HOPPGO.md §5.
 
+# Sicherungskopien von Umgebungsdateien — enthalten dieselben Geheimnisse
+.env.bak*
+.env.backup*
+.env.*.bak
+
 # Zugangsdaten und Schluessel
 *.key
 *.p12
