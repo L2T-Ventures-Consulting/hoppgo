@@ -101,3 +101,54 @@ Hüpfburgen aus Haftungsgründen nicht.
 **Einschätzung:** Ebenfalls allgemein nützlich und damit ein Upstream-Kandidat.
 Vorher prüfen, ob sich das über Kategorien und Store-Einstellungen abbilden
 lässt, ohne den Kern anzufassen.
+
+---
+
+## P-003 — Datums- und Zahlenformate folgen der Instanzsprache
+
+| | |
+|---|---|
+| **Dateien** | 12 in `apps/web/`, 1 in `packages/utils/` |
+| **Umfang** | 28 ersetzte Literale, 1 neue Datei, 3 erweiterte Typen |
+| **Datum** | 2026-08-25 |
+| **Upstream-Churn** | `lib/utils.ts` 0 Commits/6 Mon., `app/layout.tsx` 11 |
+
+**Warum nötig:** Louez formatierte Datum und Zahlen an 28 Stellen fest auf
+`fr-FR`. Auf einer deutschen Instanz stand neben vollständig übersetzten
+Beschriftungen „jeu. 27 août" — auf der Startseite, im Warenkorb und auf dem
+Mietvertrag. Es gab keine Einstellung dafür; die Werte standen im Code.
+
+Dazu zwei verwandte Fehler:
+- `app/layout.tsx` setzte `<html lang="fr">` fest, unabhängig von der
+  ausgelieferten Sprache. Screenreader und Übersetzungsdienste lasen die Seite
+  als französisch.
+- `checkout-form.tsx` wandelte `useLocale()` per `as 'fr' | 'en'` um. Deutsch
+  fiel damit in den englischen Zweig. In `deposit-form.tsx` stand bereits eine
+  Umgehung, die alle acht Sprachen auflistet — der Fehler war also bekannt.
+
+**Alternativen geprüft:** Keine Konfigurationsebene möglich, die Werte sind
+Code. Übersetzungsdateien greifen nicht, weil `Intl` sie nicht liest.
+
+**Wie gelöst:** Neue Datei `apps/web/lib/i18n/format-locale.ts` löst einen
+BCP-47-Tag auf — aus `NEXT_PUBLIC_FORMAT_LOCALE`, sonst aus
+`NEXT_PUBLIC_DEFAULT_LOCALE`, sonst aus `defaultLocale`. Die Region kommt aus
+dem bestehenden `localeCountries`, damit es nur eine Tabelle gibt.
+
+**Ohne gesetzte Variablen bleibt das Verhalten exakt wie vorher** — der
+Rückfall ist `fr-FR`. Wo eine Sprache im Zusammenhang vorlag (E-Mail-Versand,
+Checkout), wird sie benutzt statt der globalen Konstante.
+
+`packages/utils` hat keinen Zugriff auf die i18n-Konfiguration und liest
+deshalb direkt aus der Umgebung, mit demselben Rückfall.
+
+**Nicht angefasst:** `legal-templates.ts` und `pdf/contract.tsx` verengen
+ebenfalls auf `'fr' | 'en'`, dort liegen aber tatsächlich nur französische und
+englische Vertragstexte. Eine Erweiterung ohne Übersetzungen wäre falsch.
+
+**Als Upstream-Beitrag geeignet:** ja, ausdrücklich. Eine Plattform mit acht
+Übersetzungen sollte keine Datumsformate fest verdrahten. Der Rückfall hält
+das bestehende Verhalten für alle, die nichts konfigurieren.
+
+**Geprüft:** `pnpm type-check` — es bleiben nur die drei Fehler, die schon
+vorher auf `main` bestanden (`stripe-finances-card.tsx`,
+`stripe-payout-list.tsx`, `stripe-finances.queries.ts`).
