@@ -1,0 +1,30 @@
+# =============================================================================
+# Hopp & Go — aus dem Quellcode bauen statt das Upstream-Image ziehen
+# =============================================================================
+# Der Standard-Stack von Louez zieht `synapsr/louez:latest`. Damit landen
+# eigene Codeänderungen nie auf dem Server. Diese Datei baut stattdessen aus
+# dem Repository.
+#
+# NEXT_PUBLIC_* werden von Next.js zur BAUZEIT eingebettet, nicht zur
+# Laufzeit — sie müssen deshalb hier als build.args stehen, nicht nur in
+# der .env.
+#
+# Start:
+#   docker compose -f docker-compose.yml \
+#                  -f deploy/docker-compose.hoppgo.yml \
+#                  -f deploy/docker-compose.bauen.yml up -d --build
+# =============================================================================
+
+services:
+  louez:
+    image: hoppgo/web:local
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.web
+      target: app
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_APP_DOMAIN: ${NEXT_PUBLIC_APP_DOMAIN}
+        NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-de}
+        NEXT_PUBLIC_FORMAT_LOCALE: ${NEXT_PUBLIC_FORMAT_LOCALE:-}
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
