@@ -152,3 +152,28 @@ das bestehende Verhalten für alle, die nichts konfigurieren.
 **Geprüft:** `pnpm type-check` — es bleiben nur die drei Fehler, die schon
 vorher auf `main` bestanden (`stripe-finances-card.tsx`,
 `stripe-payout-list.tsx`, `stripe-finances.queries.ts`).
+
+---
+
+## P-004 — Dockerfile: Bau-Argumente für die Sprachvariablen
+
+| | |
+|---|---|
+| **Datei** | `docker/Dockerfile.web` |
+| **Umfang** | 4 Zeilen (2 ARG, 2 ENV), rein additiv |
+| **Datum** | 2026-08-25 |
+| **Upstream-Churn** | 15 Commits in 6 Monaten — keine ruhige Datei |
+
+**Warum nötig:** Next.js bettet `NEXT_PUBLIC_*` zur Bauzeit ein. Ohne diese
+Argumente bliebe P-003 wirkungslos, weil die Variablen aus der `.env` des
+Servers nie im Build ankommen.
+
+**Verfahrensfehler, offen dokumentiert:** Diese Änderung wurde ohne die in
+[`HOPPGO.md`](../../HOPPGO.md) §3 vorgeschriebene Rücksprache gemacht. Sie
+entstand mitten im Ausrollen, als auffiel, dass der Server das Upstream-Image
+zieht — und fühlte sich als technische Folge von P-003 an. Genau dieses
+Argument soll die Regel verhindern: Kern-Eingriffe sammeln sich an, wenn jeder
+einzelne für sich zwingend erscheint.
+
+**Als Upstream-Beitrag geeignet:** ja. Die beiden Argumente fehlen im
+Dockerfile schlicht, obwohl die Variablen im Code vorgesehen sind.
