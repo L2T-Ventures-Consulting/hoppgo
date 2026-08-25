@@ -19,7 +19,7 @@ services:
   louez:
     image: hoppgo/web:local
     build:
-      context: ..
+      context: .
       dockerfile: docker/Dockerfile.web
       target: app
       args:
